@@ -1,0 +1,234 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>修改回答 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <nav class="navbar navbar-default" style="margin-bottom:0px;">
+        <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="/adminask">问答管理</a></div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/adminask"><i class="fa fa-home"></i> 首页</a></li>
+                    <li><a href="/adminask/question"><i class="fa fa-align-justify"></i> 问题</a></li>
+                    <li class="active"><a href="/adminask/anwsers"><i class="fa fa-lightbulb-o"></i> 答案</a></li>
+                    <li><a href="/adminask/comment"><i class="fa fa-comment"></i> 评论</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="nav-tabs-custom">
+                    <form id="form1" action="" method="POST">
+                        <div class="box-body" style="max-width:800px">
+
+                            <div class="form-group">
+                                <label for="title">问题的标题：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <input type="hidden" name="aid" value="{$info.id}" />
+                                        <input name="title" id="title" autocomplete=off type="text" value="{$info.title}" readonly class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <gt name="info.id" value="0">
+                                <gt name="info.post_time" value="0">
+                                    <div class="form-group">
+                                        <label for="title">回答时间：</label>
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <span class="form-control" readonly>
+                                                    {:date("Y-m-d H:i:s", $info['post_time'])}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </gt>
+                            </gt>
+
+                            <div class="form-group">
+                                <label>回答内容：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <textarea name="content" id="content" style="height:200px" class="form-control" >{$info.content}</textarea>
+                                        <p id="contentCount">还可以输入 <em>1500</em>  字</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <if condition="$info.img eq '1' ">
+                                <div class="row" id="imgList">
+                                    <volist name="img" id="v">
+                                        <div class="col-xs-6 col-md-3" data-url="{$v.path}">
+                                            <a href="https://staticqn.qizuang.com/{$v.path}" target="_blank" class="thumbnail">
+                                                <img src="https://staticqn.qizuang.com/{$v.path}" data-holder-rendered="true" style="height: 120px; width: 120%; display: block;">
+                                            </a>
+                                            <div style="height: 0px; position: absolute;z-index: 300;top:8px;right: 24px;">
+                                                <a class="deleteimg" style="background: yellow;" href="javascript:void(0)" data-url="{$v.path}">删除</a>
+                                            </div>
+                                        </div>
+                                        <input type='hidden' data-url="{$v.path}" name='imgId[]' value="{$v.path}"/>
+                                    </volist>
+                                </div>
+                            <else />
+                                <div class="row" id="imgList"></div>
+                            </if>
+
+                            <div class="form-group">
+                                <label></label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <a name="uploadPic" id="uploadPic" href="javascript:;" class="btn btn-success button"><i class=" icon-plus-sign "></i>上传文件</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning" role="alert"><i class="icon-volume-up"></i> 提示：标题请勿更改，请勿回答自己的提问！已回答过的帐号请勿再回答！<br>用户说明：自动提示匹配的表示可以使用这个帐号，没有出现分两种：一种是帐号已存在，但不是我们自己的帐号，一种是没有这个帐号，可以自动注册。请不要更改自动提示的结果，除非您清楚UserID和UserName，可以使用 uid|username 格式指定外部帐号。</div>
+
+                        </div>
+
+                        <div class="box-footer">
+                            <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;{$info.btn}答案</button>
+                            <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+<script src="/assets/common/js/global.js?v={:C('STATIC_VERSION')}"></script>
+<script charset="utf-8" src="/assets/common/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/uploadify/jquery.uploadify.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/uploadify/uploadify.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript">
+function getResult(content){
+    var obj = new Function("return" + content)();
+    $("#imgList").show();
+    $("#imgList").append('<div class="col-xs-6 col-md-3"><a href="https://staticqn.qizuang.com/'+ obj.data +'" class="thumbnail"><img src="https://staticqn.qizuang.com/'+ obj.data +'" data-holder-rendered="true" target="_blank" style="height: 120px; width: 120%; display: block;"></a></div>');
+    $("#imgList").append($("<input type='hidden' name='imgId[]' value='" + obj.data + "'/>"));
+}
+$(document).ready(function(){
+    $('#username').autocomplete({
+        items:20,
+        source:function(query,process){
+            var matchCount = this.options.items;//返回结果集最大数量
+            $.ajax({
+                url: '/adminask/getseouser',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    matchcount : matchCount,
+                    text: query
+                },
+            })
+            .done(function(data) {
+                mask.hide(); mask_img.hide();
+                if(data.status == 1){
+                    return process(data.data);
+                }else{
+                    return process(data.info);
+                }
+            }).fail(function(xhr){
+                alert(xhr.responseText);
+            });
+
+        },
+        formatItem:function(item){
+           return item["name"];
+        },
+        setValue:function(item){
+            return {"data-value":item["uid"]+'|'+item["name"],"real-value":item["id"]};
+        },
+    });
+
+    $('#title').autocomplete({
+        items:20,
+        source:function(query,process){
+            var matchCount = this.options.items;//返回结果集最大数量
+            $.ajax({
+                url: '/adminask/gettitle',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    matchcount : matchCount,
+                    text: query
+                },
+            })
+            .done(function(data) {
+                mask.hide(); mask_img.hide();
+                if(data.status == 1){
+                    return process(data.data);
+                }else{
+                    return process(data.info);
+                }
+            }).fail(function(xhr){
+                alert(xhr.responseText);
+            });
+
+        },
+        formatItem:function(item){
+           return item["title"];
+        },
+        setValue:function(item){
+            return {"data-value":item["id"]+'|'+item["title"],"real-value":item["id"]};
+        },
+    });
+
+    $('#uploadPic').uploadify({
+        'swf'      : '/assets/common/js/uploadify/uploadify.swf',
+        'uploader' : '/adminask/upload',
+        'fileTypeExts': '*.gif; *.jpg; *.png',
+        'buttonText': '上传图片',
+        'queueSizeLimit' : 5,
+        'height'   : 35,
+        'auto': true,
+        'multi': true,
+        'progressData' : 'speed',
+        'formData' : {
+            'id': '',
+            'type': '2'
+        },
+        'onUploadSuccess':function(file,data,response){
+            getResult(data);
+        }
+    });
+});
+
+$(function() {
+
+    $("#submit").click(function(event){
+        if($("input[name=contents]").val() === ''){
+            $("input[name=contents]").focus();
+            $("input[name=contents]").addClass('focus');
+            alert("请填写内容");
+            return false;
+        }
+        $("#form1").submit();
+    });
+
+    $("#content").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length > 1500){
+            var offset = length - 1500;
+            $("#contentCount").html('<i class="red">您已经超出了 '+offset+" 字</i>");
+        }else{
+            $("#contentCount em").html(1500 - length);
+        }
+    });
+});
+
+</script>
+</block>

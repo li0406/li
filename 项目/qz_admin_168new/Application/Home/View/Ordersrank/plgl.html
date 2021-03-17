@@ -1,0 +1,112 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>管理重点城市-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/ordersrank/css/ordersrank.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>管理重点城市</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="col-xs-12 no-padding">
+                            <h5 class="pull-left">选择城市：</h5>
+                            <div class="col-xs-2">
+                                <select class="form-control select-city" id="select-city">
+                                    <option selected style="color: #00b6ff" >{$little}</option>
+                                    <option  value="0" >A类城市</option>
+                                    <option  value="1">B类城市</option>
+                                    <option  value="2">C类城市</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 no-padding mt20">
+                            <label class="h5 all-select"><input type="checkbox" name=""><span>全选</span></label>
+                            <div class="col-xs-2 pull-right no-padding"><input id="search-city" class="form-control" type="text" name="" placeholder="例：苏州"></div><h5 class="pull-right">快速搜索：</h5>
+                        </div>
+                        <form action="/ordersrank/pjddphzdcs" method="post">
+                            <div class="col-xs-12 no-padding hasborder mt20">
+                                <div class="city-list col-xs-12">
+                                    <volist name = 'citys' id = 'v'>
+                                        <label><input type="checkbox" name="quyu_id[]" value ={$v.id}><span>{$v.cname}</span></label>
+                                    </volist>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding mt20">
+                                <h5 class="pull-left">重点城市：</h5>
+                                <div class="col-xs-2">
+                                    <select name = "point" class="form-control">
+                                        <option>请选择类别</option>
+                                        <option  value="1">重点城市1</option>
+                                        <option  value="2">重点城市1.5</option>
+                                        <option value="3">重点城市2</option>
+                                        <option value="4">重点城市3</option>
+                                        <option value="0">移除重点城市</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding mt20">
+                                <input class="btn btn-info" type="submit">
+                                <a class="btn btn-default ml10" href="/Ordersrank/pjddphzdcs">取消</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(document).ready(function($) {
+            $('#select-city').change(function(){
+                var little = $(this).val()
+                location.href ='/ordersrank/plgl?little='+little;
+            })
+            // 全选
+            $('.all-select').on('click',function(){
+                if($(this).find('input').is(":checked")){
+                    $('.city-list input').prop('checked',true)
+                }else{
+                    $('.city-list input').prop('checked',false)
+                }
+            });
+            // 单选
+            $('.city-list').on('click',' label',function(){
+                if($(this).find('input').is(":checked")){
+                    $(this).attr('gou',1);
+                    if($('.city-list label').length == $('.city-list label[gou=1]').length){
+                        $('.all-select input').prop('checked',true)
+                    }
+                }else{
+                    $(this).removeAttr('gou');
+                    $('.all-select input').prop('checked',false)
+                }
+            });
+            // 快速搜索
+            $('#search-city').on('keyup',function(){
+                var bool=true;
+                var searchVal = $(this).val();
+
+                $('.city-list label span').each(function(index, el) {
+                    if(searchVal == $(el).text()){
+                        $(el).parent().siblings().hide();
+                        bool=false;
+                        return false;
+                    }else{
+                        bool=true;
+                    }
+                });
+
+                if(bool){
+                    $('.city-list label').show();
+                }
+            })
+        });
+    </script>
+</block>

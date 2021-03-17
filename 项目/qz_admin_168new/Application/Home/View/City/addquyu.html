@@ -1,0 +1,213 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/colorpicker/spectrum.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+            <h1>增加分站城市</h1>
+            <ol class="breadcrumb">
+                <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+                <li class="active"><a href="/city/index">区域城市管理</a></li>
+            </ol>
+        </section>
+        <section class="content">
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <form id="form1" action="" method="POST">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="title">所属省份</label>
+                                <div class="row">
+                                    <div class="col-xs-2">
+                                    <select name="provinceid" id="provinceid" class="form-control">
+                                        <volist name="provinceList" id="v">
+                                        <option value="{$v.qz_provinceid}" <if condition="$v['qz_provinceid'] EQ $info['area_id'] ">selected</if>>{$v.qz_province}</option>
+                                        </volist>
+                                    </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <select name="little" class="form-control">
+                                            <option value="0">地级市</option>
+                                            <option value="1">县级市</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">城市名</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="cname" id="cname" autocomplete=off placeholder="例：苏州">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">区划代码</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="cid" id="cid" autocomplete=off placeholder="例：320500">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">二级域名</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="bm" id="bm" placeholder="例：suzhou">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;保存</button>
+                    <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                </div>
+                </form>
+            </div>
+        </div>
+        </div>
+        </section>
+</block>
+<block name="script">
+<script type="text/javascript">
+$(document).ready(function(){
+/*
+    $('#cname').autocomplete({
+        items:20,
+        source:function(query,process){
+            var matchCount = this.options.items;//返回结果集最大数量
+            $.ajax({
+                url: '/adminquyu/getcid',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    matchcount : matchCount,
+                    text: query
+                },
+            })
+            .done(function(data) {
+                mask.hide(); mask_img.hide();
+                if(data.status == 1){
+                    return process(data.data);
+                }else{
+                    return process(data.info);
+                }
+            }).fail(function(xhr){
+                alert(xhr.responseText);
+            });
+
+        },
+        formatItem:function(item){
+           return item["cname"];
+        },
+        setValue:function(item){
+            //alert(item['cid']);
+            return {"data-value":item["cid"]+'|'+item["title"],"real-value":item["id"]};
+        },
+    });
+*/
+
+    $("#cname").blur(function(){
+        var cname = $("#cname").val();
+        if(cname == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavecname',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                cname : $("#cname").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('此城市分站已存在');
+                $("#cname").val('');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#cid").blur(function(){
+        var cid = $("#cid").val();
+        if(cid == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavecid',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                cid : $("#cid").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('区划代码已存在');
+                $("#cid").val('');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#bm").blur(function(){
+        var bm = $("#bm").val();
+        if(bm == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavebm',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                bm : $("#bm").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('二级域名已存在');
+                $("#bm").val('');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#submit").click(function(event){
+        var provinceid = $("#provinceid").val();
+        if(provinceid == null){
+            alert('请选择所属省份~ ');
+            return false;
+        }
+        if($('[name=cname]').val() === ''){
+            $("input[name=cname]").focus();
+            $("input[name=cname]").addClass('focus');
+            alert("请填写城市名~ ");
+            return false;
+        }
+        if($("input[name=cid]").val() === ''){
+            $("input[name=cid]").focus();
+            $("input[name=cid]").addClass('focus');
+            alert("请填写区划代码~ ");
+            return false;
+        }
+        if($("input[name=bm]").val() === ''){
+            $("input[name=bm]").focus();
+            $("input[name=bm]").addClass('focus');
+            alert("请填写域名~ ");
+            return false;
+        }
+        $("#form1").submit();
+    });
+});
+</script>
+</block>

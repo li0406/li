@@ -1,0 +1,224 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检服务质量统计</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检服务质量统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <form method="get">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                <p>抽查单号：</p>
+                                <input class="form-control" type="text" name="id" placeholder="抽查单号" value="{$Think.get.id}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-1">
+                                <p>开始时间:</p>
+                                <input id="start" class="form-control datepicker" type="text" name="start_time" placeholder="开始时间" value="{$Think.get.start_time}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-1">
+                                <p>结束时间:</p>
+                                <input class="form-control datepicker" type="text" name="end_time" placeholder="结束时间" value="{$Think.get.end_time}" autocomplete="off">
+                            </div>
+                            <if condition="$zjshow eq 1">
+                            <div class="col-xs-1">
+                                <p>质检员：</p>
+                                <select class="select2 select2-offscree " name="op_uid" type="text" placeholder="质检员" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="qclist" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+
+                            </div>
+                                </if>
+                            <div class="col-xs-1">
+                                <p>录音客服：</p>
+                                <select class="select2 select2-offscree " name="record_id" type="text" placeholder="录音客服" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="kfList" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>质检类型:</p>
+                                <select class="select2 select2-offscree " name="type" type="text" placeholder="质检类型" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <option value="1">抽听</option>
+                                    <option value="2">回听</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>审核客服：</p>
+                                <select class="select2 select2-offscree " name="kf_id" type="text" placeholder="审核客服" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="kfList" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>审核团：</p>
+                                <select class="select2 select2-offscree " name="kf_group" type="text" placeholder="审核团" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="groups" id="vo">
+                                        <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>审核师：</p>
+                                <select class="select2 select2-offscree " name="kf_manager" type="text" placeholder="审核师" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="manager" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                               <p>&nbsp;</p>
+                               <button  type="submit" class="btn btn-primary pull-left">查询</button>
+                               <button  type="button" id="export" class="btn btn-success pull-left">导出</button>
+                            </div>
+
+                        </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table id="myTable" class="table table-hover table-bordered ">
+                            <thead>
+                                <tr>
+                                    <th>质检时间</th>
+                                    <th>订单编号</th>
+                                    <th>质检类型</th>
+                                    <if condition="$zjshow eq 1">
+                                    <th>质检员</th>
+                                    </if>
+                                    <th>订单类型</th>
+                                    <th>录音客服</th>
+                                    <th>审核客服</th>
+                                    <th>审核团</th>
+                                    <th>审核师</th>
+                                    <th>服务礼貌</th>
+                                    <th>语音语速抢话口头禅</th>
+                                    <th>倾听能力</th>
+                                    <th>表达能力</th>
+                                    <th>引导能力</th>
+                                    <th>疑难解决</th>
+                                    <th>业务熟练</th>
+                                    <th>营销意识</th>
+                                    <th>总计</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.time}</td>
+                                        <td>{$vo.order_id}</td>
+                                        <td>{$vo.type}</td>
+                                        <if condition="$zjshow eq 1">
+                                        <td>{$vo.op_name}</td>
+                                        </if>
+                                        <td>{$vo.type_fw}</td>
+                                        <td>{$vo.record_name}</td>
+                                        <td>{$vo.kf_name}</td>
+                                        <td>{$vo.kf_group_name}</td>
+                                        <td>{$vo.kf_manager_name}</td>
+                                        <td>{$vo[1]|default=0}</td>
+                                        <td>{$vo[6]|default=0}</td>
+                                        <td>{$vo[11]|default=0}</td>
+                                        <td>{$vo[16]|default=0}</td>
+                                        <td>{$vo[21]|default=0}</td>
+                                        <td>{$vo[26]|default=0}</td>
+                                        <td>{$vo[31]|default=0}</td>
+                                        <td>{$vo[36]|default=0}</td>
+                                        <td>{$vo.sum_score|default=0}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal"  role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document" style="width: 1420px; margin-top: 10px;">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding:5px;">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center">质检评分</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+<script type="text/javascript">
+    $(function(){
+        $('#myTable').DataTable({
+            paging:false,
+            searching:false,
+            language:{
+                zeroRecords: "没有内容",
+                info:""
+            }
+        });
+        $("#time").select2();
+        $("#time").select2("val","{$Think.get.time}");
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+
+        $("#status").select2();
+        $("#status").select2("val","{$Think.get.status}");
+
+        $("select[name=kf_manager]").select2();
+        $("select[name=kf_manager]").select2("val","{$Think.get.kf_manager}");
+
+        $("select[name=kf_group]").select2();
+        $("select[name=kf_group]").select2("val","{$Think.get.kf_group}");
+
+        $("select[name=kf_id]").select2();
+        $("select[name=kf_id]").select2("val","{$Think.get.kf_id}");
+
+        $("select[name=op_uid]").select2();
+        $("select[name=op_uid]").select2("val","{$Think.get.op_uid}");
+
+        $("select[name=record_id]").select2();
+        $("select[name=record_id]").select2("val","{$Think.get.record_id}");
+
+        $("select[name=type]").select2();
+        $("select[name=type]").select2("val","{$Think.get.type}");
+
+        $("#export").click(function(){
+            window.location.href = "/qcstat/exportcityavgvip?"+ $('form').serialize();
+        })
+    });
+
+</script>
+</block>

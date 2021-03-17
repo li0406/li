@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <title>{$keys.title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <notempty name="info.header.canonical">
+    <link rel="canonical" href="{$info.header.canonical}"/>
+    </notempty>
+    <include file="Index:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+    <!--[if IE 7]>
+      <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/detail.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/detail.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/meitu/css/case.css?v={:C('STATIC_VERSION')}" />
+    <link href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/zoom.css?v={:C('STATIC_VERSION')}" media="all" />
+    <style type="text/css">
+      .reply_message{display: inline;margin-top: 6px;margin-right: 5px;float: right;}
+    </style>
+</head>
+<body>
+    {$headerTmp}
+    <div class="wrap oflow">
+        <div class="bread"><a href="/">首页</a>><a href="/riji/">装修日记</a>>{$diary_info_list.now.title|mbstr=0,15}</div>
+        <div class="de-main">
+          <div class="de-userinfo">
+              <div class="user-head"><span><img src="{$user_info.logo}" width="658" height="658"></span></div>
+              <h1>
+               {$diary_info_list.now.title}
+              </h1>
+              <ul>
+                  <li>
+                    <i class="icon-home"></i><em>房屋信息：</em><em>{$diary_info_list.now.mianji}</em>㎡  {$diary_info_list.now.hx} {$diary_info_list.now.fg}
+                  </li>
+                  <li><i class="icon-map-marker"></i><em>所在小区：</em><em>{$diary_info_list.now.xiaoqu}</em></li>
+                  <li>
+                    <i class="icon-group"></i><em>装修公司：</em>
+                    <if condition="$diary_info_list['now']['company_name'] neq ''">
+                      <if condition="$diary_info_list['now']['company_id'] neq 0">
+                        <a href="{$SCHEME_HOST.scheme_full}{$diary_info_list.now.bm}.{:C('QZ_YUMING')}/company_home/{$diary_info_list.now.company_id}" target="_blank">{$diary_info_list.now.company_name}</a>
+                        <else/>
+                        {$$diary_info_list.now.company_name}
+                      </if>
+                    <else/>
+                      未选择装修公司
+                    </if>
+                  </li>
+              </ul>
+              <!-- <a class="likeit" href="#"><i class="icon-heart-empty mr10"></i>收藏</a>
+              <a class="likeit done" href="#"><i class="icon-heart mr10"></i>已收藏</a> -->
+              <div class="de-userinfo-num">
+                <span>浏览<i class="red">{$diary_info_list.all_page_view}</i></span>
+                <span>关注<i class="red">{$diary_info_list.all_concern_count}</i></span>
+                <span>日记<i class="red">{$diary_info_list.diary_all_count}</i></span>
+              </div>
+          </div>
+          <ul class="de-all-dairy">
+                <li class="active"><a href="/riji/s{$diary_info_list['now']['id']}">新日记</a></li>
+          </ul>
+          <ul class="dairy-main mt50">
+              <volist name="diary_info_list.child" id="vo">
+                <li>
+                  <div class="dairy-date">
+                    <span class="step">
+                      <if condition="$vo['stage'] eq 1">准备阶段<elseif condition="$vo['stage'] eq 2" />施工阶段<elseif condition="$vo['stage'] eq 3" />入住阶段<else/></if>
+                    </span>
+                    <span class="date">{$vo.diary_time|date='m',###}月{$vo.diary_time|date='d',###}日<br><i>{$vo.diary_time|date='Y',###}年</i></span>
+                  </div>
+                  <div class="dairy-more">
+                    <h1>
+                      <span>{$vo.second_type_name}</span>
+                      <a href="/riji/d{$vo.id}.html" target="_blank">{$vo.title}</a>
+                    </h1>
+                    <p>
+                        {$vo.content|mbstr=0,140}
+                    </p>
+                    <p>
+                      <volist name="vo.img_list" id="v" offset="0" length="5">
+                        <if condition="$v['img_host'] EQ 'qiniu'">
+                          <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.img_path}">
+                        <else/>
+                        </if>
+                      </volist>
+                    <a href="/riji/d{$vo.id}.html" target="_blank" >阅读全文>></a>
+                    <br style="clear:both;"/>
+                    </p>
+                  </div>
+                </li>
+              </volist>
+              <br style="clear:both;" />
+          </ul>
+          <if condition="$info['recommendCases']">
+            <div class="mt50 inlink-b-bottom">
+                <div class="inlink-tit">热图推荐</div>
+                <div style="width:538px;float:left; padding-left:5px;">
+                <ul>
+                    <volist name="info.recommendCases" id="vo" offset="0" length="5" >
+                    <if condition="$key EQ 0">
+                        <li class="first">
+                            <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" target="_blank">
+                            <span>
+                              <if condition="$vo['img_host'] EQ 'qiniu'">
+                                <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.img_path}-w300.jpg" alt="{$vo.title}" width="788" height="522">
+                              <else/>
+                                <img src="{$SCHEME_HOST.scheme_full}{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}" alt="{$vo.title}" width="788" height="522">
+                              </if>
+                               <em>{$vo.title}</em>
+                            </span>
+                            </a>
+                        </li>
+                    <else/>
+                        <li>
+                            <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" target="_blank">
+                            <span>
+                              <if condition="$vo['img_host'] EQ 'qiniu'">
+                                <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.img_path}-w300.jpg" alt="{$vo.title}" width="788" height="522">
+                              <else/>
+                                <img src="{$SCHEME_HOST.scheme_full}{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}" alt="{$vo.title}" width="788" height="522">
+                              </if>
+                               <em>{$vo.title}</em>
+                            </span>
+
+                            </a>
+                        </li>
+                    </if>
+                    </volist>
+                </ul>
+                </div>
+                <div style="width:380px;float:left;">
+                    <ul>
+                    <volist name="info.recommendCases" id="vo" offset="5" length="8" >
+                        <if condition="$key EQ 5">
+                            <li class="first">
+                                <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" target="_blank">
+                                <span>
+                                  <if condition="$vo['img_host'] EQ 'qiniu'">
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.img_path}-w300.jpg" alt="{$vo.title}" width="788" height="522">
+                                  <else/>
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}" alt="{$vo.title}" width="788" height="522">
+                                  </if>
+                                   <em>{$vo.title}</em>
+                                </span>
+
+                                </a>
+                            </li>
+                        <else/>
+                            <li>
+                                <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" target="_blank">
+                                <span>
+                                  <if condition="$vo['img_host'] EQ 'qiniu'">
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.img_path}-w300.jpg" alt="{$vo.title}" width="788" height="522">
+                                  <else/>
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}" alt="{$vo.title}" width="788" height="522">
+                                  </if>
+                                   <em>{$vo.title}</em>
+                                </span>
+
+                                </a>
+                            </li>
+                        </if>
+                    </volist>
+                    </ul>
+                </div>
+            </div>
+          </if>
+        </div>
+
+        <div class="de-lesser">
+            <if condition="isset($_SESSION['u_userInfo']) AND $_SESSION['u_userInfo']['classid'] NEQ 3">
+               <a rel="nofollow" class="xiriji" href="{$SCHEME_HOST.scheme_full}u.qizuang.com/diary/" target="_blank"><i class="icon-book mr10"></i>写装修日记</a>
+              <div class="mt10">
+            <elseif condition="isset($_SESSION['u_userInfo']) AND $_SESSION['u_userInfo']['classid'] EQ 3"/>
+              <div>
+            <else />
+              <a rel="nofollow" class="xiriji" href="{$SCHEME_HOST.scheme_full}u.qizuang.com/"><i class="icon-book mr10"></i>写装修日记</a>
+              <div class="mt10">
+            </if>
+              {$orderTmp}
+            </div>
+            <div class="de-sider-box">
+                <h1>按装修阶段看日记</h1>
+                <ul class="step-dairy">
+                    <li><a href="/riji/s{$diary_info_list.now.id}/">所有日记（{$diary_info_list.diary_all_count|default=0}）</a></li>
+                    <li><a href="/riji/s{$diary_info_list.now.id}-zhunbei/">准备阶段（{$diary_info_list.zhunbei|default=0}）</a></li>
+                    <li><a href="/riji/s{$diary_info_list.now.id}-shigong/">施工阶段（{$diary_info_list.shigong|default=0}）</a></li>
+                    <li><a href="/riji/s{$diary_info_list.now.id}-ruzhu/">入住阶段（{$diary_info_list.ruzhu|default=0}）</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <include file="Index:footer" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script src="{$static_host}/assets/home/diary/js/zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    // 加载省市 为了弹窗做准备
+    var shen = null,
+    shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+    var type = '{$Think.get.type}';
+    if(type == "-zhunbei"){
+      $('.step-dairy li:eq(1)').attr('class','all-dairy');
+    }else if(type == '-shigong'){
+      $('.step-dairy li:eq(2)').attr('class','all-dairy');
+    }else if(type == '-ruzhu'){
+      $('.step-dairy li:eq(3)').attr('class','all-dairy');
+    }else{
+      $('.step-dairy li:eq(0)').attr('class','all-dairy');
+    }
+    $(function(){
+      $("input[name='tel']").focus();//选中手机号码
+
+      //点击回复进行回复
+      $(".de-mydairy-mes p .pull-right").click(function() {
+        /* 点击回复触发的事件 */
+        var data_id=$(this).attr("data-id");//获取当前评论的id
+        var data_name=$(this).attr("data-name");//获取被评论的人昵称
+        var textarea_obj=$(this).parent().parent().parent().parent().parent().find("textarea");//
+        var sub_resend_obj=textarea_obj.parent().next().find(".resend-btn");
+        sub_resend_obj.attr("data-id",data_id);
+        textarea_obj.attr("placeholder","回复 "+data_name+":");
+        textarea_obj.focus();
+      });
+      //点击我来回复触发的事件
+      $(".de-mydairy-mes p .resend-btn").click(function(event) {
+        /* 点击我来回复 */
+        var content_obj=$(this).parent().prev().find("textarea");
+        var content=$.trim(content_obj.val());
+        var msg_obj=$(this).next();
+        msg_obj.html("");
+        if(content=="")
+        {
+          msg_obj.html("回复内容不能为空");
+          $(this).parent().prev().find("textarea").focus();
+        }else
+        {
+          var data_id=$(this).attr("data-id");
+          var diary_id=$(this).attr("diary_id");
+          $.post("/add_diary_comment",{diary_id:diary_id,data_id:data_id,content:content},function(res){
+            if(res.info!="Ok")
+            {
+              msg_obj.html(res.data);//提示错误信息
+            }else
+            {
+              alert("评论经审核有效后可见");//发布回复成功  提示信息 可以刷新页面或者做其他的效果 这里先用弹窗提示一下
+              content_obj.val('');//文本框清空
+            }
+          },'json');
+        }
+      });
+    });
+    </script>
+</body>
+</html>

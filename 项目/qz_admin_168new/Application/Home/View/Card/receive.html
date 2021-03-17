@@ -1,0 +1,250 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>领用</title>
+
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/card/css/receive.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/card/common">通用礼券管理</a> > 领用</h1>
+    </section>
+    <section class="content-header">
+        <div class="col-sm-12  content">
+            <div class="col-sm-6">
+                <form class="form-horizontal" id="myform">
+                    <input type="hidden" name="cardid" value="{$Think.get.id}">
+                    <div class="form-group companyname">
+                        <label for="name" class="col-sm-2 control-label"><span style="color:red">*</span>公司名称 :</label>
+                        <div class="col-sm-6" id="addul">
+                            <input type="text" class="form-control" autocomplete="off" name="name" id="name">
+                            <!-- <ul>
+                                <li data-id="">12332131</li>
+                                <li data-id="">12332131</li>
+                                <li data-id="">12332131</li>
+                                <li data-id="">12332131</li>
+                            </ul> -->
+                        </div>
+                        <label for="id" class="col-sm-2 control-label"><span style="color:red">*</span>会员id :</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" autocomplete="off" name="id" id="id" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="number" class="col-sm-2 control-label"><span style="color:red">*</span>领用数量 :</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" autocomplete="off" name="number" oninput="if(value>99)value=99">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="time_start" class="col-sm-2 control-label"><span style="color:red">*</span>有效时间 :</label>
+                        <div class="col-sm-4">
+                            <input type="text" autocomplete="off" name="time_start" class="form-control datepicker" value="">
+                        </div>
+                        <label for="time_end" class="col-sm-1 control-label">至</label>
+                        <div class="col-sm-4">
+                            <input type="text" autocomplete="off" name="time_end" class="form-control datepicker" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hdtime_start" class="col-sm-2 control-label"><span style="color:red">*</span>活动时间 :</label>
+                        <div class="col-sm-4">
+                            <input type="text" autocomplete="off" name="hdtime_start" class="form-control datepicker" value="">
+                        </div>
+                        <label for="hdtime_end" class="col-sm-1 control-label">至</label>
+                        <div class="col-sm-4">
+                            <input type="text" autocomplete="off" name="hdtime_end" class="form-control datepicker" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2">
+                            <button type="button" class="btn btn-info" id="btn" style="width:100px">确认</button>
+                            <button type="button" class="btn btn-default cancel" style="width:100px;margin-left: 50px">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input').attr('autocomplete','off')
+            $(".datepicker").datetimepicker({
+                format: "yyyy-mm-dd hh:ii:ss",
+                autoclose: true,
+                minView: 0,
+                minuteStep:1
+            })
+
+
+            $('button.cancel').on('click', function () {
+                location.href = '/card/common'
+            })
+
+            // 确认按钮点击
+            $('#btn').on('click', function () {
+                if ($('input[name=name]').val().trim() == '') {
+                    $(this).Alert({
+                        msg: '请填写公司名称',
+                        level: 2
+                    })
+                    return false;
+                }
+
+                if ($('input[name=id]').val().trim() == '') {
+                    $(this).Alert({
+                        msg: '请填写会员id',
+                        level: 2
+                    })
+                    return false;
+                }
+
+                if(!checkNumber($('input[name=number]').val(),['请填写领用数量','数字框必须填写数字，且为整数'])){
+                    return false;
+                }
+
+                if($('input[name=time_start]').val() == '' || $('input[name=time_end]').val() == '' ) {
+                    $(this).Alert({
+                        msg: '请填写有效时间',
+                        level: 2
+                    })
+                    return false;
+                }
+                if($('input[name=hdtime_start]').val() == '' || $('input[name=hdtime_end]').val() == '' ) {
+                    $(this).Alert({
+                        msg: '请填写活动时间',
+                        level: 2
+                    })
+                    return false;
+                }
+                var start = new Date($('input[name=time_start]').val())
+                var end = new Date($('input[name=time_end]').val())
+                if(start > end) {
+                    $(this).Alert({
+                        msg: '活动有效开始时间需要早于有效结束时间',
+                        level: 2
+                    })
+                    return false;
+                }
+                var hdstart = new Date($('input[name=hdtime_start]').val())
+                var hdend = new Date($('input[name=hdtime_end]').val())
+                if(hdstart > hdend) {
+                    $(this).Alert({
+                        msg: '活动开始时间需要早于活动结束时间',
+                        level: 2
+                    })
+                    return false;
+                }
+                if(hdstart>start){
+                    $(this).Alert({
+                        msg: '活动开始时间需要早于等于有效开始时间',
+                        level: 2
+                    })
+                    return false;
+                }
+                if(hdend>end){
+                    $(this).Alert({
+                        msg: '活动结束时间需要早于等于有效结束时间',
+                        level: 2
+                    })
+                    return false;
+                }
+
+                $('#btn').attr("disabled","disabled");
+                var data = $('#myform').serializeArray();
+                var id = $('input[name=id]').val();
+                data.push({name:"id",value:id});
+                $.ajax({
+                    url: '/card/receive/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                window.location.href = '/card/common';
+                            }else{
+                                $('#btn').removeAttr("disabled");
+                                alert(data.info);
+                                return false;
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+
+
+            })
+
+            function checkNumber(obj,msg) {
+                var reg = /^\d+$/;
+                if(obj == '' || obj == 0) {
+                    $(this).Alert({
+                        msg: msg[0],
+                        level: 2
+                    })
+                    return false;
+                }
+                if (obj != "" && !reg.test(obj)) {
+                    $(this).Alert({
+                        msg: msg[1],
+                        level: 2
+                    })
+                    return false;
+                }
+                return true;
+            }
+            //搜索公司
+            $("input[name=name]").on("input propertychange",function(){
+                $('#addul ul').remove()
+                var name = $.trim($("input[name=name]").val());
+                if(name != ''){
+                    $.ajax({
+                        url: '/card/searchCom/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            name:name
+                        }
+                    })
+                            .done(function(data) {
+                                if (data.status == 0) {
+                                    //下拉框内容
+                                    var ul = $("<ul></ul>")
+                                    data.data.forEach(function(ele,index) {
+                                        var li = $("<li></li>").data("id",ele.id).text(ele.qc)
+                                        ul.append(li)
+                                    })
+                                    $('#addul').append(ul)
+                                } else {
+                                    alert(data.errmsg || data.info);
+                                }
+                            });
+                }
+            });
+            // 下拉框点击事件
+            $('#addul').on('click','li',function(e){
+                var id = $(this).data("id")
+                var text = $(this).text()
+                $('input[name=id]').val(id)
+                $('input[name=name]').val(text)
+                $('#addul ul').remove()
+                e.stopPropagation
+            })
+            $(document).on('click',function(){
+                if($('#addul ul').length) {
+                    $('#addul ul').remove()
+                }
+            })
+        });
+    </script>
+</block>

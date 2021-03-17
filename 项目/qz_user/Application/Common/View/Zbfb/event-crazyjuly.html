@@ -1,0 +1,127 @@
+<div class="windowbg">
+    <div class="order-window">
+        <div class="tit">10秒提交装修信息 抢万元大奖</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info">
+            <p>
+            <span style="color:#FF5659">您是今天第<span id="bj_enroll_count"></span>位参加该活动的老客户！<br>
+                <span style="font-size:15px">请继续完善剩余信息</span>
+                </span>
+            </p>
+            <div class="box-line"><br></div>
+
+            <div class="box-line edit-text">
+                <input type="text" name="xiaoqu" style="width:100%" placeholder="您的小区，以便精准匹配" />
+            </div>
+
+            <div class="box-line edit-text">
+                <input type="text" name="mianji" style="width:100%" class="mipt" placeholder="请填写房屋面积" value="" />
+            </div>
+
+            <div class="box-line edit-text ">
+                <select class="edit-city" name="start">
+                    <option value="">请选择开工时间</option>
+                    <option value="半个月内">半个月内</option>
+                    <option value="1个月">1个月</option>
+                    <option value="2个月">2个月</option>
+                    <option value="3个月">3个月</option>
+                    <option value="3个月以上">3个月以上</option>
+                    <option value="面议">面议</option>
+                </select>
+            </div>
+
+            <div class="box-line edit-text">
+                <select class="edit-city" name="yusuan">
+                    <option value="">请选择不包括家具、电器的预算</option>
+                    <volist name="step.yusuan" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+            <button type="button">报名</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+
+
+    $(function(){
+        $("#bj_enroll_count").text($('#enroll_count').html());
+
+        $(".windowbg .fa-remove").click(function(event) {
+            $(".windowbg").remove();
+        });
+
+        $(".order-window button").click(function(event) {
+            var container = $(".order-window");
+            $(".err").html('');
+
+            if ($("input[name=xiaoqu]").val() == '') {
+                $(".err").html("您还没有填写楼盘名称噢 ^_^!");
+                $("input[name=xiaoqu]").addClass('focus').focus();
+                return false;
+            }
+            $("input[name=xiaoqu]").removeClass('focus');
+
+            if ($("input[name=mianji]").val() == '') {
+                $(".err").html("您还没有填写房屋面积噢 ^_^!");
+                $("input[name=mianji]").addClass('focus').focus();
+                return false;
+            }
+            $("input[name=mianji]").removeClass('focus');
+
+            var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+            if (!re.test($("input[name=mianji]").val())) {
+                $("input[name=mianji]").addClass('focus').focus();
+                $(".err").html("亲,面积只能填写纯数字 ^_^!");
+                return false;
+            }
+            $("input[name=mianji]").removeClass('focus');
+
+
+            if ($("select[name=start]").val() == '') {
+                $(".err").html("您还没有选择开工时间噢 ^_^!");
+                $("select[name=start]").addClass('focus').focus();
+                return false;
+            }
+            $("select[name=start]").removeClass('focus');
+
+            if ($("select[name=yusuan]").val() == '') {
+                $(".err").html("您还没有选择装修预算噢 ^_^!");
+                $("select[name=yusuan]").addClass('focus').focus();
+                return false;
+            }
+            $("select[name=yusuan]").removeClass('focus');
+
+
+            $.ajax({
+                url: '/fb_order/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    xiaoqu:$("input[name=xiaoqu]", container).val(),
+                    mianji:$("input[name=mianji]", container).val(),
+                    yusuan:$("select[name=yusuan]", container).val(),
+                    start:$("select[name=start]", container).val(),
+                    orderid:"{$step.orderid}",
+                    tel:"{$step.tel}",
+                    step:3
+                }
+            })
+            .done(function(data) {
+                container.remove();
+                if (data.status == 1) {
+                    $("body").append(data.data.tmp);
+                }
+            })
+            .fail(function(xhr) {
+                container.remove();
+            });
+        });
+    });
+</script>

@@ -1,0 +1,650 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>在线客服负激励统计-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+	<section class="content-header">
+		<h1>在线客服负激励统计</h1>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box">
+                    <div class="row">
+	                    <div class="col-xs-12">
+	                        <ul class="npoc-tab-wrap">
+	                        <li class="npoc-tab first-tab" data-tab='1'>
+	                            <span style="font-size: 14px;">审核客服</span>
+	                        </li>
+	                        <li class="npoc-tab first-tab" data-tab='2'>
+	                            对接客服
+	                        </li>
+	                        </ul>
+	                    </div>
+                    </div>
+                </div>
+				<div id="tab1">
+					<div class="box">
+	                    <div class="row">
+		                    <div class="col-xs-12">
+		                        <ul class="npoc-tab-wrap">
+		                        <li class="npoc-tab second-tab" data-tab='3'>
+		                            <span style="font-size: 14px;">按人统计</span>
+		                        </li>
+		                         <li class="npoc-tab second-tab" data-tab='4'>
+		                            <span style="font-size: 14px;">按团统计</span>
+		                        </li>
+		                        <li class="npoc-tab second-tab" data-tab='5'>
+		                            <span style="font-size: 14px;">按师统计</span>
+		                        </li>
+		                        </ul>
+		                    </div>
+	                    </div>
+	                </div>
+					<div id="tab3">
+						<div class="box box-default">
+							<div class="box-header">
+								<div class="col-xs-12">
+									条件查询
+								</div>
+							</div>
+							<div class="box-body">
+								<form action="/qcstat/qcdeductionstat/" method="get" class="">
+									<div class="form-group pull-left col-sm-12">
+										<div class="col-xs-2">
+											 <label>开始时间:</label>
+											 <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="实际发布时间" value="{$Think.get.begin}">
+										</div>
+										<div class="col-xs-2">
+											<label>结束时间：</label>
+											<input class="form-control datepicker" type="text" name="end" placeholder="实际发布时间" value="{$Think.get.end}">
+										</div>
+										<div class="col-xs-2">
+											<label>客服团</label>
+											<select id="qc" name="group" name="" class="form-control">
+												<option value="">请选择</option>
+												<volist name="kfgroup.groups" id="vo">
+												<if condition="$_GET['group'] EQ $vo['kfgroup']">
+												<option value="{$vo.kfgroup}" selected="selected">{$vo.name}</option>
+												<else/>
+												<option value="{$vo.kfgroup}">{$vo.name}</option>
+												</if>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-2">
+											<label>客服师</label>
+											<select id="qc" name="manager" class="form-control">
+												<option value="">请选择</option>
+												<volist name="kfgroup.manager" id="vo">
+												<if condition="$_GET['manager'] EQ $vo['id']">
+												<option value="{$vo.id}" selected="selected">{$vo.name}</option>
+												<else/>
+												<option value="{$vo.id}">{$vo.name}</option>
+												</if>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-2">
+											<label>审核客服</label>
+											<select id="kf" name="kf">
+												<option value="">请选择</option>
+												<volist name="kfList" id="vo">
+												<option value="{$vo.id}">{$vo.name}</option>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+										  	 <button type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+										    <input name="index" value="1" type="hidden" />
+										    <input name="tab" value="1" type="hidden" />
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+											<button type="button" class="btn btn-success pull-right btn-export" data-id="1">导出&nbsp;Excel</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div class="box box-default" style="overflow-x: auto; overflow-y: hidden;">
+							<div style="width: 2400px;" >
+							<table id="myTable1" class="table table-bordered no-padding" >
+								<thead>
+								<tr>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服姓名</th>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服师</th>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服团</th>
+									<volist name="items" id="vv">
+										<th colspan="<?php echo $vv['colspan'];?>">{$vv.name}</th>
+									</volist>
+
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">合计</th>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+									<th colspan="<?php echo count($v['child']);?>" style="width:120px; vertical-align: middle;">{$v.name}</th>
+									<else/>
+									<th style="width:100px; vertical-align: middle;">{$v.name}</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="i">
+											<th style="width: 40px;">{$i.name}</th>
+										</volist>
+									<else/>
+									<th  style="width:100px; vertical-align: middle;">{$v.money}元
+										<if condition="!empty($v['money2'])">
+										或{$v.money2}元
+										</if>
+										/次
+									</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								</thead>
+								<tbody>
+								<volist name="list" id="vo">
+									<tr>
+										<td>{$vo.name}</td>
+										<td>{$vo.manager|default="-"}</td>
+										<td>{$vo.group|default="-"}</td>
+										<volist name="vo.item" id="v">
+										<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="j">
+										<td>{$j|default=0}</td>
+										</volist>
+										<else/>
+										<td>{$v.count|default=0}</td>
+										</if>
+										</volist>
+										<td>{$vo.money|default=0}</td>
+									</tr>
+								</volist>
+								</tbody>
+							</table>
+							</div>
+						</div>
+					</div>
+					<div id="tab4">
+						<div class="box box-default">
+							<div class="box-header">
+								<div class="col-xs-12">
+									条件查询
+								</div>
+								<div class="box-body">
+								<form action="/qcstat/qcdeductionstat/" method="get" class="">
+									<div class="form-group pull-left col-sm-12">
+										<div class="col-xs-2">
+											 <label>开始时间:</label>
+											 <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="实际发布时间" value="{$Think.get.begin}">
+										</div>
+										<div class="col-xs-2">
+											<label>结束时间：</label>
+											<input class="form-control datepicker" type="text" name="end" placeholder="实际发布时间" value="{$Think.get.end}">
+										</div>
+										<div class="col-xs-2">
+											<label>客服团</label>
+											<select id="qc" name="group" name="" class="form-control">
+												<option value="">请选择</option>
+												<volist name="kfgroup.groups" id="vo">
+												<if condition="$_GET['group'] EQ $vo['kfgroup']">
+												<option value="{$vo.kfgroup}" selected="selected">{$vo.name}</option>
+												<else/>
+												<option value="{$vo.kfgroup}">{$vo.name}</option>
+												</if>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-2">
+											<label>客服师</label>
+											<select id="qc" name="manager" class="form-control">
+												<option value="">请选择</option>
+												<volist name="kfgroup.manager" id="vo">
+												<if condition="$_GET['manager'] EQ $vo['id']">
+												<option value="{$vo.id}" selected="selected">{$vo.name}</option>
+												<else/>
+												<option value="{$vo.id}">{$vo.name}</option>
+												</if>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+										  	 <button type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+										    <input name="index" value="1" type="hidden" />
+										    <input name="tab" value="2" type="hidden" />
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+											<button type="button" class="btn btn-success pull-right btn-export" data-id="1">导出&nbsp;Excel</button>
+										</div>
+									</div>
+								</form>
+								</div>
+							</div>
+						</div>
+						<div class="box box-default" style="overflow-x: auto; overflow-y: hidden;">
+							<div style="width: 2400px;" >
+							<table id="myTable1" class="table table-bordered no-padding" >
+								<thead>
+								<tr>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服师</th>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服团</th>
+									<volist name="items" id="vo">
+										<th colspan="<?php echo $vo['colspan'];?>">{$vo.name}</th>
+									</volist>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">合计</th>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+									<th colspan="<?php echo count($v['child']);?>" style="width:120px; vertical-align: middle;">{$v.name}</th>
+									<else/>
+									<th style="width:100px; vertical-align: middle;">{$v.name}</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="i">
+											<th style="width: 40px;">{$i.name}</th>
+										</volist>
+									<else/>
+									<th  style="width:100px; vertical-align: middle;">{$v.money}元
+										<if condition="!empty($v['money2'])">
+										或{$v.money2}元
+										</if>
+										/次
+									</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								</thead>
+								<tbody>
+								<volist name="groupList" id="vo">
+									<tr>
+										<td>{$vo.manager|default="-"}师</td>
+										<td>{$vo.group|default="-"}团</td>
+										<volist name="vo.item" id="v">
+										<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="j">
+										<td>{$j|default=0}</td>
+										</volist>
+										<else/>
+										<td>{$v.count|default=0}</td>
+										</if>
+										</volist>
+										<td>{$vo.money|default=0}</td>
+									</tr>
+								</volist>
+								</tbody>
+							</table>
+							</div>
+						</div>
+					</div>
+					<div id="tab5">
+						<div class="box box-default">
+							<div class="box-header">
+								<div class="col-xs-12">
+									条件查询
+								</div>
+								<div class="box-body">
+								<form action="/qcstat/qcdeductionstat/" method="get" class="">
+									<div class="form-group pull-left col-sm-12">
+										<div class="col-xs-2">
+											 <label>开始时间:</label>
+											 <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="实际发布时间" value="{$Think.get.begin}">
+										</div>
+										<div class="col-xs-2">
+											<label>结束时间：</label>
+											<input class="form-control datepicker" type="text" name="end" placeholder="实际发布时间" value="{$Think.get.end}">
+										</div>
+										<div class="col-xs-2">
+											<label>客服师</label>
+											<select id="qc" name="manager" class="form-control">
+												<option value="">请选择</option>
+												<volist name="kfgroup.manager" id="vo">
+												<if condition="$_GET['manager'] EQ $vo['id']">
+												<option value="{$vo.id}" selected="selected">{$vo.name}</option>
+												<else/>
+												<option value="{$vo.id}">{$vo.name}</option>
+												</if>
+												</volist>
+											</select>
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+										  	 <button type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+										    <input name="index" value="1" type="hidden" />
+										    <input name="tab" value="3" type="hidden" />
+										</div>
+										<div class="col-xs-1">
+											<label style="display: block;">&nbsp;</label>
+											<button type="button" class="btn btn-success pull-right btn-export" data-id="1">导出&nbsp;Excel</button>
+										</div>
+									</div>
+								</form>
+								</div>
+							</div>
+						</div>
+						<div class="box box-default" style="overflow-x: auto; overflow-y: hidden;">
+							<div style="width: 2400px;" >
+							<table id="myTable1" class="table table-bordered no-padding" >
+								<thead>
+								<tr>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">客服师</th>
+									<volist name="items" id="vo">
+										<th colspan="<?php echo $vo['colspan']?>">{$vo.name}</th>
+									</volist>
+									<th rowspan="3" style="width: 100px; vertical-align: middle;">合计</th>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+									<th colspan="<?php echo count($v['child']);?>" style="width:120px; vertical-align: middle;">{$v.name}</th>
+									<else/>
+									<th style="width:100px; vertical-align: middle;">{$v.name}</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								<tr>
+									<volist name="items" id="vo">
+									<volist name="vo.child" id="v">
+									<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="i">
+											<th style="width: 40px;">{$i.name}</th>
+										</volist>
+									<else/>
+									<th  style="width:100px; vertical-align: middle;">{$v.money}元
+										<if condition="!empty($v['money2'])">
+										或{$v.money2}元
+										</if>
+										/次
+									</th>
+									</if>
+									</volist>
+									</volist>
+								</tr>
+								</thead>
+								<tbody>
+								<volist name="managerList" id="vo">
+									<tr>
+										<td>{$vo.manager|default="-"}师</td>
+										<volist name="vo.item" id="v">
+										<if condition="count($v['child']) GT 0">
+										<volist name="v.child" id="j">
+										<td>{$j|default=0}</td>
+										</volist>
+										<else/>
+										<td>{$v.count|default=0}</td>
+										</if>
+										</volist>
+										<td>{$vo.money|default=0}</td>
+									</tr>
+								</volist>
+								</tbody>
+							</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="tab2">
+					<div class="box box-default">
+						<div class="box-header">
+							<div class="col-xs-12">
+								条件查询
+							</div>
+						</div>
+						<div class="box-body">
+							<form action="/qcstat/qcDeductionStat/" method="get" class="">
+								<div class="form-group pull-left col-sm-12">
+									<div class="col-xs-2">
+										 <label>开始时间:</label>
+										 <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="实际发布时间" value="{$Think.get.begin}">
+									</div>
+									<div class="col-xs-2">
+										<label>结束时间：</label>
+										<input class="form-control datepicker" type="text" name="end" placeholder="实际发布时间" value="{$Think.get.end}">
+									</div>
+
+									<div class="col-xs-2">
+										<label>客服团</label>
+										<select name="dockinggroup" name="" class="form-control">
+											<option value="">请选择</option>
+											<volist name="dockingGroup.groups" id="vo">
+											<if condition="$_GET['dockinggroup'] EQ $vo['kfgroup']">
+											<option value="{$vo.kfgroup}" selected="selected">{$vo.name}</option>
+											<else/>
+											<option value="{$vo.kfgroup}">{$vo.name}</option>
+											</if>
+											</volist>
+										</select>
+									</div>
+									<div class="col-xs-2">
+										<label>对接客服</label>
+										<select id="docking" name="docking">
+											<option value="">请选择</option>
+											<volist name="dockingKf" id="vo">
+											<option value="{$vo.id}">{$vo.name}</option>
+											</volist>
+										</select>
+									</div>
+									<div class="col-xs-1">
+										<label style="display: block;">&nbsp;</label>
+									   <button type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+									   <input name="index" value="2" type="hidden"/>
+									</div>
+									<div class="col-xs-1">
+										<label style="display: block;">&nbsp;</label>
+										<button type="button" class="btn btn-success pull-right btn-export" data-id="2">导出&nbsp;Excel</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="box box-default" style="overflow-x: auto; overflow-y: hidden;">
+						<div style="width: 2400px;" >
+						<table id="myTable2" class="table table-bordered no-padding" >
+							<thead>
+							<tr>
+								<th rowspan="3" style="width: 100px; vertical-align: middle;">客服姓名</th>
+								<th rowspan="3" style="width: 100px; vertical-align: middle;">客服团</th>
+								<volist name="dockingItems" id="vo">
+									<th colspan="{$vo.colspan}">{$vo.name}</th>
+								</volist>
+
+								<th rowspan="3" style="width: 100px; vertical-align: middle;">合计</th>
+							</tr>
+							<tr>
+								<volist name="dockingItems" id="vo">
+									<volist name="vo.child" id="v">
+										<if condition="count($v['child']) GT 0">
+											<th colspan="<?php echo count($v['child']);?>" style="width:120px; vertical-align: middle;">{$v.name}</th>
+											<else/>
+											<th style="width:100px; vertical-align: middle;">{$v.name}</th>
+										</if>
+									</volist>
+								</volist>
+							</tr>
+							<tr>
+								<volist name="dockingItems" id="vo">
+									<volist name="vo.child" id="v">
+										<if condition="count($v['child']) GT 0">
+											<volist name="v.child" id="i">
+												<th style="width: 40px;">{$i.name}</th>
+											</volist>
+											<else/>
+											<th  style="width:100px; vertical-align: middle;">{$v.money}元
+												<if condition="!empty($v['money2'])">
+													或{$v.money2}元
+												</if>
+												/次
+											</th>
+										</if>
+									</volist>
+								</volist>
+							</tr>
+							</thead>
+							<tbody>
+								<volist name="dockingList" id="vo">
+								<tr>
+									<td>{$vo.name}</td>
+									<td>{$vo.group|default="-"}</td>
+									<volist name="vo.item" id="v">
+										<if condition="count($v['child']) GT 0">
+											<volist name="v.child" id="j">
+												<td>{$j|default=0}</td>
+											</volist>
+											<else/>
+											<td>{$v.count|default=0}</td>
+										</if>
+									</volist>
+									<td>{$vo.money|default=0}</td>
+								</tr>
+							</volist>
+							</tbody>
+						</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+	$("#kf").select2();
+    $("#kf").select2("val","{$Think.get.kf}");
+
+    $("#docking").select2();
+    $("#docking").select2("val","{$Think.get.docking}");
+
+	$(".datepicker").datepicker({
+		format:"yyyy-mm-dd"
+	});
+
+	$('#myTable1').DataTable({
+	   paging:false,
+	   searching:false,
+	   language:{
+			zeroRecords: "没有内容",
+			info:""
+	   },
+	   sWidth:"100%",
+	   scrollY:"600px",
+	   bSort:true,
+	   scrollCollapse: true
+	});
+
+	$('.npoc-tab-wrap li.first-tab').eq({$Think.get.index|default=1}-1).addClass('npoc-tab-active');
+	$('.npoc-tab-wrap li.second-tab').eq({$Think.get.tab|default=1}-1).addClass('npoc-tab-active');
+
+	//tab切换
+    $('.first-tab').on('click', function() {
+        $('.npoc-tab.first-tab').removeClass('npoc-tab-active');
+        $(this).addClass('npoc-tab-active');
+        var tabIndex = $(this).attr('data-tab');
+        $("#tab1,#tab2").hide();
+        $('#tab'+tabIndex).show();
+    });
+    $(".npoc-tab-active").trigger('click');
+
+    $('.second-tab').on('click', function() {
+        $('.npoc-tab.second-tab').removeClass('npoc-tab-active');
+        $(this).addClass('npoc-tab-active');
+        var tabIndex = $(this).attr('data-tab');
+        $("#tab3,#tab4,#tab5").hide();
+        $('#tab'+tabIndex).show();
+    });
+    $(".npoc-tab-active").trigger('click');
+
+	$(".btn-export").click(function(event) {
+		var _this = $(this);
+		var index = _this.attr("data-id");
+		var head = $("#myTable"+index).find("thead");
+		var body = $("#myTable"+index).find("tbody");
+		var data = [];
+		var headTr = [];
+
+		head.find("tr").eq(0).find("th").each(function(i){
+			var th = [];
+			if (i < 3 && index  == 1) {
+				th["text"] = $(this).text().trim();
+				headTr.push(th);
+			} else if (i < 2 && index  == 2){
+				th["text"] = $(this).text().trim();
+				headTr.push(th);
+			}
+		});
+
+		head.find("tr").eq(1).find("th").each(function(i){
+			var th = [];
+			th["text"] = $(this).text().trim();
+			if (i == 9) {
+				th["col_span"] = 3;
+			}
+			headTr.push(th);
+		});
+
+		var th = [];
+		th["text"] = head.find("tr").eq(0).find("th").eq(head.find("tr").eq(0).find("th").length -1).text().trim();
+		headTr.push(th);
+		data.push(headTr);
+
+		body.find("tr").each(function(){
+			var tr = [];
+			$(this).find("td").each(function(){
+				var td = [];
+				td["text"] = $(this).text().trim();
+				tr.push(td);
+			});
+			data.push(tr);
+		});
+		var str = "";
+		if (index == 1) {
+			str = "审核客服";
+		} else {
+			str = "对接客服";
+		}
+
+		_this.exportExcel({
+			data: data,
+			title: str+"负激励统计",
+			url: "/export/download",
+			show:false
+		 });
+	});
+
+</script>
+</block>

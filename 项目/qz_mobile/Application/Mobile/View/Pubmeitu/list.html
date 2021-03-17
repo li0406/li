@@ -1,0 +1,350 @@
+<extend name="Common:basic"/>
+<block name="link">
+<notempty name="info.canonical">
+<link rel="canonical" href="{$info.canonical}"/>
+</notempty>
+<link href="/assets/mobile/meitu/css/m-xgt-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/css/top-sj-bj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+<meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.meitu.0.img_path}-w300.jpg" />
+<style>
+.s_hd span {width:33%;}
+</style>
+</block>
+<block name="content">
+<article>
+    <!--三个分类-->
+    <div class="m_box" id="box">
+        <div class="s_hd" id="m_hd">
+            <span class="">{$info.nav.wz|default="局部"} <i class="fa fa-angle-down"></i></span>
+            <span class="">{$info.nav.fg|default="风格"} <i class="fa fa-angle-down"></i></span>
+            <span class="">{$info.nav.mj|default="面积"} <i class="fa fa-angle-down"></i></span>
+        </div>
+        <div class="m_bd" id="m_bd">
+            <ul>
+                <li><a rel="nofollow" href="{$info['select']['location']}">不限</a></li>
+                <volist name="info.wz" id="v">
+                <li><a href="{$v.link}" <empty name="v.nofollow">rel="nofollow"</empty> <if condition="$info['navParams']['location'] EQ $v.id ">class="now"</if> >{$v.name}</a></li>
+                </volist>
+            </ul>
+            <ul>
+                <li><a rel="nofollow" href="{$info['select']['fengge']}">不限</a></li>
+                <volist name="info.fg" id="v">
+                <li><a href="{$v.link}" <empty name="v.nofollow">rel="nofollow"</empty> <if condition="$info['navParams']['fengge'] EQ $v.id ">class="now"</if> >{$v.name}</a></li>
+                </volist>
+            </ul>
+            <ul>
+                <li><a rel="nofollow" href="{$info['select']['mianji']}">不限</a></li>
+                <volist name="info.mj" id="v">
+                <li><a href="{$v.link}" <empty name="v.nofollow">rel="nofollow"</empty> <if condition="$info['navParams']['mianji'] EQ $v.id ">class="now"</if> >{$v.name}</a></li>
+                </volist>
+            </ul>
+        </div>
+    </div>
+    <!-- 遮罩层-->
+    <div id="mask"></div>
+    <!--图片模块-->
+    <div class="m_case" style="display: block;">
+        <div class="wrapper">
+        <ul class="wall">
+            <div class="wall-column">
+                <div class="article" id="gongzuang">
+                    <img src="/assets/mobile/meitu/img/gongzuang.png" />
+                    <p>更多高清美图尽在手中</p>
+                </div>
+            <volist name="info.meitu" id="v">
+            <div class="article" id="">
+                <a href="/meitu/g{$v.id}.html">
+                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.img_path}-w300.jpg" alt="{$v.title}"/>
+                </a>
+                <p><a href="/meitu/g{$v.id}.html">{$v.title}</a></p>
+            </div>
+            </volist>
+            </div>
+        </ul>
+        </div>
+    </div>
+    <empty name="info['meitu']">
+        <div class="notfind-more">
+            <span class="notfind">施主！这个类型的图片很有可能跟人私奔了</span>
+            <a href="/meitu/">>>去看看其他美图</a>
+        </div>
+    <else />
+        {$info.page}
+    </empty>
+    <input name="pageid" id="pageid" type="hidden" value="{$info.pageid}">
+</article>
+<!-- <div class="call-tel">装修咨询热线：<a href="tel:{:OP('QZ_CONTACT_TELNUM400')}"><i class="fa fa-phone"></i>{:OP('QZ_CONTACT_TEL400')}</a></div> -->
+
+<input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+<div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <include file="Common/footfadantc"/>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/mobile/meitu/js/jaliswall.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(function(){
+        var hongbao = localStorage.hongbao;
+        if(hongbao == 1){
+            $('.red_box').css('display','none');
+        }
+    });
+
+    $(function(){
+        tab("box"); //列表选项卡
+        $('.wall').jaliswall({ item: '.article' });
+
+        // 导航层级修改
+        $('#full-nav-shut').on('click',function(){
+            $('.m_bd').css('zIndex','1')
+            $('.s_hd').css('zIndex','1')
+        });
+
+        // 红包部分
+        (function(){
+            var timer = setTimeout(function(){
+                $('.red_box').addClass('animated wobble show');
+
+                var timer1 = setTimeout(function(){
+                    clearTimeout(timer1);
+                },1000)
+                clearTimeout(timer);
+            },800);
+        })();
+
+        $('.red_box').on('touchend', function(){
+            $('.red_box_pop').addClass('show').find('.start_box').addClass('show')
+        });
+        $('.close_red_box').on('touchend', function(e){
+            $('.red_box').hide();
+            return false;
+        });
+        $('.start_box .close_start').on('touchend', function(){
+            $('.start_box').removeClass('show').parent().removeClass('show');
+            return false;
+        });
+
+        $('.end_box .close_start,.close_ok').on('touchend', function(){
+            $('.end_box').removeClass('show').parent().removeClass('show');
+            $('.red_box').css('display','none');
+            return false;
+        });
+    });
+
+    var urlStr = "{$realurl}";
+    var index = 1;
+    var timer = 0;
+    var done = true;
+
+//    $(window).on("scroll",function(){
+//        if ($(document).height() - $(this).scrollTop() - $(this).height() < 80){
+//            if(timer){
+//                clearTimeout(timer);
+//                timer = 0;
+//            }
+//            timer = setTimeout(getNextPageImg,1000);
+//        }
+//    });
+
+    getNextPageImg = function(){
+        var page = $("#pageid").val();
+        if(page !== '0'){
+            var url = urlStr + 'p' + (index + 1);
+            if(done){
+                done = false;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'JSON',
+                })
+                .done(function(result) {
+                    if(result.status == 1){
+                        done = true;
+                        $(".wall").append($(result.data).fadeIn(2000));
+                        $('.wall').jaliswall({ item: '.article' });
+                        index = index + 1;
+                    }else{
+                        done = false;
+                        alert(result.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("加载失败,请刷新再试！");
+                });
+            }
+        }
+    }
+
+    // 置顶
+    $(window).on("scroll", function(){
+        if($(document).scrollTop()>="1000"){
+            $('#gotop').addClass('show');
+        }else{
+            $('#gotop').removeClass('show');
+        }
+    });
+
+    // 列表选项卡
+    function tab(id) {
+        var mask = document.getElementById('mask');
+        var eleId = document.getElementById(id) || false;
+        if (eleId != false) {
+            var span = eleId.getElementsByTagName("span");
+            var ul = eleId.getElementsByTagName("ul");
+            var li = eleId.getElementsByTagName('li');
+            var mhd = $('#m_hd');
+            var mbd = eleId.getElementsByClassName('m_bd')[0];
+            // mhd.css({
+            //     'z-index':1,
+            //     'position':'relative',
+            //     'top':'0'
+            // });
+            for (var i = 0; i < span.length; i++) {
+                span[i].index = i;
+                span[i].onclick = function() {
+                    if (this.className == 'active') {
+                        this.className = "";
+                        ul[this.index].className = "";
+                        mask.className = "";
+
+                    } else {
+                        for (var j = 0; j < ul.length; j++) {
+                            span[j].className = "";
+                            ul[j].className = "";
+                            mask.className = "";
+                        }
+                        this.className = "active";
+                        ul[this.index].className = "show";
+                        mbd.style.zIndex = '3'
+                        mask.className = "show";
+                        mhd.css({
+                            'z-index':3,
+                            'position':'absolute',
+                            'top':'50px'
+                        });
+
+                    }
+                }
+                mask.onclick = function() {
+                    for (var i = 0; i < span.length; i++) {
+                        span[i].className = ''
+                        ul[i].className = "";
+                    }
+                    mask.className = "";
+                    mhd.css({
+                        'z-index':1,
+                        'position':'relative',
+                        'top':'0'
+                    });
+                }
+            }
+        }
+    }
+
+    //发单
+    $(function() {
+        $(".home-zb .get_free").click(function(event) {
+            var container = $(this).parents(".home-zb");
+            var name = $(".m-bj-edit input[name=name]").val();
+            var tel = $(".m-bj-edit input[name=tel]").val();
+            var cs = $('input[name=city]').attr('data-id');
+            var qx = $('input[name=area]').attr('data-id');
+
+
+            if (!App.validate.run(name)) {
+                $(".m-bj-edit input[name=name]").focus();
+                alert("请输入您的称呼");
+                return false;
+            } else {
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if (!reg.test(name)) {
+                    $(".m-bj-edit input[name=name]").focus();
+                    alert("请输入正确的名称，只支持中文和英文");
+                    return false;
+                }
+            }
+            if (!App.validate.run(tel)) {
+                $(".m-bj-edit input[name=tel]").focus();
+                alert("请填写正确的手机号码 ^_^!");
+                return false;
+            } else {
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if (!reg.test(tel)) {
+                    $(".m-bj-edit input[name=tel]").focus();
+                    $(".m-bj-edit input[name=tel]").val('');
+                    alert("请填写正确的手机号码 ^_^!");
+                    return false;
+                }
+            }
+            if ('' == cs || '' == qx) {
+                alert('请选择您所在的区域 ≧▽≦');
+                return false;
+            }
+
+            window.order({
+                extra:{
+                    cs: cs,
+                    qx: qx,
+                    name: $("input[name=name]", container).val(),
+                    tel: $("input[name=tel]", container).val(),
+                    fb_type: $("input[name=fb_type]", container).val(),
+                    source: '315'
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+
+                },
+                success:function(data, status, xhr){
+
+                    if (data.status == 1) {
+                        localStorage.hongbao = 1;
+                        $('.start_box').removeClass('show');
+                        $('.end_box').addClass('show bounceIn animated')
+                        var timer2 = setTimeout(function(){
+                            $('.end_box').removeClass('bounceIn animated');
+                            clearTimeout(timer2)
+                        },800);
+                    } else {
+                        alert(data.info);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+        var url = location.href.split("-")[1].substring(4,7)
+        if(url != 'm0/'){
+            $("#gongzuang").hide()
+        }else{
+            $("#gongzuang").show()
+        }
+    });
+</script>
+<script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+<script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    // 城市选择插件
+    /*selectQz.init({
+        province:$("input[name=province]").attr("data-id"),
+        city:$("input[name=city]").attr("data-id"),
+        area:$("input[name=area]").attr("data-id")
+    });*/
+</script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

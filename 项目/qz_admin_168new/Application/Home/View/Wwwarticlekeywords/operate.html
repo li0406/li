@@ -1,0 +1,171 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>文章内链关键字</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/wwwarticlekeywords/">文章内链关键字</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 文章内链关键字</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form id="form" action="javascript:void(0)" method="POST">
+                            <div class="tab-content">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label>模块</label>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <select name="keyword_module" class="form-control" >
+                                                    <option value="1">攻略</option>
+                                                    <option value="2">分站</option>
+                                                    <option value="3">百科</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>关键字名称</label>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <input type="input" class="form-control validate[required]" name="name" placeholder="关键字名称" id="name" value="{$info.info.name}">
+                                                <input type="hidden" name="nameCheck" value="1"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>关键字链接</label>
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <input type="input" class="form-control validate[required]" name="href" placeholder="关键字链接" id="href" value="{$info.info.href}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-success btn-save">
+                                        <i class="fa fa-save"></i>&nbsp;保存
+                                    </button>
+                                    <button type="button" class="btn btn-default">
+                                        <a href="/wwwarticlekeywords/"><i class="fa fa-mail-reply"></i>&nbsp;返回</a>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $('select[name=keyword_module]').val('{$info.info.keyword_module|default=1}');
+        if ('' != '{$info.info.id}') {
+            $('select[name=keyword_module]').attr('disabled', 'disabled');
+        };
+
+        // 自定义参数调用
+        $('#form').validationEngine('attach', {
+          promptPosition: 'centerRight',
+          autoHidePrompt: true,
+          autoHideDelay: '2000',
+          scroll: true
+        });
+
+        $("#name").bind('input porpertychange',function(){
+            var _this = $(this);
+            var len = _this.val().length
+            $("input[name=nameCheck]").val(1);
+            if(len > 1) {
+                $.ajax({
+                    url: '/wwwarticlekeywords/findword',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {word:  $(this).val(),module: $("select[name=keyword_module]").val()}
+                    })
+                  .done(function(data) {
+                      if (data.error_code == 1) {
+                         _this.validationEngine('showPrompt','已有重复数据，请重新输入','error');
+                         $("input[name=nameCheck]").val(0);
+                      }
+                 });
+            }
+        });
+
+        $('.btn-save').click(function(){
+            if(! $('#form').validationEngine('validate')){
+                return false;
+            }
+
+            if ($("input[name=nameCheck]").val() == 0) {
+                $("#name").validationEngine('showPrompt','已有重复数据，请重新输入','error');
+                return false;
+            }
+
+            var id = '{$Think.get.id}';
+            $.ajax({
+                url: '/wwwarticlekeywords/operate/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    keyword_module:$('select[name=keyword_module]').val(),
+                    name:$('#name').val(),
+                    href:$('#href').val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                            window.location.href = window.location.href;
+                        }
+                    });
+                    e.show();
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    </script>
+</block>

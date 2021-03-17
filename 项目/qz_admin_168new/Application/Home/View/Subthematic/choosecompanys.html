@@ -1,0 +1,159 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>选取装修公司</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/subthemeatic/css/choosecompanys.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <h4 class="col-xs-2">选取装修公司</h4>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <form action="/subthematic/choosecompanys" method="get" id="biaodantj">
+                            <input type="hidden" name="ztid" class="form-control" value="{$Think.get.ztid}">
+                            <div class="row">
+                                <div class="col-xs-10">
+                                    <div class="col-xs-2">
+                                        装修公司ID：
+                                        <input type="text" name="company_id" class="form-control" value="{$getdata.company_id}" placeholder="请输入装修公司ID">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        装修公司名称：
+                                        <input type="text" name="company_name" class="form-control" value="{$getdata.company_name}" placeholder="请输入装修公司名称">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        选取状态
+                                        <select class="form-control" type="text" name="status">
+                                            <option value="">请选择</option>
+                                            <if condition="$getdata['status'] eq 1">
+                                                <option value="1" selected="selected" >是</option>
+                                            <else/>
+                                                <option value="1">是</option>
+                                            </if>
+                                            <if condition="$getdata['status'] eq 2">
+                                                <option value="2" selected="selected" >否</option>
+                                                <else/>
+                                                <option value="2">否</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <button type="submit" class="btn btn-primary search"><i class="fa fa-search"></i> 查询</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>装修公司ID</th>
+                                <th>装修公司简称</th>
+                                <th>所属站点/区域</th>
+                                <th>服务特长</th>
+                                <th>会员状态</th>
+                                <th>是否已选取</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.company_id}</td>
+                                    <td>{$vo.company_jc}</td>
+                                    <td>{$vo.company_cityname}-{$vo.company_areaname}</td>
+                                    <td>{$vo.fuwu}</td>
+                                    <td>{$vo.vipstatus}</td>
+                                    <td><if condition="$vo['is_choose']">是<else/>否</if></td>
+                                    <if condition="$vo['is_choose']">
+                                        <td class="delete" data-companyid="{$vo.company_id}" data-subthematicid="{$Think.get.ztid}">取消</td>
+                                    <else/>
+                                        <td class="choose" data-companyid="{$vo.company_id}" data-subthematicid="{$Think.get.ztid}">选取</td>
+                                    </if>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                    <a href="/subthematic/addthematicpageinfo?id={$Think.get.ztid}" class="btn return">返回</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            //选择
+            $(".choose").click(function () {
+                if (confirm("确定选择该装修公司吗？")) {
+                    var company_id = $(this).data('companyid');
+                    var subthematic_id = $(this).data('subthematicid');
+                    var params = {};
+                    params.company_id = company_id;
+                    params.subthematic_id = subthematic_id;
+                    $.ajax({
+                        url: '/subthematic/chooseCompanyAction',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: params
+                    })
+                        .done(function (data) {
+                            if(data.error_code == 1){
+                                console.log(data);
+                                layer.msg('操作成功', {icon: 1});
+                                setTimeout("history.go(0);",1000);
+                            }else{
+                                alert(data.error_msg);
+                                return false;
+                            }
+                        })
+                        .fail(function (xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+                }
+            });
+
+
+            //取消
+            $(".delete").click(function () {
+                if (confirm("确定取消选择该装修公司吗？")) {
+                    var company_id = $(this).data('companyid');
+                    var subthematic_id = $(this).data('subthematicid');
+                    var params = {};
+                    params.company_id = company_id;
+                    params.subthematicid = subthematic_id;
+                    $.ajax({
+                        url: '/subthematic/deletechooseByThematicidAndCompanyId',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: params
+                    })
+                        .done(function (data) {
+                            if (data.error_code == 1) {
+                                console.log(data);
+                                layer.msg('取消成功', {icon: 1});
+                                setTimeout("history.go(0);",1000);
+                            } else {
+                                alert(data.error_msg);
+                                return false;
+                            }
+                        })
+                        .fail(function (xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+                }
+            });
+
+        })
+    </script>
+</block>

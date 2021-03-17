@@ -1,0 +1,295 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>频道标签管理</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-header with-border">条件查询</div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-2">
+                            <label>频道标签名称：</label>
+                            <div class="form-group">
+                                <select class="flat no-padding select2" id="name">
+                                    <option value="">全部</option>
+                                    <volist name="tags" id='v'>
+                                        <option value="{$v.name}">{$v.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>频道标签ID：</label>
+                            <div class="form-group">
+                                <select class="flat select2" id="tagId">
+                                    <option value="">请选择</option>
+                                    <volist name="tags" id='v'>
+                                        <option value="{$v.code}">{$v.code}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-5">
+                            <div><label>时间选择：</label></div>
+                            <div class="col-xs-6 no-padding">
+                                <input class="form-control flat timer" name="time" />
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="btn btn-primary" id="searchNow"><i class="fa fa-search"></i> 查询</div>
+                                <div class="btn btn-primary" id="addNewTag"><i class="fa fa-plus-circle"></i> 新增标签</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>频道标签ID</th>
+                                    <th>频道标签名称</th>
+                                    <th>频道个数</th>
+                                    <th>更新日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="v">
+                                    <tr>
+                                        <td>{$v.code}</td>
+                                        <td>{$v.name}</td>
+                                        <td><a href="javascript:;" class="text-info showCon" data-toggle="modal" data-target="#myModal" data-id="{$v.id}">{$v.num}</a></td>
+                                        <td>{$v.edit_time|date="Y-m-d H:i:s",###}</td>
+                                        <td>
+                                            <a href="/flowanalysis/channellabeledit/?id={$v.id}" target="_blank"><span class="label label-success" data-id="{$v.id}"><i class="fa fa-edit"> 编辑</i></span></a>
+                                            <span class="label label-danger wantDel" data-toggle="modal" data-target="#deleteModalTrue" data-id="{$v.id}"><i class="fa fa-trash"> 删除</i></span>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        <div class="text-center">
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 频道个数表格模态框 -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            频道标签名称：<span></span>
+                        </h4>
+                    </div>
+                    <div class="modal-body" style="overflow: hidden;">
+                        暂无下属频道
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 确定删除模态框->确定 -->
+        <div class="modal fade" id="deleteModalTrue" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            频道标签删除
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        确认删除该标签？
+                    </div>
+                    <div class="modal-footer text-center">
+                       <button type="button" class="btn btn-info pull-left delNow" data-dismiss="modal" data-id="">确定</button>
+                       <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('.select2').select2();
+            $("#name").select2('val','{$keyword.name}');
+            $("#tagId").select2('val','{$keyword.id}');
+
+            var nowtime = new Date();
+            var ms = parseInt({$lastDate});
+            nowtime.setTime(ms);
+            $('.timer').daterangepicker({
+                maxDate : moment(), //最大时间
+                startDate:nowtime,
+                endDate:new Date(),
+                showDropdowns : true,
+                showWeekNumbers : false, //是否显示第几周
+                opens : 'left', //日期选择框的弹出位置
+                cancelClass : 'btn-small',
+                format: 'YYYY/MM/DD', //控件中from和to 显示的日期格式
+                locale : {
+                    applyLabel : '确定',
+                    cancelLabel : '取消',
+                    fromLabel : '起始时间',
+                    toLabel : '结束时间',
+                    monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                            '七月', '八月', '九月', '十月', '十一月', '十二月' ]
+                }
+            });
+            var time = "{$keyword.time}";
+            if(time != ''){
+                $('.timer').prop('value',"{$keyword.time}");
+            }
+
+            $("#addNewTag").on('click',function(){
+                window.location.href = '/flowanalysis/channellabeladd/';
+            });
+
+            $('.wantDel').click(function(){
+                var id = $(this).attr('data-id');
+                $('.delNow').attr('data-id',id);
+            });
+
+            $('.delNow').click(function(){
+                var id = $(this).attr('data-id');
+                //ajax写入数据
+                $.ajax({
+                    url: '/flowanalysis/delchanneltag/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('操作失败');
+                })
+            });
+
+            $('#searchNow').on('click',function(){
+                var name    = $('#name').val();
+                var id      = $('#tagId').val();
+                var time    = $('input[name=time]').val();
+                window.location.href = '/flowanalysis/channellabel/?name='+name+'&id='+id+'&time='+time;
+            });
+
+            /*S-申请记录弹窗*/
+            // $('.chakanmore').click(function() {
+            //     function loadData(num) {
+            //         $.ajax({
+            //             url: '/flowanalysis/stockapplyrecord/',
+            //             type: 'GET',
+            //             dataType: 'JSON',
+            //             async: false,
+            //             data: {
+            //                 p:num,
+            //                 pageCount:8
+            //             }
+            //         })
+            //         .done(function(data) {
+            //             if(data.status == '1'){
+            //                 $("#PageCount").val(data.data.count);
+            //                 $(".stock-apply-record-modal").html(data.data.html);
+            //             }else{
+            //                 alert(data.info);
+            //             }
+            //         })
+            //         .fail(function(xhr) {
+            //             alert('网络错误，请稍后重试')
+            //         });
+            //     }
+            //     function exeData(num, type) {
+            //         loadData(num);
+            //         loadpage();
+            //     }
+            //     function loadpage() {
+            //         var myPageCount = parseInt($("#PageCount").val());
+            //         var myPageSize = parseInt($("#PageSize").val());
+            //         var countindex = myPageCount % myPageSize > 0 ? (myPageCount / myPageSize) + 1 : (myPageCount / myPageSize);
+            //         $("#countindex").val(countindex);
+
+            //         $.jqPaginator('#pagination', {
+            //             totalPages: parseInt($("#countindex").val()),
+            //             visiblePages: parseInt($("#visiblePages").val()),
+            //             currentPage: 1,
+            //             first: '<li class="first"><a href="javascript:;">首页</a></li>',
+            //             prev: '<li class="prev"><a href="javascript:;"><i class="arrow arrow2"></i>上一页</a></li>',
+            //             next: '<li class="next"><a href="javascript:;">下一页<i class="arrow arrow3"></i></a></li>',
+            //             last: '<li class="last"><a href="javascript:;">末页</a></li>',
+            //             page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+            //             onPageChange: function (num, type) {
+            //                 if (type == "change") {
+            //                     exeData(num, type);
+            //                 }
+            //             }
+            //         });
+            //     }
+            //     loadData(1);
+            //     loadpage();
+            //     $('.yinyingz').show();
+            //     $('.dabiaoge').show();
+            // });
+
+            $('.showCon').each(function(){
+                $(this).click(function(){
+                    var id = $(this).attr('data-id');
+                    //ajax写入数据
+                    $.ajax({
+                        url: '/flowanalysis/getchannelsintag/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            //window.location.href = window.location.href;
+                            $('#myModal').html(data.data);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        alert('操作失败');
+                    })
+                });
+            });
+
+
+        })
+    </script>
+
+</block>

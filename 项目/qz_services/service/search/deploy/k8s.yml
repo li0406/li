@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      imagePullSecrets:
+        - name: "container-registry-a"
+      containers:
+      - name: search
+        # image: registry.cn-shanghai.aliyuncs.com/qizuang/search:master-040ce9e
+        image: <K8S_IMAGE>
+        imagePullPolicy: Always
+        # command: [ "echo", "SUCCESS" ]
+        ports:
+        - containerPort: 16000
+          name: 16000tcp00
+          protocol: TCP
+        # envFrom:
+        # - configMapRef:
+        #     name: env-app-config
+        volumeMounts:
+          - mountPath: /data/app/search/config
+            name: app-volume
+      volumes:
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: search
+                path: config.toml
+            name: app-config
+            optional: false
+          name: app-volume
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: search
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: search
+  ports:
+    - protocol: TCP
+      port: 16000
+      targetPort: 16000
+  type: ClusterIP

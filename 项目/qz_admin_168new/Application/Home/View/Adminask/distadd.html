@@ -1,0 +1,161 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>精华管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <nav class="navbar navbar-default" style="margin-bottom:0px;">
+        <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="/adminask">问答管理</a></div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/adminask"><i class="fa fa-home"></i> 首页</a></li>
+                    <li><a href="/adminask/question"><i class="fa fa-align-justify"></i> 问题</a></li>
+                    <li><a href="/adminask/anwsers"><i class="fa fa-lightbulb-o"></i> 答案</a></li>
+                    <li><a href="/adminask/comment"><i class="fa fa-comment"></i> 评论</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="nav-tabs-custom">
+                    <form id="form1" action="" method="POST">
+                        <div class="box-body" style="max-width:800px">
+                            <input type="hidden" id="qid" name="qid" value="{$info.id}" />
+
+                            <div class="form-group">
+                                <label for="title">标题：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <input name="title" id="title" autocomplete=off type="text" placeholder="" value="{$info.id}|{$info.title}" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>排序：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <input name="order" autocomplete=off type="text" placeholder="" value="{$info.order}" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row" id="imgList" >
+                                <input type='hidden' name='oldImg' value='{$info.img}'/>
+                                <div class="col-xs-6 col-md-3"><a href="https://staticqn.qizuang.com/{$info.img}" target="_blank" class="thumbnail"><img src="https://staticqn.qizuang.com/{$info.img}" data-holder-rendered="true" style="height: 120px; width: 120%; display: block;"></a></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label></label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <a name="uploadPic" id="uploadPic" href="javascript:;" class="btn btn-success button"><i class="fa fa-plus-sign "></i>上传文件</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning" role="alert" style="font-size:16px;color:#000"><i class="icon-volume-up"></i> 提示：第一条精华必须要有最佳答案，不然全站首页不会显示。切记哦~</div>
+                        </div>
+
+
+
+                        <div class="box-footer">
+                            <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;{$info.btn}</button>
+                            <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+<script src="/assets/common/js/global.js?v={:C('STATIC_VERSION')}"></script>
+<script charset="utf-8" src="/assets/common/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/uploadify/jquery.uploadify.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/uploadify/uploadify.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript">
+function getResult(content){
+    var obj = new Function("return" + content)();
+    $("#imgList").show();
+    $("#imgList").html('<div class="col-xs-6 col-md-3"><a href="https://staticqn.qizuang.com/'+ obj.data +'" class="thumbnail"><img src="https://staticqn.qizuang.com/'+ obj.data +'" data-holder-rendered="true" target="_blank" style="height: 120px; width: 120%; display: block;"></a></div>');
+    $("#imgList").append($("<input type='hidden' name='imgId[]' value='" + obj.data + "'/>"));
+}
+
+$(document).ready(function(){
+
+    $('#uploadPic').uploadify({
+        'swf'      : '/assets/common/js/uploadify/uploadify.swf',
+        'uploader' : '/adminask/upload',
+        'fileTypeExts': '*.gif; *.jpg; *.png',
+        'buttonText': '{$info.imgBtn}',
+        'queueSizeLimit' : 1,
+        'height'   : 35,
+        'auto': true,
+        'multi': true,
+        'progressData' : 'speed',
+        'formData' : {
+            'id': '',
+            'type': '4' //type 4 为精华
+        },
+        'onUploadSuccess':function(file,data,response){
+            getResult(data);
+        }
+    });
+
+    $('#title').autocomplete({
+        items:20,
+        source:function(query,process){
+            var matchCount = this.options.items;//返回结果集最大数量
+            $.ajax({
+                url: '/adminask/gettitle',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    matchcount : matchCount,
+                    text: query
+                },
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    return process(data.data);
+                }else{
+                    return process(data.info);
+                }
+            }).fail(function(xhr){
+                alert(xhr.responseText);
+            });
+
+        },
+        formatItem:function(item){
+           return item["title"];
+        },
+        setValue:function(item){
+            return {"data-value":item["id"]+'|'+item["title"],"real-value":item["id"]};
+        },
+    });
+
+
+    $("#submit").click(function(event){
+        if($("input[name=title]").val() === ''){
+            $("input[name=title]").focus();
+            alert("问题必须选择");
+            return false;
+        }
+        $("#form1").submit();
+    });
+
+});
+</script>
+</block>

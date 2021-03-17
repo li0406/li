@@ -1,0 +1,233 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>装修攻略-标签组管理-编辑</title>
+</block>
+<block name="style">
+    
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/plugins/layer/theme/default/layer.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/Specialarticle/css/basetagsedit.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+    <if condition="!empty(I('get.id'))">
+        <h1><a href="/specialarticle/basetags">详情页标签管理</a> > 编辑标签名</h1>
+        <else/>
+        <h1><a href="/specialarticle/basetags">详情页标签管理</a> > 新增标签名</h1>
+    </if>
+    </section>
+    <div class="form" style="margin: 30px 0 0 20px">
+      <div class="col-xs-12">
+        <div class="box box-default">
+        <div class="box-body">
+        <form id="form">
+            <div class="form-group">
+
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>展示页</div>
+                <select class="form-control select-sm input_d showselect" name="style" <if condition="!empty(I('get.id'))">disabled</if> >
+                    <option value="" >请选择</option>
+                    <option value="1" {$data['style'] === '0' ? 'selected':''} >装修攻略详情页</option>
+                    <option value="2" {$data['style'] == 1 ? 'selected':''} >装修百科详情页</option>
+                    <option value="3" {$data['style'] == 2 ? 'selected':''} >主站-装修公司页</option>
+                    <option value="4" {$data['style'] == 3 ? 'selected':''} >问答知识频道页</option>
+                    <option value="5" {$data['style'] == 4 ? 'selected':''} >问答知识专题页</option>
+                    <option value="6" {$data['style'] == 5 ? 'selected':''} >在线问答详情页</option>
+                    <option value="7" {$data['style'] == 6 ? 'selected':''} >装修专题栏目页</option>
+                    <option value="8" {$data['style'] == 7 ? 'selected':''} >装修百科专题页</option>
+                </select>
+               </div>
+               <div class="col-xs-2">
+                <div><span class="xingred">*</span>标签组</div>
+                <select class="form-control select-sm input_d labelgroup" name="pid" <if condition="!empty(I('get.id'))">disabled</if> >
+                   <option value="{$data['pid']}">{$data['pname']}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>标签名</div>
+                <input type="text" class="form-control" maxlength="20" name="name" placeholder="请输入新标签名" value="{$data.name|default=''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>PC端链接地址</div>
+                <input type="text" class="form-control" maxlength="60" name="url" placeholder="请输入PC端链接地址" value="{$data.url|default=''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>M端链接地址</div>
+                <input type="text" class="form-control" maxlength="60" name="m_url" placeholder="请输入M端链接地址" value="{$data.m_url|default=''}">
+                </div>
+            </div>
+            <input type="hidden" value="{$data.id|default=''}" name="id">
+            <div class="col-xs-2">
+
+                    <input type="hidden" class="position-value" value="{$data['position']}" />
+                    <div class="btn btn-info save_btn">保存</div>
+                    <div style="margin-left: 20px" class="btn btn-primary back_btn">返回</div>
+            </div>
+        </form>
+       </div>
+      </div>
+     </div>
+    </div>
+    
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            if($(".position-value").val() == 1){
+                $('input[name=m_url]').attr("disabled",true)
+            }
+            if ($("input[name=id]").val() == '') {
+                //展示页选择启用禁用
+                if ($('.showselect').val() != '') {
+                    $('.labelgroup').attr("disabled", false);
+                } else {
+                    $('.labelgroup').attr("disabled", true);
+                    $('.labelgroup').html("<option value=''>请选择</option>");
+                }
+            }
+            
+            $('.showselect').change(function () {
+                var zhanshiyeval = $(this).val();
+                if (zhanshiyeval != "") {
+                    $('.labelgroup').attr("disabled", false);
+                } else {
+                    $('.labelgroup').attr("disabled", true);
+                }
+            });
+
+
+
+            //展示页
+            $('.showselect').change(function () {
+                var showselectval = $(this).val();
+                if(showselectval!="") {
+                    $.ajax({
+                        url: '/specialarticle/getgroup',
+                        type: 'get',
+                        dataType: 'json',
+                        data: {style: showselectval},
+                        success: function (res) {
+                            if (res.status == 1) {
+                                var str = "<option value=''>请选择</option>";
+                                for (var i = 0; i < res.data.length; i++) {
+                                    str += '<option data-position="'+res.data[i].position+'" value="' + res.data[i].id + '">' + res.data[i].name + '</option>'
+                                }
+                                $('.labelgroup').html(str);
+                            } else {
+                                layer.msg(res.info, {
+                                    time: 1000
+                                })
+                            }
+                        }
+                    })
+                }
+            });
+
+            $('.labelgroup').change(function(){
+                var positionval = $(this).children('option:selected').data("position");
+                if(positionval==1){
+                  $('input[name=m_url]').attr("disabled",true)
+                }else if(positionval==2){
+                    $('input[name=m_url]').attr("disabled",false)
+                }
+            })
+
+            //返回按钮
+            $(".back_btn").on('click', function () {
+                window.history.back(-1);
+            });
+
+            //保存按钮
+            $(".save_btn").on('click', function () {
+                var _this = $(this);
+                var showselectval=$('.showselect').val(),
+                    labelgroupval=$('.labelgroup').val();
+                 if(showselectval==""){
+                    layer.msg("请选择展示页!", {time: 1000},function () {
+                        $(".showselect").focus();
+                    });
+                    return false;
+                 }
+                 if(labelgroupval==""){
+                    layer.msg("请选择标签组!", {time: 1000},function () {
+                        $(".labelgroup").focus();
+                    });
+                    return false;
+                 }
+                 
+                //验证名称是否存在
+                var tag_name = $("input[name=name]").val();
+                if (tag_name == '') {
+                    layer.msg("请输入名称！", {time: 1000},function () {
+                        $("input[name=name]").focus();
+                    });
+                    return false;
+                }
+
+                var match = /^((ht|f)tps?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/;
+
+                var url = $("input[name=url]").val();
+                var murl = $("input[name=m_url]").val();
+                if(url == ''){
+                    layer.msg("请输入PC端链接地址！", {time: 1000},function () {
+                        $("input[name=url]").focus();
+                    });
+                    return false;
+                }
+                if(!match.test(url)){
+                    layer.msg("请输入正确的PC端标签链接！", {time: 1000},function () {
+                        $("input[name=url]").focus();
+                    });
+                    return false;
+                }
+                if($("input[name=m_url]").attr("disabled")!="disabled"){
+                    if(murl == ''){
+                    layer.msg("请输入M端链接地址！", {time: 1000},function () {
+                        $("input[name=m_url]").focus();
+                    });
+                    return false;
+                    }
+                    if(!match.test(murl)){
+                        layer.msg("请输入正确的M端标签链接！", {time: 1000},function () {
+                            $("input[name=m_url]").focus();
+                        });
+                        return false;
+                    }
+                }
+            
+                saveData(_this);
+            });
+        });
+
+        //验证成功后采去提交数据
+        function saveData(_this) {
+            var obj = $("#form").serializeArray();
+            console.log(obj);
+            $.ajax({
+                url: '/specialarticle/basetagsedit',
+                type: 'POST',
+                dataType: 'JSON',
+                data: obj
+            }).done(function (data) {
+                if (data.status == 1) {
+                    layer.msg("保存成功！", {time: 1000},function () {
+                        window.location.href = '/specialarticle/basetags';
+                    });
+                } else {
+                    layer.msg(data.info, {time: 1000});
+                }
+            }).fail(function () {
+                layer.msg('操作失败,请联系技术部门！', {time: 1000});
+            });
+        }
+    </script>
+</block>

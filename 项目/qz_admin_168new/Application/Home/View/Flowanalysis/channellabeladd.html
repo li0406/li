@@ -1,0 +1,98 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+    <style type="text/css">
+        .ms-container {width:420px !important;}
+        .ms-container .ms-list {height:450px !important;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/flowanalysis/channellabel/">频道标签管理</a> <i class="fa fa-angle-right"></i> 新增标签</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left h5">频道标签名称：</div>
+                        <div class="col-xs-2">
+                            <input type="text" name="name" id="name" class="form-control flat">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left">选&nbsp;&nbsp;取&nbsp;&nbsp;&nbsp;频&nbsp;&nbsp;道：</div>
+                        <div class="col-xs-5">
+                            <select id='citys' multiple='multiple' class="flat">
+                                <volist name="channels" id="v">
+                                    <option value='{$v.id}'>{$v.name}</option>
+                                </volist>
+                            </select>
+                            <div class="h5 text-yellow">注：频道标签ID由系统自动生成</div>
+                            <br>
+                            <div class="col-xs-12 no-padding">
+                                <div class="col-xs-2 no-padding"><div class="btn btn-info addNow">确认</div></div>
+                                <div class="btn btn-default" id="backToList">取消</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('#citys').multiSelect();
+
+            $('.addNow').click(function(){
+                var name = $("#name").val();
+                var checkedchannels = $("#citys").val() + ",";
+                checkedchannels = checkedchannels.substring(0,checkedchannels.length-1);
+
+                if(name == ''){
+                    alert('请输入频道标签名称！');
+                    return false;
+                }
+                if(checkedchannels == 'null'){
+                    alert('请选择频道！');
+                    return false;
+                }
+                //ajax写入数据
+                $.ajax({
+                    url: '/flowanalysis/addnewchanneltags/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        name:name,
+                        checkedchannels:checkedchannels
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = '/flowanalysis/channellabel/';
+                    }else{
+                        alert(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('操作失败');
+                })
+            });
+
+            $('#backToList').on('click',function(){
+                window.location.href = '/flowanalysis/channellabel/';
+            });
+        })
+    </script>
+</block>

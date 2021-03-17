@@ -1,0 +1,537 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>用户中心-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Designer:resource" />
+    <link href="{$static_host}/assets/user/designer/css/de-info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <!--<script type="text/javascript" src="{$static_host}/assets/user/scripts/swfobject.js?v={:C('STATIC_VERSION')}"></script>-->
+    <!--<script type="text/javascript" src="{$static_host}/assets/user/scripts/fullAvatarEditor.js?v={:C('STATIC_VERSION')}"></script>-->
+    <link rel="stylesheet" href="{$static_host}/assets/common/plugin/cropper/css/cropper.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/common/plugin/cropper/css/imgcropping.css?v={:C('STATIC_VERSION')}">
+    <style>
+        #flash_img{width:630px;height: 480px;border:1px solid #ccc;padding:6px; display: none;position: fixed;margin: auto;left: 0;top: 0;right: 0;bottom: 0;box-shadow: 0 0 1px 1px #ccc;background-color: white;z-index: 999;}
+        #replaceImg{width: 120px;height: 25px;color: #fff;margin-top: 5px;margin-left:90px;margin-bottom:5px;border: 1px solid #e43a3d;border-radius:3px;cursor: pointer;text-align: center;line-height: 25px;background: #ff5659;font-size: 14px;font-family: "Microsoft Yahei";}
+        #replaceImg:hover{background: #ff9090;}
+        #user_img{width:120px;height:120px;border: 1px solid #ccc;overflow: hidden;}
+    </style>
+</head>
+    <body>
+        <include file="Designer:header" />
+        <div class="ht-wrap oflow">
+            <include file="Designer:desnavleft" />
+            <div class="yh-main">
+                <h1 class="yh-tit">修改资料信息</h1>
+                <form id="myForm" onsubmit="return false;">
+                <ul class="ht-moreinfo">
+                    <li>
+                        <span><i class="red">*</i>所在地区：</span>
+                        <select name="" class="select mr10" disabled>
+                            <option value="{$info.citys.shen.id}">{$info.citys.shen.oldname}</option>
+                        </select>
+                        <select name="qx" class="select">
+                            <volist name="info.citys.shi" id="vo">
+                                <if condition="$info['designer']['qx'] EQ $vo['qz_areaid']">
+                                    <option value="{$vo.qz_areaid}" selected="selected">{$vo.oldName}</option>
+                                    <else/>
+                                    <option value="{$vo.qz_areaid}">{$vo.oldName}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>昵称：</span>
+                        <input name="name" type="text" value="{$info.designer.name}" placeholder="昵称">
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>性别：</span>
+                        <if condition="$info['designer']['sex'] EQ '' OR $info['designer']['sex'] EQ '先生'">
+                            <input name="sex" type="radio" class="icheck" value="先生" checked>&nbsp;先生
+                            <input name="sex" type="radio" class="icheck" value="女士">&nbsp;女士
+                            <else/>
+                            <input name="sex" type="radio" class="icheck" value="先生">&nbsp;先生
+                            <input name="sex" type="radio" class="icheck" value="女士" checked>&nbsp;女士
+                        </if>
+                    </li>
+                    <li>
+                        <span>毕业学校：</span>
+                        <input name="school" type="text" placeholder="毕业学校" value="{$info.designer.school}">
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>联系电话：</span>
+                        <input name="tel" type="text" placeholder="联系电话" value="{$info.designer.tel}">
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>电子邮箱：</span>
+                        <input name="mail" type="text" placeholder="电子邮箱" value="{$info.designer.mail}">
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span>联系QQ：</span>
+                        <input name="qq" type="text" placeholder="QQ" value="{$info.designer.qq}">
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span>设计收费:</span>
+                        <input name="cost" value="{$info.designer.cost}" type="text" placeholder="设计收费">元/平米
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>从业时间：</span>
+                        <select name="jobtime" class="select">
+                            <volist name="info.jobtime" id="vo">
+                                <if condition="$vo EQ $info['designer']['jobtime']">
+                                    <option value="{$vo}" selected="selected">{$vo}</option>
+                                    <else/>
+                                    <option value="{$vo}">{$vo}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </li>
+                    <li>
+                        <span class="vtop">擅长风格：</span>
+                        <input name="all" data-area="fengge" type="checkbox" class="all">&nbsp;全部
+                        <volist name="info.fengge" id="vo">
+                            <if condition="mb_strpos($info['designer']['fengge'],$vo['name']) nheq false">
+                                <input name="fengge[]" value="{$vo.name}" type="checkbox" class="icheck" checked>&nbsp;{$vo.name}
+                                <else/>
+                                <input name="fengge[]" value="{$vo.name}" type="checkbox" class="icheck">&nbsp;{$vo.name}
+                            </if>
+                        </volist>
+                    </li>
+                    <li>
+                        <span class="vtop">擅长领域：</span>
+                        <input data-area="lingyu" value="{$vo.id}" type="checkbox" class="all">&nbsp;全部
+                        <volist name="info.lingyu" id="vo">
+                            <if condition="mb_strpos($info['designer']['lingyu'],$vo) nheq false">
+                                <input name="lingyu[]" value="{$vo}" type="checkbox" class="icheck" checked>&nbsp;{$vo}
+                                <else/>
+                                <input name="lingyu[]" value="{$vo}" type="checkbox" class="icheck">&nbsp;{$vo}
+                            </if>
+                        </volist>
+                    </li>
+                    <li>
+                        <span><i class="red">*</i>简介：</span>
+                        <textarea class="jianjiemain" name="text" placeholder="个人简介">{$info.designer.text}</textarea>
+                        <i class="red err-tips"></i>
+                    </li>
+                    <li>
+                        <span class="vtop">设计理念</span>
+                        <textarea placeholder="设计理念" class="jianjiemain" name="linian">{$info.designer.linian}</textarea>
+                    </li>
+                    <!-- <li>
+                        <span class="vtop">代表作</span>
+                        <textarea placeholder="代表作" class="jianjiemain" name="case">{$info.designer.cases}</textarea>
+                    </li> -->
+                </ul>
+                <div class="change-head">
+                    <span><i class="red">*</i>上传头像：</span>
+                    <div>
+                        <div id="user_img">
+                            <if condition="$info['designer']">
+                                <img src="{$info.designer.logo}" width="120" height="120" />
+                            <else/>
+                                <img src="{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}" width="120px" height="120px"/>
+                            </if>
+                            <input type="hidden" name="logo" value="{$info.designer.logo}" />
+                        </div>
+                        <div>
+                            <!--<div id="upload_img">修改头像</div>-->
+                            <div id="replaceImg">修改头像</div>
+                        </div>
+                    </div>
+
+                    <div class="ht-yes">
+                        <a href="javascript:void(0)"><i class="icon-ok mr10"></i>保存资料</a>
+                        <input name="id" type="hidden" value="{$info.designer.id}" />
+                        <i class="red err-tips"></i>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+        <!--<div id="flash_img">
+            <div>
+                <p id="swfContainer">
+                    本组件需要安装Flash Player后才可使用，请从<a href="http://www.adobe.com/go/getflashplayer">这里</a>下载安装。
+                </p>
+            </div>
+            <button id="close_img" style="position: absolute;right: 10px;top: 10px;">X</button>
+        </div>-->
+        <!--图片裁剪框 start-->
+        <div style="display: none" class="tailoring-container">
+            <div class="black-cloth" onclick="closeTailor(this)"></div>
+            <div class="tailoring-content">
+                <div class="tailoring-content-one">
+                    <label title="上传图片" for="chooseImg" class="l-btn choose-btn">
+                        <input type="file" accept="image/jpg,image/jpeg,image/png" name="file" id="chooseImg" class="hidden"
+                               onchange="selectImg(this)">
+                        选择图片
+                    </label>
+                    <div class="close-tailoring" onclick="closeTailor(this)">×</div>
+                </div>
+                <div class="tailoring-content-two">
+                    <div class="tailoring-box-parcel">
+                        <img id="tailoringImg">
+                    </div>
+                    <div class="preview-box-parcel">
+                        <p>图片预览：</p>
+                        <div class="square previewImg"></div>
+                        <div class="circular previewImg"></div>
+                    </div>
+                </div>
+                <div class="tailoring-content-three">
+                    <!--<button class="l-btn cropper-reset-btn">复位</button>
+                    <button class="l-btn cropper-rotate-btn">旋转</button>
+                    <button class="l-btn cropper-scaleX-btn">换向</button>-->
+                    <button class="l-btn sureCut" id="sureCut">确定</button>
+                </div>
+            </div>
+        </div>
+        <!--图片裁剪框 end-->
+        <include file="Index:footer" />
+        <!--<script type="text/javascript">
+            swfobject.addDomLoadEvent(function () {
+                var swf = new fullAvatarEditor("swfContainer", {
+                        id: 'swf',
+                        upload_url: '/uplogo/',
+                        src_upload:1,
+                        avatar_sizes:"180*180"
+                    }, function (msg) {
+                        switch(msg.code)
+                        {
+                            // case 1 : alert("页面成功加载了组件！");break;
+                            // case 2 : alert("已成功加载默认指定的图片到编辑面板。");break;
+                            case 3 :
+                                if(msg.type == 0)
+                                {
+                                    alert("摄像头已准备就绪且用户已允许使用。");
+                                }
+                                else if(msg.type == 1)
+                                {
+                                    alert("摄像头已准备就绪但用户未允许使用！");
+                                }
+                                else
+                                {
+                                    alert("摄像头被占用！");
+                                }
+                            break;
+                            case 5 :
+                                if(msg.type == 0)
+                                {
+                                    /*if(msg.content.sourceUrl)
+                                    {
+                                        alert("原图已成功保存至服务器，url为：\n" +　msg.content.sourceUrl);
+                                    }*/
+                                    document.getElementById('flash_img').style.display = 'none';
+                                    if (msg.content.success == true) {
+                                        var src = "http://{:C('QINIU_DOMAIN')}/" + msg.content.data.key;
+                                        $("#user_img img").attr("src", src);
+                                        $("input[name=logo]").val(src);
+                                    }
+                                    ///alert(msg.content.success);
+                                }
+                            break;
+                        }
+                    }
+                );
+                document.getElementById("upload").onclick=function(){
+                    swf.call("upload");
+                };
+            });
+        </script>-->
+        <!--<script type="text/javascript">
+            window.onload = function(){
+                var uploadImg = document.getElementById('upload_img');
+                var flashImg = document.getElementById('flash_img');
+                var closeImg = document.getElementById('close_img');
+                uploadImg.onclick = function(){
+                    flashImg.style.display = 'block';
+                }
+                closeImg.onclick = function(){
+                    flashImg.style.display = 'none';
+                }
+            }
+        </script>-->
+    </body>
+<script src="/assets/common/plugin/cropper/js/cropper.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/plugin/cropper/js/canvas-toBlob.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+
+    //弹出框水平垂直居中
+    (window.onresize = function () {
+        var win_height = $(window).height();
+        var win_width = $(window).width();
+        if (win_width <= 768) {
+            $(".tailoring-content").css({
+                "top": (win_height - $(".tailoring-content").outerHeight()) / 2,
+                "left": 0
+            });
+        } else {
+            $(".tailoring-content").css({
+                "top": (win_height - $(".tailoring-content").outerHeight()) / 2,
+                "left": (win_width - $(".tailoring-content").outerWidth()) / 2
+            });
+        }
+    })();
+
+    //弹出图片裁剪框
+    $("#replaceImg").on("click", function () {
+        var o = navigator.userAgent.match(/MSIE (\d+)/)
+        o = o && o[1]
+        if (!!o && o < 10) {
+            alert("当前浏览器版本过低，请更新浏览器版本到IE10及以上")
+            return false
+        } else {
+            $(".tailoring-container").toggle();
+        }
+    });
+
+    //图像上传
+    function selectImg(file) {
+        if (!file.files || !file.files[0]) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (evt) {
+            var replaceSrc = evt.target.result;
+            //更换cropper的图片
+            $('#tailoringImg').cropper('replace', replaceSrc, false);//默认false，适应高度，不失真
+        }
+        reader.readAsDataURL(file.files[0]);
+    }
+
+    //cropper图片裁剪
+    $('#tailoringImg').cropper({
+        // aspectRatio: 1 / 1,//默认比例
+        preview: '.previewImg',//预览视图
+        guides: false,  //裁剪框的虚线(九宫格)
+        autoCropArea: 0.5,  //0-1之间的数值，定义自动剪裁区域的大小，默认0.8
+        movable: false, //是否允许移动图片
+        dragCrop: true,  //是否允许移除当前的剪裁框，并通过拖动来新建一个剪裁框区域
+        movable: true,  //是否允许移动剪裁框
+        resizable: true,  //是否允许改变裁剪框的大小
+        zoomable: false,  //是否允许缩放图片大小
+        mouseWheelZoom: false,  //是否允许通过鼠标滚轮来缩放图片
+        touchDragZoom: true,  //是否允许通过触摸移动来缩放图片
+        rotatable: true,  //是否允许旋转图片
+        crop: function (e) {
+            // 输出结果数据裁剪图像。
+        }
+    });
+    //旋转
+    $(".cropper-rotate-btn").on("click", function () {
+        $('#tailoringImg').cropper("rotate", 45);
+    });
+    //复位
+    $(".cropper-reset-btn").on("click", function () {
+        $('#tailoringImg').cropper("reset");
+    });
+    //换向
+    var flagX = true;
+    $(".cropper-scaleX-btn").on("click", function () {
+        if (flagX) {
+            $('#tailoringImg').cropper("scaleX", -1);
+            flagX = false;
+        } else {
+            $('#tailoringImg').cropper("scaleX", 1);
+            flagX = true;
+        }
+        flagX != flagX;
+    });
+
+    //裁剪后的处理
+    $("#sureCut").on("click", function () {
+        if ($("#tailoringImg").attr("src") == null) {
+            return false;
+        } else {
+            var cas = $('#tailoringImg').cropper('getCroppedCanvas');//获取被裁剪后的canvas
+            var base64url = cas.toDataURL('image/png'); //转换为base64地址形式
+            cas.toBlob(function (blob) {
+                var formData = new FormData();
+                formData.append('__avatar1', blob, base64url)
+                formData.append('__source', blob, base64url)
+                formData.append('__initParams', '?angle=0&zoom=1&x=1&y=66.6&x1=60&y1=60&w=180&h=180&b=0&c=0&s=0')
+                $.ajax({
+                    url: '/uplogo/',
+                    type: 'post',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (data) {
+                        var tempData =JSON.parse(data)
+                        var src = "{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/" + tempData.data.key;
+                        $("#user_img img").attr("src", src);
+                        $("input[name=logo]").val(src);
+                        /*var src = GLOBAL_QINIU_DOMAIN + data.url;
+                        console.log(src)
+                        $("#finalImg").prop("src", src);//显示为图片的形式
+                        $(".logoImg").attr("src", src);
+                        $("input[name='logo-img']").val(src);*/
+                    },
+                    error: function (err) {
+                        console.log(22, err)
+                    }
+                })
+            })
+
+            //关闭裁剪框
+            closeTailor();
+        }
+    });
+
+    //关闭裁剪框
+    function closeTailor() {
+        $(".tailoring-container").toggle();
+    }
+
+
+</script>
+    <script type="text/javascript">
+    $('.all').iCheck({
+        checkboxClass: 'icheckbox_minimal-red',
+        radioClass: 'iradio_minimal-red',
+        increaseArea: '' // optional
+    }).on("ifChecked", function(event) {
+        var target = $(event.target);
+        target.iCheck('check');
+        var area = target.attr("data-area");
+        $('input[name=' + area + '\\[\\]]').iCheck("check");
+    }).on("ifUnchecked", function(event) {
+        var target = $(event.target);
+        target.iCheck('uncheck');
+        var area = target.attr("data-area");
+        $('input[name=' + area + '\\[\\]]').iCheck("uncheck");
+    });
+
+    $('.icheck').iCheck({
+        checkboxClass: 'icheckbox_minimal-red',
+        radioClass: 'iradio_minimal-red',
+        increaseArea: '' // optional
+    }).on("ifChecked", function(event) {
+        var target = $(event.target);
+        target.attr("checked", "checked");
+    }).on("ifUnchecked", function(event) {
+        var target = $(event.target);
+        target.attr("checked", false);
+        target.parent().parent().find(".all").iCheck("uncheck");
+    });
+    //$("#uplogo").click(function(event) {
+    //    $(".dialog_form").show();
+    //});
+
+    //$(".dialog_content").click(function(event) {
+    //    $(".dialog_form").hide();
+    //});
+
+    /*$("#reset").click(function(event) {
+        if(App.validate.run($("input[name=logo]").val())){
+          $(".meitu img").attr("src",$("input[name=logo]").val());
+        }else{
+          $(".meitu img").attr("src","//{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}");
+        }
+    });*/
+
+    $(".ht-yes a").click(function(event) {
+        $(".focus").removeClass('focus');
+        $(".err-tips").html('');
+        var _this = $(this);
+
+        if(!App.validate.run($("input[name=name]").val())){
+            $("input[name=name]").focus().addClass('focus').parent().find(".err-tips").html("请输入您的昵称");
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=tel]").val())){
+            $("input[name=tel]").focus().addClass('focus').parent().find(".err-tips").html("请输入您的联系电话");
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=tel]").val(),"tel")){
+            $("input[name=tel]").focus().addClass('focus').parent().find(".err-tips").html("请输入正确的联系电话");
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=mail]").val())){
+            $("input[name=mail]").focus().addClass('focus').parent().find(".err-tips").html("请输入您的电子邮箱");
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=mail]").val(),"email")){
+            $("input[name=mail]").focus().addClass('focus').parent().find(".err-tips").html("请输入正确的电子邮箱");
+            return false;
+        }
+
+
+        if(!App.validate.run($("textarea[name=text]").val())){
+            $("textarea[name=text]").focus().addClass('focus').parent().find(".err-tips").html("请输入您的简介");
+            return false;
+        }
+
+          if(App.validate.run($("input[name=qq]").val())){
+              if(!App.validate.run($("input[name=qq]").val(),"num")){
+                $("input[name=qq]").focus();
+                $("input[name=qq]").addClass('focus');
+                $("input[name=qq]").parent().find(".err-tips").html("无效的qq号码");
+                return false;
+              }
+          }
+
+          if(App.validate.run($("input[name=cost]").val())){
+              if(!App.validate.run($("input[name=cost]").val(),"num")){
+                $("input[name=cost]").focus();
+                $("input[name=cost]").addClass('focus');
+                $("input[name=cost]").parent().find(".err-tips").html("无效的收费数据");
+                return false;
+              }
+          }
+
+
+          var data = $("#myForm").serializeArray();
+          //获取logo
+          data.push({name:"logo",value: $("#user_img img").attr("src")});
+          var lingyu = "";
+          var fengge = "";
+          for (var i  in data) {
+              if(data[i].name.indexOf("lingyu") != -1){
+                  lingyu += data[i]["value"]+",";
+                  continue;
+              }
+
+              if(data[i].name.indexOf("fengge") != -1){
+                  fengge += data[i]["value"]+",";
+                  continue;
+              }
+          };
+          data.push({name:"lingyu",value:lingyu});
+          data.push({name:"fengge",value: fengge});
+
+          $.ajax({
+            url: '/desinfo/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:data,
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href="/success/designer/"
+              }else{
+                _this.parent().find(".err-tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+              _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+          });
+      });
+
+
+    </script>
+
+</html>

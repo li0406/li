@@ -1,0 +1,147 @@
+<extend name="Common:basic"/>
+<block name="title"><title>{$head.title}</title></block>
+<block name="keywords"><meta name="keywords" content="{$head.keywords}" /></block>
+<block name="description"><meta name="description" content="{$head.description}" /></block>
+<block name="link">
+    <link href="/assets/mobile/card/css/coupontake.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+</block>
+<block name="top">
+    <div class="m-header-his">
+       <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$cityInfo.bm}/" class="m-header-left"></a>
+    <div class="m-header-city" style="left: 35%;"><a href="/city/">{$cityInfo.name|default="全国"}<i class="fa fa-sort-desc"></i></a></div>
+</block>
+<block name="content">
+   <article>
+        <div class="contentone">
+            <if condition="$info['active_type'] EQ 2">
+                <div class="youhuiqwk youhuiqwk2">
+            <else/>
+                <div class="youhuiqwk">
+            </if>
+                <div class="youhqneir">
+                    <div class="youhqneir-title">{$info.jc}</div>
+                    <input type="hidden" value="{$info.record_id}" id="recordid" />
+                    <input type="hidden" value="{$info.com_id}" id="comid" />
+                    <input type="hidden" value="{$orderid}" id="orderid" />
+                    <div class="quanzhiwk">
+                        <if condition="$info['active_type'] EQ 2">
+                            <div class="pricewk">{$info.gift}</div>
+                         <else/>
+                            <div class="pricewk"><span class="pricewk-danwei">￥</span>{$info.money2}</div>
+                        </if>
+                        <div class="pricems">
+                            <div>{$info.name}</div>
+                        </div>
+                    </div>
+                    <div class="youohuiqtime">使用时间：<span>{$info.start|date="Y.m.d",###}</span>~<span>{$info.end|date="Y.m.d",###}</span></div>
+                </div>
+            </div>
+
+            <if condition="$info['hadliangfang'] EQ 2">
+                <a href="javascript:void(0)" class="jinniuhui">立即领取</a>
+            <elseif condition="$info['hadreceive'] EQ 1"/>
+                <div class="anniuwk">
+                    <a href="javascript:void(0)" class="jinniu" id="gocardbag">去使用</a>
+                </div>
+            <else/>
+                <if condition="$info['receiveall'] EQ 1">
+                    <div class="anniuwk"><a href="javascript:void(0)" class="jinniu yilingwan">已领完</a></div>
+                <else/>
+                    <div class="anniuwk"><a href="javascript:void(0)" class="jinniu lijilingqu">立即领取</a></div>
+                </if>
+            </if>
+        </div>
+       <if condition="$info['rule'] neq ''">
+           <div class="contenttwo">
+               <div class="contenttwo-title">使用须知</div>
+               <pre class="usemiaos">{$info.rule}</pre>
+           </div>
+       </if>
+
+        <div class="rulesyiny"></div>
+        <!-- 未确认量房点击立即领取弹窗 -->
+       <div class="nolfwk">
+            <p class="pitemms">若该装修公司已为您量房，请点击确认量房按钮。</p>
+            <p class="pitemms">确认量房后才能领取该装修公司的优惠券哦。</p>
+            <div class="nolfniu">我知道了</div>
+        </div>
+        <!-- 点击已领完弹窗 -->
+        <div class="takeendwk">
+            <div class="takeendwk-title">对不起，您来晚了！</div>
+            <div class="takeendwk-ms">该礼券已被领完，看看别的礼券吧~</div>
+            <div class="takeendwk-niu">我知道了</div>
+        </div>
+   </article>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(function(){
+            //点击已领完按钮弹窗
+            $('.yilingwan').click(function(){
+                $('.rulesyiny').show();
+                $('.takeendwk').show()
+            });
+
+            //【已领完按钮】弹窗点击 “我知道了” 关闭弹窗
+            $('.takeendwk-niu').click(function(){
+                $('.rulesyiny').hide();
+                $('.takeendwk').hide()
+            })
+
+
+
+            $('.contentone .jinniuhui').click(function(){
+                $('.rulesyiny').show();
+                $('.nolfwk').show();
+                // $('.takeendwk').show()
+            })
+            //确认量房关闭
+            $('.nolfwk .nolfniu').click(function(){
+                $('.rulesyiny').hide();
+                $('.nolfwk').hide();
+            })
+
+
+            //立即领取优惠券
+            $('.lijilingqu').click(function(){
+                var cardid = $('#recordid').val();
+                var comid = $('#comid').val();
+                var orderid = $('#orderid').val();
+                /*  领取操作  */
+                $.ajax({
+                    url: '/card/receiveCard/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        cardid: cardid,
+                        comid:comid,
+                        orderid:orderid
+                    },
+                })
+                .done(function(data){
+                    if(data.error_code == 1){
+                        window.location.href="/card/coupontsuccess?id="+data.data.id;
+                    }else{
+                        alert(data.error_msg);
+                    }
+                })
+                .fail(function() {
+                    console.log("请求失败！");
+                    alert('请求失败！');
+                });
+
+            });
+
+            $('#gocardbag').click(function(){
+                window.location.href='/card/cardbag/';
+            });
+
+          if($("body").height()<$("html").height()){
+            $("article").height($("html").height() - $("#footer").outerHeight()-$('header').outerHeight())
+          }
+
+        })
+    </script>
+</block>

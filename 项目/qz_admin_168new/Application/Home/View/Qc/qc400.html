@@ -1,0 +1,476 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>在线客服-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugins/toastr/css/toastr.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>在线客服</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">在线客服</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-info">400客服</button>
+                            <a href="/qc/qc53/" class="btn btn-default">53客服</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <form action="/qc/qc400/" method="get" id="choose_form">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-2">
+                                开始时间:<br/><input type="text" name="begin" class="form-control datepicker"  placeholder="日期" value="{$Think.get.begin}">
+                            </div>
+                            <div class="col-xs-2">
+                                结束时间:<br/><input type="text" name="end" class="form-control datepicker"  placeholder="日期" value="{$Think.get.end}">
+                            </div>
+                            <div class="col-xs-1">
+                                显示个数:<br/>
+                                <select class="form-control select2 select2-offscree" name="count">
+                                    <option value="50" <if condition="$_GET['count'] EQ 50 or empty($_GET['count'])">selected</if>>50</option>
+                                    <option value="100" <if condition="$_GET['count'] EQ 100 ">selected</if>>100</option>
+                                    <option value="150" <if condition="$_GET['count'] EQ 150 ">selected</if>>150</option>
+                                    <option value="300" <if condition="$_GET['count'] EQ 300 ">selected</if>>300</option>
+                                    <option value="500" <if condition="$_GET['count'] EQ 500 ">selected</if>>500</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <br/>
+                                <a class="btn btn-info choose">筛选</a>
+                            </div>
+                            <div class="pull-right">
+                                <br/>
+                                <button id="btnAdd" type="button" class="btn btn-info">新增记录</button>
+                                <button id="btnSave" type="button" class="btn btn-info">保存</button>
+                                <button id="btnExport" type="button" class="btn btn-info">导出</button>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table id="myTable" class="table table-hover table-bordered ">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">日期</th>
+                                    <th class="col-sm-1">在线客服</th>
+                                    <th class="col-sm-1">城市</th>
+                                    <th class="col-sm-1">电话号码</th>
+                                    <th class="col-sm-1">订单编号</th>
+                                    <th class="col-sm-1">录音补充说明/截图</th>
+                                    <volist name="item" id="vo">
+                                    <th class="col-sm-1">{$vo.name}</th>
+                                    </volist>
+                                    <if condition="$zjshow eq 1">
+                                    <th class="col-sm-1">质检员</th>
+                                    </if>
+                                    <th >操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.time|date="Y-m-d",###}</td>
+                                    <td>{$vo.kfname}</td>
+                                    <td>
+                                        <if condition="!empty($vo['cname'])">
+                                            {$vo.cname}
+                                        <else/>
+                                        {$vo.city_id}
+                                        </if>
+                                    </td>
+                                    <td>{$vo.tel|default='无'}</td>
+                                    <td>{$vo.order_id|default='无'}</td>
+                                    <td>{$vo.remark|default='无'}</td>
+                                    <volist name="vo.child" id="v">
+                                    <td>{$v.money}</td>
+                                    </volist>
+                                    <if condition="$zjshow eq 1">
+                                    <td>{$vo.qcname}</td>
+                                    </if>
+                                    <td>
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" class="editor btn btn-primary btn-sm">编辑</a>
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" class="delete btn btn-primary btn-sm">删除</a>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/toastr/js/toastr.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var kfList = '{$kf|json_encode}';
+    kfList = JSON.parse(kfList);
+    var qckf = '{$qckf|json_encode}';
+    qckf = JSON.parse(qckf);
+    init();
+
+    toastr.options = {
+        closeButton: false,
+        debug: false,
+        progressBar: true,
+        positionClass: "toast-bottom-center",
+        onclick: null,
+        showDuration: "300",
+        hideDuration: "1000",
+        timeOut: "2000",
+        extendedTimeOut: "1000",
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut"
+    };
+
+    $("#btnAdd").click(function(event) {
+        //获取td的数量
+        var _tbody = $("#myTable tbody");
+        var _length = $("#myTable tr th").length;
+        var _tr = $("<tr data-mark='1'></tr>");
+        for (var i = 0; i < _length; i++) {
+            var _td = $("<td></td>");
+            var _child = null;
+            switch (i) {
+                case 0:
+                //第一个单元格添加日期插件
+                _child = $("<input type='text' class='datepicker form-control'/>");
+                break;
+                case 1:
+                _child = $("<select name='kf' class='select2 form-control'></select>");
+                var _option = $("<option value=''>请选择</option>");
+                _child.append(_option);
+                for (var j in kfList) {
+                    var _option = $("<option></option>");
+                    _option.html(kfList[j].name);
+                    _option.val(kfList[j].id);
+                    _child.append(_option);
+                 }
+                break;
+                case 3:
+                _child = $("<input type='text' class='form-control' maxlength='11'/>");
+                break;
+                case 10:
+                _child = $("<select name='qckf' class='select2 form-control'></select>");
+                var _option = $("<option value=''>请选择</option>");
+                _child.append(_option);
+                for (var j in qckf) {
+                    var _option = $("<option></option>");
+                    _option.html(qckf[j].name);
+                    _option.val(qckf[j].id);
+                    _child.append(_option);
+                 }
+                break;
+                case 11:
+                _child = $("<button type='button' class='btn btn-primary btn-sm'>删除</button>");
+                _child.click(function(event) {
+                     $(this).parents("tr").remove();
+                 });
+                break;
+                default:
+                _child = $("<input type='text' class='form-control'/>");
+                break;
+            }
+            _td.append(_child);
+            _tr.append(_td);
+        }
+        _tbody.prepend(_tr);
+        init();
+    });
+
+    $("#btnSave").click(function(event) {
+        var _tr = $("#myTable tr[data-mark=1]");
+        var data = [];
+        _tr.each(function(){
+            var _this = $(this);
+            var subData = [];
+            _this.find("td:not(:last)").each(function(){
+                var _td = $(this);
+                var _child = _td.children(":first-child");
+                var val = _child.val().length == 0?0:_child.val();
+                subData.push(val);
+            });
+            data.push(subData);
+        });
+        data = JSON.stringify(data);
+
+        $.ajax({
+            url: '/qc/qc400up/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                data:data
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = window.location.href ;
+            } else {
+                toastr.info(data.info);
+            }
+        });
+    });
+
+    $("#btnExport").click(function(event) {
+        var colums = [];
+        var data =[];
+        $('#myTable thead th').each(function(){
+            var sub =[];
+            sub["text"] = $(this).html().trim();
+            colums.push(sub);
+        });
+        data.push(colums);
+        $('#myTable tbody tr').each(function(i){
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function(){
+                var _td = {
+                    text:$(this).text().trim()
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data:data,
+            title:'400客服质检',
+            url:'/export/download/',
+            show:false
+        });
+    });
+
+    $(".editor").click(function(event) {
+        var _this = $(this);
+        var _parent = $(this).parents("tr");
+        var _children = _parent.children("td");
+        var _length = _parent.find("td").length;
+
+        for(var i in _children){
+            if (isNaN(i)) {
+                return ;
+            }
+            i = parseInt(i);
+            var _td = $(_children[i]);
+            var __td = $("<td></td>");
+            var _child = null;
+            switch (i) {
+                case 0:
+                //第一个单元格添加日期插件
+                _child = $("<input type='text' class='datepicker form-control' value='"+_td.text()+"'/>");
+                break;
+                case 1:
+                _child = $("<select name='kf' class='select2 form-control'></select>");
+                var _option = $("<option value=''>请选择</option>");
+                _child.append(_option);
+                for (var j in kfList) {
+                    var _option = $("<option></option>");
+                    _option.html(kfList[j].name);
+                    _option.val(kfList[j].id);
+                    if (kfList[j].name == $(_children[i]).text()) {
+                        _option.attr("selected","selected");
+                    }
+                    _child.append(_option);
+                }
+                break;
+                case 3:
+                _child = $("<input type='text' class='form-control' maxlength='11' value='"+_td.text()+"'/>");
+                break;
+                case 10:
+                _child = $("<select name='qckf' class='select2 form-control'></select>");
+                var _option = $("<option value=''>请选择</option>");
+                _child.append(_option);
+                for (var j in qckf) {
+                    var _option = $("<option></option>");
+                    _option.html(qckf[j].name);
+                    _option.val(qckf[j].id);
+                    if (qckf[j].name == _td.text()) {
+                        _option.attr("selected","selected");
+                    }
+                    _child.append(_option);
+                }
+                break;
+                case 11:
+                _child = $("<button type='button'  class='btn btn-primary btn-sm'>保存</button>");
+                _child.click(function(event) {
+                    var data = [];
+                    var subData = [];
+                    _parent.find("td:not(:last)").each(function(){
+                        var first = $(this).children(":first-child");
+                        var val = first.val().length == 0?0:first.val();
+                        subData.push(val);
+                    });
+                    subData.push(_this.attr("data-id"));
+                    data.push(subData);
+                    data = JSON.stringify(data);
+
+                    $.ajax({
+                        url: '/qc/qc400up/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            data:data
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            window.location.href = window.location.href;
+                        }else {
+                            toastr.info(data.info);
+                        }
+                    });
+                });
+                break;
+                default:
+                _child = $("<input type='text' class='form-control' value='"+_td.text().trim()+"'/>");
+                break;
+            }
+            __td.append(_child);
+            _td.replaceWith(__td);
+            init();
+        }
+    });
+
+    $(".delete").click(function(event) {
+        if (confirm("确定删除吗？")) {
+            $.ajax({
+                url: '/qc/del400/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id:$(this).attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                }
+            });
+        }
+    });
+
+    function init() {
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd",
+            minViewMode:0,
+            autoclose:'ture'
+        });
+
+        $(".select2").select2({
+            allowClear: true,
+            placeholder: "请选择"
+        });
+    }
+
+    //筛选操作
+    $(".choose").on('click',function () {
+        var beginTime = $('input[name="begin"]').val();
+        var endTime = $('input[name="end"]').val();
+        var beforeTime = getBeforeMonth(endTime);
+        var nextTime = getNextMonth(beginTime);
+        if(beginTime || endTime){
+            if(!beginTime || !endTime){
+                alert("请输入全部时间!");
+                return
+            }
+            if(beginTime > endTime){
+                alert("筛选开始时间不能大于结束时间!");
+                $('input[name="begin"]').val(endTime)
+                $('input[name="end"]').val(beginTime)
+                return
+            }
+            //开始时间小于 结束时间的前一个月 //结束时间大于 开始时间的后一个月
+            if (beginTime < beforeTime || endTime > nextTime) {
+                alert("筛选不能超过一个月!");
+                $('input[name="end"]').val(nextTime);
+                return
+            }
+        }
+        $("#choose_form").submit();
+    });
+
+    /**
+     * 获取指定时间的上一个月
+     */
+    function getBeforeMonth(time) {
+        var curDateMonth = new Date(time).getMonth() + 1;
+        var curDate = new Date(time).getDate();
+        var curYear = new Date(time).getFullYear();
+        var lastMonth, lastYear, lastDate;
+        if (curDateMonth == 1) {
+            lastMonth = 12;
+            lastYear = curYear - 1;
+            lastDate = curDate;
+            return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(lastDate);
+        } else {
+            lastMonth = curDateMonth - 1;
+            lastYear = curYear;
+            lastDate = curDate;
+            var prevMonthLastDay = new Date(lastYear, lastMonth, 0).getDate();
+
+            if (prevMonthLastDay >= curDate) {
+                return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(lastDate);
+            } else {
+                return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(prevMonthLastDay);
+            }
+        }
+    }
+
+    /**
+     * 获取指定时间的下一个月
+     */
+    function getNextMonth(time){
+        var curDateMonth=new Date(time).getMonth()+1;
+        var curDate = new Date(time).getDate();
+        var curYear = new Date(time).getFullYear();
+        var lastMonth, lastYear, lastDate;
+        if (curDateMonth == 12) {
+            lastMonth = 1;
+            lastYear = curYear + 1;
+            lastDate = curDate;
+            return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(lastDate);
+        } else {
+            lastMonth = curDateMonth + 1;
+            lastYear = curYear;
+            lastDate = curDate;
+            var prevMonthLastDay = new Date(lastYear, lastMonth, 0).getDate();
+
+            if (prevMonthLastDay >= curDate) {
+                return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(lastDate);
+            } else {
+                return lastYear + "-" + prevZero(lastMonth) + "-" + prevZero(prevMonthLastDay);
+            }
+        }
+    }
+
+    function prevZero(num) {
+        var num = parseInt(num);
+        if (num < 10) {
+            num = "0" + num;
+        }
+        return num;
+    }
+</script>
+</block>

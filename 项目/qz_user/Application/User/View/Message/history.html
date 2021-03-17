@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/message/css/ht-messge.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/laydate.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Message:header" />
+        <div class="ht-main">
+            <div class="ht-system-check"><strong>筛选:</strong>
+                <input id="start" name="begin" class="laydate-icon" type="text" placeholder="开始时间" value="{$info.begin}">
+                <input id="end" name="end" type="text" class="laydate-icon" placeholder="结束时间" value="{$info.end}">
+                <input id="btnSearch" type="button" value="搜索">
+                <i class="red err-tips"></i>
+            </div>
+            <div class="red mt20"><i class="mr10 icon-exclamation-sign"></i>默认1个月内的日志,筛选时间段起止最多1个月。</div>
+            <div class="red"><i class="icon-info-sign mr10"></i>若不是您本人操作，请与齐装网客服联系，谢谢！</div>
+            <dl class="ht-messge-czjl mt20">
+                <volist name="info.logs" id="vo">
+                    <if condition="$key EQ date('Y-m-d')">
+                        <dt>今天</dt>
+                    <else/>
+                        <dt>{$vo.date|date="m-d",###}</dt>
+                    </if>
+                    <volist name="vo.child" id="v">
+                        <dd><i class="icon-time mr10"></i>{$v.time|date="H:i:s",###}&nbsp;&nbsp;&nbsp;{$v.info}&nbsp;&nbsp;&nbsp;{$v.remark}</dd>
+                    </volist>
+                </volist>
+            </dl>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    //日期范围限制
+    var start = {
+        elem: '#start',
+        format: 'YYYY-MM-DD',
+        max: '{:date("Y-m-d")}', //最大日期
+        istime: true,
+        istoday: false,
+        choose:function(datas){
+           end.min = datas;
+        }
+    };
+
+    var end = {
+        elem: '#end',
+        format: 'YYYY-MM-DD',
+        istime: true,
+        istoday: false,
+        max:'{:date("Y-m-d")}',
+        choose: function(datas) {
+            //start.max = datas; //结束日选好后，充值开始日的最大日期
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    $("#btnSearch").click(function(event) {
+        $(".err-tips").html("");
+        if(!App.validate.run($("input[name=begin]").val()) || !App.validate.run($("input[name=end]").val())){
+            $("input[name=begin]").focus();
+            $(".err-tips").html("请选择一个时间段");
+            return false;
+        }
+        window.location.href="/history/"+$("input[name=begin]").val()+"/"+$("input[name=end]").val();
+    });
+</script>
+</html>

@@ -1,0 +1,129 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>装修攻略-专题文章-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装修攻略-专题文章</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/specialarticle/articles/">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    文章标题:<input type="text" name="title" class="form-control"  placeholder="标题" value="{$title}">
+                                </div>
+                                <div class="col-xs-2">
+                                    审核状态:
+                                    <select name="status" class="form-control">
+                                        <option value="">-请选择-</option>
+                                        <option value="1">未审核</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="pull-right col-sm-1">
+                                <br/>
+                                    <a  href="/specialarticle/articleup/" class="btn btn-block btn-info">新增文章</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th class="col-sm-3">标题</th>
+                            <th class="col-sm-2">关键字</th>
+                            <th class="col-sm-2">标签</th>
+                            <th class="col-sm-1">分类</th>
+                            <th class="col-sm-1">评论</th>
+                            <th class="col-sm-1">发布时间</th>
+                            <th class="col-sm-1">状态</th>
+                            <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="list.list" id="vo">
+                            <tr>
+                                <td>{$vo.title}</td>
+                                <td>{$vo.keywords}</td>
+                                <td>{$vo.tagnames}</td>
+                                <td>{$vo.classname}</td>
+                                <td>查看(2)</td>
+                                <td>{$vo.time|date="Y-m-d H:i",###}</td>
+                                <td>
+                                    <if condition="$vo['status'] EQ 1">
+                                        未审核
+                                    <else/>
+                                        已审核
+                                    </if>
+                                </td>
+                                <td>
+                                    <a href="/specialarticle/articleup?id={$vo.id}" class="fa fa-pencil" title="编辑"></a>
+                                    <eq name="vo.status" value="2">
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="fa fa-toggle-on" title="取消"></a>
+                                    <else/>
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" data-value="2" class="fa fa-toggle-off " title="审核"></a>
+                                    </eq>
+                                </td>
+                            </tr>
+                        </volist>
+                    </table>
+                    {$list.page}
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$("a[class*='fa-toggle']").click(function(event) {
+    var _this = $(this);
+    var val = _this.attr("data-value");
+
+    $.ajax({
+        url: '/specialarticle/audit/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            val: val,
+            id:_this.attr("data-id")
+        }
+    })
+    .done(function(data) {
+        if (data.status ==1) {
+            window.location.href = window.location.href;
+        } else {
+            _this.Alert({
+                msg:data.info,
+                level:2
+            });
+        }
+    })
+    .fail(function() {
+        _this.Alert({
+            msg:"操作失败,请联系技术部门！",
+            level:2
+        });
+    });
+
+});
+</script>
+</block>

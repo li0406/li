@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/ht-photo.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Cases:header" />
+        <div class="ht-main">
+            <table class="ht-team-design" border="0" cellpadding="0" cellspacing="0">
+                <tr class="team-title">
+                    <td>案例图片</td>
+                    <td>楼盘名</td>
+                    <td>户型</td>
+                    <td>建筑面积</td>
+                    <td>风格</td>
+                    <td>设计师</td>
+                    <td>造价</td>
+                    <td>状态</td>
+                    <td>发布时间</td>
+                    <td>操作</td>
+                </tr>
+                <volist name="info.cases" id="vo">
+                    <if condition="$vo['isdelete'] NEQ 3">
+                        <tr class="team-list">
+                    <else/>
+                        <tr class="team-list list-bg">
+                    </if>
+                    <td>
+                    <span class="userhead">
+                    <if condition="$vo['img_host'] EQ 'qiniu'">
+                    <img src="{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/{$vo.img_path}-h100" width="422" height="470">
+                    <else/>
+                    <img src="{:C('QZ_YUMING_SCHEME')}://{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}" width="422" height="470">
+                    </if>
+                    </span>
+                    </td>
+                    <if condition="$vo['isdelete'] NEQ 3">
+                         <td>{$vo.title}</td>
+                    <else/>
+                        <td>
+                            <span style="text-decoration:line-through;display:block;">{$vo.title}</span>
+                            <span>已被设计师删除</span>
+                        </td>
+                    </if>
+
+                    <td>{$vo.hx}{$vo.lx}</td>
+                    <td>{$vo.mianji}㎡</td>
+                    <td>{$vo.fg}</td>
+                    <td>{$vo.dname}</td>
+                    <td>{$vo.jiage}</td>
+                    <td>
+                      <if condition="$vo['on'] EQ 1">
+                          已审
+                      <else/>
+                          未审
+                      </if>
+                    </td>
+                    <td>{$vo.time|date="Y-m-d",###}</td>
+                    <td>
+                        <a class="blue" href="{:C('QZ_YUMING_SCHEME')}://{$info.user.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.id}.shtml" target="_blank">查看</a>
+                        <if condition="$vo['isdelete'] NEQ 3">
+                            <a class="blue" href="/caseup/{$vo.id}">编辑</a>
+                        <else/>
+                            <a class="blue reset" data-id="{$vo.id}" href="javascript:void(0)">恢复</a>
+                        </if>
+                        <a class="red delcase" href="javascript:void(0)" data-id="{$vo.id}">删除</a></td>
+                </tr>
+                </volist>
+            </table>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(".delcase").click(function(event) {
+        if(confirm("确定删除吗?")){
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/delcase/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = window.location.href;
+                }else{
+                    $.pt({
+                        target: _this,
+                        content:data.info,
+                        width: 'auto'
+                   });
+                }
+            })
+            .fail(function(xhr) {
+               $.pt({
+                target: _this,
+                content:"发生了未知的错误,请刷新重试！",
+                width: 'auto'
+               });
+            });
+        }
+    });
+
+    $(".reset").click(function(event) {
+        if(confirm("确定恢复吗?")){
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/resetcase/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = window.location.href;
+                }else{
+                    $.pt({
+                        target: _this,
+                        content:data.info,
+                        width: 'auto'
+                   });
+                }
+            })
+            .fail(function(xhr) {
+               $.pt({
+                target: _this,
+                content:"发生了未知的错误,请刷新重试！",
+                width: 'auto'
+               });
+            });
+        }
+    });
+</script>
+</html>

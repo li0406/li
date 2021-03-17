@@ -1,0 +1,165 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<div class="box no-border">
+    <div class="box box-default">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-xs-4" id="articleclass">
+                选择分类：
+                    <div class="cx-select-wrap">
+                        <select data-value="{$Think.get.onelevel}" class="onelevel cx-select form-control">
+                        </select>
+                        <select data-value="{$Think.get.twolevel}" class="twolevel cx-select mg form-control">
+                        </select>
+                        <select data-value="{$Think.get.threelevel}" class="threelevel cx-select mg form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                是否审核：
+                    <select class="form-control" id="state">
+                        <option value="0" selected>请选择</option>
+                        <option value="1">未审核</option>
+                        <option value="2">已发布</option>
+                    </select>
+                </div>
+                <div class="col-xs-1" id="articleclass">
+                是否推荐：
+                    <select class="form-control" id="recommend">
+                        <option value="" selected>请选择</option>
+                        <option value="0">未推荐</option>
+                        <option value="1">推荐</option>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                标题或ID：<input type="text" id="condition" class="form-control condition" placeholder="标题或ID" value="{$Think.get.condition}">
+                </div>
+                <div class="col-xs-1">
+                    选取状态：
+                    <select name="is_choice" id="is_choice" class="form-control">
+                        <option value="0">请选择</option>
+                        <option value="1">已选取</option>
+                        <option value="2">未选取</option>
+                    </select>
+                </div>
+                <div class="col-xs-1">
+                    <br/>
+                    <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                        <i class="fa fa-search"></i>查询
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>标题</th>
+                    <th>关键字</th>
+                    <th>标签</th>
+                    <th>分类</th>
+                    <th>发布时间</th>
+                    <th>发布人</th>
+                    <th width="140px">选取</th>
+                </tr>
+                <volist name="info.list" id="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>
+                            <if condition="$vo['state'] NEQ 2">
+                            {$vo.title}
+                            <else/>
+                            <a href="http://www.{:C('QZ_YUMING')}/gonglue/{$vo.shortname}/{$vo.id}.html" target="_blank">{$vo.title}</a>
+                            </if>
+                        </td>
+                        <td>{$vo.keywords}</td>
+                        <td>{$vo.tagname}</td>
+                        <td>
+                            {$vo.classname}
+                        </td>
+                        <td>{$vo.addtime|date='Y-m-d',###}</td>
+                        <td>{$vo.uname}</td>
+                        <td><span class="fa {$vo.toggleIcon} choice" data-id="{$vo.id}"></span></td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+    <div class="box-footer no-border fenye">
+        <div class="col-xs-12">{$info.page}</div>
+    </div>
+</div>
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    //将老cookie保留到新的cookie上,留着点击取消时还能复用
+    var oldids = '{$oldids}';
+    oldids = JSON.stringify(oldids.replace(/\"|\[|\]/g, '').split(','));
+    Cookies.set('oldarticleList', oldids);
+
+    $('#articleclass').cxSelect({
+        selects: ['onelevel', 'twolevel', 'threelevel'],
+        jsonValue: 'id',
+        jsonName: 'text',          // 数据标题字段名称
+        jsonSub: 'children',            // 子集数据字段名称
+        data: {$info.articleclass}
+    });
+    var state = "{$Think.get.state}";
+    if(state != '' && state != 'null' && state != 'undefined'){
+        $('#state').val(state);
+    }
+    $('#recommend').val("{$Think.get.recommend}");
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('articleList');
+
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 4){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,7);
+            }
+            Cookies.set('articleList',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('articleList',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+        console.log(Cookies.get('articleList'));
+    });
+
+
+    $('#search').click(function(){
+        var onelevel = $('.onelevel').val();
+        var twolevel = $('.twolevel').val();
+        var threelevel = $('.threelevel').val();
+        var state = $('#state').val();
+        var recommend = $('#recommend').val();
+        var condition = $('#condition').val();
+        var is_choice = $('#is_choice').val();
+        if(!condition){
+            condition = '';
+        }
+        window.location.href = '/meituzt/articleBox?onelevel='+onelevel+'&twolevel='+twolevel+'&threelevel='+threelevel+'&state=' + state+'&recommend='+recommend + '&condition=' +condition + '&is_choice=' +is_choice;
+    })
+})
+</script>
+</block>

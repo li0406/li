@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-ui
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: admin-ui
+  template:
+    metadata:
+      labels:
+        app: admin-ui
+    spec:
+      imagePullSecrets:
+        - name: "container-registry-a"
+      containers:
+        - name: admin-ui
+          # image: registry.cn-shanghai.aliyuncs.com/qizuang/admin-ui:master-040ce9e
+          image: <K8S_IMAGE>
+          imagePullPolicy: Always
+          # command: [ "echo", "SUCCESS" ]
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          # envFrom:
+          # - configMapRef:
+          #     name: env-app-config
+          volumeMounts:
+            - name: ssl-volume
+              mountPath: /etc/nginx/ssl
+      volumes:
+        - name: ssl-volume
+          secret:
+            secretName: app-ssl
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: admin-ui
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: admin-ui
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  type: ClusterIP

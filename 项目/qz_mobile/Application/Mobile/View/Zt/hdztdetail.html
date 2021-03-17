@@ -1,0 +1,171 @@
+<extend name="Common:basic"/>
+<block name="link">
+  <!--样式表-->
+  <script src="/assets/mobile/js/750rem.js?v={:C('STATIC_VERSION')}"></script>
+  <link rel="canonical" href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}{$_SERVER['REQUEST_URI']}"/>
+  <link href="/assets/mobile/zt/css/hddetail.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+  <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$data.zxzn.0.face}-w400.jpg"/>
+  <link href="//assets.qizuang.com/g-css/animate/animate.min.css" rel="stylesheet" type="text/css">
+  <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+  <div class="m-header-his">
+    <i class="fa fa-angle-left"></i>
+  </div>
+  <a href="/" class="m-header-left"></a>
+  <div class="m-header-tit">活动详情</div>
+</block>
+<block name="content">
+  <div class="z-header">
+    <div class="h-title"  id="to-order">
+      <a href="/hdzt">活动列表</a>&nbsp; &gt;&nbsp;<h1 class="reset-h">活动详情</h1>
+    </div>
+    <div class="h-cate">
+      <div class="c-title">{$info.name}</div>
+<!--      <img class="c-img" src="/assets/mobile/zt/images/jky.png" alt="">-->
+          <img class="c-img" src="//{:C('QINIU_DOMAIN')}/{$info.business_logo}" />
+      <p>活动商家：{$info.business_name}</p>
+      <if condition="$info['add_num'] gt 0">
+        <p> 参与数量：{$info.add_num}</p>
+      </if>
+      <p> 活动时间：{$info.start_at|date="Y年m月d日",###} 至 {$info.end_at|date="Y年m月d日",###}</p>
+    </div>
+    <div class="order-box" >
+      <div class="border-body">
+        <ul class="m-bj-edit">
+          <li>
+            <button id="showCityPicker2" class="c-zb-city" type="button" style="border-radius: 0.051rem;">
+              <i class="map-marker"></i>
+              请选择您所在的区域
+            </button>
+            <input type="hidden" name="hide_city_id" value="">
+            <input type="hidden" name="province" data-id="">
+            <input type="hidden" name="city" data-id="">
+            <input type="hidden" name="area" data-id="">
+          </li>
+          <li>
+            <input type="text" placeholder="怎么称呼您" name="name" maxlength="20">
+          </li>
+          <li>
+            <input type="text" name="tel" placeholder="输入手机号即可预约" maxlength="11">
+          </li>
+          <li>
+            <include file="Common/disclaimer" />
+          </li>
+          <div class="m-b-btn submit-1">
+            免费预约
+          </div>
+        </ul>
+      </div>
+    </div>
+    <div class="p-mask"></div>
+    <div class="result-box">
+      <div class="close"></div>
+      <div class="header">
+        恭喜您预约成功
+      </div>
+      <div class="neck-line"></div>
+      <p class="xq-title">详情咨询：<span>{:OP('QZ_CONTACT_TEL400')}</span> 齐装客服热线</p>
+      <br>
+      <img src="/assets/mobile/zt/images/hdcode.png" style="width:33%"/>
+      <br>
+      <br>
+      <p class="xq-text">扫一扫，下载官方APP</p>
+      <p class="xq-text">有房要装，就上齐装</p>
+    </div>
+    <div class="h-con">
+      <div class="con-title">活动详情</div>
+      <div class="con-back"></div>
+      <!--富文本-->
+      <div class="con-text">
+        {$info.detail}
+      </div>
+    </div>
+  </div>
+  <a class="z-bit"  href="#to-order">立即预约</a>
+</block>
+<block name="script">
+  <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+  <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+  <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+  <!--脚本-->
+  <script>
+    $(".join-btn").click(function () {
+      $(".order-box, .mask").fadeIn();
+    })
+
+    $(function () {
+      // 城市选择插件
+      selectQz.init({
+        province: $("input[name=province]").attr("data-id"),
+        city: $("input[name=city]").attr("data-id"),
+        area: $("input[name=area]").attr("data-id")
+      });
+    })
+
+    $(".close").click(function(){
+      closeResult()
+    })
+    function openResult(){
+      $(".p-mask,.result-box").fadeIn();
+    }
+    function closeResult(){
+      $(".p-mask,.result-box").fadeOut();
+      $(".m-bj-edit input[name=name]").val("")
+      $("input[name=tel]").val("")
+    }
+    // 发单：
+    $(".submit-1").click(function(){
+      window.order({
+        url:"/fb_order/",
+        extra:{
+          cs:$(".m-bj-edit input[name=city]").attr("data-id"),
+          qx:$(".m-bj-edit input[name=area]").attr("data-id"),
+          name:$(".m-bj-edit input[name=name]").val(),
+          tel:$("input[name=tel]").val(),
+          source:19101514
+        },
+        submitBtn:{
+          className:$(this),
+          type:'btn'
+        },
+        error:function(){
+          alert("发生了未知的错误,请稍后再试！");
+        },
+        success:function(data, status, xhr){
+          if(data.status == 1){
+            openResult()
+          }else{
+            alert(data.info);
+          }
+        },
+        validate:function(item, value, method, info){
+          if ('cs' == item || 'qx' == item) {
+            alert(info);
+            return false;
+          };
+          if ('name' == item && '' != method) {
+            alert(info);
+            $(".m-bj-edit input[name=name]").focus();
+            return false;
+          };
+          if ('tel' == item) {
+            alert(info);
+            $("input[name=tel]").focus();
+            $("input[name=tel]").val('');
+            return false;
+          };
+          var checked = $(".disclamer-check").attr("data-checked")
+          if(checked == "false"){
+            alert("请勾选我已阅读并同意齐装网的《免责声明》！");
+            return false
+          }
+          return true;
+        }
+      });
+
+    })
+  </script>
+</block>

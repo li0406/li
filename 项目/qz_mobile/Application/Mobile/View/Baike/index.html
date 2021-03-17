@@ -1,0 +1,281 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/baike/" rel="canonical" />
+    <link href="/assets/common/js/tooltips/tooltips.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/red-packet.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/meitu/css/meitu-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/baike/css/baike-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.0.thumb}" />
+    <style>
+        #q-a-z-dv{padding: 0 0.08rem; background-color: white;margin-top: 10px; border-bottom: 1px solid #EBEBEB;}
+        .qz_ad_single_text, .qz_ad_multi_text{ margin-bottom: 0rem !important; color: #333 !important; font-size: 0.126rem !important; font-weight: bold; }
+        .qz_ad_multi_text .qz_ad_multi_text-title{margin-bottom: 0rem !important; color: #333 !important; font-size: 0.126rem !important; font-weight: bold;     padding-bottom: 0.02rem;}
+    </style>
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+    <div class="m-header-tit">{$basic.body.title}</div>
+</block>
+<block name="content">
+    <div id="baike-gold-34"></div>
+    <div id="position">
+        <div class="type-list">
+            <div class="parent-list" id="wrapper">
+                <ul id="parent-content">
+                    <volist name="category" id="v">
+                        <li id="{$v.url}"><a href="/baike/{$v.url}/">{$v.name}</a></li>
+                    </volist>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--C 百科列表 S-->
+    <div class="baike-list-box contentnr">
+        <ul class="contentnr_ul xiaogutou-list-wrap">
+            <include file="list-content" />
+        </ul>
+    </div>
+    <!--C 百科列表 E-->
+
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <!--置顶-->
+    <div id="gotop" style="display: none"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <include file="Common/footfadantc"/>
+</block>
+
+<block name="script">
+    <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+    <!-- <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/red-packet.js?v={:C('STATIC_VERSION')}"></script> -->
+    <script type="text/javascript" src="/assets/mobile/qzgold/js/qz_gold.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var cityId = "{$cityInfo.id}";
+        console.log(cityId)
+        // 调用广告
+        qzInsertGold('.xiaogutou-list-wrap li:first-child', 8, cityId)
+        qzInsertGold('#baike-gold-34', 34, cityId)
+
+        $(document).ready(function() {
+            init();
+            $("#parent-content li").click(function(){
+                var index=0,
+                    leftDistence=0;
+                index=$(this).index();
+                leftDistence=index*$(this).width();
+                sessionStorage.index=index;
+                sessionStorage.leftDistence=leftDistence;
+                $(this).addClass("chose-active");
+                $(this).siblings().removeClass('chose-active');
+                $($(".list-box")[index]).show();
+                $($(".list-box")[index]).siblings().hide();
+                $(".list-box ul li").removeClass('child-chose-active');
+                getWidth($($(".list-box")[index]).children('ul'));
+                $($(".list-box")[index]).attr("id","wrapper1");
+                $($(".list-box")[index]).siblings().attr("id","");
+                $("#wrapper1 ul").css({
+                    'transform':'translate(0px,0px) translateZ(0px) scale(1)',
+                    '-ms-transform':'translate(0px,0px) translateZ(0px) scale(1)',    /* IE 9 */
+                    '-moz-transform':'translate(0px,0px) translateZ(0px) scale(1)',   /* Firefox */
+                    '-webkit-transform':'translate(0px,0px) translateZ(0px) scale(1)', /* Safari 和 Chrome */
+                    '-o-transform':'translate(0px,0px) translateZ(0px) scale(1)',
+                });
+                new JRoll("#wrapper1",{scrollX:true,scrollY:false});
+
+            });
+            $(".foot-zan").click(function(){
+                var num=parseInt($(this))
+            });
+
+
+
+            //定义固有变量
+            var loading = false;
+            var last_page = '{$totalpage|default=0}';
+            var this_page = '{$pageid}';
+            var alertinfo = false;
+            var list_sums = '{:count($info["cases"])}';
+            //下拉无限加载
+            window.onscroll=function(){
+                /*导航栏固定*/
+                var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+                if(top>103){
+                    $("#tofixed").addClass('tofixed')
+                }else{
+                    $("#tofixed").removeClass('tofixed')
+                }
+                /*下拉刷新加载*/
+                if ($(document).height() - $(this).scrollTop() - $(this).height() < 800){
+                    if(this_page >= last_page){
+                        if (alertinfo == false && list_sums > 0) {
+                            $(".contentnr").append('<div class="wrapbt"><div class="spmore">没有更多了，看看别的吧..</div></div>');                        };
+                        alertinfo = true;
+                        return false;
+                    }else{
+                        if (loading == true) {
+                            return false;
+                        };
+                        loading = true;
+                        var url = '?p=' + (parseInt(this_page) + 1);
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'html',
+                        })
+                            .done(function(result) {
+                                loading = false;
+                                $(".xiaogutou-list-wrap").append($(result).fadeIn(2000));
+                                this_page++;
+                            })
+                            .fail(function(xhr) {
+                                loading = false;
+                                alert("加载失败,请刷新再试！");
+                            });
+                    }
+                }
+
+                //回到顶部
+                $(window).on("scroll", function(){
+                    if($(document).scrollTop()>="1000"){
+                        $('#gotop').css('display',"block");
+                    }else{
+                        $('#gotop').css('display',"none");
+                    }
+                });
+            }
+
+        });
+
+        window.onscroll=function(){
+            var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+            if(top>103){
+                $("#position").addClass('tofixed')
+            }else{
+                $("#position").removeClass('tofixed')
+            }
+        };
+
+        function changeString(str){
+            str=str.substring(0,str.length);
+            str=str.split(",");
+            for(var i=0;i<str.length;i++){
+                str[i]=parseInt(str[i])
+            }
+            return str;
+        }
+        function init() {
+            var thisIndex=0,
+                leftDistence=0,
+                childrenLeft=0,
+                childrenIndex=0,
+                children=[],
+                childPosi=[],
+                jroll1="",
+                jroll2="";
+
+            thisIndex=parseInt(sessionStorage.index);
+            leftDistence=-parseInt(sessionStorage.leftDistence);
+            childrenLeft= -parseInt(sessionStorage.childrenLeft);
+            childrenIndex= parseInt(sessionStorage.childrenIndex);
+            // thisIndex=thisIndex?thisIndex:0;
+            // childrenIndex=childrenIndex?childrenIndex:0;
+            leftDistence=leftDistence?leftDistence:0;
+            childrenLeft=childrenLeft?childrenLeft:0;
+            if(sessionStorage.children==undefined){
+                for(var i=0; i<$("#parent-content li").length;i++){
+                    children[i]=0;
+                    childPosi[i]=0;
+                }
+                childrenIndex=childPosi[0];
+                childrenLeft=children[0];
+                sessionStorage.children=children;
+                sessionStorage.childPosi=childPosi;
+            }else{
+                children=changeString(sessionStorage.children);
+                childPosi=changeString(sessionStorage.childPosi);
+                childrenLeft=children[thisIndex];
+                childrenIndex=childPosi[thisIndex];
+            }
+            leftDistence=setJuli(leftDistence);
+            childrenLeft=setJuli(childrenLeft);
+            getWidth($("#parent-content"));
+            jroll1=new JRoll("#wrapper",{scrollX:true,scrollY:false});
+            jroll1.scrollTo(-leftDistence, 0, 100, true);
+
+        }
+        function setJuli(distance){
+            var width=screen.availWidth;
+            distance=Math.abs(distance);
+
+            if(distance<width){
+                return 0;
+            }else if(distance%width==0&&distance!=width){
+                return distance;
+            }else{
+                var num=Math.floor(distance/width);
+                return num*width;
+            }
+        }
+        function getWidth(obj){
+            var length=0,
+                width=0;
+            length=obj.children().length;
+            $(obj.children()).width(screen.availWidth/3);
+            width=$(obj.children()[0]).width();
+            obj.width(length*width+2);
+
+        }
+
+        function insertImg (argument) {
+            var freeDesign="<div class='free-design'><a href='/sheji/'><img src='/assets/mobile/baike/img/free-design.png' alt='免费获取设计' title='免费获取设计'></a></div>",
+                bkList=$(".baike-list-box ul li");
+            $(bkList[2]).after(freeDesign);
+        }
+
+        $('.foot-zan').click(function(){
+            var num = parseInt($(this).children('.zan-num').text());
+            num++;
+            $(this).children('.zan-num').text(num);
+            $(this).addClass('now');
+
+        });
+        $("#gotop").click(function(event) {
+            $(document).scrollTop(0)
+        });
+        //第五条数据后插入app入口
+        var oLi = $(".contentnr_ul li").eq(4)
+        var html = '<li class="five-appentry" data-tag="M-19" style="cursor:pointer;">\n' +
+            '           <div class="img-box">\n' +
+            '                <img src="/assets/mobile/baike/img/zxbaike.png">\n' +
+            '            </div>\n' +
+            '            <div class="baike-list-content">\n' +
+            '                <div class="list-content-title">\n' +
+            '                   更多家装秘籍就在齐装APP\n' +
+            '                </div>\n' +
+            '                <div class="list-content-body">\n' +
+            '                    装修知识快捷查看，满满家装干货等你带回家\n\n' +
+            '                </div>\n' +
+            '                <div class="list-content-foot">\n' +
+            '                    <span class="foot-date" style="color:#FF4E4E;">齐装APP</span>\n' +
+            '                    <span class="foot-zan" style="padding:0.04rem 0.1rem;color:#FF4E4E;background:#FFB1B1;border-radius:17px;">立即下载</span>\n' +
+            '                </div>\n' +
+            '            </div>\n' +
+            '    </li>'
+        $(html).insertAfter(oLi)
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

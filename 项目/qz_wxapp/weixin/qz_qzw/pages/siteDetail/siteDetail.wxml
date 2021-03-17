@@ -1,0 +1,332 @@
+<view class="main">
+  <view class="contain">
+    <image class="bg" src="http://staticqn.qizuang.com/custom/20200107/Fm_v9PLtXVPooB7Lozj1Z445UgpY"></image>
+    <view class="tit">{{owner}}新家的装修现场</view>
+    <view class="datas">
+      <view class="item">
+        <view class="son">户型</view>
+        <view>{{live_info.order_type == 2? (live_info.huxing_other_name != null ? live_info.huxing_other_name : '实用户型' ) : (live_info.huxing_name != null ? live_info.huxing_name : '实用户型' )}}</view> 
+      </view>
+      <view class="item">
+        <view class="son">面积</view>
+        <view>{{live_info.mianji ? live_info.mianji : 96}}㎡</view>
+      </view>
+      <view class="item">
+        <view class="son">风格</view>
+        <view> {{live_info.fengge_name ? live_info.fengge_name : '宜家宜居'}}</view>
+      </view>
+      <view class="item">
+        <view class="son">方式</view>
+        <view>{{live_info.fangshi_name ? live_info.fangshi_name : '全包' }}</view>
+      </view>
+    </view>
+  </view>
+  <view class="desc">
+    <view class="every">
+      报价
+      <text>{{live_info.qiandan_jine}}万</text>
+    </view>
+    <view class="every" wx:if="{{live_info.xiaoqu}}">
+      小区
+      <text>{{live_info.xiaoqu}}</text>
+    </view>
+    <view class="all">
+      <view class="every">
+        公司
+        <text>{{live_info.jc}}</text>
+      </view>
+
+      <navigator hover-class='none' url="../company_detail/company_detail?id={{live_info.company_id}}&bm={{live_info.bm}}" class="point">
+        进店逛逛 >
+      </navigator>
+    </view>
+    <view class="all" wx:if="{{live_info.fans}}">
+      <view class="fans">
+        <image wx:for="{{fans}}" wx:for-item="item" wx:key="{{it.uuid}}" src="{{item.avatar?item.avatar:'../../img/default-head.png'}}" wx:for-index="index"></image>
+        <view class="nums">粉丝</view>
+      </view>
+      <navigator url='../fans/fans?id={{live_info.id}}' class="point" hover-class="none">
+        {{fansLen > 6 ? '等'+fansLen : fansLen}}位 >
+      </navigator>
+    </view>
+  </view>
+  <view class="state">
+    <view class="title">装修动态
+      <text>共{{infoTotal}}条</text>
+    </view>
+    <scroll-view class="scroll-view_H" scroll-x="true" scroll-y="false" bindscroll="scroll" style="width: 100%">
+      <view class="line">
+        <view class="l-item {{item.step>step ? '' :  'red'}}" wx:for="{{classify}}" wx:key="item">
+          <view class="xian"></view>
+          <view class="yuan"></view>
+        </view>
+      </view>
+      <view class='scroll-view-item_H' wx:for="{{classify}}" wx:key="item">
+        <view>{{item.name}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="site-list">
+    <block wx:for="{{infoList}}" wx:for-item="item" wx:key="{{item.id}}">
+      <view class="item">
+        <image class="logo" src="{{item.logo}}"></image>
+        <view class="con">
+          <view class="xtit">
+            <view class="t-title">{{item.jc}} </view>
+            <view class="t-satisfy" wx:if="{{item.check_state==2 && item.check_ret ==1}}">
+              <image src="../../img/laugh.png"></image>
+              <view>业主非常满意</view>
+            </view>
+            <view class="t-satisfy" wx:if="{{item.check_state==2 && item.check_ret ==2}}">
+              <image src="../../img/smile.png"></image>
+              <view>业主还算满意</view>
+            </view>
+            <view class="t-satisfy" wx:if="{{item.check_state==2 && item.check_ret ==3}}">
+              <image src="../../img/sad.png"></image>
+              <view>业主很不满意</view>
+            </view>
+          </view>
+          <view class="xtips">【{{item.step_name}}】</view>
+          <view class="des-title">
+            {{item.content}}
+          </view>
+          <view class="d-imgs {{ item.meiaLen == 1 ? '' : item.meiaLen == 2 ? 'tu2' :  'tu3'}}" wx:if="{{item.media_type == 1}}">
+            <image wx:for="{{item.media_list}}" wx:for-item="it" wx:key="{{it.id}}" bindtap="dllClick" data-tid="{{it.id}}" data-id="{{item.id}}" src='{{it.url_thumb}}'></image>
+            <view class="d-nums" wx:if="{{item.meiaLen>3}}">{{item.meiaLen}}图</view>
+          </view>
+          <view class="d-imgs" wx:if="{{item.media_type == 2}}">
+            <image mode="center" wx:for="{{item.media_list}}" wx:for-item="it" wx:key="{{it.id}}" data-url='{{it.url_full}}' src="{{it.url_thumb}}" bindtap="videoClick">
+              <image class="play-btn" src="../../img/playsmall.png"></image>
+            </image>
+          </view>
+          <view class="xtime">
+            <view class="times">{{item.created_date}}</view>
+            <view class="likes" bindtap="doLike" data-id="{{item.id}}" data-like="{{item.is_like}}">
+              <image wx:if="{{item.is_like == 0}}" src="../../img/sitehand.png"></image>
+              <image wx:else src="../../img/sitehandact.png"></image>
+              <view>{{item.like}}</view>
+            </view>
+          </view>
+          <view class="xmap" wx:if="{{item.check_effect.length}}">
+            <view class="map-tit">业主印象：</view>
+            <view class="map-tips">
+              <view class="items" wx:for="{{item.check_effect}}" wx:for-item="check">{{check}}</view>
+            </view>
+          </view>
+          <view class="dialog" wx:if="{{item.comment.length}}">
+            <view wx:for="{{item.comment}}" wx:for-item="mack" wx:key="{{mack.id}}">
+              <text>业主：</text> {{mack.content}}
+              <view wx:for="{{mack.company_comment}}" wx:for-item="macks" wx:key="{{macks.id}}">
+                <text>商家回复业主：</text> {{macks.content}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <image class="gs-ad" wx:if="{{index==0}}" bindtap="adfd" mode="scaleToFill" src="http://staticqn.qizuang.com/custom/20200109/FnyfFbcTKrGhdKGuajcaMa2Xp-QZ"></image>
+    </block>
+    <view class="more-mes" wx:if="{{infoTotal > 3}}" bindtap="moreState">
+      <view>{{nomore ==2 ? '更多动态信息' : nomore==1 ? "加载中" : '没有更多了'}}</view>
+      <image wx:if="{{nomore != 3}}" src="../../img/sitemore.png"></image>
+    </view>
+  </view>
+
+  <view class="more-site" wx:if="{{recommend.length > 0}}">
+    <view class="m-title">
+      <view>更多装修现场</view>
+      <view class="more" bindtap='toExample' wx:if="{{recomTotal>3}}">更多 ></view>
+    </view>
+
+    <view class="item" wx:for="{{recommend}}" wx:for-item="item" wx:key="{{item.id}}">
+      <view class="con" bindtap="toSitedetail" data-id="{{item.id}}">
+        <view class="tits"> 
+          <view class="t-tit">{{item.owner}}新家的装修现场</view>
+          <view class="t-btn">{{item.last_work}}</view>
+        </view>
+        <view class="tips">
+          <text>{{item.order_type == 2 ? (item.huxing_other_name != null ? item.huxing_other_name : '实用户型' ) : (item.huxing_name != null ? item.huxing_name : '实用户型' )}}</text>
+          <text> {{item.mianji ? item.mianji : 96}}㎡ </text>
+          <text> {{item.fengge_name ? item.fengge_name : '宜家宜居'}}</text>
+          <text>{{item.fangshi_name ? item.fangshi_name : '全包'}}</text>
+          <text> {{item.qiandan_jine}}万元</text>
+        </view>
+      </view>
+      <view class="des">
+        <view class="d-title" bindtap="toSitedetail" data-id="{{item.id}}">
+          {{item.content}}
+        </view>
+        <view class="d-imgs {{ item.meiaLen == 1 ? '' : item.meiaLen == 2 ? 'tu2' :  'tu3'}}" wx:if="{{item.media_type == 1}}">
+          <image wx:for="{{item.media_list}}" wx:for-item="it" mode='aspectFill' wx:key="{{it.id}}" bindtap="tuClick" data-tid="{{it.id}}" data-id="{{item.id}}" src='{{it.url_thumb}}'></image>
+          <view class="d-nums" wx:if="{{item.meiaLen>3}}">{{item.meiaLen}}图</view>
+        </view>
+        <view class="d-imgs" wx:if="{{item.media_type == 2}}">
+          <image mode="center" wx:for="{{item.media_list}}" wx:for-item="it" wx:key="{{it.id}}" data-url='{{it.url_full}}' src="{{it.url_thumb}}" bindtap="videoClick">
+            <image class="play-btn" src="../../img/playsmall.png"></image>
+          </image>
+
+        </view>
+
+        <view class="fans" wx:if="{{item.fanLen}}"  bindtap="toSitedetail" data-id="{{item.id}}">
+          <view class="f-nums">{{item.fanLen > 6 ? '等'+item.fanLen : item.fanLen}}位粉丝</view>
+          <image wx:for="{{item.fans}}" wx:for-item="it" wx:key="{{it.id}}"  src="{{it.avatar ? it.avatar : '../../img/default-head.png'}}"></image>
+          <view class="f-que">围观:</view>
+        </view>
+        <view class="fans" wx:else  bindtap="toSitedetail" data-id="{{item.id}}">
+          <view class="f-nums g-nums">围观现场，实时掌握施工动态 ></view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+<view class="footer">
+  <navigator hover-class='none' url="../company_detail/company_detail?id={{live_info.company_id}}&bm={{live_info.bm}}" class="f-zy">
+    <image src="../../img/site-zy.png"></image>
+    <text>公司主页</text>
+  </navigator>
+
+  <view class="f-fx" bindtap="share">
+    <image src="../../img/site-fx.png"></image>
+    <text>分享</text>
+  </view>
+  <view class="f-bth" bindtap="wguan" data-fan="{{is_fans}}">
+    <image src="../../img/site-wg.png"></image>
+    <text>{{is_fans == 0 ? '围观' : '已围观'}}</text>
+  </view>
+  <navigator url='../jsq/jsq' class="f-bj" hover-class="none">
+    <image src="../../img/site-bj.png"></image>
+    <text>免费报价</text>
+  </navigator>
+</view>
+<view class="service" hover-class="none">
+  <image src="../../img/site-service.png"></image>
+
+  <contact-button class="contact" type="default-light" size="30" session-from="weapp"></contact-button>
+</view>
+<view class="gift" bindtap="yli">
+  <image src="../../img/site-yl.png"></image>
+</view>
+<!-- 弹窗 -->
+<view class="wx-popup" wx:if="{{flag}}">
+  <view class="fx" wx:if="{{pop}}">
+    <button class="item" open-type="share">
+      <image src="../../img/site-wx.png" bindtap="pNext"></image>
+      <text>微信好友</text>
+    </button>
+    <view class="item">
+      <image src="../../img/site-hb.png" bindtap="pHb"></image>
+      <text>生成海报</text>
+    </view>
+  </view>
+</view>
+<!-- 海报 -->
+<view class="hb-bg" style='animation: {{isShow ? "show" : "dismiss"}}Mask 0.3s forwards ease; position: fixed; top: 0; left: {{isCreate ? 0 : "750rpx"}};' catchtap='catchtap'>
+  <canvas canvas-id='poster' style='width: 600rpx; height: 822rpx; position: fixed; left: 750rpx;'></canvas>
+  <image class="hb-img" src='{{poster}}'>
+    <view class='maskButton' hidden='{{!isCreate}}'>
+      <view class="cancel">取消</view>
+      <view class="save" catchtap='btnCreate'>保存到本地</view>
+    </view>
+  </image>
+</view>
+<!-- 围观现场 -->
+<view class="wg-bg" catchtap='catchwg' wx:if="{{wgShow}}">
+  <view class="wg-code" catchtap="stopWg">
+    <image src="http://staticqn.qizuang.com/custom/20200111/Fu4sd-t7rSeygFeJjByyJI9Zdqau" class="code-bg"></image>
+    <view class="title">围观现场</view>
+    <view class="des">最新装修动态第一时间掌握</view>
+    <image src="{{wgCode}}" class="qr"></image>
+    <view class="long-des"> 长按识别上方二维码</view>
+    <view class="long-des">关注公众号，即可围观现场</view>
+    <image class="close" catchtap='catchwg' src="../../img/gongz/close.jpg"></image>
+  </view>
+</view>
+<!-- 进店有礼 -->
+<view class="yl-bg" catchtap='catchyl' wx:if="{{ylShow}}">
+  <view class="yl-code" catchtap="stopWg">
+    <image class="code-bg" src="http://staticqn.qizuang.com/custom/20200111/FoHK-9GBcIuldVwv2-dz_BuZqe4S"></image>
+    <view class="code-fd">
+      <view class="c-title">进店有礼</view>
+      <view class="c-options">
+        <view class="c-item">
+          <image src="../../img/site-option.png"></image>
+          <text>免费上门量房</text>
+        </view>
+        <view class="c-item">
+          <image src="../../img/site-option.png"></image>
+          <text>免费设计</text>
+        </view>
+        <view class="c-item">
+          <image src="../../img/site-option.png"></image>
+          <text>免费报价方案</text>
+        </view>
+        <view class="c-item">
+          <image src="../../img/site-option.png"></image>
+          <text>神秘到店礼一份</text>
+        </view>
+      </view>
+      <input placeholder-style="color:#999999; font-size: 24rpx;" bindinput="Phone" type="text" maxlength="11" class="c-phone" placeholder="请输入您的手机号获取报价结果" value="{{emptyphone}}" />
+      <view class='mianze'>
+        <checkbox-group class="checkbox" bindchange="checkboxChange">
+          <checkbox class='check' value="{{checkValue}}" checked/>
+          <view class='agree'>我已阅读并同意齐装网的
+            <navigator url="../disclamer/disclamer">
+              <text class='dis'>《免责声明》</text>
+            </navigator>
+          </view>
+          <text class='dis-line'></text>
+        </checkbox-group>
+      </view>
+      <view class="yl-btn" bindtap="ylFd">
+        立即预约
+      </view>
+    </view>
+    <image class="close" catchtap='catchyl' src="../../img/gongz/close.jpg"></image>
+  </view>
+</view>
+<!-- 广告发单 -->
+<view class="yl-bg" catchtap='catchad' wx:if="{{adShow}}">
+  <view class="yl-code ad-code" catchtap="stopWg">
+    <image class="code-bg" src="http://staticqn.qizuang.com/custom/20200111/FhBy6vXrBypXBqe_5GNdEm1pQnqQ"></image>
+    <view class="code-fd">
+      <view class="ad-free">免费预约装修服务</view>
+      <view class="ad-konw">施工靠不靠谱，看过现场就知道</view>
+      <input placeholder-style="color:#999999; font-size: 24rpx;" bindinput="adPhone" type="text" maxlength="11" class="c-phone" placeholder="请输入您的手机号获取报价结果" value="" />
+      <view class='mianze'>
+        <checkbox-group class="checkbox" bindchange="adChange">
+          <checkbox class='check' value="{{adValue}}" checked/>
+          <view class='agree'>我已阅读并同意齐装网的
+            <navigator url="../disclamer/disclamer">
+              <text class='dis'>《免责声明》</text>
+            </navigator>
+          </view>
+          <text class='dis-line'></text>
+        </checkbox-group>
+      </view>
+      <view class="yl-btn" bindtap="adFd">
+        立即预约
+      </view>
+    </view>
+    <image class="close" catchtap='catchad' src="../../img/gongz/close.jpg"></image>
+  </view>
+</view>
+<!-- 图片轮播 -->
+<view class="swiper-mask" wx:if="{{largeView}}" bindtap='getLargeImage'>
+  <view class="swiper-wrap" style="height:100%">
+    <swiper duration="500" interval="500" circular="true" current="{{currentIndex-1}}" bindchange="swiperChange" style="height:100%">
+      <block wx:for="{{swiperData}}" wx:for-index="key" wx:key="{{item.id}}">
+        <swiper-item item-id="{{item.id}}">
+          <view style="height:100%;position:relative;">
+            <image src="{{item.url_full}}" mode="widthFix" style="width:100%;position:absolute;left:0px;right:0px;top:0px;bottom:0px;margin:auto;"></image>
+          </view>
+        </swiper-item>
+      </block>
+    </swiper>
+  </view>
+  <view class="num-box">
+    {{currentIndex}}/{{swiperLen}}
+  </view>
+</view>
+<view class="wg-bg" wx:if="{{is_fans ==0 && wgflag}}" catchtap="wgBg">
+  <image class="sitegzhu" src="../../img/sitegzhu.png" catchtap="wguan" data-fan="{{is_fans}}"></image>
+</view>

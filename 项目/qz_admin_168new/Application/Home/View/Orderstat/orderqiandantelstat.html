@@ -1,0 +1,188 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>签单呼叫次数统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>签单呼叫次数统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">签单呼叫次数统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <form id="searchform" action="/orderstat/orderqiandantelstat/" method="get">
+                            <div class="col-xs-2">
+                                <div>选择城市</div>
+                                <select id="citys"  name="city" data-search='1' class="form-control" name="kf">
+                                    <option value="0">选择城市</option>
+                                    <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <div>选择日期</div>
+                                <input type="text" class="form-control datepicker" name="begin" placeholder="开始时间" value="{$Think.get.begin}">
+                            </div>
+                            <div class="col-sm-2" >
+                                <div>&nbsp;</div>
+                                <input type="text" class="form-control datepicker" name="end" placeholder="结束时间" value="{$Think.get.end}">
+                            </div>
+                            <div class="col-sm-2">
+                                <div>签单类型</div>
+                                <select id="type"  name="type" data-search='1' class="form-control" name="kf">
+                                    <option value="0">请选择</option>
+                                    <option value="1">分单</option>
+                                    <option value="2">赠单</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-1">
+                                <div>&nbsp;</div>
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div id="main" style="height:300px;">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body act-box">
+                        <table id="" class="table table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="myTable_info">
+                            <thead>
+                                <tr role="row">
+                                    <th>序号</th>
+                                    <th>签单日期</th>
+                                    <th>发布日期</th>
+                                    <th>城市</th>
+                                    <th>签单小区</th>
+                                    <th>签单类型</th>
+                                    <th>签单面积</th>
+                                    <th>签单金额</th>
+                                    <th>呼叫次数</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr role="row" class="odd">
+                                    <td>
+                                        <php>echo $key + 1 + ((I('get.p') == 0 ? 1:I('get.p')) - 1) * 20</php>
+                                    </td>
+                                    <td>{$vo.qiandan_addtime}</td>
+                                    <td>{$vo.time_real}</td>
+                                    <td>{$vo.cname} {$vo.qx}</td>
+                                    <td>{$vo.xiaoqu}</td>
+                                    <td>
+                                        <if condition="$vo['type_fw'] EQ 1">
+                                        分单
+                                        <else/>
+                                        赠单
+                                        </if>
+                                    </td>
+                                    <td>{$vo.mianji}㎡</td>
+                                    <td>{$vo.qiandan_jine}万元</td>
+                                    <td>{$vo.count}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#citys").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $('#citys').select2("val","{$Think.get.city}");
+    $("#type").select2({
+        allowClear: true,
+        placeholder: "选择分单类型"
+    });
+    $('#type').select2("val","{$Think.get.type}");
+    $(".datepicker").datepicker({
+          format:"yyyy-mm-dd",
+          minViewMode:0
+    });
+
+    var legendJson = JSON.parse('{$chart|json_encode}');
+    var legend = new Array();
+    var series = new Array();
+    if (legendJson !== null) {
+        for(var i in legendJson){
+            legend.push(legendJson[i].name);
+            series.push({
+                value:legendJson[i].count,
+                name:legendJson[i].name
+            });
+
+        }
+    } else{
+        legend.push("暂无数据");
+        series.push({
+            value:0,
+            name:"暂无数据"
+        });
+    }
+
+    var myChart = echarts.init(document.getElementById('main'));
+
+    var option = {
+    title : {
+        text: '签单呼叫次数统计扇形图',
+        x:'5%'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c}"
+    },
+    legend: {
+        orient: 'vertical',
+        left: '60%',
+        data: legend
+    },
+    series : [
+        {
+            name: '数据占比',
+            type: 'pie',
+            radius : '80%',
+            center: ['35%', '60%'],
+            data:series,
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+myChart.setOption(option);
+</script>
+</block>

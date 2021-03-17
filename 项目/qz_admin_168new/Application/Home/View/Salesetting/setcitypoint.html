@@ -1,0 +1,413 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市会员指标设置 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="overflow-x">
+                        <div class="overflow-box" style="width: 1190px;">
+                            <div class="box-header">
+                                <h3><i class="xs-icon gangwei-icon"></i> 城市会员指标设置</h3>
+                                <form class="form-horizontal">
+                                    <div class="from-list">
+                                        <style>
+                                        .select2-container{width: 130px;vertical-align: middle;}
+                                        .select2-choice{height: auto !important;line-height: 17px !important;}
+                                        .select2-container .select2-choice div b{background-position: 0 0 !important;}
+                                        .from-list .from-item span {text-align: left;}
+                                        .width-800{width: 800px;}
+                                        table#reset-table thead tr th{line-height: 45px;}
+                                        </style>
+                                        <div class="from-item">
+                                            <span style="width: auto;float: left;line-height: 25px;">城市：</span>
+                                            <select id="cityid" name="cityid" class="select2 select2-offscree pull-left">
+                                                <option value="">所属城市</option>
+                                                <volist name="citys" id="vo">
+                                                    <option value="{$vo.id}">{$vo.city}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span style="width: auto;float: left;line-height: 25px;">部门：</span>
+                                            <select id="department" class="select2 select2-offscree pull-left" name="department" type="text">
+                                                <option value="">全部</option>
+                                                <option value="1">商务</option>
+                                                <option value="2">外销</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span style="width: auto">生效月份：</span>
+                                            <input id="time" class="datepicker" type="text" name="time" placeholder="选择日期" value="{$keyword.time}">
+                                        </div>
+                                        <button class="search-btn xs-btn">查询</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="box-body">
+                                <div class="todo-item">
+                                    <a href="/salesetting/downloadmodule?type=2" class="hideLoading" style="color: #FFF;"><button class="xs-btn">模板下载</button></a>
+                                    <button class="xs-btn add-new" id="importAct">导入</button>
+                                    <div class="pull-right position-relative">
+                                        <a href="/salesetting/downloadmodule?type=2&data=1" class="hideLoading" style="color: #FFF;"><button class="xs-btn">导出</button></a>
+                                        <button class="xs-btn log-info">操作日志</button>
+                                        <i class="xs-icon zhushi-icon"></i>
+                                        <div class="zhushi-info">
+                                            <p>输入人注意事项：本页数据以城市为唯一标识，其他数据均为城市附属信息</p>
+                                            <p>会员指标的数值取值为整数</p>
+                                            <p>1、上方区域显示的是筛选条件，当选择相应的筛选条件并点击<查询>按钮时，列表内显示相应的搜索结果信息。</p>
+                                            <p>2、点击导入按钮批量新增指标。导入的表格必须按照城市顺序，部门必须为商务或者外销，否则不可导入。</p>
+                                            <p>3、修改：点击修改可修改的内容为会员指标 、生效月份。其中会员指标为文本输入框、生效月份为日期选择框。操作时间及操作人自动生成。</p>
+                                            <p>4、城市会员指标：比如苏州会员指标25家，在2017年8月16日设置更改为30家，生效月份为2017年8月，则
+                                            （1）2017年8月之前月份的会员指标依然为25家，相关会员完成率等相关数据中，会员指标依然取值为25家。
+                                            （2）2017年8月之后月份的会员指标为30家，相关会员完成率等相关数据中，会员指标取值为30家。
+                                            （3）2017年8月当月1-15日及全月的会员指标取值均为30家。</p>
+                                            <p>5、操作日志：操作信息痕迹化，确保所有修改信息能够查询到记录。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-item-count">
+                                    <p><span class="count-list">共<i>{$totalnum}</i>条</span></p>
+                                </div>
+                                <table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                                    <thead class="thead1" style="width: 1190px;">
+                                        <tr role="row">
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th title="城市级别">城市级别</th>
+                                            <th title="重点系数">重点系数</th>
+                                            <th title="会员指标">会员指标</th>
+                                            <th title="生效月份">生效月份</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="thead2" style="width: 1190px;">
+                                        <tr role="row">
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th title="城市级别">城市级别</th>
+                                            <th title="重点系数">重点系数</th>
+                                            <th title="会员指标">会员指标</th>
+                                            <th title="生效月份">生效月份</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <volist name="list" id="v">
+                                        <tr role="row" class="odd">
+                                            <td><span>{$v.city}</span></td>
+                                            <td><span>{$v.department}</span></td>
+                                            <td><span><switch name="v.level" ><case value="1">地级市</case><case value="2">区</case><case value="3">县城</case><case value="4">县级市</case><default />-</switch></span></td>
+                                            <td><span>{$v.ratio}</span></td>
+                                            <td><span>{$v.point}</span></td>
+                                            <td><span>{$v.time}</span></td>
+                                            <td class="revise-time">{$v.lasttime}</td>
+                                            <td><span class="pintuanzhang-text">{$v.manager}</span></td>
+                                            <td class="revise"><i class="fa fa-pencil editnow" data-id="{$v.id}"></i></td>
+                                        </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                                <div class="city-list-pop" style="top: 348px;">
+                                    <volist name="list" id="v">
+                                        <div>{$v.city}</div>
+                                    </volist>
+                                </div>
+                            </div>
+                            <div class="box-footer text-center">{$page}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="importExcel" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="" id="uploadForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">导入城市会员指标</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal .control-label">
+                        <div style="overflow: hidden;">
+                            <div class="col-xs-5 no-padding">
+                                <h3>导入Excel表：</h3>
+                                <input  type="file" name="excel" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="thisId" value="">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="upload">上传指标</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--公用记录模态框-->
+    <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog width-800">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title">记录列表</h4>
+                </div>
+                <div class="modal-body common-model-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            //上传
+            $('#importAct').click(function(event){
+                $('#importExcel').modal('show');
+            });
+            $("#upload").click(function () {
+                //var formData = new FormData();
+                //formData.append("excelFile", document.getElementById("file1").files[0]);
+                var formData = new FormData($("#uploadForm")[0]);
+                $.ajax({
+                    url: "/salesetting/uploadExcel",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.status == 1) {
+                            alert("上传成功！"+data.data);
+                            window.location.reload();
+                        }
+                        if (data.status == 0) {
+                            alert(data.msg);
+                        }
+                    },
+                    error: function () {
+                        alert("上传失败！");
+                    }
+                });
+            });
+
+            $(".select2").select2();
+            $("#cityid").select2("val","{$keyword.cityid}");
+            $("#department").select2("val","{$keyword.department}");
+
+            $(".datepicker").datepicker({
+                language: "zh-CN",
+                todayHighlight: true,
+                format: 'yyyy-mm',
+                autoclose: true,
+                startView: 'months',
+                maxViewMode:'years',
+                minViewMode:'months'
+            });
+            // 修改 or 保存
+            $('tbody').on('click', function(event){
+                if(event.target.nodeName == 'I'){
+                    var $a = $(event.target);
+                    var val,arr=[];
+                    if($a.hasClass('fa-floppy-o')){
+
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+                            val = $a.parent().parent().find('.info-item').eq(i).val();
+                            arr.push(val);
+                            if(val){
+                                $a.parent().parent().find('td').eq(i+2).find('span').html(val);
+                            }else{
+                                $a.parent().parent().find('td').eq(i+2).find('select,input').focus();
+                                return false;
+                            }
+
+                            if(arr.length < $a.parent().parent().find('.info-item').length){
+
+                                for(var j=0;j<arr.length;j++){
+                                    $a.parent().parent().find('td').eq(j+2).find('span').hide();
+                                }
+                            }else{
+                                for(var j=0;j<arr.length;j++){
+
+                                    $a.parent().parent().find('td').eq(j+2).find('span').show();
+
+                                    $a.parent().parent().find('td').eq(j+2).find('div').hide();
+
+                                    $a.parent().parent().removeClass('new-list');
+                                }
+                                for(var i=0;i<3;i++){
+                                    $a.parent().parent().find('td').eq(i+2).find('div').remove()
+                                }
+                            }
+                        }
+
+                        var id = $a.attr("data-id");
+
+                        //ajax写入数据
+                        $.ajax({
+                            url: '/salesetting/editcitypoint/',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                id:id,
+                                arr:arr
+                            }
+                        })
+                        .done(function(data) {
+                            if(data.status == '1'){
+                                alert(data.info);
+                                window.location.href = window.location.href;
+                            }else{
+                                alert(data.info);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert('操作失败');
+                        })
+
+                        $a.removeClass('fa-floppy-o').addClass('fa-pencil');
+                        $('.add-new').attr('disabled',false).css('background','#359bed');
+                        // 都修改
+                        $('.table tbody tr').each(function(index, el) {
+                            $(this).find('.fa').each(function(index, el) {
+                                $(el).show();
+                            })
+                        });
+                    }else{
+
+                        for(var i=0;i<4;i++){
+                            var spanVal = $a.parent().parent().find('td').eq(i+2).find('span').html();
+                            if(i < 3){
+                                $a.parent().parent().find('td').eq(i+2).append('<div><input type="text" value="'+spanVal+'" name="" class="info-item"></div>');
+                            }else{
+                                $a.parent().parent().find('td').eq(i+2).append('<div><input type="text" value="'+spanVal+'" name="" class="info-item edittime"></div>');
+                            }
+
+                        }
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+
+                            $a.parent().parent().find('div').eq(i).show();
+
+                            $a.parent().parent().find('div').eq(i).siblings('span').hide();
+                        }
+
+                        $a.removeClass('fa-pencil').addClass('fa-floppy-o');
+
+                        $('.add-new').attr('disabled',true).css('background','#ccc');
+                        //选择时间
+                        $(".edittime").datepicker({
+                            language: "zh-CN",
+                            todayHighlight: true,
+                            format: 'yyyy-mm',
+                            autoclose: true,
+                            startView: 'months',
+                            maxViewMode:'years',
+                            minViewMode:'months'
+                        });
+
+                        // 只能编辑当前操作一条
+                        $('.table tbody tr').each(function(index, el) {
+                            if($(this).find('td:last').find('i').hasClass('fa-pencil')){
+                                $(this).find('td:last').find('i').hide();
+                            }
+                        });
+                    }
+                }
+            });
+            // 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = 0;
+            $(document).on('scroll',function(){
+                $('.city-list-pop').css({'top':348-$(this).scrollTop()});
+                if($(document).scrollTop() >= 340){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                if($(this).scrollLeft()>130){
+                    $('.city-list-pop').show();
+                }else{
+                    $('.city-list-pop').hide();
+                }
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+                $('.city-list-pop').css({'left':$('.sidebar').width()});
+            });
+
+            //历史记录
+            /*S-最近操作记录*/
+            $('.log-info').click(function(event) {
+                $.ajax({
+                    url: '/salesetting/gethistorylog/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:2
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    } else {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.info);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+        })
+    </script>
+</block>

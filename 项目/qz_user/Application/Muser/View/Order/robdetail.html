@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+    <meta content="telephone=no" name="format-detection" />
+    <meta name="applicable-device" content="mobile">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <title>用户中心-齐装网</title>
+    <link rel="stylesheet" href="/assets/muser/css/robdetail.css?v={:C('STATIC_VERSION')}">
+    <include file="Index:css_resources" />
+</head>
+
+<body class="m-bg">
+<div class="m-wrap">
+    <div class="top-fixed">
+        <include file="Index:header" />
+    </div>
+    <div class="order-main bg-ff" style="margin-bottom: 4em;">
+        <div class="order-bread">
+            <a href="/home?type={$rob_status|default=3}">订单列表</a><i class="icon-double-angle-right"></i>订单详情
+        </div>
+        <ul class="order-tab qiangdan-detail-tab">
+            <li><span>订单编号</span>{$order.id}</li>
+            <li><span>发布时间</span>{$order.time|date="Y-m-d H:i:s",###}</li>
+            <li><span>所在区域</span>{$order.cname}{$order.qz_area}</li>
+            <li><span>小区名称</span>{$order.xiaoqu}</li>
+            <li><span>房屋面积</span>{$order.mianji}</li>
+            <li><span>房屋户型</span>{$order.hxname}</li>
+            <li><span>装修类型</span>
+                <if condition="$order['lx'] EQ 2">公装<elseif  condition="$order['lx'] EQ 1"/>家装</if>
+            </li>
+            <li><span>预算</span>{$order.yusuan}</li>
+            <li><span>装修方式</span>{$order.fangshi}</li>
+            <li><span>装修风格</span>{$order.fengge}</li>
+            <li><span>开工时间</span>{$order.start}</li>
+            <li><span>量房时间</span>{$order.lftime}</li>
+            <li><span>装修要求</span>
+                <textarea readonly="false;">{$order.text}</textarea>
+            </li>
+        </ul>
+    </div>
+    <div class="qiangdan-detail">
+        <button type="button" class="qiangdan-no-btn">不抢</button>
+        <button type="button" class="qiangdan-detail-btn">抢单</button>
+    </div>
+</div>
+<div class="robdetail-cover">
+    <div class="cover-content">
+        <span class="robdetail-close">×</span>
+        <p>恭喜您，抢单成功。</p>
+        <p>可在“未读订单”查看哦。</p>
+        <button type="button" class="robdetali-back-btn">关闭</button>
+        <button type="button" class="robdetali-submit-btn">直接查看订单</button>
+    </div>
+</div>
+<div class="cover">
+    <div class="second-tip">
+        <div class="second-tip-content">发发发发发发</div>
+        <div class="second-tip-img"><img src="/assets/muser/img/noorder.png" /></div>
+        <button class="rob-return">返回用户中心</button>
+    </div>
+</div>
+</body>
+<include file="Index:js_resources" />
+<script>
+    $(function () {
+        var error_show = '{$error_show}';
+        var error_msg = '{$error_msg}';
+        if(error_show == 1){
+            //alert(data.errmsg)
+            $(".cover").show();
+            $(".second-tip-content").html(error_msg)
+        }
+        var id = '{$order.id}';
+        $(".qiangdan-detail-btn").click(function () {
+            $.ajax({
+                url: '/getrob',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                },
+                beforeSend:function () {
+                    $("loading").show();
+                }
+            })
+                .done(function(data) {
+                    if(data.code == 200){
+                        $(".robdetail-cover").show();
+                        $("html,body").css({"overflow":"hidden","height":"100%"});
+                    }else{
+                        var errmsg = data.errmsg;
+                        if(errmsg == null || errmsg == ''){
+                            errmsg = "抱歉，该订单已抢完！\n 下次手速要更快哦~";
+                        }
+                        $(".cover").show();
+                        $(".second-tip-content").html(errmsg)
+                    }
+                })
+                .complete(function () {
+                    $("loading").hide();
+                })
+                .fail(function() {
+                    alert("获取信息失败！");
+                });
+        })
+        //返回用户中心
+        $("body").on("click",".rob-return",function () {
+            window.location.href = '/home/';
+        })
+        $(".robdetail-close").click(function () {
+            $(".robdetail-cover").hide();
+            $("html,body").css({"overflow": "inherit", "height": "100%"})
+        })
+
+        //不抢操作
+        $(".qiangdan-no-btn").on('click', function () {
+            var id = '{$order.id}';
+            $.ajax({
+                url: '/add_norob',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+                .done(function (data) {
+                    //alert(data.errmsg)
+                    $(".cover").show();
+                    $(".second-tip-content").html(data.errmsg)
+                })
+                .fail(function () {
+                    alert("获取信息失败！");
+                });
+        });
+
+        $(".robdetali-back-btn").click(function () {
+            window.location.href = '/home?type={$rob_status|default=3}';
+        })
+        $(".robdetali-submit-btn").on('click', function () {
+            window.location.href = '/orderdetails?id=' + '{$order.id}';
+        });
+    })
+</script>
+</html>

@@ -1,0 +1,171 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服错误项管理 > 新增</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/qc/css/errorItem.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header">
+                <table class="head-table">
+                    <tr>
+                        <td style="text-align: left; padding-left: 10px;"><h4>客服错误项管理&nbsp;>&nbsp
+                        <notempty name="row.id">
+                            编辑
+                            <else/>
+                            新增
+                        </notempty>
+                        </h4></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-body">
+               <table class="edit-table">
+                   <tr>
+                       <td class="table-name"><span style="color:red">*</span>错误项名称:</td>
+                       <td><input type="text" name="itemname" value="{$row.name}" class="form-control"></td>
+                       <input type="hidden" name="itemid" value="{$row.id}">
+                   </tr>
+                   <tr>
+                       <td class="table-name"><span style="color:red">*</span>扣款1:</td>
+                       <td><input type="text" name="money" value="{$row.money}" class="form-control"></td>
+                       <td class="dw">元/次</td>
+                   </tr>
+                   <tr>
+                       <td class="table-name">扣款2:</td>
+                       <td><input type="text" name="money2" value="{$row.money2}"  class="form-control"></td>
+                       <td class="dw">元/次</td>
+                   </tr>
+                   <tr>
+                       <td class="table-name">扣款3:</td>
+                       <td><input type="text" name="money3" value="{$row.money3}" class="form-control"></td>
+                       <td class="dw">元/次</td>
+                   </tr>
+                   <tr>
+                       <td class="table-name"><span style="color:red">*</span>客服类型:</td>
+                       <td>
+                         <select name="group" id="group" class="form-control" >
+                             <option value="">请选择</option>
+                             <option value="1" <if condition="$row['group'] EQ 1 ">selected</if>>审核客服</option>
+                             <option value="2" <if condition="$row['group'] EQ 2 ">selected</if>>对接客服</option>
+                         </select>
+                       </td>
+                   </tr>
+                   <tr>
+                       <td class="table-name"><span style="color:red">*</span>所属组:</td>
+                       <td>
+                         <select name="parent" id="parent" class="form-control">
+                             <option value="">请选择</option>
+                             <volist name="parent" id="vo">
+                                 <option value="{$vo.id}" <if condition="$row['parentid'] EQ $vo['id']">selected</if>>{$vo.name}</option>
+                             </volist>
+                         </select>
+                       </td>
+                   </tr>
+                   <tr>
+                       <td class="table-name">福利:</td>
+                       <td>
+                          <input type="checkbox" name="welfare" value="1" <if condition="$row['welfare'] EQ 1">checked</if>>&nbsp;1次免罚/月
+                       </td>
+                   </tr>
+
+               </table>
+               <br/>
+               <br/>
+               <div class="row" style="margin-left: 20px">
+                   <div class="col-xs-1">
+                       <button class="btn btn-info">&nbsp;&nbsp;确认&nbsp;&nbsp;</button>
+                   </div>
+                   <div class="col-xs-1">
+                       <button class="btn"><a href="/qc/erroritem">&nbsp;&nbsp;取消&nbsp;&nbsp;</a></button>
+                   </div>
+               </div>
+
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            $('.btn-info').click(function(){
+                var name = trim($("input[name=itemname]").val());
+                if(name == ''){
+                    alert("错误项名称未输入，请输入！");
+                    return false;
+                }
+
+                var money = trim($("input[name=money]").val());
+                if(money == ''){
+                    alert("扣款1未输入，请输入！");
+                    return false;
+                }else{
+                    if(!/^[0-9]+$/.test(money)){
+                        alert("请输入数字!");
+                        return false;
+                    }
+                }
+
+                var money2 = trim($("input[name=money2]").val());
+                if(money2 != ''){
+                    if(!/^[0-9]+$/.test(money2)){
+                        alert("请输入数字!");
+                        return false;
+                    }
+                }
+
+                var money3 = trim($("input[name=money3]").val());
+                if(money3 != ''){
+                    if(!/^[0-9]+$/.test(money3)){
+                        alert("请输入数字!");
+                        return false;
+                    }
+                }
+
+                var group = trim($('#group option:selected') .val());
+
+                if(group == '' || group == 0){
+                    alert("客服类型未选择，请选择！");
+                    return false;
+                }
+
+                var parent = trim($('#parent option:selected') .val());
+                if(parent == '' || parent == 0){
+                    alert("所属组未选择，请选择！");
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/qc/adderroritem/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: $("input[name=itemid]").val(),
+                        name:name,
+                        money:money,
+                        money2:money2,
+                        money3:money3,
+                        group:group,
+                        parent:parent,
+                        welfare:$("input[name=welfare]:checked").val()
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == '1') {
+                            alert( data.info);
+                            window.location.href= '/qc/erroritem';
+                        }else{
+                            alert(data.info);
+                        }
+                    });
+            })
+
+        })
+    </script>
+</block>

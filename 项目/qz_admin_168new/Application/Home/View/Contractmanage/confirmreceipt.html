@@ -1,0 +1,139 @@
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">收货确认</span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line"></span>
+    </div>
+    <if condition="empty($expresslist)">
+        <div class="step5 step-container">
+            <div class="no_record">
+                <div class="no_img pull-left"></div>
+                <span class="pull-left">暂时没有合同快递呦~~</span>
+            </div>
+        </div>
+    <else />
+        <div class="step3 step-container">
+            <div class="choseAll_box owf" style="width:1100px;">
+                 <span class="checkBox pull-left" data-status='0' id="all_get"><i class="fa fa-square-o"></i></span><span class="pull-left all_text">全选</span>
+                 <button class="pull-right button noChose" id="all_queren">确认收到</button>
+            </div>
+            <ul class="shouhuo_box" id="shouhuo_box">
+                <volist name="expresslist" id="v">
+                    <li class="owf myexpress" data-id="001">
+                        <span class="checkBox pull-left" data-status='0' data-id="{$v.id}"><i class="fa fa-square-o" data-id="{$v.id}"></i></span>
+                        <div class="pull-left shouhuo_column">
+                            <if condition="($v['type'] EQ 3) OR ($v['type'] EQ 4)">
+                                <div class="shouhuo_column_row">
+                                    <span>合同编号 ：</span><span>{$v.contractid}</span>
+                                </div>
+                            <elseif condition="$v['type'] eq 6"/>
+                                <div class="shouhuo_column_row">
+                                    <span>票据编号 ：</span><span>{$v.contractid}</span>
+                                </div>
+                            </if>
+                        </div>
+                        <div class="pull-left shouhuo_column">
+                            <div class="shouhuo_column_row">
+                                <span>发件人 ：</span><span>{$v.name}</span>
+                            </div>
+                            <div class="shouhuo_column_row">
+                                <span>寄送时间 ：</span><span>{$v.signtime|date="Y",###}年{$v.signtime|date="m",###}月{$v.signtime|date="d",###}日</span>
+                            </div>
+                        </div>
+                        <div class="pull-left shouhuo_column">
+                            <div class="shouhuo_column_row">
+                                <if condition="$v['express'] eq 1">
+                                    <span>快递单号 ：</span><span>{$v.expressid}</span>
+                                <else/>
+                                    <span>快递单号 ：</span><span>其他送达方式</span>
+                                </if>
+                            </div>
+                        </div>
+                        <div class="pull-left shouhuo_column">
+                            <div class="shouhuo_column_row">
+                               <button class="button saveOne" data-id="{$v.id}">确认收到</button>
+                            </div>
+                        </div>
+                    </li>
+                </volist>
+            </ul>
+        </div>
+    </if>
+</div>
+<script type="text/javascript">
+    /*确认收货,全选确认*/
+    var shData=[];
+    $("#all_get").click(function(){
+        var status=$(this).data("status");
+        var length=$("#shouhuo_box li").length;
+        if(status==0){
+            $(".step3 .checkBox").data("status",1);
+            $(".step3 .checkBox").html("<i class='fa fa-check-square-o'></i>");
+            $("#all_queren").attr("class","button hasBg pull-right");
+            $("#all_queren").addClass('submitAll');
+        }else{
+            $(".step3 .checkBox").data("status",0);
+            $(".step3 .checkBox").html("<i class='fa fa-square-o'></i>");
+            $("#all_queren").attr("class","button noChose pull-right");
+            $("#all_queren").removeClass('submitAll');
+            shData.length=0;
+        }
+    });
+
+    $('body').on('click','.submitAll',function(){
+        $('.myexpress .fa-check-square-o').each(function(){
+            var id = $(this).parent().attr('data-id');
+            shData.push(id);
+        });
+        $.ajax({
+            url: '/contractmanage/confirmget/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                ids:shData,
+                from:{$expressstatus}
+            }
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                alert(data.info);
+                window.location.href = window.location.href;
+            } else {
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生未知错误，请联系技术部门~');
+            return false;
+        })
+    });
+
+    $('.saveOne').each(function(){
+        $(this).click(function(){
+            var id = $(this).attr('data-id');
+            shData.push(id);
+            $.ajax({
+                url: '/contractmanage/confirmget/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    ids:shData,
+                    from:{$expressstatus}
+                }
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    alert(data.info);
+                    window.location.href = window.location.href;
+                } else {
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('发生未知错误，请联系技术部门~');
+                return false;
+            })
+        });
+    });
+</script>

@@ -1,0 +1,139 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>过期会员城市统计-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/ordersrank/css/ordersrank.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>过期会员城市统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <form id="searchForm" action="" method="get">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <div class="box-title">条件查询</div>
+                    </div>
+                    <div class="box-body">
+                        <div class="pull-left h5">选择时间：</div>
+                        <div class="col-xs-2">
+                            <input type="text" class="form-control datatimepicker" name="date" value="{$info.date}">
+                        </div>
+                        <div class="pull-left">
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>&nbsp;查询</button>
+                        </div>
+                        <input type="hidden" value="0" name="dl">
+                        <div class="pull-right"> <button type="button" id="exportExcel" class="btn btn-flat btn-success hideLoading"><i class="fa fa-download"></i>&nbsp;导出 Excel</button></div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <div class="box-title">数据列表</div>
+                    </div>
+                    <div class="box-body table-responsive">
+                        <table class="table table-hover table-bordered" id="example1">
+                            <thead>
+                                <tr>
+                                    <th><span>城市</span></th>
+                                    <th><span>重点</span></th>
+                                    <th><span>级别</span></th>
+                                    <th><span>分单量</span><i class="fa fa-question-circle text-primary fendanliang-icon" data-toggle="tooltip" data-placement="left" title="说明" ></i></th>
+                                    <th><span>分单率</span><i class="fa fa-question-circle text-primary fendanlv-icon" data-toggle="tooltip" data-placement="left" title="说明" ></i></th>
+                                    <th><span>最近会员开始时间</span></th>
+                                    <th><span>最近会员结束时间</span></th>
+                                    <th><span>操作</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="v">
+                                <tr>
+                                    <td><span>{$v.cname}</span></td>
+                                    <td><span>{$v.point}</span></td>
+                                    <td><span><switch name="v.abc"><case value="1">B</case><case value="2">C</case>
+                                        <default/>A</switch></span></td>
+                                    <td><span>{$v.fen|default=0}</span></td>
+                                    <td><span>{$v.rate|default=0}%</span></td>
+                                    <td><span>{$v.start_time|default='-'}</span></td>
+                                    <td><span>{$v.end_time|default='-'}</span></td>
+                                    <td class="text-primary"><a href="/ordersrank/citydetail?cid={$v.cid}"><span class="modal-click"><i class="fa fa-clock-o"></i> 查看详细</span></a></td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 说明
+        $('.fendanliang-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content"><p>当前城市财年内每月分单量汇总</p></div></div>'
+        });
+        $('.fendanlv-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content">分单量/发单量*100%</div></div>'
+        });
+        // 分单详细数据
+        $('.fendan-info').each(function(index, el) {
+            var pingjun = $(this).attr('pingjun');
+            var zongfendan = $(this).attr('zongfendan');
+            var zonghuiyuan = $(this).attr('zonghuiyuan');
+            $(this).tooltip({
+                template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">分单详细数据</h3><div class="popover-content"><p>平均分单量:'+pingjun+'</p><p>总分单量:'+zongfendan+'</p><p>总会员数:'+zonghuiyuan+'</p></div></div>'
+            });
+        });
+        $('.datatimepicker').datetimepicker({
+            format: 'yyyy',
+            autoclose:true,
+            startView: '4',
+            minView: '4',
+        });
+        $('.select2').select2();
+
+
+        $('#example1').dataTable({
+            // sDom: '<"top"fli>rt<"bottom"p><"clear">',
+            // aaSorting: [[ 0, "desc" ]],
+            oLanguage: {
+                sLengthMenu: '选择显示数量： _MENU_ ',
+                sZeroRecords: '抱歉， 没有找到',
+                sInfo: '共 _TOTAL_ 条记录',
+                sInfoEmpty: '没有数据',
+                sInfoFiltered: '(从 _MAX_ 条数据中检索',
+                sSearch:'快速搜索：',
+                oPaginate: {
+                    sFirst: '首页',
+                    sPrevious: '&laquo;',
+                    sNext: '&raquo;',
+                    sLast: '尾页'
+                }
+            },
+            "order": [[ 1, "desc" ]],
+            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 7] }]
+        });
+
+        $('#exportExcel').on('click', function(){
+            $('input[name="dl"]').val('1');
+            $('#searchForm').submit();
+            $('input[name="dl"]').val('0');
+        });
+
+
+    </script>
+</block>

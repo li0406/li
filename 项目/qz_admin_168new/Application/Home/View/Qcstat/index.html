@@ -1,0 +1,252 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>订单问题汇总-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<style type="text/css">
+.btn-group button.active,.btn-group button.active:hover,.btn-group button.active:active{background: #00c0ef !important;color: #fff !important;}
+</style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单问题汇总</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div class="col-xs-12">
+                            条件查询
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <form action="/qcstat/" method="get" class="">
+                            <div class="form-group pull-left col-sm-12">
+                                <div class="col-xs-2">
+                                     <label>开始时间:</label>
+                                     <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="实际发布时间" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label>结束时间：</label>
+                                    <input class="form-control datepicker" type="text" name="end" placeholder="实际发布时间" value="{$Think.get.end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label style="display: block;">&nbsp;</label>
+                                   <button id="btnSearch" type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div style="margin-bottom: 10px; padding-left: 10px; margin-top: 20px;">
+                            <div class="btn-group" role="group" aria-label="...">
+                                <volist name="chartData" id="vo" key="k">
+                                    <if condition="$k eq 1">
+                                        <button type="button" class="btn btn-default mr0 active" value="{$vo.id}">{$vo.name}</button>
+                                    <else/>
+                                        <button type="button" class="btn btn-default" value="{$vo.id}">{$vo.name}</button>
+                                    </if>
+
+                                </volist>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div id="chart1" class="col-sm-8" style="height:300px;">
+
+                        </div>
+                        <div id="chart2" class="col-sm-4" style="height:300px;">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default" style="overflow-x: auto;">
+                    <div class="box-body">
+                        <table class="table table-bordered no-padding" >
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="col-sm-1">问题类别</th>
+                                    <volist name="date" id="vo">
+                                        <th>{$vo}</th>
+                                    </volist>
+                                    <th>合计</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" class="col-sm-1">合计:</td>
+                                    <volist name="list.date" id="vo">
+                                        <td>{$vo.count}</td>
+                                    </volist>
+                                    <td>{$sums.total}</td>
+                                </tr>
+                                <volist name="list.child" id="vo">
+                                    <tr>
+                                        <td rowspan="{:count($vo['child'])+2}">{$vo.name}</td>
+                                    </tr>
+                                    <volist name="vo.child" id="v">
+                                        <tr>
+                                            <td>{$v.name}</td>
+                                            <volist name="v.date" id="i">
+                                                <td>
+                                                    {$i.count}
+                                                </td>
+                                            </volist>
+                                            <td>{$sums['item'][$v['id']]|default=0}</td>
+                                        </tr>
+                                    </volist>
+                                    <tr>
+                                        <td><b>小计:</b></td>
+                                        <volist name="vo.date" id="v">
+                                            <td><b>{$v.count|default=0}</b></td>
+                                        </volist>
+                                        <td><b>{$sums['item_parent'][$vo['id']]|default=0}</b></td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var json = $.parseJSON('{$chartData|json_encode|}');
+    var myChart = echarts.init(document.getElementById('chart1'));
+    var myChart2 = echarts.init(document.getElementById('chart2'));
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd"
+    });
+    $(".btn-group button").click(function(event) {
+        $(".btn-group button.active").removeClass('active');
+        $(this).addClass('active');
+        ViewSourceInit();
+    });
+    $(".btn-group button.active").trigger('click');
+
+    function ViewSourceInit() {
+        myChart.clear();
+        var legend = new Array();
+        var series = new Array();
+        var xAxisData = new Array();
+        var active = $(".btn-group button.active").val();
+        var data = json[active];
+        var date = $.parseJSON('{$date|json_encode}');
+
+        for(var i in date){
+            xAxisData.push(date[i]);
+        }
+
+        for(var i in data["caption"]){
+            legend.push(data["caption"][i]);
+        }
+
+
+        for(var i in data["item"]){
+            var seriesData = new Array();
+            for(var j in data["item"][i]["date"]){
+                seriesData.push(data["item"][i]["date"][j].count);
+            }
+            var obj = {
+                name:data["item"][i].name,
+                type:'line',
+                data:seriesData,
+                smooth: true
+            }
+            series.push(obj);
+        }
+
+        var option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:legend
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xAxisData
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: series
+        };
+        myChart.setOption(option);
+
+        //视图2
+        series = new Array();
+        var sub = new Array();
+        var sub1 = new Array();
+
+        for(var i in json){
+            var obj = {
+                value:json[i]["count"],
+                name:json[i]["name"]
+            }
+            sub.push(obj);
+
+            for(var j in json[i]['item']){
+                var obj = {
+                    name:json[i]['item'][j]["name"],
+                    value:json[i]['item'][j]["all"]["count"]
+                }
+                sub1.push(obj);
+            }
+        }
+
+
+        option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b}: {c} ({d}%)"
+            },
+            series: [
+                {
+                    name:'错误项',
+                    type:'pie',
+                    selectedMode: 'single',
+                    radius: [0, '30%'],
+
+                    label: {
+                        normal: {
+                            position: 'inner'
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data:sub
+                },
+                {
+                    name:'错误项',
+                    type:'pie',
+                    radius: ['40%', '55%'],
+                    data:sub1
+                }
+            ]
+        };
+        myChart2.setOption(option);
+    }
+
+
+
+</script>
+</block>

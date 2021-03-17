@@ -1,0 +1,290 @@
+<div class="plnew">
+    <h1 id="myspeak">我也来说两句</h1>
+    <div class="plnew_star" style="">
+        <ul>
+            <li>
+                <em>设计水平:</em>
+                <div class="star"></div>
+                <br style="clear:both;"/>
+            </li>
+            <li>
+                <em>服务态度:</em>
+                <div class="star"></div>
+                <br style="clear:both;"/>
+            </li>
+            <li>
+                <em>施工质量:</em>
+                <div class="star"></div>
+                <br style="clear:both;"/>
+            </li>
+        </ul>
+        <script type="text/javascript">
+            $(function(){
+                $(".star").raty({
+                    size: 24,
+                    path: '{$static_host}/assets/common/js/raty/img/',
+                    half: true,
+                    starHalf : 'star-half-big.png',
+                    starOff  : 'star-off-big.png',
+                    starOn   : 'star-on-big.png',
+                    hints: ['差评', '一般', '还不错', '挺好的', '好评'],
+                    score:5,
+                    precision: false
+                });
+            });
+        </script>
+    </div>
+    <div class="userhead">
+        <if condition="isset($_SESSION['u_userInfo'])">
+            <img src="{$_SESSION['u_userInfo']['logo']}" width="100" height="100">
+        <else/>
+            <img src="{$static_host}/assets/common/pic/userhead.jpg" width="100" height="100">
+        </if>
+    </div>
+    <div class="textinput">
+        <div class="lp">
+            <span>所在楼盘:</span>
+            <input type="text" placeholder="填写您的楼盘名称" name="lp"/>
+        </div>
+        <textarea class="t1" placeholder="随便说说你的想法，或者有什么问题？和大家一起探讨吧"></textarea>
+        <div class="send">
+            <!-- <input name="verifyCode" type="text" placeholder="验证码" >
+            <a class="verify" href="javascript:void(0)">
+                <img src="/verify" align="top"  />
+            </a> -->
+            <a id="btnComment" href="javascript:void(0)"  >提交</a>
+            <div id="popup-captcha"></div>
+            <span class="error" ></span>
+            <span class="info">
+            请勿灌水发言,您还可以输入<i >200</i>个字
+            </span>
+        </div>
+    </div>
+</div>
+<script src="{$static_host}/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".plnew .verify").click(function(event) {
+            $(this).find("img").attr("src","/verify?rand="+Math.random());
+        });
+        $(".plnew .t1").bind("input propertychange",function(){
+            $(".send .error").html("");
+            var length = $(this).val().length;
+            if(length >200){
+                $(".send .info i").html(200);
+                var offset = length - 200;
+                $(".send .error").html("您已经超出了 "+offset+" 字");
+            }else{
+                $(".send .info i").html(200 - length);
+            }
+        });
+
+        $.ajax({
+          // 获取id，challenge，success（是否启用failback）
+            url: "/companyhome/getstartverify?t=" + (new Date()).getTime(), // 加随机数防止缓存
+            type: "get",
+            dataType: "json",
+            success: function (data) {
+                // 使用initGeetest接口
+                // 参数1：配置参数
+                // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
+                initGeetest({
+                    gt: data.gt,
+                    challenge: data.challenge,
+                    product: "popup", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
+                    offline: !data.success // 表示用户后台检测极验服务器是否宕机，一般不需要关注
+                }, handlerPopup);
+            }
+        });
+
+        var handlerPopup = function (captchaObj) {
+            // 弹出式需要绑定触发验证码弹出按钮
+            captchaObj.bindOn("#btnComment");
+            // 将验证码加到id为captcha的元素里
+            captchaObj.appendTo("#popup-captcha");
+            $("#btnComment").click(function () {
+
+                $(".send .error").html("");
+                var _this = $(".plnew #btnComment");
+                if($(".plnew .t1").val() == ""){
+                    $.pt({
+                        target: _this,
+                        content: "亲,您怎么着的也得说点什么吧！",
+                        width: 'auto'
+                    });
+                    return false;
+                }
+                if($(".plnew .t1").val().length > 200){
+                    $.pt({
+                        target: _this,
+                        content: "亲,你写的太多了,少点吧！",
+                        width: 'auto'
+                    });
+                    return false;
+                }
+
+                var validate = captchaObj.getValidate();
+                if (!validate) {
+                    alert('请先完成验证！');
+                    return;
+                }
+
+                $.ajax({
+                    url: "/companyhome/verifylogin", // 进行二次验证
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        // 二次验证所需的三个值
+                        geetest_challenge: validate.geetest_challenge,
+                        geetest_validate: validate.geetest_validate,
+                        geetest_seccode: validate.geetest_seccode
+                    },
+                    success: function (result) {
+                        if (result.status == 1) {
+                            var _this = $(".plnew #btnComment");
+
+                            /*if($(".plnew input[name=verifyCode]").val() == ""){
+                                $.pt({
+                                    target: _this,
+                                    content: "请输入验证码",
+                                    width: 'auto'
+                                });
+                                return false;
+                            }*/
+                            var score = [];
+                            $(".plnew_star ul li").each(function(){
+                                  var val =_this.find(".star input[name=score]").val();
+                                  score.push(val);
+                            });
+
+                            $.ajax({
+                                url: '/companycomment/',
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data: {
+                                    id: "{$userInfo.user.id}",
+                                    content:$(".t1").val(),
+                                    cs:"{$cityInfo.id}",
+                                    sj:score[0],
+                                    fw:score[1],
+                                    sg:score[2],
+                                    lp:$(".plnew input[name=lp]").val()
+                                }
+                            })
+                            .done(function(data) {
+                                if(data.status == 1){
+                                    window.location.href = window.location.href;
+                                }else{
+                                    $.pt({
+                                        target: _this,
+                                        content: data.info,
+                                        width: 'auto'
+                                    });
+                                }
+                            })
+                            .fail(function(xhr) {
+                                $.pt({
+                                    target: _this,
+                                    content: "提交失败,请稍后再试！",
+                                    width: 'auto'
+                                });
+                            });
+                        }
+                    }
+                });
+            });
+        };
+
+        /*$(".plnew #btnComment").click(function(event) {
+          $(".send .error").html("");
+          var _this = $(this);
+          if($(".plnew .t1").val() == ""){
+              $.pt({
+                  target: _this,
+                  content: "亲,您怎么着的也得说点什么吧！",
+                  width: 'auto'
+              });
+              return false;
+          }
+          if($(".plnew .t1").val().length > 200){
+              $.pt({
+                  target: _this,
+                  content: "亲,你写的太多了,少点吧！",
+                  width: 'auto'
+              });
+              return false;
+          }
+          if($(".plnew input[name=verifyCode]").val() == ""){
+              $.pt({
+                  target: _this,
+                  content: "请输入验证码",
+                  width: 'auto'
+              });
+              return false;
+          }
+          var score = [];
+          $(".plnew_star ul li").each(function(){
+                var val =$(this).find(".star input[name=score]").val();
+                score.push(val);
+          });
+
+          $.ajax({
+              url: '/companycomment/',
+              type: 'POST',
+              dataType: 'JSON',
+              data: {
+                  id: "{$userInfo.user.id}",
+                  content:$(".t1").val(),
+                  cs:"{$cityInfo.id}",
+                  code:$(".plnew input[name=verifyCode]").val(),
+                  sj:score[0],
+                  fw:score[1],
+                  sg:score[2],
+                  lp:$(".plnew input[name=lp]").val()
+              }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href = window.location.href;
+              }else{
+                  $.pt({
+                      target: _this,
+                      content: data.info,
+                      width: 'auto'
+                  });
+              }
+          })
+          .fail(function(xhr) {
+              $.pt({
+                  target: _this,
+                  content: "提交失败,请稍后再试！",
+                  width: 'auto'
+              });
+          });
+      });*/
+        $("#btnLogin").click(function(event) {
+            var _this = $(this);
+            $.ajax({
+                url: '/login/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    ssid:"{$ssid}"
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    $("body").append(data.data);
+                    $(".win_login").fadeIn(400);
+                }
+            }).fail(function(xhr) {
+                //显示提示
+                $.pt({
+                    target: _this,
+                    content: '操作失败,请稍后再试！',
+                    width: 'auto'
+                });
+            });
+        });
+    })
+</script>

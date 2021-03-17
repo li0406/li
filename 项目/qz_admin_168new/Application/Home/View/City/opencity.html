@@ -1,0 +1,155 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">开站城市一览</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                  <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-1">
+                          <button class=" icon-share btn btn-default" type='button' style="width:auto"><i class="fa fa-share-square-o"></i>导出</button>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <form id="myForm" class="form-horizontal box" onsubmit="return false">
+                    <div class="box-body">
+                        <table class="table menu-table" id="all_list">
+                            <thead>
+                                <tr>
+                                    <th width="7%" style="text-align:left;">站点</th>
+                                    <th width="15%" class="spilt"><span>管辖</span>/<span>类别</span></th>
+                                    <th width="7%">运营状态</th>
+                                    <th width="7%">PC站</th>
+                                    <th width="7%">移动站</th>
+                                    <th width="7%">移动-报价</th>
+                                    <th width="7%">移动-设计</th>
+                                    <th width="7%">移动-招标</th>
+                                    <th width="10%">增加时间</th>
+                                </tr>
+                            </thead>
+                            <volist name="info" id="vo">
+                                <tr>
+                                    <td style="text-align:left;">{$vo.cname}</td>
+                                    <td class="spilt">
+                                        <switch name="vo.manager">
+                                            <case value="0"><span class="label label-info">商务</span></case>
+                                            <case value="1"><span class="label label-primary">外销</span></case>
+                                            <case value="2"><span class="label label-warning">商务外销</span></case>
+                                            <default />未知状态
+                                        </switch>
+                                        <switch name="vo.little">
+                                            <case value="0"><span class="label label-info">A</span></case>
+                                            <case value="1"><span class="label label-primary">B</span></case>
+                                            <case value="2"><span class="label label-warning">C</span></case>
+                                            <case value="3"><span class="label label-warning">D</span></case>
+                                            <case value="4"><span class="label label-warning">S1</span></case>
+                                            <case value="5"><span class="label label-warning">S2</span></case>
+                                            <default /><span class="label label-warning">未知</span>
+                                        </switch>
+                                    </td>
+                                    <td>
+                                        <eq name="vo.is_open_city" value="1">
+                                            <span class="label label-success">开通</span>
+                                        <else />
+                                            <span class="label label-danger">关闭</span>
+                                        </eq>
+                                    </td>
+                                    <td><a href="{$vo.web}" target="block">{$vo.web}</a></td>
+                                    <td><a href="{$vo.mobile}" target="block">{$vo.mobile}</a></td>
+                                    <td><a href="{$vo.baojia}" target="block">{$vo.baojia}</a></td>
+                                    <td><a href="{$vo.sheji}" target="block">{$vo.sheji}</a></td>
+                                    <td><a href="{$vo.zhaobiao}" target="block">{$vo.zhaobiao}</a></td>
+                                    <td>{$vo.time_add}</td>
+                                </tr>
+                            </volist>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<!-- 引入排序表格开始 -->
+<link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<!-- 引入排序表格结束 -->
+
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+//排序表格设置
+    $('#all_list').DataTable({
+        responsive: true,
+        pageLength: -1,
+        lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"] ],
+        "order": [],
+        //"iDisplayLength":100,
+    });
+
+    $(".icon-share").click(function(event) {
+        var colums = [];
+        var data =[];
+        $("#all_list th").each(function(){
+            var text = $(this).html().trim();
+            text = text.split("/")[0];
+            if($(this).hasClass('spilt')){
+                var sub =[];
+                sub["text"] = $(this).find('span:first').text().trim();
+                colums.push(sub);
+                var sub =[];
+                sub["text"] = $(this).find('span:last').text().trim();
+                colums.push(sub);
+            }else{
+                var sub =[];
+                sub["text"] = text;
+                colums.push(sub);
+            }
+        });
+        data.push(colums);
+        $("#all_list tr:not(:first)").each(function(i){
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function(){
+               var text = $(this).text().trim();
+               text = text.split("(")[0];
+               if($(this).hasClass('spilt')){
+                    var _td = {
+                        text:$(this).find('span:first').text().trim()
+                    }
+                    sub.push(_td);
+                    var _td = {
+                        text:$(this).find('span:last').text().trim()
+                    }
+                    sub.push(_td);
+               }else{
+                    var _td = {
+                        text:text
+                    }
+                    sub.push(_td);
+               }
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data:data,
+            title:"开站城市一览",
+            url:"/export/download"
+        });
+    });
+</script>
+</block>

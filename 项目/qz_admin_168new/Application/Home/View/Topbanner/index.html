@@ -1,0 +1,258 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>顶部广告 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>轮播管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/topbanner">首页轮播管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                <form id="searchform" action="" method="get">
+                    <div class="col-sm-2"  style="margin-top:10px">
+                        <select name="city_id" class="select2">
+                            <option value="">所属城市</option>
+                            <volist name="citys" id="vo">
+                                <option value="{$vo.cid}">{$vo.cname}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-sm-3" style="margin-top:10px">
+                        <div class="input-group" >
+                            <input type="text" name="title" class="form-control pull-right" placeholder="顶部广告标题" value="{$Think.get.title}">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>&nbsp;查询</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2 pull-right" style="margin-top:10px">
+                        <a href="/topbanner/edit" class="pull-right"><button type='button' class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i> 新增轮播</button></a>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">轮播列表</h3>
+                    <div class="box-tools"></div>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <th width="50">ID</th>
+                                <th style="text-align:left;width:230px ;">标题</th>
+                                <th width="80">所属城市</th>
+                                <th width="130">开始时间</th>
+                                <th width="130">结束时间</th>
+                                <th width="80">剩余天数</th>
+                                <th width="50">状态</th>
+                                <th width="110">操作</th>
+                            </tr>
+                            <volist name="list" id="v">
+                                <tr>
+                                    <td>{$v.id}</td>
+                                    <td style="text-align:left;font-size:15px">{$v.title}</td>
+                                    <td >{$v.city_name}<if condition="$v.city_id EQ '0' ">全站</if></td>
+                                    <td>{$v.start_time|date="Y-m-d",###}</td>
+                                    <td>{$v.end_time|date="Y-m-d",###}</td>
+                                    <td>{$v.date}</td>
+                                    <td>
+                                        <if condition="$v.status EQ '0' || $v.date EQ '0'"><span class="badge bg-gray">停用</span><else/><span class="">启用</span></if>
+                                    </td>
+                                    <td>
+                                        <span title="预览" class="fa fa-photo" data-img="{$v.img_url}" data-color="{$v.value}"></span>
+                                        <span title="编辑" class="fa fa-pencil" data-id="{$v.id}"></span>
+                                        <span title="日志" class="log fa fa-reorder" data-id="{$v.id}" data-name="{$v.company_name}"></span>
+                                        <if condition="$v.status EQ '0'|| $v.date EQ '0'">
+                                            <span title="启用" class="fa fa-toggle-off status" data-id="{$v.id}" data-time="{$v.date}"></span>
+                                        <else />
+                                            <span title="停用" class="fa fa-toggle-on status" data-id="{$v.id}" data-time="{$v.date}"></span>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer clearfix">
+                <!-- <input type="button" onclick="allCkb('ckb')" value="全　选"/>
+                <input type="button" onclick="unAllCkb('ckb')" value="全不选"/>
+                <input type="button" onclick="inverseCkb('ckb')" value="反　选"/> -->
+                    <ul class="pagination no-margin pull-right">{$page}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog " style="width:100%;height:455px">
+            <div class="modal-content">
+                <div class="modal-body" style="padding: 10px"><img style="border: 10px solid white;border-top:none;border-bottom:none;" src="" id="Preview" width="100%" height="405"></div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        //全选
+        function allCkb(items){
+            $('[name='+items+']:checkbox').attr("checked", true);
+        }
+        //全不选
+        function unAllCkb(){
+            $('[type='+items+']:checkbox').attr('checked', false);
+        }
+        //反选
+        function inverseCkb(items){
+            $('[name='+items+']:checkbox').each(function(){
+                this.checked=!this.checked;
+            });
+        }
+
+        $(".select2").select2();
+        $(".select2").select2("val", '{$Think.get.city_id}');
+        $(".orderby").select2({
+            minimumResultsForSearch: Infinity
+        });
+
+        $('.fa-pencil').click(function(){
+            location.href="/topbanner/edit?id=" + $(this).attr('data-id');
+        });
+
+        $('.fa-photo').click(function(){
+            var imgUrl = "//{:C('QINIU_DOMAIN')}/" + $(this).attr('data-img');
+            var backColor = $(this).attr('data-color');
+            $("#Preview").attr("src",imgUrl);
+            $(".modal-content").css("background-color",backColor);
+            $('#myModal').modal('show');
+        });
+
+        $('.status').click(function(){
+            if($(this).attr('data-time') == 0){
+                alert('已停用，请重新选择结束时间');
+                return;
+            }
+            if(confirm("您确定要停用/启用吗？")){
+                var id = $(this).attr('data-id');
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                $.ajax({
+                    url: '/topbanner/status',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {id:id}
+                })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else {
+                            alert(data.info);
+                        }
+                    })
+            }
+        });
+
+        $('.log').click(function(){
+            var id = $(this).attr('data-id');
+            var _this = this;
+            $.ajax({
+                url: '/api/getlogslistbyid/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    limit:10,
+                    logtype:'home_topbanner'
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    var data = data.data;
+                    var infos = '';
+                    result ='<table class="table table-bordered"><tbody><tr><th width="180px;">操作时间</th><th>操作人</th><th>广告开始时间</th><th>广告结束时间</th><th>操作备注</th></tr>';
+                    $.each(data,function(key,info) {
+                        var obj = $.parseJSON(info.info);
+                        company_id = '';
+                        company_name = '';
+                        start_time = '';
+                        end_time = '';
+                        if(obj){
+                            if(obj.company_id){
+                                company_id = obj.company_id;
+                            }
+                            if(obj.company_name){
+                                company_name = obj.company_name;
+                            }
+                            if(obj.start_time){
+                                start_time = moment(obj.start_time*1000).format('YYYY-MM-DD HH:mm:ss');
+                            }
+                            if(obj.end_time){
+                                end_time = moment(obj.end_time*1000).format('YYYY-MM-DD HH:mm:ss');
+                            }
+                        }
+                        infos = infos + '<tr><td>'+info.time+'</td><td>'+info.username+'</td><td>'+start_time+'</td><td>'+end_time+'</td><td>'+info.remark+'</td></tr>'
+                    });
+                    if('' == infos){
+                        result = '没有查询到相关的日志记录！';
+                    }else{
+                        result = result + infos + '</tbody></table>'
+                    }
+                    var d = dialog({
+                        quickClose: true,
+                        align: 'left',
+                        content: result,
+                        follow: _this,
+                        onclose: function () {}
+                    });
+                    d.show();
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    </script>
+</block>

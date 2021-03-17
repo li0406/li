@@ -1,0 +1,361 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检结论错误明细统计-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检结论错误明细统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div class="col-xs-12">
+                            条件查询
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <form id="myForm" action="/qcstat/qcconclusionstat/" method="get" class="">
+                            <div class="form-group pull-left col-sm-12">
+                                <div class="col-xs-2">
+                                     <label>抽查单号：</label>
+                                     <input class="form-control" type="text" name="order_id" placeholder="抽查单号" value="{$Think.get.order_id}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>质检时间：</label>
+                                    <input class="form-control datepicker" type="text" name="start_time" placeholder="开始时间" value="{$Think.get.start_time}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>&nbsp;</label>
+                                    <input class="form-control datepicker" type="text" name="end_time" placeholder="结束时间" value="{$Think.get.end_time}">
+                                </div>
+                                <if condition="$zjshow eq 1">
+                                <div class="col-xs-1">
+                                    <label>质检员：</label>
+                                    <select name="op_uid" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.zhi_jian" id="vo">
+                                            <if condition="$_GET['op_uid'] EQ $vo['id']">
+                                            <option value="{$vo.id}" selected>{$vo.name}</option>
+                                            <else/>
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                    </if>
+                                <div class="col-xs-1">
+                                    <label>客服师：</label>
+                                    <select name="kf_manager" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.groups.manager" id="vo">
+                                            <if condition="$_GET['kf_manager'] EQ $vo['id']">
+                                            <option value="{$vo.id}" selected>{$vo.name}</option>
+                                            <else/>
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>审核团：</label>
+                                    <select name="kf_group" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.groups.groups" id="vo">
+                                            <if condition="$_GET['kf_group'] EQ $vo['kfgroup']">
+                                            <option value="{$vo.kfgroup}" selected>{$vo.name}</option>
+                                            <else/>
+                                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>对接团：</label>
+                                    <select name="docking_group" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.duijie" id="vo">
+                                            <gt name="vo.kfgroup" value="0">
+                                                <if condition="$_GET['docking_group'] EQ $vo['kfgroup']">
+                                                <option value="{$vo.kfgroup}" selected>{$vo.name}</option>
+                                                <else/>
+                                                <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                                </if>
+                                            </gt>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>审核客服：</label>
+                                    <select name="kf_id" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.ke_fu" id="vo">
+                                        <if condition="$_GET['kf_id'] EQ $vo['id']">
+                                        <option value="{$vo.id}" selected>{$vo.name}</option>
+                                        <else/>
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                 <div class="col-xs-1">
+                                    <label>对接客服：</label>
+                                    <select name="docking_id" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.docking" id="vo">
+                                        <if condition="$_GET['docking_id'] EQ $vo['id']">
+                                        <option value="{$vo.id}" selected>{$vo.name}</option>
+                                        <else/>
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>有无备注：</label>
+                                    <select name="remark" class="form-control" >
+                                        <option value="0">请选择</option>
+                                        <option value="1">有</option>
+                                        <option value="2">无</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group pull-left col-sm-12">
+                                <div class="col-xs-1">
+                                    <label>有无错误：</label>
+                                    <select name="error" class="form-control" >
+                                        <option value="0">请选择</option>
+                                        <option value="1">有</option>
+                                        <option value="2">无</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>错误类型：</label>
+                                    <select name="type" class="form-control" >
+                                        <option value="0">请选择</option>
+                                        <option value="1">审核错误</option>
+                                        <option value="2">对接错误</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-3">
+                                    <label>质检项：</label>
+                                    <select name="item" class="select-two">
+                                        <option value="">请选择</option>
+                                        <volist name="info.items" id="vo">
+                                            <optgroup label="{$vo.name}">
+                                            <volist name="vo.child" id="v">
+                                            <if condition="$_GET['item'] EQ $v['id']">
+                                            <option value="{$v.id}" selected>{$v.name}</option>
+                                            <else/>
+                                            <option value="{$v.id}">{$v.name}</option>
+                                            </if>
+                                            </volist>
+                                            </optgroup>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label>质检类型：</label>
+                                    <select name="qctype" class="form-control" >
+                                        <option value="0">请选择</option>
+                                        <option value="1">抽听</option>
+                                        <option value="2">回听</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <label style="display: block;">&nbsp;</label>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                    <button id="export" class=" icon-share btn btn-success  btn-sm btn-flat  ml10" type='button' style="width:auto"><i class="fa fa-share-square-o"></i>导出</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <table id="myTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">质检时间</th>
+                                    <th class="col-sm-1">订单编号</th>
+                                    <th class="col-sm-1">质检类型</th>
+                                    <if condition="$zjshow eq 1">
+                                    <th class="col-sm-1">质检员</th>
+                                    </if>
+                                    <th class="col-sm-1">订单类型</th>
+                                    <th class="col-sm-1">审核客服</th>
+                                    <th class="col-sm-1">对接客服</th>
+                                    <th class="col-sm-1">客服团长</th>
+                                    <th class="col-sm-1">备注</th>
+                                    <th class="col-sm-1">正确操作备注</th>
+                                    <th>问题项</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="vars.list" id="vo">
+                                <tr>
+                                    <td>{$vo.time}</td>
+                                    <td>
+                                    <a href="javascript:void(0)" class="icheck" data-href="/qc/qcinfo?id={$vo.order_id}" data-backdrop="false">{$vo.order_id}</a>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['type'] EQ 1">
+                                        抽听
+                                        <else/>
+                                        回听
+                                        </if>
+                                    </td>
+                                    <if condition="$zjshow eq 1">
+                                    <td>{$vo.op_name}</td>
+                                    </if>
+                                    <td>
+                                    <if condition="$vo['on'] EQ 4 and $vo['type_fw'] EQ 1">
+                                    分单
+                                    <elseif condition="$vo['on'] EQ 4 and $vo['type_fw'] EQ 2"/>
+                                    赠单
+                                    <elseif condition="$vo['on'] EQ 0 and $vo['type_fw'] EQ 9"/>
+                                    次新单
+                                    <elseif condition="$vo['on'] EQ 5"/>
+                                    无效单
+                                    <elseif condition="$vo['on'] EQ 2"/>
+                                    待定单
+                                    <else/>
+                                    扫单
+                                    </if>
+                                    </td>
+                                    <td>
+                                        <if condition="!isset($vo['kfmark'])">
+                                        {$vo.kf_name}
+                                        <else/>
+                                        <span class="red">{$vo.kf_name}</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="!isset($vo['dockingmark'])">
+                                        {$vo.docking_name}
+                                        <else/>
+                                        <span class="red">{$vo.docking_name}</span>
+                                        </if>
+                                    </td>
+                                    <td>{$vo.group_name}</td>
+                                    <td>{$vo.remark}</td>
+                                    <td>{$vo.remark2}</td>
+                                    <td>
+                                        <volist name="vo.child" id="v" key="k">
+                                        <span class="red">{$v}</span>
+                                        </volist>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$vars.show}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal"  role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 1420px; margin-top: 10px;">
+            <div class="modal-content">
+                <div class="modal-header" style="padding:5px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center">质检评分</h4>
+                </div>
+                <div class="modal-body no-padding">
+                </div>
+            </div>
+        </div>
+    </div>
+    <form id="form1" style="display: none;" method="post" action="/export/downLoadQcConclusionStat">
+        <input type="hidden" name="start" />
+        <input type="hidden" name="end" />
+    </form>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $('.select-two').select2();
+    // $('select[name=op_uid]').select2("val","{$Think.get.op_uid}");
+    // $('select[name=kf_manager]').select2("val","{$Think.get.kf_manager}");
+    // $('select[name=kf_group]').select2("val","{$Think.get.kf_group}");
+    // $('select[name=kf_id]').select2("val","{$Think.get.kf_id}");
+    // $('select[name=docking_group]').select2("val","{$Think.get.docking_group}");
+    // $('select[name=docking_id]').select2("val","{$Think.get.docking_id}");
+    $('select[name=remark]').val('{$Think.get.remark|default=0}');
+    $('select[name=error]').val('{$Think.get.error|default=0}');
+    $('select[name=type]').val('{$Think.get.type|default=0}');
+    // $('select[name=item]').select2("val",'{$Think.get.item}');
+    $('select[name=qctype]').val('{$Think.get.qctype|default=0}');
+
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd"
+    });
+
+    $(".icheck").click(function(event) {
+        $("#myModal .modal-body").load($(this).attr("data-href")+"&rand="+new Date().getTime(),function(){
+            $("#myModal").modal("show").on("shown.bs.modal",function(){
+                isLoading = false;
+                $.ajax({
+                    url: '/voip/voiprecord/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id: $("input[name=orderid]").val(),
+                        type:'qc'
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $("#video").html(data.data);
+                    }
+                });
+
+                $("input[name='item[]']:checked").each(function(){
+                    $(this).parents(".checkbox").next(".radiobox").css("visibility","visible");
+                });
+
+                $("input[name='qcservice[]']:checked").each(function(){
+                    $(this).parents(".checkbox").next(".radiobox-service").css("visibility","visible");
+                });
+            });
+        })
+    });
+
+    $("#export").click(function(event) {
+        var start = $("input[name=start_time]").val();
+        var end = $("input[name=end_time]").val();
+        var startDate = new Date(start);
+        var endDate = new Date(end);
+
+        if ( ((endDate.getTime() - startDate.getTime())/1000/60/60/24 +1) > 31) {
+            alert("时间筛选不能超过31天");
+            return false;
+        }
+        var target = $("#myForm");
+        var form = $("<form></form>");//定义一个form表单
+        form.attr("style","display:none");
+        form.attr("target","");
+        form.attr("method","post");
+        form.attr("action","/export/downLoadQcConclusionStat");
+        form.html(target.html());
+        $("body").append(form);//将表单放置在web中
+        form.submit();//表单提交
+
+        // $("#form1") = $("#myForm").clone();
+        // $("#form1").off("submit");
+        // $("#form1").submit();
+    });
+</script>
+</block>

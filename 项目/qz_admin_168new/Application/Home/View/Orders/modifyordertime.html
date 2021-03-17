@@ -1,0 +1,217 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网文章榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>修改订单发布时间</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/order/">订单列表</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">修改订单发布时间</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row modify-wrap">
+                            <div class="col-xs-2">
+                            订单编号：<input type="text" class="form-control orderid" placeholder="订单编号" >
+                            </div>
+                            <div class="col-xs-2">
+                            修改时间为：<input type="text" class="form-control time" placeholder="修改时间为" >
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="modify" class="btn btn-block btn-success normal">
+                                    确认修改
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">搜索修改订单发布时间记录</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row search-wrap">
+                            <div class="col-xs-2">
+                            订单编号：<input type="text" class="form-control orderid" placeholder="订单编号" value="{$Think.get.orderid}">
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">查询</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">订单发布时间修改记录</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>记录序号</th>
+                                        <th>订单号</th>
+                                        <th>修改时间</th>
+                                        <th>修改前时间</th>
+                                        <th>修改后时间</th>
+                                        <th>修改人</th>
+                                    </tr>
+                                    <volist name="main.info.list" id="vo">
+                                        <tr>
+                                            <td>{$vo.id}</td>
+                                            <td>{$vo.order_id}</td>
+                                            <td>{$vo.addtime|date='Y-m-d H:i:s',###}</td>
+                                            <td>{$vo.pre_time|date='Y-m-d H:i:s',###}</td>
+                                            <td>{$vo.now_time|date='Y-m-d H:i:s',###}</td>
+                                            <td>{$vo.name}</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$main.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //插件初始化
+            $('.modify-wrap .time').datetimepicker({
+                format:"yyyy-mm-dd hh:ii:ss"
+            });
+
+            //修改
+            $('#modify').click(function(event) {
+                var orderid = $('.modify-wrap .orderid').val();
+                var time = $('.modify-wrap .time').val();
+                $.ajax({
+                    url: '/order/modifyordertime/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        orderid:orderid,
+                        time:time,
+                        confirm:false
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        var e = dialog({
+                            title: '消息',
+                            content: data.data,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                                $.ajax({
+                                    url: '/order/modifyordertime/',
+                                    type: 'POST',
+                                    dataType: 'JSON',
+                                    data: {
+                                        orderid:orderid,
+                                        time:time,
+                                        confirm:true
+                                    }
+                                })
+                                .done(function(data) {
+                                    if(data.status == '1'){
+                                        var e = dialog({
+                                            title: '消息',
+                                            content: data.info,
+                                            okValue: '确 定',
+                                            quickClose: true,
+                                            ok: function () {
+                                                window.location.href = window.location.href;
+                                            }
+                                        });
+                                        e.show();
+                                    }else{
+                                        var e = dialog({
+                                            title: '消息',
+                                            content: data.info,
+                                            okValue: '确 定',
+                                            quickClose: true,
+                                            ok: function () {}
+                                        });
+                                        e.show();
+                                        return false;
+                                    }
+                                })
+                                .fail(function(xhr) {
+                                    var e = dialog({
+                                        title: '消息',
+                                        content: '发生未知错误，请联系技术部门~',
+                                        okValue: '确 定',
+                                        quickClose: true,
+                                        ok: function () {}
+                                    });
+                                    e.show();
+                                    return false;
+                                })
+                            }
+                        });
+                        e.show();
+                        return false;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+
+            //查询
+            $('#search').click(function(){
+                var orderid = $('.search-wrap .orderid').val();
+                window.location.href = '/order/modifyordertime/?orderid='+orderid;
+            })
+        })
+    </script>
+</block>

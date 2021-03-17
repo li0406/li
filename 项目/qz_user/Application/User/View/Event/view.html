@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>过期活动 - 用户中心 - {$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/css/ht-event.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <ul class="ht-nav-tit">
+            <li class="active"><a href="/event/">齐装网官方活动</a></li>
+            <li ><a href="/oneselfevent">自发活动</a></li>
+        </ul>
+
+    <div class="ht-main">
+        <div class="c-cont-box">
+        <h1>{$info.title}</h1>
+            <div class="c-cont-date">{$info.add_time|date='Y-m-d',###}</div>
+            <div class="c-cont-main">{$info.content}</div>
+            <ul class="c-cont-time">
+                <li>活动时间：{$info.start_time|date='Y-m-d',###}~{$info.end_time|date='Y-m-d',###}</li>
+                <li>报名截止时间：{$info.enroll_time|date='Y-m-d',###}</li>
+            </ul>
+            <div class="c-cont-bottom">
+                <if condition="$info.new_status EQ '7' "><button id="join">立即报名</button></if>
+                <if condition="$info.new_status EQ '6' "><button class="c-cont-btn-done" disabled>已报名</button></if>
+                <if condition="$info.new_status EQ '5' "><button class="btn-cancel">取消报名</button></if>
+                <if condition="$info.new_status EQ '2' "><button class="c-cont-btn-done" disabled>不可报名</button></if>
+                <p>&nbsp;</p>
+                <p>说明：报名之后需要等待客服的审核，（审核条件：本市报名人数≥5家，本市上线此活动）</p>
+                <p>如果没有达成满足条件而导致本市不能上线活动的，请您谅解。</p>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+<include file="Index:footer" />
+<script type="text/javascript">
+
+//报名
+$('#join').click(function(){
+    openwindow("您确定要报名吗？<br>（报名截止后将无法取消报名）",function(){
+        $.ajax({
+            url: '/event/setstatus/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                id:{$info.id},
+                type:'2'
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                window.location.href = window.location.href;
+            }else{
+                alert('操作失败了');
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败');
+        })
+    });
+})
+
+//取消报名
+$('.btn-cancel').click(function(){
+    openwindow("确定放弃参加活动？<br>（报名截止后将无法继续报名）",function(){
+        $.ajax({
+            url: '/event/setstatus/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                id:{$info.id},
+                type:'1'
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                window.location.href = window.location.href;
+            }else{
+                alert('操作失败了');
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败');
+        })
+    });
+})
+
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>装修公司banner审核</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/advbanner/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>装修公司banner审核</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/advbanner">装修公司banner审核</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                <form id="searchform" action="" method="get" class="form-horizontal">
+                    <div class="pull-left">
+                        <label class="control-label pull-left">公司名称：</label>
+                        <div class="pull-left" style="padding-left:0px" >
+                            <input type="text" name="company" class="form-control" id="company" placeholder="轮播标题" value="{$Think.get.company}">
+                        </div>
+                    </div>
+                    <div class="pull-left">
+                        <label class="control-label pull-left">公司ID：</label>
+                        <div class="pull-left" style="padding-left:0px" >
+                            <input type="text" name="company_id" class="form-control" id="company_id" placeholder="装修公司ID" value="{$Think.get.company_id}">
+                        </div>
+                    </div>
+                    <div class="pull-left tab-sign-1">
+                        <label class="control-label pull-left">城市筛选：</label>
+                        <div class="pull-left">
+                            <select name="city_id" id="city_id" class="select2" style="width:130px">
+                                <option value="">所属城市</option>
+                                <volist name="cityList" id="vo">
+                                    <option value="{$vo.cid}">{$vo.first_abc} {$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- <div class="pull-left tab-sign-1">
+                        <label for="" class="control-label pull-left" style="padding-right:0px">会员类型：</label>
+                        <div class="pull-left">
+                            <select name="memberType" class="form-control" id="vip-type">
+                                <option value="">请选择</option>
+                                <volist name="member_status" id="vo">
+                                <option value="{$key}" <if condition="strlen($_GET['memberType']) gt 0"><eq name="key" value="$Think.get.memberType">selected=''</eq> </if>>{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div> -->
+                    <div class="pull-left tab-sign-1">
+                        <label for="" class="control-label pull-left" style="padding-right:0px">审核状态：</label>
+                        <div class="pull-left">
+                            <select name="status" class="form-control" id="check-type">
+                                <option value="">请选择</option>
+                                <volist name="banner_status" id="vo">
+                                <option value="{$key}" <if condition="strlen($_GET['status']) gt 0"><eq name="key" value="$Think.get.status">selected=''</eq></if>>{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="pull-left tab-sign-1">
+                        <button type="submit" class="btn btn-info" style="outline:none;">查询</button>
+                        <button type="button" class="btn" style="outline:none;" id="reset">重置</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">轮播列表</h3>
+                    <div class="box-tools"></div>
+                </div>
+                <div class="box-body table-responsive no-padding">
+
+                    <empty name="banners.list">
+                        <div class="col-xs-12">
+                            <div class="alert alert-warning alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                <h4><i class="icon fa fa-warning"></i> 提示信息!</h4>
+                                没有找到您要查询的信息
+                            </div>
+                        </div>
+                    <else/>
+                    <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <th width="260">缩略图</th>
+                                <th>装修公司</th>
+                                <th>城市</th>
+                                <!-- <th>会员类型</th> -->
+                                <th>提交审核时间</th>
+                                <th>审核状态</th>
+                                <th width="220">操作</th>
+                            </tr>
+                            <volist name="banners.list" id="vo">
+                                <tr data-id="{$vo.id}">
+                                    <td><img class="thumbs" src="{$vo.img_path}" style="max-width: 100%;"></td>
+                                    <td>{$vo.company_name}</td>
+                                    <td>{$vo.city_name}</td>
+                                    <!-- <td>{$vo.type}</td> -->
+                                    <td>{$vo.submit_date}</td>
+                                    <td>{$vo.status_desc}</td>
+                                    <td>
+                                        <if condition="$btn_show eq 1">
+                                            <neq name="vo.status" value="1">
+                                                <button type="button" data-mark="1" class="btn btn-info btn-xs checkBtn">审核通过</button>
+                                                <else/>
+                                                <button type="button" data-mark="1" class="btn btn-disbaled btn-xs" disabled="">审核通过</button>
+                                            </neq>
+                                            <neq name="vo.status" value="2">
+                                                <button type="button" data-mark="2" class="btn btn-xs btn-danger checkBtn">审核不通过</button>
+                                                <else/>
+                                                <button type="button" data-mark="1" class="btn btn-disbaled btn-xs" disabled="">审核不通过</button>
+                                            </neq>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    </empty>
+                </div>
+                <div>{$banners.pageshow}</div>
+              </div>
+            </div>
+          </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog " style="width:100%;height:455px">
+            <div class="modal-content">
+                <div class="modal-body" style="padding: 10px">
+                    <img style="border: 10px solid white;border-top:none;border-bottom:none;object-fit: contain;" src="" id="Preview" width="100%" height="405">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="checkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center" >提示</h4>
+                </div>
+                <div class="modal-body setText" style="text-align: center;">
+                    
+                </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <input type="hidden" name="banner_id" value="0">
+                    <input type="hidden" name="mark" value="0">
+                    <button type="button" class="btn btn-success doneCheck">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $(".select2").select2();
+        $(".select2").select2("val", '{$Think.get.city_id}');
+
+        $("#reset").click(function(){
+            $("#company").val('')
+            $("#company_id").val('')
+            $("#vip-type").val('')
+            $("#check-type").val('')
+            $(".select2").select2("val",'')
+        })
+
+        $('.thumbs').click(function(){
+            var imgUrl = $(this).attr('src');
+            $("#Preview").attr("src", imgUrl);
+            $('#myModal').modal('show');
+        });
+
+        $('.checkBtn').on('click', function(){
+            var _this = $(this)
+            var mark = _this.data('mark')
+
+            let textMsg = ''
+            if(mark == 2){
+                textMsg = '将这条记录审核不通过'
+            }else{
+                textMsg = '将这条记录审核通过'
+            }
+
+            var banner_id = _this.parents('tr').data('id')
+            $('input[name=mark]').val(mark)
+            $('input[name=banner_id]').val(banner_id)
+            $('.setText').html(textMsg)
+            $("#checkModal").modal()
+        })
+
+        $('.doneCheck').on('click', function(){
+            var banner_id = $('input[name=banner_id]').val()
+            var mark = $('input[name=mark]').val()
+            
+            var _this = $(this)
+            _this.attr('disabled', true)
+            $.post('/company/makeBannerStatus', {banner_id: banner_id, mark: mark},function(res){
+                _this.attr('disabled', false)
+                if(res.status == '1'){
+                    window.location.href = window.location.href;
+                }else{
+                    alert('操作失败了');
+                }
+            })
+        })
+    </script>
+</block>

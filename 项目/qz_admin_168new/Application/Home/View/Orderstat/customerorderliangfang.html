@@ -1,0 +1,775 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新客服量房统计-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/customerorderliangfang.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新客服量房统计</h1>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/"><i class="fa fa-dashboard"></i> 控制面板</a>
+            </li>
+            <li>
+                <a href="/orderstat/customerorderliangfang/">新客服量房统计</a>
+            </li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <form class="form-horizontal" method="GET" action="/orderstat/customerorderliangfang/">
+                            <div class="col-xs-12">
+                                <ul class="npoc-tab-wrap">
+                                    <li class="npoc-tab" data-tab='1'>
+                                        <a href="/orderstat/customerorderliangfang/?index=1"><span style="font-size: 14px;">按人统计</span></a>
+                                    </li>
+                                    <li class="npoc-tab" data-tab='2'>
+                                        <a href="/orderstat/customerorderliangfang/?index=2">按组统计</a>
+                                    </li>
+                                    <li class="npoc-tab" data-tab='3'>
+                                        <a href="/orderstat/customerorderliangfang/?index=3">按师统计</a>
+                                    </li>
+                                    <!-- <li class="npoc-tab" data-tab='4'>
+                                        <a href="/orderstat/customerorderliangfang/?index=4">按日统计</a>
+                                    </li>
+                                    <li class="npoc-tab" data-tab='5'>
+                                        <a href="/orderstat/customerorderliangfang/?index=5">客服中心统计</a>
+                                    </li> -->
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <if condition="($Think.get.index eq 1) OR ($Think.get.index eq '')">
+                <div class="col-xs-12" id="tab1">
+            <else/>
+                <div class="col-xs-12" id="tab1" style="display: none">
+            </if>
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerorderliangfang/" method="get">
+                        <div class="col-xs-2">
+                            <div>客服姓名</div>
+                            <select id="kfList" name="kf" data-search='1' class="form-control" placeholder="请选择">
+                                <volist name="kflist" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>客服组</div>
+                            <select id="groups1" name="groups" data-search='1' type="text" class="form-control" tabindex="3" placeholder="请选择">
+                                <volist name="groups" id="vo">
+                                    <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-开始:</div>
+                            <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.begin}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-结束:</div>
+                            <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.end}">
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">查询</div>
+                            <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                            <input type="hidden" name="index" value="1" />
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">导出EXCEL</div>
+                            <button type="button" class="btn-success form-control export" data-tab="myTable2">导出EXCEL</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <!-- <div class="col-xs-12">
+                        <ul class="sub-npoc-tab-wrap" style="margin-left: 10px">
+                            <li class="sub-npoc-tab sub-npoc-tab-active" data-target="myTable2">
+                                <span style="font-size: 14px;">分单</span>
+                            </li>
+                            <li class="sub-npoc-tab" data-target="myTable2-1">
+                                赠单
+                            </li>
+                        </ul>
+                    </div> -->
+                    <table id="myTable2" class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>客服姓名</th>
+                            <th>客服组</th>
+                            <th>登陆天数</th>
+                            <th>发单量</th>
+                            <th>分单量</th>
+                            <th>赠单量</th>
+                            <th>量房量</th>
+                            <!-- <th>首次量房数<br>(分单)</th> -->
+                            <!-- <th>首次量房率<br>(分单)</th> -->
+                            <!-- <th>二次回访量<br>(分单)</th> -->
+                            <!-- <th>二次量房数<br>(分单)</th> -->
+                            <!-- <th>量房数合计<br>(分单)</th> -->
+                            <!-- <th>量房率合计<br>(分单)</th> -->
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo" key="key">
+                            <tr>
+                                <td>{$key}</td>
+                                <td class="center-middle">{$vo.name}</td>
+                                <td>{$vo.kfgroup}</td>
+                                <td>{$vo.day|default=0}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.lf_count|default=0}</td>
+                                <!-- <td>{$vo.scfenlfNum|default=0}</td> -->
+                                <!-- <td>{$vo.sc_fen_lf_rate|default=0}%</td> -->
+                                <!-- <td>{$vo.ecfenhfNum|default=0}</td> -->
+                                <!-- <td>{$vo.ecfenlfNum|default=0}</td> -->
+                                <!-- <td>{$vo.fen_lf_total|default=0}</td> -->
+                                <!-- <td>{$vo.fen_lf_rate|default=0}%</td> -->
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <if condition="$Think.get.index eq 2">
+            <div class="col-xs-12" id="tab2">
+        <else/>
+            <div class="col-xs-12" id="tab2" style="display: none">
+        </if>
+        <div class="box">
+            <div class="box-header">
+                <form action="/orderstat/customerorderliangfang/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups2" name="groups" data-search='1' class="form-control" type="text" placeholder="请选择">
+                            <volist name="groups" id="vo">
+                                <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager1" name="manager" data-search='1' name="cs" type="text" class="form-control" tabindex="3" placeholder="请选择">
+                            <volist name="manager" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="2" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button"  class="btn-success form-control export" data-tab="myTable3">导出EXCEL</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table id="myTable3" class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>客服组</th>
+                        <th>客服师</th>
+                        <th>发单量</th>
+                        <th>分单量</th>
+                        <th>赠单量</th>
+                        <th>量房量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="grouplist" id="vo" key="key">
+                        <tr>
+                            <td class="center-middle">{$key}</td>
+                            <td>{$vo.kfgroup}</td>
+                            <td>{$vo.manager}</td>
+                            <td>{$vo.all|default=0}</td>
+                            <td>{$vo.fen|default=0}</td>
+                            <td>{$vo.zen|default=0}</td>
+                            <td>{$vo.lf_count|default=0}</td>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        <if condition="$Think.get.index eq 3">
+            <div class="col-xs-12" id="tab3">
+        <else/>
+            <div class="col-xs-12" id="tab3" style="display: none">
+        </if>
+        <div class="box">
+            <div class="box-header">
+                <form action="/orderstat/customerorderliangfang/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager2" name="manager" data-search='1' class="form-control" type="text" placeholder="请选择">
+                            <volist name="manager" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="3" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="myTable4">导出EXCEL</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table id="myTable4" class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>客服组数</th>
+                        <th>负责人</th>
+                        <th>发单量</th>
+                        <th>分单量</th>
+                        <th>赠单量</th>
+                        <th>量房量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="managerlist" id="vo">
+                        <volist name="vo.child" id="v">
+                            <tr>
+                                <td>{$v.kfgroup}组</td>
+                                <td>{$v.groupmanager}</td>
+                                <td>{$v.all|default=0}</td>
+                                <td>{$v.fen|default=0}</td>
+                                <td>{$v.zen|default=0}</td>
+                                <td>{$v.lf_count|default=0}</td>
+                            </tr>
+                        </volist>
+                        <tr>
+                            <td class="center-middle"><b>汇总</b></td>
+                            <td><b>{$vo.manager}</b></td>
+                            <td><b>{$vo.all|default=0}</b></td>
+                            <td><b>{$vo.fen|default=0}</b></td>
+                            <td><b>{$vo.zen|default=0}</b></td>
+                            <td><b>{$vo.lf_count|default=0}</b></td>
+                        </tr>
+                    </volist>
+                    <tr>
+                        <td class="center-middle">总计</td>
+                        <td>-</td>
+                        <td>{$total.all|default=0}</td>
+                        <td>{$total.fen|default=0}</td>
+                        <td>{$total.zen|default=0}</td>
+                        <td>{$total.lf_count|default=0}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        <if condition="$Think.get.index eq 4">
+            <div class="col-xs-12" id="tab4">
+        <else/>
+            <div class="col-xs-12" id="tab4" style="display: none">
+        </if>
+        <div class="box">
+            <div class="box-header">
+                <form action="/orderstat/customerorderliangfang/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服姓名</div>
+                        <select id="kfList4" name="kf" data-search='1' class="form-control" placeholder="请选择">
+                            <volist name="kflist" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups4" name="groups" data-search='1' class="form-control" type="text" placeholder="请选择">
+                            <volist name="groups" id="vo">
+                                <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager4" name="manager" data-search='1' class="form-control" type="text" placeholder="请选择">
+                            <volist name="manager" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="4" />
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="myTable5">导出EXCEL</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table id="myTable5" class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>负责人</th>
+                        <th>发单量</th>
+                        <th>分单量</th>
+                        <th>赠单量</th>
+                        <th>量房量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="dayList.child" id="vo">
+                        <tr>
+                            <td>{$vo.date}</td>
+                            <td>{$vo.op_name}</td>
+                            <td>{$vo.all|default=0}</td>
+                            <td>{$vo.fen|default=0}</td>
+                            <td>{$vo.zen|default=0}</td>
+                            <td>{$vo.lf_count|default=0}</td>
+                        </tr>
+                    </volist>
+                    <tr>
+                        <td class="center-middle">总计</td>
+                        <td>-</td>
+                        <td>{$dayList.all.all|default=0}</td>
+                        <td>{$dayList.all.fen|default=0}</td>
+                        <td>{$dayList.all.zen|default=0}</td>
+                        <td>{$dayList.all.lf_count|default=0}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        <if condition="$Think.get.index eq 5">
+            <div class="col-xs-12" id="tab5">
+        <else/>
+            <div class="col-xs-12" id="tab5" style="display: none">
+        </if>
+        <div class="box">
+            <div class="box-header">
+                <form action="/orderstat/customerorderliangfang/" method="get">
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" readonly="true" style="background-color: white" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="5" />
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="myTable6">导出EXCEL</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table id="myTable6" class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>发单量</th>
+                        <th>分单量</th>
+                        <th>赠单量</th>
+                        <th>量房量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="center.child" id="vo">
+                        <tr>
+                            <td>{$vo.date}</td>
+                            <td>{$vo.all|default=0}</td>
+                            <td>{$vo.fen|default=0}</td>
+                            <td>{$vo.zen|default=0}</td>
+                            <td>{$vo.lf_count|default=0}</td>
+                        </tr>
+                    </volist>
+                    <tr>
+                        <td class="center-middle">总计</td>
+                        <td>{$center.all.all|default=0}</td>
+                        <td>{$center.all.fen|default=0}</td>
+                        <td>{$center.all.zen|default=0}</td>
+                        <td>{$center.all.lf_count|default=0}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        </div>
+        <div class="col-xs-12 instruction">
+            <!-- <p><strong>说明：</strong></p>
+            <p>1.首次量房数（分/赠单）：查询时间内，未经过客服二次回访，被装修公司在后台点击了“已量房”、“已见面/已到店”、“已签约”的分/赠单的合计数量；</p>
+            <p>2.首次量房率（分/赠单）：首次量房率（分/赠单）=首次量房数（分/赠单）/（分/赠单量）；</p>
+            <p>3.二次回访量（分/赠单）：查询时间内，装修公司在后台点击“未量房”的分/赠单的合计数量；</p>
+            <p>4.二次量房数（分/赠单）：查询时间内，经过客服二次回访后，被装修公司在后台点击了“已量房”、“已见面/已到店”、“已签约”的分/赠单的合计数量；</p>
+            <p>5.二次量房率（分/赠单）：二次量房率（分/赠单）=二次量房数（分/赠单）/二次回访量（分/赠单）；</p>
+            <p>6.量房数合计（分/赠单）：量房数合计（分/赠单）=首次量房数（分/赠单）+二次量房数（分/赠单）；</p>
+            <p>7.量房率合计（分/赠单）：量房率合计（分/赠单）=量房数合计（分/赠单）/（分/赠单量）</p> -->
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js"></script>
+    <script>
+        $(function() {
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd',
+                todayBtn: true,
+                endDate:"{:date('Y-m-d')}"
+            }).on("change",function(){
+                var $form = $(this).closest('form'),
+                    $inputBegin = $form.find('input[name=begin]'),
+                    $inputEnd = $form.find('input[name=end]');
+                var flag = diffDate($inputBegin.val(), $inputEnd.val());
+                if (!flag) {
+                    msg("结束时间不能小于开始时间", function(){
+                        $inputEnd.val("");
+                    });
+                }
+                if ($inputBegin.val() && $inputEnd.val()) {
+                    var outTime = isTimeOut($inputBegin.val(), $inputEnd.val(), 31)
+                    if (outTime) {
+                        msg("开始时间和结束时间不能超过31天", function(){
+                            $inputBegin.val("");
+                            $inputEnd.val("");
+                        });
+                    }
+                }
+            });
+
+            $("#kfList").select2({
+                allowClear: true,
+                placeholder: "选择客服"
+            }).on('select2:select', function (e) {
+                $("#groups1").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#groups1").attr("disabled",false);
+            });
+            $("#kfList").select2("val","{$Think.get.kf}");
+            $("#kfList4").select2({
+                allowClear: true,
+                placeholder: "选择客服"
+            }).on('select2:select', function (e) {
+                $("#groups4,#manager4").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#kfList4,#groups4,#manager4").attr("disabled",false);
+            });
+
+            $("#kfList4").select2("val","{$Think.get.kf}");
+            $("#groups1").select2({
+                allowClear: true,
+                placeholder: "选择客服组"
+            }).on('select2:select', function (e) {
+                $("#kfList").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#kfList").attr("disabled",false);
+            });
+            $("#groups1").select2("val","{$Think.get.groups}");
+            $("#groups2").select2({
+                allowClear: true,
+                placeholder: "选择客服组"
+            }).on('select2:select', function (e) {
+                $("#manager1").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#manager1").attr("disabled",false);
+            });
+            $("#groups2").select2("val","{$Think.get.groups}");
+            $("#groups4").select2({
+                allowClear: true,
+                placeholder: "选择客服组"
+            }).on('select2:select', function (e) {
+                $("#kfList4,#manager4").val("");
+                $("#kfList4,#manager4").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#kfList4,#groups4,#manager4").attr("disabled",false);
+            });
+            $("#groups4").select2("val","{$Think.get.groups}");
+            $("#manager1").select2({
+                allowClear: true,
+                placeholder: "选择师长"
+            }).on('select2:select', function (e) {
+                $("#groups2").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#groups2").attr("disabled",false);
+            });
+            $("#manager1").select2("val","{$Think.get.manager}");
+            $("#manager2").select2({
+                allowClear: true,
+                placeholder: "选择师长"
+            });
+            $("#manager2").select2("val","{$Think.get.manager}");
+            $("#manager4").select2({
+                allowClear: true,
+                placeholder: "选择师长"
+
+            }).on('select2:select', function (e) {
+                $("#kfList4,#groups4").val("");
+                $("#kfList4,#groups4").attr("disabled","disabled");
+            }).on("select2:unselect",function(e){
+                $("#kfList4,#groups4,#manager4").attr("disabled",false);
+            });
+            $("#manager4").select2("val","{$Think.get.manager}");
+
+            $('.npoc-tab-wrap li.npoc-tab').eq({$Think.get.index|default=1}-1).addClass('npoc-tab-active');
+            //tab切换
+            $('.npoc-tab').on('click', function() {
+                $('.npoc-tab').removeClass('npoc-tab-active');
+                $(this).addClass('npoc-tab-active');
+                var tabIndex = $(this).attr('data-tab');
+                $("#tab1,#tab2,#tab3,#tab4,#tab5").hide();
+                $('#tab'+tabIndex).show();
+                var currentIndex = parseInt(tabIndex) + 1;
+                if( $("#myTable" + currentIndex + "_wrapper").length<=0 && $("#myTable" + currentIndex + "-1_wrapper").length<=0 && localIndex != 4 ) {
+                    $("#myTable" + currentIndex + ", #myTable" + currentIndex + "-1").DataTable({
+                        paging:false,
+                        searching:false,
+                        language:{
+                            zeroRecords: "没有内容",
+                            info:""
+                        },
+                        sWidth:"100%",
+                        scrollY:"600px",
+                        "bSort":true,
+                        // order:[9,"desc"]
+                    });
+                    $("#myTable" + currentIndex + "-1_wrapper").hide();
+                }
+
+                //$('#tab'+tabIndex).find('form').find('input').val('');
+                // $('#tab'+tabIndex).find('form').find('select').attr("disabled",false);
+                // $('#tab'+tabIndex).find('form').find('select').each(function (index, item) {
+                //     $(item).select2("val","");
+                // });
+            });
+
+
+            $('.sub-npoc-tab').on('click', function() {
+                $(this).closest('.sub-npoc-tab-wrap').find('.sub-npoc-tab').removeClass('sub-npoc-tab-active');
+                $(this).addClass('sub-npoc-tab-active');
+                var tabIndex = $(this).attr('data-target');
+                if(tabIndex == "myTable4" || tabIndex == "myTable4-1") {
+                    if(tabIndex == "myTable4") {
+                        $("#tab3").find("#myTable4").fadeIn(0);
+                        $("#tab3").find("#myTable4-1").fadeOut(0);
+                    }else {
+                        $("#tab3").find("#myTable4").fadeOut(0);
+                        $("#tab3").find("#myTable4-1").fadeIn(0);
+                    }
+                } else {
+                    $(this).closest('.box-body').find('.dataTables_wrapper').hide()
+                    $('#'+tabIndex+'_wrapper').fadeIn();
+                }
+                $(this).closest('.box').find('button.export').attr('data-tab', tabIndex)
+            });
+
+            if ($("#kfList4").select2("val") != null) {
+                $("#kfList4").attr("disabled",false);
+                $("#groups4,#manager4").attr("disabled","disabled");
+            }
+
+            if ($("#groups4").select2("val") != null) {
+                $("#groups4").attr("disabled",false);
+                $("#kfList4,#manager4").attr("disabled","disabled");
+            }
+
+            if ($("#manager4").select2("val") != null) {
+                $("#manager4").attr("disabled",false);
+                $("#groups4,#kfList4").attr("disabled","disabled");
+            }
+
+            // 初始化select状态，当执行搜索且某个select有选中值的话，当前tab页下的其他select都要禁用
+            initSelectStatus()
+
+            $(".export").click(function(event) {
+                var _this = $(this);
+                var tab =  _this.attr("data-tab");
+                var taget = $(this).closest('.box').find('#'+tab);
+                var colums = [];
+                var data = [];
+                taget.find("th").each(function() {
+                    var text = $(this).text().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    sub["fontColor"] = $(this).css("color");
+                    sub["bgColor"] = $(this).css("background-color");
+                    colums.push(sub);
+                });
+                data.push(colums);
+                taget.find("tbody tr").each(function(i) {
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function() {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text: text,
+                            fontColor: $(this).css("color"),
+                            bgColor: $(this).css("background-color")
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+                });
+
+                _this.exportExcel({
+                    data: data,
+                    title: "新客服量房统计",
+                    url: "/export/download",
+                    show:true
+                });
+            });
+        });
+        function diffDate(startDate, EndDate) {
+            var arry1 = startDate.split('-'),
+                sDate = new Date(arry1[0], arry1[1], arry1[2]),
+                arry2 = EndDate.split('-'),
+                eDate = new Date(arry2[0], arry2[1], arry2[2]);
+            if (sDate > eDate) {
+                return false
+            } else {
+                return true
+            }
+        }
+        function isTimeOut(startDate, EndDate, day) {
+            var arry1 = startDate.split('-'),
+                sDate = new Date(arry1[0], arry1[1], arry1[2]),
+                arry2 = EndDate.split('-'),
+                eDate = new Date(arry2[0], arry2[1], arry2[2]);
+            return Math.abs(sDate.getTime() - eDate.getTime()) > (day * 24 * 60 * 60 * 1000);
+        }
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 1300,},
+                fn || function () {
+                }
+            )
+        }
+
+        /**
+         * 初始化select状态，分离参数
+         * @param localIndex  当前选项卡索引
+         */
+        function initSelectStatus(localIndex) {
+            var localIndex = parseInt(location.href.slice(location.href.indexOf("index")).split("=")[1]);
+            var tabOneSelector = ["#kfList", "#groups1"],  // 按人统计两个select选择器
+                tabTwoSelector = ["#groups2", "#manager1"],  // 按组统计两个select选择器
+                tabFourSelector = ["#kfList4", "#groups4", "#manager4"]; // 按日统计三个select选择器
+            var selectorArr = null,
+                currentSelectIndex = 0;
+            if(!localIndex) {
+                localIndex = 1
+            }
+            switch (localIndex) {
+                case 1:
+                    selectorArr = tabOneSelector;
+                    currentSelectIndex = watchSelect(selectorArr);
+                    break;
+                case 2:
+                    selectorArr = tabTwoSelector;
+                    currentSelectIndex = watchSelect(selectorArr);
+                    break;
+                case 4:
+                    selectorArr = tabFourSelector;
+                    currentSelectIndex = watchSelect(selectorArr);
+                    break;
+            }
+            if(currentSelectIndex !== null){
+                disableSomeSelect(selectorArr, currentSelectIndex)
+            }
+        }
+
+
+        /**
+         * 判断当前哪个select处于选择状态
+         * @param selectorArr  选择器数组
+         */
+        function watchSelect(selectorArr) {
+            if(!Array.isArray(selectorArr)){
+                return
+            }
+            var selectIndex = null;
+            selectorArr.forEach(function (item, index) {
+                if($(item).val()){
+                    selectIndex = index
+                }
+            })
+            return selectIndex
+        }
+
+        /**
+         *
+         * @param optionSelector  当前选项卡选择器列表
+         * @param currentSelect  当前有值的select, int类型
+         */
+        function disableSomeSelect(optionSelector, currentSelect) {
+            if(!Array.isArray(optionSelector)){
+                return
+            }
+            optionSelector.forEach(function (item, index) {
+                if(currentSelect != index) {
+                    $(item).attr("disabled","disabled");
+                }
+            })
+        }
+    </script>
+</block>

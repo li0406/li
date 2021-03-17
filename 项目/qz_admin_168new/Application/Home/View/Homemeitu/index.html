@@ -1,0 +1,155 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>{$title}-控制台</title>
+</block>
+<block name="style">
+
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>装修效果图管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homemeitu">装修效果图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <!-- 首页装修效果图推荐 -->
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                <!-- S box -->
+                    <div class="box-header with-border">
+                        <a class="btn bg-olive btn-flat add" href="javascript:;" ><i class="fa fa-edit"></i> 新增效果图推荐</a>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <!-- <th width="1%">#</th> -->
+                                <th style="text-align:left;">标题</th>
+                                <th >图片预览</th>
+                                <th width="100">位置</th>
+                                <th width="150">操作时间</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            <volist name="list" id="v">
+                            <tr>
+                                <!-- <td>{$v.id}</td> -->
+                                <td style="text-align:left;font-size:15px">
+                                    <a href="http://meitu.{:C('QZ_YUMING')}/p{$v.company_id}.html" target="_blank" title="{$v.title}">{$v.title}</a>
+                                </td>
+                                <td><a class="view" href="javascript:;" data-url="{$v.img_url}">查看</a></td>
+                                <td>{$v.sort}</td>
+                                <td>{$v.op_time|date="Y-m-d H:i:s",###}</td>
+                                <td>
+                                    <span title="编辑" class="fa fa-pencil edit" data-id="{$v.id}"></span>
+                                </td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                        </table>
+                    </div>
+                <!-- E box -->
+                </div>
+            </div>
+        </div>
+        <!-- 首页文字推荐 -->
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                <!-- S box -->
+                    <div class="box-header with-border">
+                        <a class="btn bg-olive btn-flat add-text" href="javascript:;" ><i class="fa fa-edit"></i> 新增文字推荐</a>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <!-- <th width="1%">#</th> -->
+                                <th style="text-align:left;">标题</th>
+                                <th width="200">位置</th>
+                                <th width="250">操作时间</th>
+                                <th width="180">操作</th>
+                            </tr>
+                            <volist name="textList" id="vt">
+                            <tr>
+                                <!-- <td>{$vt.id}</td> -->
+                                <td style="text-align:left;font-size:15px">
+                                    {$vt.title}
+                                </td>
+                                <td>{$vt.sort}</td>
+                                <td>{$vt.op_time|date="Y-m-d H:i:s",###}</td>
+                                <td>
+                                    <span title="编辑" class="fa fa-pencil edit-text" data-id="{$vt.id}"></span>
+                                    <span title="删除" class="fa fa-close" data-id="{$vt.id}"></span>
+                                </td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                        </table>
+                    </div>
+                <!-- E box -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 模态框查看图片 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="padding:2%;">
+        <div class="modal-dialog" style="width:25%">
+            <div class="modal-content">
+                <div class="modal-body"><img src="" id="Preview" width="100%"></div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        //新增首页装修效果图
+        $(".add").click(function(event) {
+            if(parseInt('{$count}',10) >= 4){
+                alert("首页装修效果图推荐最多只能有4个");
+                return false;
+            }else{
+               window.location.href="/homemeitu/add";
+            }
+        });
+        //新增首页装修效果图文字
+        $(".add-text").click(function(event) {
+            if(parseInt('{$textCount}',10) >= 17){
+                alert("首页文字推荐最多只能有17个");
+                return false;
+            }else{
+               window.location.href="/homemeitu/addtext";
+            }
+        });
+        //编辑首页装修效果图
+        $(".edit").click(function(event) {
+            var id = $(this).attr('data-id');
+            window.location.href="/homemeitu/edit?id=" + id;
+        });
+        //新增首页装修效果图文字
+        $(".edit-text").click(function(event) {
+            var id = $(this).attr('data-id');
+            window.location.href="/homemeitu/edittext?id=" + id;
+        });
+
+        $(".view").click(function(event) {
+            var imgUrl = "//{:C('QINIU_DOMAIN')}/" + $(this).attr('data-url');;
+            $("#myModal").modal("show");
+            $("#Preview").attr("src",imgUrl);
+        });
+
+        $('.fa-close').click(function(){
+            if(confirm("您确定要删除吗？")){
+                var id = $(this).attr('data-id');
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                location.href="/homemeitu/deltext?id="+id;
+            }
+        });
+    </script>
+</block>

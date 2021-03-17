@@ -1,0 +1,164 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服个人有效率统计-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服个人有效率统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/orderanalysis/singleseffectiverate">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    选择日期:<input type="text" name="date" class="form-control datepicker"  placeholder="开始时间" value="{$date}">
+                                </div>
+                                <div class="col-xs-2">
+                                    客服班次:
+                                    <select id="class"   name="class" placeholder="客服班次" >
+                                        <option value="">选择班次</option>
+                                        <option value="1">白班</option>
+                                        <option value="2">晚班</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    客服分组:
+                                    <select id="group"   name="group"  placeholder="group" >
+                                        <option value="">选择分组</option>
+                                        <volist name="kfgroup" id="vo">
+                                        <option value="{$vo}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    客服:
+                                    <select id="kf"   name="kf"  placeholder="group" >
+                                        <option value="">选择客服</option>
+                                        <volist name="kfList" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                      <br/>
+                                      <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <thead>
+                            <tr>
+                                <th>客服组</th>
+                                <th>客服专员</th>
+                                <th >客服班次</th>
+                                <th >当日分单量</th>
+                                <th >当日赠单量</th>
+                                <th >当日分单率</th>
+                                <th >当日赠单率</th>
+                                <th >当日有效率</th>
+                                <th >当月累计分单量</th>
+                                <th >当月累计赠单量</th>
+                                <th >当月累计分单率</th>
+                                <th >当月累计赠单率</th>
+                                <th >当月累计有效率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                            <if condition="isset($vo['now'])">
+                            <tr>
+                                <th>{$vo.now.kfgroup}</th>
+                                <th>{$vo.now.username}</th>
+                                <th >
+                                    <if condition="$vo['now']['kftype'] EQ 1">
+                                        白班
+                                    <else/>
+                                        晚班
+                                    </if>
+                                </th>
+                                <th >{$vo.now.fencount}</th>
+                                <th >{$vo.now.zencount}</th>
+                                <th >{$vo.now.fenrate}%</th>
+                                <th >{$vo.now.zenrate}%</th>
+                                <th >{$vo.now.allrate}%</th>
+                                <th >{$vo.allfen}</th>
+                                <th >{$vo.allzen}</th>
+                                <th >{$vo.allfenrate}%</th>
+                                <th >{$vo.allzenrate}%</th>
+                                <th >{$vo.allrate}%</th>
+                            </tr>
+                            </if>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#search").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("#search").select2("val","{$cs}");
+
+    $("#class").select2({
+        allowClear: true,
+        placeholder: "选择班次"
+    });
+    $("#class").select2("val","{$class}");
+
+    $("#group").select2({
+        allowClear: true,
+        placeholder: "选择分组"
+    });
+    $("#group").select2("val","{$group}");
+
+    $("#kf").select2({
+        allowClear: true,
+        placeholder: "选择客服"
+    });
+    $("#kf").select2("val","{$kf}");
+
+    $(".datepicker").datepicker({
+          format:"yyyy-mm-dd",
+          minViewMode:0
+    });
+
+    $('#myTable').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       }
+    });
+</script>
+</block>

@@ -1,0 +1,111 @@
+<div class="form-group multi_{$index}">
+    <form>
+    <label class="col-sm-2 control-label">{$order}&nbsp;多倍:</label>
+    <div class="col-sm-2">
+        <input id="multi_start_{$index}"  type="text" class="form-control datepicker" placeholder="多倍开始时间" name="start" value="{$info.start_time}" autocomplete="off" />
+    </div>
+    <label class="col-sm-1 control-label"  style="text-align: center;">至:</label>
+    <div class="col-sm-2">
+        <input id="multi_end_{$index}"  type="text" class="form-control datepicker" placeholder="多倍结束时间" autocomplete="off" name="end" value="{$info.end_time}"  />
+    </div>
+    <div class="col-sm-2">
+        <select class="form-control" name="viptype">
+            <option value="">请选择</option>
+            <volist name="viptype" id="vo">
+            <if condition="$info['viptype'] EQ $key">
+            <option value="{$key}" selected="selected">{$vo}</option>
+            <else />
+            <option value="{$key}">{$vo}</option>
+            </if>
+            </volist>
+        </select>
+    </div>
+    <label class="col-sm-1 control-label day" style="text-align: left;">{$info.day|default=0}天</label>
+    <if condition="!isset($read)">
+    <div class="col-sm-2">
+        <button type="button" class="btn btn-success  btn-sm">保存</button>
+        <button type="button" class="btn btn-danger btn-sm">删除</button>
+    </div>
+    </if>
+    </form>
+</div>
+<if condition="$read">
+<script type="text/javascript">
+$(".multi_{$index} *").attr("disabled","disabled");
+</script>
+<else />
+<script type="text/javascript">
+    $(".multi_{$index} #multi_start_{$index}").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $(".multi_{$index} #multi_end_{$index}").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var start = $(".multi_{$index} #multi_start_{$index}").datepicker("getDate");
+        if (start == null) {
+            alert("请输入多倍开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("多倍结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days = Math.floor(offset/(24*3600*1000))+1;
+        $(".multi_{$index} .day").html(days+"天");
+    });
+
+    $(".btn-danger").click(function(event) {
+        $(this).parents(".form-group").remove();
+    });
+
+    $(".multi_{$index} .btn-success").click(function(event) {
+        var data = $(".multi_{$index} form").serializeArray();
+        var json = $("#search_company").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_company").select2("data") == "string"){
+                json = JSON.parse($("#search_company").select2("data"));
+            }
+            var company_id = json[0].id;
+            data.push({name:"company_id",value:company_id});
+            data.push({name:"company_name",value:json[0].jc});
+        };
+
+        json = $("#search_seller").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_seller").select2("data") == "string"){
+                json = JSON.parse($("#search_seller").select2("data"));
+            }
+            data.push({name:"saler_id",value:json[0].id});
+            data.push({name:"saler_name",value:json[0].text || json[0].name});
+        }
+        data.push({name:"parentid",value:$(this).parents(".panel-body").find("input[name=contract_id]").val()});
+        $.ajax({
+            url: '/vip/multi/',
+            type: 'POST',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                $(".multi_{$index} button").remove();
+                $(".multi_{$index} *").attr("disabled","disabled");
+                $(".multi_{$index}").removeClass('multi_{$index}');
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    });
+</script>
+</if>
+
+

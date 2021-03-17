@@ -1,0 +1,526 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网精英设计师管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/homedesigner.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>精英设计师管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/homedesigner/">精英设计师管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                  <div class="box-header with-border">
+                    <h3 class="box-title">条件查询</h3>
+                  </div>
+                  <div class="box-body">
+                    <div class="row">
+                      <div class="col-xs-2">
+                        设计师名字或ID：<input type="text" class="form-control condition" placeholder="设计师名字或ID" value="{$Think.get.condition}">
+                      </div>
+                      <div class="col-xs-2">
+                            所属城市：
+                            <select name="cs" class="select2" id="citylist">
+                                <option value="">全部城市</option>
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                      </div>
+                      <div class="col-xs-1">
+                        <br/>
+                        <button type="button" id="search" class="btn btn-block btn-primary normal"><i class="fa fa-search"></i>查询</button>
+                      </div>
+                      <div class="col-xs-1">
+                        <br/>
+                        <button type="button" id="preview" class="btn btn-block bg-teal normal"><i class="fa fa-eye"></i>预览</button>
+                      </div>
+                      <div class="col-xs-2 pull-right">
+                        <br/>
+                        <a href="/homedesigner/add/" class="pull-right"><button class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i>新增设计师</button></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">设计师列表</h3>
+                        <!--
+                        <div class="box-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+                                <div class="input-group-btn">
+                                  <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <form id="designercheck">
+                            <table class="table table-hover text-center" id="designerlist">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            <a href="javascript:void(0)" id="reverse">全选</a>
+                                        </th>
+                                        <th>设计师ID</th>
+                                        <th>设计师名字</th>
+                                        <th>所属城市</th>
+                                        <th>排序</th>
+                                        <th>所属公司</th>
+                                        <th>头像</th>
+                                        <th>添加日期</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="info.info" id="vo">
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="selected[]" value="{$vo.id}" class="bids" data-id="{$vo.uid}">
+                                            </td>
+                                            <td>{$vo.uid}</td>
+                                            <td class="center-middle">
+                                                <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/blog/{$vo.uid}" target="_blank">{$vo.name}</a>
+                                            </td>
+                                            <td>{$vo.cname}</td>
+                                            <td>
+                                                <input class="validate[required]"  type="text" name="order" placeholder="" value="{$vo.sort}">
+                                            </td>
+                                            <td>
+                                                <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/company_home/{$vo.company_id}" target="_blank">{$vo.jc}</a>
+                                            </td>
+                                            <td>
+                                                <img class="designerthumb"  alt="{$vo.jc}-{$vo.name}" src="{$vo.logo}"/>
+                                            </td>
+                                            <td>{$vo.op_time|date='Y-m-d H:i:s',###}</td>
+                                            <eq name="vo.status" value="1">
+                                                <td></td>
+                                            <else/>
+                                                <td>
+                                                    <span class="badge bg-gray">停用</span>
+                                                </td>
+                                            </eq>
+                                            <td>
+
+                                                <a href="/homedesigner/edit/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <!--
+                                                <a>
+                                                    <span title="日志" class="fa fa-reorder"></span>
+                                                </a>&nbsp;&nbsp;
+                                                -->
+                                                <eq name="vo.status" value="1">
+                                                    <a href="javascript:void(0)" data-id='{$vo.id}' class="delete">
+                                                        <span title="停用" class="fa fa-toggle-on"></span>
+                                                    </a>
+                                                <else />
+                                                    <a href="javascript:void(0)" data-id='{$vo.id}' class="enable">
+                                                        <span title="启用" class="fa fa-toggle-off"></span>
+                                                    </a>
+                                                </eq>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            <button type="button" id="reset" class="btn btn-info btn-sm">更新设计师排序</button>
+                            <button type="button" id="allde" class="btn btn-warning btn-sm">批量设为不可用</button>
+                            {$info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="padding:11%;">
+        <div class="modal-dialog " style="width:1258px;height:425px">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table class="table">
+                        <caption style="padding: 6px 0 3px 0;color: red;">推荐设计师</caption>
+                        <tbody id="ajaxcontent">
+                            <tr>
+                                <td>
+                                    <div>
+                                        <img src="https://staticqn.qizuang.com/logoadv/20160503/FgLCZ5eWY0qIOlYLHMmPVLHb4WIT" width="106" height="43" style=" position: relative;">
+                                        <p style="margin-top: 10px;">朱武智-设计总监-蓝海经典</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"
+                       data-dismiss="modal">关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //反选
+            $('#reverse').click(function(){
+                $("input[class='bids']").each(function() {
+                      var flag = $(this).prop("checked");
+                    $(this).prop("checked", !flag);
+                })
+            })
+            $(".select2").select2();
+            $(".select2").select2("val", '{$Think.get.cs}');
+
+            $("#file-designer").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption:false,
+                browseClass:"btn blue",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount:1,
+                uploadClass:"btn green",
+                removeClass:"btn red",
+                uploadAsync:true,
+                dropZoneEnabled:false,
+                previewSettings:{
+                    image: {width: "auto", height: "100px"}
+                },
+                minImageWidth: null,
+                minImageHeight: null,
+                maxImageWidth: null,
+                maxImageHeight: null,
+                layoutTemplates:{
+                    actionDelete:"",
+                    actionUpload:""
+                },
+                uploadExtraData:{
+                    prefix:'qzlogo'
+                },
+                initialPreview:'{$leave.files|default=''}',
+            }).on('fileuploaded', function(event, data) {
+                var _this = $(this);
+                if(data.response.status == 1){
+                    var obj = data.response.data.file_data;
+                    var val = $("input[name=files]").val();
+                    val += ","+obj.url+",";
+                    $("input[name=files]").val(val);
+                }else{
+                    /*
+                    _this.Alert({
+                        msg:data.response.info,
+                        level:2
+                    });
+                    */
+                }
+            }).on("fileuploaderror",function(event, data){
+                var _this = $(this);
+                /*
+                 _this.Alert({
+                    msg:"附件上传失败,请联系技术部门！",
+                    level:2
+                });
+                */
+                 return false;
+            }).on("fileclear",function(){
+                $("input[name=files]").val("");
+            });
+
+            //预览功能
+            $('#preview').click(function(){
+                var cs = $('#citylist').val();
+                if('' == cs || '0' == cs){
+                    var e = dialog({
+                        title: '消息',
+                        content: '请选择要预览的城市！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }else{
+                    $.ajax({
+                        url: '/homedesigner/getpreview/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            cs:cs
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            //热门装修公司预览
+                            $('#ajaxcontent').empty();
+                            $ajaxcontent = '<tr>';
+                            $.each(data.data,function(key,value) {
+                                $ajaxcontent = $ajaxcontent + '<td><div><img src="'+value.logo+'" width="106" height="120" style=" position: relative;"><p style="margin-top: 10px;">'+value.uname+'-'+value.zw+'-'+value.jc+'</p></div><td>';
+                                if((key+1)%5 == 0){
+                                    $ajaxcontent = $ajaxcontent + '</tr><tr>';
+                                }
+                            });
+                            $ajaxcontent = $ajaxcontent + '</tr>';
+                            $('#ajaxcontent').html($ajaxcontent);
+                            $('#myModal').modal('show');
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                }
+            })
+
+            $('#reset').click(function(){
+                if(! $('#designercheck').validationEngine('validate')){
+                    return false;
+                }
+                var reset = new Object();
+                $("input[class='bids']").each(function(key) {
+                    var flag = $(this).prop("checked");
+                    if(flag){
+                        reset[key] = {
+                            id:$(this).parent().parent().find('.bids').attr('data-id'),
+                            sort:$(this).parent().parent().find('input[name=order]').val()
+                        }
+                    }
+                })
+
+                var hasProp = false;
+                for (var prop in reset){
+                    hasProp = true;
+                    break;
+                }
+                if (!hasProp){
+                    var d = dialog({
+                        title: '消息',
+                        content: '请选择需要重新排序的设计师！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    d.show();
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/homedesigner/reset/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        reset:reset
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+
+            $('#allde').click(function(){
+                var allde = new Object();
+                $("input[class='bids']").each(function(key) {
+                    var flag = $(this).prop("checked");
+                    if(flag){
+                        allde[key] = {
+                            id:$(this).parent().parent().find('.bids').attr('data-id')
+                        }
+                    }
+                })
+
+                var hasProp = false;
+                for (var prop in allde){
+                    hasProp = true;
+                    break;
+                }
+                if (!hasProp){
+                    var d = dialog({
+                        title: '消息',
+                        content: '请选择需要批量删除的设计师！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    d.show();
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/homedesigner/deleteall/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        allde:allde
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+
+
+            $('.delete').click(function(){
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/homedesigner/setstatus/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:'0'
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            $('.enable').click(function(){
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/homedesigner/setstatus/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:'1'
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            $('#search').click(function(){
+                var condition = $('.condition').val();
+                var cs = $('#citylist').val();
+                window.location.href = "/homedesigner/?condition="+condition+"&cs="+cs;
+            })
+        })
+    </script>
+</block>

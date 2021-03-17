@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>微信渠道关联设置-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>微信渠道关联设置</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="">
+                                <div class="col-xs-12 no-padding">
+                                    <div class="col-xs-2">
+                                        <div class="h5">渠道标记代号</div>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div class="h5">所属来源组</div>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div class="h5">所属部门</div>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div class="h5">是否付费</div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 no-padding">
+                                    <div class="col-xs-2">
+                                        <input type="text" class="form-control" name="src" placeholder="渠道标记代号" value="{$Think.get.search_name}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <select class="form-control select-sm" name="source_group" id="source_group">
+                                            <option value="">请选择</option>
+                                                <volist name="group" id="vo">
+                                                    <option value="{$vo.id}">{$vo.name}</option>
+                                                </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <select class="form-control select-sm" name="group_name" id="group_name">
+                                            <option value="">请选择</option>
+                                            <volist name="department" id="vo">
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <select class="form-control select-sm" name="charge" id="charge">
+                                            <option value="">请选择</option>
+                                            <option value="2">付费</option>
+                                            <option value="1">免费</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-search"></i> 查询</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                            <div class="col-xs-12 h5">
+                                <a href="javascript:void(0)" id="setBatch"><div class="btn btn-success">批量设置微信公众号信息</div></a>
+                                <a href="/Wechatmanagement/setdefaultwechat/"><div class="btn btn-success">设置默认微信公众号信息</div></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="h4">微信公众号信息列表</div>
+                        <table id="list-table" class="table table-bordered table-hover dataTable">
+                            <thead>
+                            <tr>
+                                <th><input type="checkbox" id="input-checkbox" /><label for="input-checkbox">全选</label></th>
+                                <th>渠道标记代号</th>
+                                <th>所属来源组</th>
+                                <th>所属部门</th>
+                                <th>是否付费</th>
+                                <th>微信公众号名称</th>
+                                <th class="col-sm-2">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="v">
+                                <tr>
+                                    <td><input type="checkbox" data-id="{$v.id}" class="icheck"/></td>
+                                    <td>{$v.src}</td>
+                                    <td>{$v.groupname}</td>
+                                    <td>
+                                        <if condition="$v.dept EQ '1' ">推广部</if>
+                                        <if condition="$v.dept EQ '2' ">流量部</if>
+                                        <if condition="$v.dept EQ '3' ">产品部</if>
+                                        <if condition="$v.dept EQ '4' ">渠道部</if>
+                                        <if condition="$v.dept EQ '5' ">总裁办</if>
+                                        <if condition="$v.dept EQ '6' ">推广部自媒体组</if>
+                                        <if condition="$v.dept EQ '7' ">推广部视频组</if>
+                                    </td>
+                                    <td>
+                                        <if condition="$v.charge EQ '0' "><span class="badge bg-blue">未知</span></if>
+                                        <if condition="$v.charge EQ '1' "><span class="badge bg-green">免费</span></if>
+                                        <if condition="$v.charge EQ '2' "><span class="badge bg-red">付费</span></if>
+                                    </td>
+                                    <td>
+                                        <if condition="$v.wxname neq ''">
+                                            {$v.wxname}
+                                        </if>
+                                    </td>
+                                    <td><a href="/Wechatmanagement/setwechat/id/{$v.id}">设置微信公众号</a></td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        <form action="/Wechatmanagement/setbatchwechat/" method="post" id="batch">
+                            <input type="hidden" name="ids" value="">
+                        </form>
+                    </div>
+                    <!--分页-->
+                    <div class="box-footer clearfix page">
+                        <ul class="pagination no-margin">{$page}</ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            $("#source_group").select2();
+            $("#source_group").select2("val","{$Think.get.source_group}");
+            $("#group_name").select2();
+            $("#group_name").select2("val","{$Think.get.group_name}");
+            $("#charge").select2();
+            $("#charge").select2("val","{$Think.get.charge}");
+
+
+            $('#list-table #input-checkbox').on('click',function(){
+                if($(this).is(':checked')){
+                    $('#list-table tbody tr').each(function(index, el) {
+                        $(el).attr('check-bool','true').find('td').eq(0).find('input').prop('checked', true)
+                    });
+                }else{
+                    $('#list-table tbody tr').each(function(index, el) {
+                        $(el).removeAttr('check-bool').find('td').eq(0).find('input').prop('checked', false)
+                    });
+                }
+            });
+            $('#list-table tbody tr td').find('input').on('click',function(){
+                if($(this).is(':checked')){
+                    $(this).parent('td').parent('tr').attr('check-bool','true');
+                    if($('#list-table tbody tr[check-bool="true"]').length==$('#list-table tbody tr').length){
+                        $('#list-table #input-checkbox').prop('checked', true)
+                    }else{
+                        $('#list-table #input-checkbox').prop('checked', false)
+                    }
+                }else{
+                    $(this).parent('td').parent('tr').removeAttr('check-bool');
+                    $('#list-table #input-checkbox').prop('checked', false)
+                }
+            });
+            $('.select-sm').select2()
+        });
+
+
+        //批量设置
+        $('#setBatch').click(function(){
+            var ids = [];
+            $(".icheck").each(function(){
+                if(true == $(this).is(':checked')){
+                    ids.push($(this).attr('data-id'));
+                    $("input[name=ids]").val(ids);
+                    $("#batch").submit();
+                }
+            });
+        });
+    </script>
+</block>

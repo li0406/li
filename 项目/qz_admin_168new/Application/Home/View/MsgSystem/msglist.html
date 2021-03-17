@@ -1,0 +1,81 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>通知中心</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/msglist/css/msglist.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+
+    <style type="text/css">
+        .system .cont .tiao {color: normal;}
+        .system .cont .tiao a {color: normal;}
+
+        .system .cont .tiao:hover{color: #cc221a;}
+        .system .cont .tiao:hover a {color: inherit;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>通知中心</h1>
+    </section>
+   
+    <div class="notice">
+        <div class="msgtype_box">
+            <volist name="type_list" id="item">
+                <a href="/msgSystem/msglist?type_id={$item.id}" <if condition="$type_id == $item['id']"> class="active" </if> >
+                    {$item.name}<gt name="item.msg_count" value="0">（{$item.msg_count}）</gt> 
+                </a>
+            </volist>
+        </div>
+      
+        <div id="tab-content">
+            <notempty name="data.list">
+                <div class="">
+                    <volist name="data.list" id="item">
+                        <div class="system">
+                            <div class="cont">
+                                <div class="title">
+                                    <span class="left">{$item.title}</span>
+                                    <span class="right">{$item.created_date}</span>
+                                </div>
+                                <div class="tiao">
+                                    <empty name="item.link_url">
+                                        {$item.content}
+                                    <else />
+                                        <a href="{$item.link_url}" target="_blank">{$item.content}</a>
+                                    </empty>
+                                </div>
+                            </div>
+                            <div class="del_this_tips" data-id="{$item.id}">删除</div>
+                        </div>
+                    </volist>
+                </div>
+
+                <div>{$data.pageshow}</div>
+            </notempty>
+
+            <empty name="data.list">
+                <div style="padding: 20px; text-align: center;">暂无数据</div>
+            </empty>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(function(){
+            // 删除
+            $("#tab-content").on("click", ".del_this_tips", function(event){
+                var msg_id = $(this).data("id");
+                if (confirm("确定要删除该消息吗？") == true) {
+                    $.post("/msgSystem/deleteMsg", {msg_id: msg_id}, function(response){
+                        if (response.error_code == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(response.error_msg);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</block>

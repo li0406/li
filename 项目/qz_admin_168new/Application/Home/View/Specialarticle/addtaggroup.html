@@ -1,0 +1,154 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>装修攻略-标签组管理-编辑</title>
+</block>
+<block name="style">
+    
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/plugins/layer/theme/default/layer.css?v={:C('STATIC_VERSION')}">
+    <style>
+      .form-group{overflow: hidden;}
+      .xingred{color: #ff2f87;}
+      .tishi{color: #ff1727;margin-top: 3px;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+    <if condition="!empty(I('get.id'))">
+        <h1><a href="/specialarticle/basetags">详情页标签管理</a> > <a href="/specialarticle/taggroup">标签组管理</a> > 编辑标签组</h1>
+        <else/>
+        <h1><a href="/specialarticle/basetags">详情页标签管理</a> > <a href="/specialarticle/taggroup">标签组管理</a> > 新增标签组</h1>
+    </if>
+    </section>
+    <div class="form" style="margin: 30px 0 0 20px">
+      <div class="col-xs-12">
+        <div class="box box-default">
+        <div class="box-body">
+        <form id="form">
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>展示页</div>
+                <select class="form-control showselect" name="style" <if condition="!empty(I('get.id'))">disabled</if> >
+                    <option value="" >请选择</option>
+                    <option value="1" {$data['style'] === '0' ? 'selected':''} >装修攻略详情页</option>
+                    <option value="2" {$data['style'] == 1 ? 'selected':''} >装修百科详情页</option>
+                    <option value="3" {$data['style'] == 2 ? 'selected':''} >主站-装修公司页</option>
+                    <option value="4" {$data['style'] == 3 ? 'selected':''} >问答知识频道页</option>
+                    <option value="5" {$data['style'] == 4 ? 'selected':''} >问答知识专题页</option>
+                    <option value="6" {$data['style'] == 5 ? 'selected':''} >在线问答详情页</option>
+                    <option value="7" {$data['style'] == 6 ? 'selected':''} >装修专题栏目页</option>
+                    <option value="8" {$data['style'] == 3 ? 'selected':''} >装修百科专题页</option>
+                </select>
+                <div class="tishi showtishi"></div>
+               </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>标签组名称</div>
+                <input type="text" class="form-control labelgroup" maxlength="20" name="name" placeholder="请输入标签组名称" value="{$data.name|default=''}">
+                <div class="tishi labeltishi"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-2">
+                <div><span class="xingred">*</span>展示位置</div>
+                <select class="form-control showposition" <if condition="!empty(I('get.id'))">disabled</if>>
+                    <option value="">请选择</option>
+                    <option value="1" {$data['position'] == 1 ? 'selected':''}>底部</option>
+                    <option value="2" {$data['position'] == 2 ? 'selected':''}>右侧</option>
+                </select>
+                <div class="tishi positiontishi"></div>
+            </div>
+            </div>
+            <input type="hidden" name="position">
+            <input type="hidden" name="id" value="{$data.id}">
+            <div class="col-xs-2">
+                <div class="btn btn-info save_btn">保存</div>
+                <div style="margin-left: 20px" class="btn btn-primary back_btn">返回</div>
+            </div>
+        </form>
+       </div>
+      </div>
+     </div>
+    </div>
+    
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            //返回按钮
+            $(".back_btn").on('click', function () {
+                window.history.back(-1);
+            });
+
+           $('.showselect').change(function(){
+              var tag_name = $(".showselect").val();
+              if(tag_name == 3 ){
+                $('.showposition').val(1).attr("disabled",true)
+                $('input[name=position]').val(1)
+              }else{
+                $('.showposition').attr("disabled",false)
+                $('input[name=position]').val("")
+                $('.showposition').val("")
+              }
+           })
+
+           $('.showposition').change(function(){
+               var showpositionval=$(this).val();
+               $('input[name=position]').val(showpositionval)
+           })
+
+
+            //保存按钮
+            $(".save_btn").on('click', function () {
+                var _this = $(this);
+                $('.tishi').html('');
+                //验证名称是否存在
+                var tag_name = $(".showselect").val(),
+                    labelgroupval = $.trim($('.labelgroup').val()),
+                    showpositionval = $('.showposition').val();
+                if (tag_name == '') {
+                    $(".showselect").focus();
+                    $('.showtishi').html("请选择展示页");
+                    return false;
+                }
+                if (labelgroupval == "") {
+                    $(".labelgroup").focus();
+                    $('.labeltishi').html("请输入标签组名称");
+                    return false;
+                }
+                if (showpositionval == "") {
+                    $(".showposition").focus();
+                    $('.positiontishi').html("请选择展示位置");
+                    return false;
+                }
+                saveData(_this);
+            });
+        });
+
+        //验证成功后采去提交数据
+        function saveData(_this) {
+            var obj = $("#form").serializeArray();
+            $.ajax({
+                url: '/specialarticle/addtaggroup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: obj
+            }).done(function (data) {
+                if (data.status == 1) {
+                    layer.msg("保存成功！", {time: 1000},function () {
+                        window.location.href = '/specialarticle/taggroup';
+                    });
+                } else {
+                    layer.msg(data.info, {time: 1000});
+                }
+            }).fail(function () {
+                layer.msg('操作失败,请联系技术部门！', {time: 1000});
+            });
+        }
+    </script>
+</block>

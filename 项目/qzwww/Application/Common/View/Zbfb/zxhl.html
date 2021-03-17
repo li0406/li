@@ -1,0 +1,143 @@
+<div class="windowbg onehxsj"></div>
+<div class="windowbg" id="quchujicheng">
+    <div class="order-window big-order-window ganxsq2" style="padding-top: 25px; height: 480px">
+        <div class="tit"><span>吉日</span>开工&nbsp;&nbsp;&nbsp;&nbsp;开工大吉</div>
+        <p>
+                <span style="color:#ff5353;">10秒</span>测算您的装修吉日
+            </p>
+        <div class="shutdown"><i class="guanbisheji"></i></div>
+        <div class="order-info fengshui">
+            <div class="box-line edit-text">
+                <div class="edit-half-left">装修时间</div>
+                <select class="select edit-half-right selectbox" name="xztime">
+                    <option value="1">一个月内装修</option>
+                    <option value="2">半年内装修</option>
+                    <option value="3">半年后装修</option>
+                </select>
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">所在地区</div>
+                <select class="selectbox_two" style="float:left;position:relative;left:4px;" name="city_box"></select>
+                <select class="selectbox_two" name="quyu_box"></select>
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">您的称呼</div>
+                <input type="text" name="name" class="edit-half-right" placeholder="怎么称呼您" />
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">手机号码</div>
+                <input type="text" name="tel" class="edit-half-right" placeholder="输入手机号" maxlength="11" />
+                <input type="hidden" name="fb_type" value="huangli">
+            </div>
+            <div class="box-line edit-text" style="margin-bottom: 0px">
+                <include file="Common@Order/disclamer"/>
+            </div>
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+
+            <button type="button">马上获取</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var ip_cityid = '{$Think.cookie.iplookup}';
+    var city_id = '{$theCityId}';
+
+    (city_id == '') ? cityId = ip_cityid : cityId = city_id;
+    if(cityId == ''){
+        getLocation();
+    }else{
+        initCity(cityId);
+    }
+
+    function initCity(cityId){
+        App.citys.init(".windowbg select[name='city_box']",".windowbg select[name='quyu_box']",shen,shi,cityId);
+    }
+
+    $(function(){
+        $(".windowbg .guanbisheji").click(function(event) {
+            $(".windowbg").remove();
+        });
+        $(".big-order-window button").click(function(event) {
+            var container = $(".big-order-window");
+
+            $(".err").html('');
+            $(".windowbg").find('.focus').removeClass('focus');
+
+            var name = $("input[name=name]", container).val();
+            var tel = $("input[name=tel]", container).val();
+            var city = $("select[name=city_box]", container).val();
+            var quyu = $("select[name=quyu_box]", container).val();
+
+            if (city == '') {
+                $(".err").html("您还没有选择城市哦 ^_^!");
+                $("select[name=city_box]", container).addClass('focus').focus();
+                return false;
+            }
+
+            if (!App.validate.run(name)) {
+                $(".err").html("请输入您的称呼 ^_^!");
+                $("input[name=name]", container).addClass('focus').focus();
+                return false;
+            } else {
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if (!reg.test($("input[name=name]", container).val())) {
+                    $(".err").html("请输入正确的名称，只支持中文和英文");
+                    $("input[name=name]", container).addClass('focus').focus();
+                    return false;
+                }
+            }
+            if (!App.validate.run(tel)) {
+                $(".err").html("请输入正确的手机号码 ^_^!");
+                $("input[name=tel]", container).addClass('focus').focus();
+                return false;
+            } else {
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if (!reg.test($("input[name=tel]", container).val())) {
+                    $(".err").html("请输入正确的手机号码 ^_^!");
+                    $("input[name=tel]", container).addClass('focus').focus();
+                    return false;
+                }
+            }
+
+           if(!checkDisclamer(".fengshui")){
+                 return false;
+            }
+
+            window.order({
+                extra:{
+                    cs: city,
+                    qx: quyu,
+                    name: name,
+                    tel: tel,
+                    fb_type: $("input[name=fb_type]", container).val(),
+                    source: "{$source}" || 1,
+                    hltime: $("select[name=xztime]").val(),
+                    step:99,
+                    ssid:"{$ssid}"
+                },
+                error:function(){
+                    container.remove();
+                },
+                success:function(data, status, xhr){
+                    container.remove();
+                    if (data.status == 1) {
+                        $('.onehxsj').hide();
+                        $("body").append(data.data.tmp);
+                    } else {
+                        $.pt({
+                            target: _this,
+                            content: data.info,
+                            width: 'auto'
+                        });
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+    });
+</script>

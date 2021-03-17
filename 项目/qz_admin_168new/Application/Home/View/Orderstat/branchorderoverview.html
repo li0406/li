@@ -1,0 +1,142 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-分单量总览</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-info">分单量总览</button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/customerorderstatistics/">分时段统计</a>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/fendanteamanalysissheet/">团队分析</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-2">
+                                开始日期:<br/><input type="text" name="start_time" class="form-control datepicker"  placeholder="日期" value="{$Think.get.start_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                结束日期:<br/><input type="text" name="end_time" class="form-control datepicker"  placeholder="日期" value="{$Think.get.end_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                <br/>
+                                <button class="btn btn-info search-btn">查询</button>
+                            </div>
+                            <div class=" pull-right">
+                                <br/>
+                                <eq name="Think.get.average" value="1">
+                                    <button data-value="0" class="btn btn-info average-btn" style="margin-left: 20px;">切换至部门</button>
+                                <else />
+                                    <button data-value="1" class="btn btn-info average-btn" style="margin-left: 20px;">切换至人均</button>
+                                </eq>
+                            </div>
+                            <div class="pull-right">
+                                <br/>
+                                <a class="btn btn-info" href="/orderstat/branchorderaveragechart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                    切换至图表
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>时间段</th>
+                                    <th>坐席数</th>
+                                    <th>
+                                        汇总
+                                        <i class="fa fa-question-circle text-info" title="单日所有时段汇总数据"></i>
+                                    </th>
+                                    <volist name="main.time" id="vi">
+                                        <th>{$vi.begin}-{$vi.end}</th>
+                                    </volist>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.date" id="vi">
+                                    <tr>
+                                        <th>{$vi}</th>
+                                        <td>{$main['attendance'][$vi]['all']|default=0}</td>
+                                        <td>{:number_format($main['info']['date'][$vi], 2)}</td>
+                                        <volist name="main.time" id="vj">
+                                            <td>
+                                                <php>
+                                                    echo number_format($main['info']['list'][$vi][$vj['begin'] . '-' . $vj['end']], 2);
+                                                </php>
+                                            </td>
+                                        </volist>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>平均值</th>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <volist name="main.time" id="vj">
+                                        <td>
+                                            {:number_format(($main['info']['time'][$vj['begin'] . '-' . $vj['end']]) / (count($main['date'])), 2)}
+                                        </td>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        汇总
+                                        <i class="fa fa-question-circle text-info" title="多日单时段汇总数据"></i>
+                                    </th>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <volist name="main.time" id="vj">
+                                        <td>
+                                            <php>
+                                                echo number_format($main['info']['time'][$vj['begin'] . '-' . $vj['end']], 2);
+                                            </php>
+                                        </td>
+                                    </volist>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:'ture'
+    });
+
+    $('.search-btn').click(function(event) {
+        var average = ('{$Think.get.average}' === '' ? '0' : '{$Think.get.average}');
+        window.location.href = '/orderstat/branchorderoverview/?start_time=' + $('input[name=start_time]').val() + '&end_time=' + $('input[name=end_time]').val() + '&average=' + average;
+    });
+
+    $('.average-btn').click(function(event) {
+        window.location.href = '/orderstat/branchorderoverview/?start_time=' + $('input[name=start_time]').val() + '&end_time=' + $('input[name=end_time]').val() + '&average=' + $(this).attr('data-value');
+    });
+</script>
+</block>

@@ -1,0 +1,97 @@
+<div class="win_box step zixun_fb">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="zb_box_in">
+            <div class="zb_box_title">
+                <div class="zb_box_hds"></div>
+            </div>
+            <span class="win_box_close" title="关闭">
+            </span>
+            <div class="zb_box_form" style="padding:10px 30px;">
+                <div class="input">
+                    <div class="zb_box_info">
+                    欢迎拨打免费电话
+                    </div>
+                </div>
+                <div class="input" style="text-align:center;">
+                    <input type="text" class="input-control" name="tel" placeholder="请输入您的手机号码" style="width:90%;" />
+                    <div class="input-error"></div>
+                </div>
+                <div class="input" style="text-align:center;">
+                    <button id="stepSave" type="button" class="button" style="width:130px;">立刻免费通话</button>
+                </div>
+                <div class="line zb_box_footer">
+                    <div class="zb_box_msg">
+                    输入您的手机号码，点击通话，稍后您将接到我们的电话，该通话对您<span>完全免费</span>,请放心接听。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //请先定义citys对象
+    App.citys.init("#fb-cs","#fb-qy",shen,shi,"{$cityid}");
+    $(".zixun_fb .win_box_close").click(function(event) {
+        $(".zixun_fb").fadeOut(400,function(){
+            $(this).remove();
+        });
+    });
+
+    $(".zixun_fb #stepSave").click(function(event) {
+        $(".input-error").html("");
+        $(".focus").removeClass("focus");
+        var _this = $(this);
+
+        if(!App.validate.run($(".zixun_fb input[name=tel]").val())){
+            $(".zixun_fb input[name=tel]").addClass('focus');
+            $(".zixun_fb input[name=tel]").focus();
+            $(".zixun_fb input[name=tel]").parent().find(".input-error").html("请填写您的电话");
+            return false;
+        }
+
+        if(!App.validate.run($(".zixun_fb input[name=tel]").val(),"moblie")){
+            $(".zixun_fb input[name=tel]").addClass('focus');
+            $(".zixun_fb input[name=tel]").focus();
+            $(".zixun_fb input[name=tel]").parent().find(".input-error").html("无效的电话");
+            return false;
+        }
+
+        $.ajax({
+            url: '/fb_order/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                tel: $(".zixun_fb input[name=tel]").val(),
+                name: $(".zixun_fb input[name=name]").val(),
+                source: "{$source}" || 111,
+                select_comid : "{$select_comid}" || 0,
+                display_type : "{$display_type}" || 0,
+                safecode:"{$safecode}",
+                safekey: "{$safekey}",
+                ssid:"{$ssid}",
+                step:2
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $(".zixun_fb").remove();
+                $("body").append(data.data.tmp);
+            } else {
+                $.pt({
+                    target: _this,
+                    content: data.info,
+                    width: 'auto'
+                });
+            }
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target: _this,
+                content: '发布失败,请刷新页面！',
+                width: 'auto'
+            });
+         });
+    });
+</script>

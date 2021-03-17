@@ -1,0 +1,488 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网标签管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/icheck/skins/all.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/js/plugins/icheck/skins/flat/grey.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/home/css/tags.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>标签管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/tags/">标签管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                是否推荐：
+                                <select name="istop" class="form-control istop" id="istop">
+                                    <option value="">全部</option>
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                            标签名：<input type="text" id="condition" class="form-control condition" placeholder="标签名" value="{$Think.get.condition}">
+                            </div>
+                            <div class="col-xs-2">
+                                标签位置：
+                                <select name="location" class="form-control istop" id="location">
+                                    <option value="">全部</option>
+                                    <option value="1">标签首部</option>
+                                    <option value="2">标签尾部</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a href="/tags/operate/" class="pull-right">
+                                    <button class="btn btn-success normal">
+                                        <i class="fa fa-plus-circle"></i>新增标签
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a href="javascript:void(0)" class="pull-right">
+                                    <button class="btn btn-default normal download-submit">
+                                        <i class="fa fa-download"></i>批量导出
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a href="javascript:void(0)" class="pull-right">
+                                    <button id="upload" class="btn btn-info normal">
+                                        <i class="fa fa-plus"></i>批量导入
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a id="deleteall" href="javascript:void(0)" class="pull-right">
+                                    <button class="btn btn-warning normal">
+                                        <i class="fa fa-trash"></i>批量删除
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">标签列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            <a class="checkall" data-value="uncheck" href="javascript:void(0)">全选</a>
+                                        </th>
+                                        <th>标签名</th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="id" href="javascript:void(0)">
+                                                添加时间
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="article_count" href="javascript:void(0)">
+                                                攻略
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="meitu_count" href="javascript:void(0)">
+                                                美图
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="diary_count" href="javascript:void(0)">
+                                                日记
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="ask_count" href="javascript:void(0)">
+                                                问答
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="baike_count" href="javascript:void(0)">
+                                                百科
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a class="order-btn" data-ordertype="subarticle_count" href="javascript:void(0)">
+                                                分站
+                                            </a>
+                                        </th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="info.info.list" id="vo">
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" class="icheck" name="check" data-id="{$vo.id}" />
+                                            </td>
+                                            <td>{$vo.name}</td>
+                                            <td>{$vo.time|date="Y-m-d H:i:s",###}</td>
+                                            <td>
+                                                <a target="_blank" href="http://{:C('QZ_YUMINGWWW')}/tags/gonglue{$vo.id}">
+                                                    <neq name="vo.article_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.article_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a target="_blank" href="http://{:C('QZ_YUMINGWWW')}/tags/meitu{$vo.id}">
+                                                    <neq name="vo.meitu_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.meitu_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a target="_blank" href="http://{:C('QZ_YUMINGWWW')}/tags/riji{$vo.id}">
+                                                    <neq name="vo.diary_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.diary_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a target="_blank" href="http://{:C('QZ_YUMINGWWW')}/tags/wenda{$vo.id}">
+                                                    <neq name="vo.ask_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.ask_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a target="_blank" href="http://{:C('QZ_YUMINGWWW')}/tags/baike{$vo.id}">
+                                                    <neq name="vo.baike_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.baike_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a target="_blank" href="javascript:void(0)">
+                                                    <neq name="vo.subarticle_count" value="0">
+                                                        <span class="badge bg-teal">
+                                                            {$vo.subarticle_count}
+                                                        </span>
+                                                    </neq>
+                                                </a>
+                                            </td>
+                                            <td data-id='{$vo.id}' >
+                                                <a href="/tags/operate/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" class="delete">
+                                                    <span title="删除" class="fa fa-trash"></span>
+                                                </a>
+                                                <eq name="vo.istop" value="1">
+                                                    <a href="javascript:void(0)" class="istop-btn" data-value="0">
+                                                        <span title="已推荐" class="text-green fa fa-thumbs-o-up"></span>
+                                                    </a>
+                                                <else />
+                                                    <a href="javascript:void(0)" class="istop-btn" data-value="1">
+                                                        <span title="未推荐" class="text-gray fa fa-thumbs-o-up"></span>
+                                                    </a>
+                                                </eq>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$info.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                    <div class="form-group">
+                        <label class=" control-label">选择文件:</label>
+                        <div class=" file-group">
+                             <input id="fileUp" name="fileup" type="file" />
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#upload").click(function(event) {
+                $("#myModal").modal();
+            });
+
+            $('.download-submit').click(function(event) {
+                var d = dialog({
+                    title: '请选择要导出的模块',
+                    content:'<div class="download-dialog">' +
+                            '<input type="radio" name="type" id="article" value="article" /><label for="article">攻略</label>' +
+                            '<input type="radio" name="type" id="meitu" value="meitu" /><label for="meitu">美图</label>' +
+                            '<input type="radio" name="type" id="diary" value="diary" /><label for="diary">日记</label>' +
+                            '<input type="radio" name="type" id="ask" value="ask" /><label for="ask">问答</label>' +
+                            '<input type="radio" name="type" id="baike" value="baike" /><label for="baike">百科</label>' +
+                            '</div>',
+                    okValue: '确定',
+                    ok: function () {
+                        var type = $('body').find(".download-dialog input[name='type']:checked").val();
+                        if ('undefined' == typeof(type)) {
+                            alert('请选择要导出的模块');
+                            return false;
+                        };
+                        window.open('/tags/downloadtags/?type=' + type + '&condition=' + $('#condition').val() + '&istop=' + $('#istop').val());
+                        d.close().remove();
+                    },
+                    cancelValue: '取消',
+                    cancel: function () {}
+                });
+                d.show();
+            });
+
+            $("#fileUp").fileinput({
+                language: 'zh', //设置语言,
+                allowedFileExtensions:['xls','xlsx'],
+                uploadUrl:"/export/tags/",
+                browseClass:"btn btn-primary",
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                showPreview:false,
+                uploadAsync:true,
+                showRemove:true,
+                showCancel:false,
+                showUpload:true,
+                maxFileCount:1,
+                dropZoneEnabled:false
+            }).on('fileuploaded', function(event, data) {
+                if(1 == data.response.status){
+                    window.location.href =  window.location.href;
+                }else{
+                    $("#myModal").Alert({
+                        msg:'上传失败！',
+                        level:2
+                    });
+                }
+            });
+
+            $('.icheck').iCheck({
+                checkboxClass: 'icheckbox_minimal-grey',
+                radioClass: 'iradio_minimal-grey',
+                increaseArea: '' // optional
+            });
+
+            $('#deleteall').click(function(){
+                var ids = [];
+                $(".icheck").each(function(){
+                    if(true == $(this).is(':checked')){
+                        ids.push($(this).attr('data-id'));
+                    }
+                });
+
+                if(confirm("确定要删除数据吗？")){
+                    $.ajax({
+                        url: '/tags/deletealltags/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            ids:ids
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                }
+            })
+
+            $('.delete').click(function(){
+                var id = $(this).parent().attr('data-id');
+                $.ajax({
+                    url: '/tags/deletetags/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            $('.istop-btn').click(function(){
+                var id = $(this).parent().attr('data-id');
+                var istop = $(this).attr('data-value');
+                $.ajax({
+                    url: '/tags/editistop/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        istop:istop
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            $('.checkall').click(function(){
+                if($(this).attr('data-value') == 'uncheck'){
+                    $('.icheck').iCheck('check');
+                    $('.checkall').attr('data-value','check');
+                }else{
+                    $('.icheck').iCheck('uncheck');
+                    $('.checkall').attr('data-value','uncheck');
+                }
+            });
+
+            //初始化排序
+            var ordertype = '{$Think.get.ordertype}';
+            if(ordertype != ''){
+                $('a[data-ordertype="'+ordertype+'"]').addClass('text-green')
+            }
+
+            var istop = '{$Think.get.istop}';
+            if(istop != ''){
+                $('#istop').val(istop);
+            }
+            $('#location').val('{$Think.get.location}');
+            $('.order-btn').attr('data-ordervalue', 1);
+            if('{$Think.get.ordervalue}' == 1){
+                $('a[data-ordertype="{$Think.get.ordertype}"]').attr('data-ordervalue', 2);
+            }
+            $('.order-btn').click(function(){
+                var ordertype = $(this).attr('data-ordertype');
+                var ordervalue = $(this).attr('data-ordervalue');
+                var condition = $('#condition').val();
+                var istop = $('#istop').val();
+                if(!condition){
+                    condition = '';
+                }
+                window.location.href = '/tags/?condition=' +condition + '&ordertype=' +ordertype + '&ordervalue=' +ordervalue +'&istop='+istop;
+            })
+
+            $('#search').click(function(){
+                var condition = $('#condition').val();
+                if(!condition){
+                    condition = '';
+                }
+                var istop = $('#istop').val();
+                var location = $('#location').val();
+                window.location.href = '/tags/?condition=' +condition +'&istop='+istop+"&location="+location;
+            })
+        })
+    </script>
+</block>

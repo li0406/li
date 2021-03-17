@@ -1,0 +1,193 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">角色编辑</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>角色编辑</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <volist name="topDept" id="vo">
+                            {~$link = ($vo['id'] == 17 ? "rolenew" : "role")}
+                            <if condition="($_GET['tab'] EQ $vo['id']) OR (!isset($_GET['tab']) AND $key EQ 0)">
+                            <li role="presentation" class="active"><a href="/auth/{$link}?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            <else/>
+                            <li role="presentation"><a href="/auth/{$link}?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <div class="box-header">
+                        条件查询
+                    </div>
+                    <div class="box-body">
+                        <form method="get" action="/auth/role">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    <label for="exampleInputEmail1">角色名称：</label>
+                                    <input type="text" class="form-control" name="name"  id="exampleInputEmail1" placeholder="角色名称" value="{$Think.get.name}">
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="department">所属部门：</label>
+                                    <select id="department" name="dept" class="col-sm-12">
+                                        <option value="">请选择</option>
+                                        <volist name="list.myDepartment" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label >&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label >&nbsp;</label>
+                                    <button id="btnAdd" type="button" class="btn btn-success btn-block"><i class="fa fa-plus-circle"></i>添加角色</button>
+                                </div>
+                                <input name="tab" type="hidden" value="{$tab}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active">
+                                <div class="col-sm-8">
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <tr>
+                                            <th>角色名称</th>
+                                            <th>所属部门</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        <volist name="list.roles" id="vo">
+                                        <tr>
+                                            <td>{$vo.role_name}</td>
+                                            <td>{$vo.dept_name}</td>
+                                            <td>
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" data-name="{$vo.role_name}" data-dept="{$vo.dept_id}" class="green" >编辑</a>
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" class="red">删除</a>
+                                            </td>
+                                        </tr>
+                                        </volist>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加角色</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="myForm" class="form-horizontal">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">角色名称：</label>
+                                <div class="col-sm-10">
+                                  <input type="text" class="form-control" name="name" id="inputEmail3" placeholder="角色名称">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">所属部门：</label>
+                                <div class="col-sm-10">
+                                    <select id="dept" name="dept" style="width: 100%;">
+                                        <option value="">请选择</option>
+                                        <volist name="list.departments" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                 <input type="hidden" name="id"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="btnSave" type="button" class="btn btn-primary pull-left">保存</button>
+                        <input type="hidden" name="id" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#department").select2();
+            $("#department").select2("val","{$Think.get.dept}");
+
+            $("#dept").select2();
+
+            $("#btnAdd").click(function(event) {
+                $(".modal-body input[name=name]").val("");
+                $("#dept").select2("val","");
+                $("input[name=id]").val("");
+                $("#myModal").modal();
+            });
+
+            $(".green").click(function(event) {
+                var dept_id = $(this).attr("data-dept");
+                var name = $(this).attr("data-name");
+                var id =  $(this).attr("data-id");
+                $("input[name=id]").val(id);
+                $(".modal-body input[name=name]").val(name);
+                $("#dept").select2("val",dept_id);
+                $("#myModal").modal();
+            });
+
+            $("#btnSave").click(function(event) {
+                $.ajax({
+                    url: '/auth/role/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: $("#myForm").serializeArray()
+                })
+                .done(function(data) {
+                    alert(data.info);
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }
+                });
+            });
+
+            $(".red").click(function(event) {
+                if (confirm("确定删除该角色吗？")) {
+                    var id = $(this).attr("data-id");
+                    $.ajax({
+                        url: '/auth/removerole/',
+                        type: 'post',
+                        dataType: 'JSON',
+                        data: {id: id}
+                    })
+                    .done(function(data) {
+                        alert(data.info);
+                        if (data.status ==  1) {
+                            window.location.href = window.location.href;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</block>

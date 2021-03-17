@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="用户中心">
+  <meta name="description" content="用户中心">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <title>用户中心-齐装网</title>
+  <include file="Index:resource" />
+  <include file="User:resource" />
+  <link rel="stylesheet" href="{$static_host}/assets/user/user/css/yh-dairy.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" href="{$static_host}/assets/user/user/css/ht-public.css?v={:C('STATIC_VERSION')}">
+  <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/labelauty.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" src="{$static_host}/assets/common/js/laydate.js?v={:C('STATIC_VERSION')}"></script>
+
+  <link rel="stylesheet" type="text/css" href="{$static_host}/assets/common/js/baidu/uploader/dist/webuploader.css?v={:C('STATIC_VERSION')}">
+  <link href="{$static_host}/assets/common/js/baidu/css/upload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+  <link href="{$static_host}/assets/common/js/baidu/css/companyimg.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="{$static_host}/assets/common/js/baidu/uploader/dist/webuploader.js?v={:C('STATIC_VERSION')}"></script>
+  <script charset="utf-8" src="{$static_host}/assets/common/js/baidu/uploader/upload.js?v={:C('STATIC_VERSION')}"></script>
+
+  <script>
+    $(document).ready(function () {
+        //参数{input类名，选择类型(单选or多选)}
+        $(".rdolist").labelauty("rdolist", "rdo");
+        $(".rdolist").labelauty("rdolist", "second_type");
+        $(".rdolist").labelauty("rdolist", "tags");
+    });
+  </script>
+  <style type="text/css">
+  .laydate-icon{width: 150px;}
+  .ht-moreinfo li ul li{width: 150px;}
+  .ht-yes a{display: inline-block;}
+  .my_tags{border:solid 1px #C6C6C6;color:#666;padding-left:5px;height:30px;line-height:22px;padding-right:20px}
+  </style>
+</head>
+<body>
+    <include file="User:header" />
+    <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+        <div class="yh-main">
+            <h1 class="yh-tit">添加日记文章</h1>
+            <dl class="new-diary">
+                <dt>标题<span></span></dt>
+                <dd>
+                  <div class="rdo">
+                    <input name="title" type="text" style="width:250px;" placeholder="标题"><i class="red err-tips"></i>
+                  </div>
+                </dd>
+                <dt>选择装修阶段<span></span></dt>
+                <dd id="first_step">
+                    <div class="rdo">
+                        <volist name="diary_type" id="vo">
+                            <input type="radio" name="rdo" class="rdolist" <if condition="$key  lt 1"> checked="checked" </if> value="{$vo.id}" />
+                            <label class="rdobox" data_id="{$key}">
+                                <span class="check-image"></span>
+                                <span class="radiobox-content">{$vo.type_name}</span>
+                            </label>
+                        </volist>
+                    </div>
+                </dd>
+                <dt>选择装修细节<span></span></dt>
+
+                <dd id="second_type">
+                    <volist name="diary_type" id="vo">
+                        <div class="rdo" id="second_type_div_{$key}" <if condition="$key gt 0">style="display:none"</if> >
+                            <if condition="$vo['child']">
+                                <volist name="vo.child" id="list">
+                                    <input type="radio" name="second_type" class="rdolist" value="{$list.id}" />
+                                    <label class="rdobox">
+                                        <span class="check-image"></span>
+                                        <span class="radiobox-content">{$list.type_name}</span>
+                                    </label>
+                                </volist>
+                            <else/>
+                                <input type="radio" name="second_type" class="rdolist" value="{$vo.id}" />
+                                <label class="rdobox">
+                                    <span class="check-image"></span>
+                                    <span class="radiobox-content">{$vo.type_name}</span>
+                                </label>
+                            </if>
+                        </div>
+                    </volist>
+                </dd>
+                <i class="red err-tips"></i>
+                <dt>日记内容</dt>
+                <dd>
+                    <textarea name="content" placeholder="说点什么吧，来记录您装修过程中的点点滴滴。"></textarea>
+                </dd>
+                <dt>选择日期<span>如果是写回忆日记，可修改为发生当天的日期</span></dt>
+                    <dd><input class="laydate-icon" name="diary_time" id="diary_time" value="" /><i class="red err-tips"></i></dd>
+                    <dt>上传图片<span>选择装修过程中的照片，每张低于5M，支持JPG/JPEG/PNG格式</span></dt>
+                    <dd>
+                        <div class="ht-comp-phot">
+                            <div id="uploader" class="uploader" data-data='{$img_list}'>
+                            </div>
+                        </div>
+                        <input type="hidden" name="imgs"/>
+                </dd>
+
+                <dd>
+                <input id="verifyCode" name="verifyCode" type="text" style="width:120px;height:24px;float:left;border:1px #C6C6C6 solid;height: 30px;line-height: 22px;padding-left:10px" placeholder="请输入验证码" value="">
+                <p style="text-align:left;padding-top:5px;" >
+                <img src="/verify" style="cursor:pointer" id="verifyimg" title="点击更换验证码">
+                </p>
+                <i class="red err-tips"></i>
+                </dd>
+            </dl>
+
+            <input type="hidden" name="id" value="{$id}">
+            <input type="hidden" name="is_over" value="0">
+            <div class="ht-yes"><a href="javascript:;">发布日记</a></div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    $(function(){
+        $("#verifyimg").click(function(event) {
+            $(this).attr("src","/verify?rand="+Math.random());
+        });
+
+        //点击第一阶段触发的事件
+        $("#first_step .rdo label").click(function(event) {
+            /* Act on the event */
+            $("#second_type .rdo").hide();
+            var type_id=$(this).attr("data_id");
+            $("#second_type_div_"+type_id).show();
+        });
+
+        //日历控件的加载
+        $("#diary_time").click(function(event) {
+            laydate.skin('yahui');//日历的样式
+            laydate({
+                elem: '#diary_time',
+                choose: function(datas){ //选择日期完毕的回调
+                 }
+                });//绑定元素
+        });
+
+        //加载图片上传控件
+        $(".ht-comp-phot").uploader({
+          host:"{:C('QINIU_DOMAIN')}",
+          old_host:"{:C('STATIC_HOST1')}",
+          server:"/uploader/",
+          drag:false,
+          fileNumLimit:15,
+          threads:15,
+          prefix:"diary",
+          formData:{
+              prefix:"diary"
+          },
+          removePath:"/diary/del_diary_img/",
+          callback:function(res){
+              var data =  $("input[name=imgs]").data("data");
+              if(typeof data == "undefined"){
+                  data = [];
+              }
+              img = {
+                  id:res["id"],
+                  img:res.data["hash"],
+                  path:res.data["key"],
+                  tabIndex:res.tabIndex
+              }
+              data.push(img);
+              $("input[name=imgs]").data("data",data);
+          }
+        });
+
+        //点击提交
+        //点击保存后触发的事件
+        $(".ht-yes").click(function(event) {
+          if($("input[name=verifyCode]").val() == ""){
+              $("input[name=verifyCode]").focus();
+              alert("请填写验证码");
+              return false;
+            }
+
+            //获取装修阶段
+            var title = $("input[name=title]").val();
+            if(title == ""){
+               $("input[name=title]").focus();
+               $("input[name=title]").next().html("请填写日记标题");
+               return false;
+            }
+
+            //获取装修阶段
+            var first_step_val=$("#first_step .checked").prev().val();
+            var second_step_val=$("#second_type .checked").prev().val();
+
+            if(typeof(second_step_val)=="undefined")
+            {
+                //如果是未定义 说明没选择二级阶段
+                $("#second_type").next().html("您需要选择装修细节");
+                // window.scrollTop($("#second_type").offset().top);
+                $("html,body").animate({scrollTop:$("#second_type").offset().top-40},1000);
+                return false;
+            }
+            var content=$("textarea[name='content']").val();//日记的内容
+            if (content=="")
+            {
+                $("textarea[name='content']").focus();//如果没有写日记内容 让用户写日记内容
+                return false;
+            }
+            var diary_time=$("#diary_time").val();//获取日记所记录的时间
+            if (diary_time=="")
+            {
+                $("#diary_time").next().html("请选择日记时间");
+                return false;
+            }
+            var id =$("input[name='id']").val();//日记ID
+            var imgs_obj=$("input[name='imgs']");
+            imgs_obj.val('');//先把这个存储空间设为空
+            var imgData = imgs_obj.data("data");//获取缓存区域值
+            if(typeof imgData == "undefined")
+            {
+                $(".ht-comp-phot").find(".uploader-info").html("请选择要上传的图片");
+                return false;
+            }
+            if(typeof imgData != "undefined")
+            {
+                for(var i = 0; i< imgData.length;i++ )
+                {
+                    if (imgs_obj.val()=="")
+                    {
+                        //这是第一张图 然后直接赋值
+                        imgs_obj.val(imgData[i].path);
+                    }else
+                    {
+                        //先判断数组中是否有这个值了
+                        imgs_obj.val(imgs_obj.val()+","+imgData[i].path);
+                    }
+                }
+            }
+            var is_over=$("input[name='is_over']").val();//获取是否完成日记的值
+            if (imgs_obj.val()!="")
+            {
+                //开始提交了
+                $.post("/write_diary_second",{
+                    id:id,
+                    first_type:first_step_val,
+                    second_type:second_step_val,
+                    content:content,
+                    diary_time:diary_time,
+                    is_over:is_over,
+                    img:imgs_obj.val(),
+                    title:title,
+                    code:$("input[name=verifyCode]").val()
+                },function(res){
+                    if (res.status!=1)
+                    {
+                        alert(res.data);//传图失败
+                    }else
+                    {
+                      // 传图成功
+                      window.location.href="/diary/";
+                    }
+                },'json');
+            }
+        });
+
+        //点击保存并发布后触发的事件
+        $(".disable").click(function(event) {
+          $("input[name='is_over']").val(1);//发布并完成确定赋值为1
+          $(".ht-yes").click();
+        });
+    })
+    </script>
+    <include file="Public/footer" />
+</body>
+</html>

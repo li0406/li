@@ -1,0 +1,159 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市平均会员统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/cityavgvip/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市平均会员统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-xs-12">
+                            <form id="searchform" action="/cityavgvip/index" method="get">
+                                <div class="col-sm-3">
+                                    <div class="group">
+                                        <span>开始时间</span>
+                                        <input type="text" class="form-control datetime" name="begin" placeholder="开始时间" value="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="group">
+                                        <span>结束时间</span>
+                                        <input type="text" class="form-control datetime" name="end" placeholder="结束时间" value="">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="group">
+                                        <span>城市</span>
+                                        <select id="citys" name="city_id" class="select2">
+                                            <option value="">请选择城市</option>
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-info btn-search">查询</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" id="export" class="btn btn-success">导出</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="box-tools"></div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead >
+                                <tr>
+                                    <th><span>城市</span></th>
+                                    <!--<th><span>多倍会员数</span></th>-->
+                                    <!--<th><span>会员数</span></th>-->
+                                    <th><span>平均会员数</span></th>
+                                    <th><span>平均会员总数</span></th>
+                                    <th><span>城市订单量</span></th>
+                                    <th><span>城市分单量</span></th>
+                                    <th><span>平均分单量</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataLists">
+                            <volist name="list" id="v">
+                                <tr>
+                                    <td>{$v.cname}</td>
+                                    <!--<td>{$v.vip_num}</td>-->
+                                    <!--<td>{$v.vip_count}</td>-->
+                                    <td>{$v.vip_count}</td>
+                                    <td>{$v.vip_num}</td>
+                                    <td>{$v.dd_sum}</td>
+                                    <td>{$v.fd_sum}</td>
+                                    <td>{$v.fd_avg}</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        <div class="page">{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+
+    $("#citys").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $('#citys').select2("val","{$Think.get.city}");
+    $("input[name=begin]").val("{$Think.get.begin}");
+    $("input[name=end]").val("{$Think.get.end}");
+
+    $('.datetime').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        format: "yyyy-mm-dd",
+        minView: 2,
+        pickerPosition: "bottom-left",
+        autoclose: true,
+        endDate: new Date(),
+    });
+    // 导出
+    $("#export").click(function(event) {
+        var city = $("#citys").select2("data");
+        var begin  = $("input[name=begin]").val();
+        var end  = $("input[name=end]").val();
+        window.location.href = "/cityavgvip/exportcityavgvip?city="+city.id+"&city_name="+ city.text +"&begin="+begin+"&end="+end;
+    });
+
+    // 表格排序
+    // $('#all_list').dataTable({
+    //     paging:false,
+    //     searching:false,
+    //     language:{
+    //         zeroRecords: "没有内容",
+    //         info:""
+    //    },
+    // });
+    //查询
+    $("#searchform .btn-search").click(function(event) {
+        var city = $("#citys").select2("data");
+        var begin  = $("input[name=begin]").val();
+        var end  = $("input[name=end]").val();
+        window.location.href = "/cityavgvip/index?city="+city.id+"&begin="+begin+"&end="+end;
+    });
+</script>
+</block>

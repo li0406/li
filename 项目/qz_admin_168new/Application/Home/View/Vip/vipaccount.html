@@ -1,0 +1,413 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>会员管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">搜索条件</h3>
+                </div>
+                <form id="searchForm" class="form-horizontal" action="/vip/vipaccount/" method="get">
+                    <div class="box-body">
+                        <div class="form-group">
+                            <div class="col-sm-2">
+                                所属城市:
+                                <br/>
+                                <select id="city" name="city" class="form-control">
+                                    <option value="">-请选择-</option>
+                                    <volist name="city" id="vo">
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                会员ID:
+                                <br/>
+                                <input type="text" class="form-control" id="uid" placeholder="会员ID" name="uid"
+                                       value="{$Think.get.uid}">
+                            </div>
+                            <div class="col-sm-2">
+                                会员名称:
+                                <br/>
+                                <input type="text" class="form-control" id="name" placeholder="会员名称" name="name"
+                                       value="{$Think.get.name}">
+                            </div>
+                            <div class="col-sm-2">
+                                所属销售:
+                                <br/>
+                                <input type="text" class="form-control" id="sell" placeholder="所属销售" name="sell"
+                                       value="{$Think.get.sell}">
+                            </div>
+                            <div class="col-sm-2">
+                                会员类型:
+                                <br/>
+                                <select class="form-control" name="viptype">
+                                    <option value="">请选择</option>
+                                    <volist name="viptype" id="vo">
+                                        <if condition="I('get.viptype') EQ $key">
+                                            <option value="{$key}" selected="selected">{$vo}</option>
+                                        <else/>
+                                            <option value="{$key}">{$vo}</option>
+                                        </if>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                真/假会员:
+                                <br/>
+                                <select class="form-control" name="fake">
+                                    <if condition="I('get.fake') EQ 1">
+                                        <option value="">请选择</option>
+                                        <option value="0">真</option>
+                                        <option value="1" selected="selected">假</option>
+                                        <elseif condition="I('get.fake') EQ '0'"/>
+                                        <option value="">请选择</option>
+                                        <option value="0" selected="selected">真</option>
+                                        <option value="1">假</option>
+                                        <else/>
+                                        <option value="">请选择</option>
+                                        <option value="0">真</option>
+                                        <option value="1">假</option>
+                                    </if>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                会员时间:
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control datepicker" id="begin"
+                                               placeholder="本次合同开始时间" name="begin" value="{$Think.get.begin}">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control datepicker" id="end"
+                                               placeholder="本次合同结合时间" name="end" value="{$Think.get.end}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                合作方式:
+                                <br/>
+                                <select class="form-control" name="cooperation">
+                                    <option value="">请选择</option>
+                                    <option value="1">常规</option>
+                                    <option value="2">独家</option>
+                                    <option value="3">垄断</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-1">
+                                合作模式:
+                                <br/>
+                                <select class="form-control" name="cooperate_mode">
+                                    <option value="">请选择</option>
+                                    <volist name="cooperate_mode" id="item">
+                                        <eq name="key" value="$_GET['cooperate_mode']">
+                                            <option value="{$key}" selected>{$item}</option>
+                                        <else/>
+                                            <option value="{$key}">{$item}</option>
+                                        </eq>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-1 text-center">
+                                <br/>
+                                <button type="button" class="btn btn-warning"><i class="fa fa-refresh"></i> 重置</button>
+                            </div>
+                            <div class="col-sm-1">
+                                <br/>
+                                <button id="btnSearch" type="submit" class="btn btn-primary"><i
+                                        class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="col-sm-2">
+                            <a href="/vip/vipup/" class="btn btn-success btn-block"><i class="fa fa-plus-square"></i>&nbsp;新增</a>
+                        </div>
+                        <div class="col-sm-4">
+                            <volist name="status" id="vo">
+                                <if condition="$Think.get.status EQ $key">
+                                    <label class="checkbox-inline mt20">
+                                        <input type="checkbox" name="status" value="{$key}" checked> {$vo}
+                                    </label>
+                                    <else/>
+                                    <label class="checkbox-inline mt20">
+                                        <input type="checkbox" name="status" value="{$key}"> {$vo}
+                                    </label>
+                                </if>
+                            </volist>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <table class="table table-striped table-bordered table-hover text-center">
+                        <tr>
+                            <th>会员ID</th>
+                            <th class="col-sm-1">会员简称</th>
+                            <th class="col-sm-1">所属城市</th>
+                            <th class="col-sm-1">会员是否有效</th>
+                            <th class="col-sm-1">所属销售</th>
+                            <th class="col-sm-1">总合同开始时间</th>
+                            <th class="col-sm-1">总合同结束时间</th>
+                            <th class="col-sm-1">本次合同开始时间</th>
+                            <th class="col-sm-1">本次合同结束时间</th>
+                            <th class="col-sm-1">会员状态</th>
+                            <th class="col-sm-1">合作模式</th>
+                            <th class="col-sm-2">操作</th>
+                        </tr>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.id}</td>
+                                <td>
+                                    <a href="http://{$vo.bm}.qizuang.com/company_home/{$vo.id}"
+                                       target="_blank">{$vo.jc}</a>
+                                    <if condition="$vo['fake'] EQ 1"> (假)</if>
+                                </td>
+                                <td>
+                                    {$vo.cname}
+                                </td>
+                                <td>
+                                    <if condition="$vo['on'] NEQ '2'"> 无效
+                                        <else/>
+                                        有效
+                                    </if>
+                                </td>
+                                <td>
+                                    {$vo.saler|default='-'}
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        {$vo.allstart|default='-'}
+                                        <else/>
+                                        -
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        {$vo.allend|default='-'}
+                                        <else/>
+                                        -
+                                    </if>
+                                </td>
+                                <td>
+                                    {$vo.start}
+                                </td>
+                                <td>
+                                    {$vo.end}
+                                </td>
+                                <td>
+                                    <switch name="vo.on">
+                                        <case value="2">VIP</case>
+                                        <case value="-4">暂停</case>
+                                        <case value="-1">到期</case>
+                                    </switch>
+                                </td>
+                                <td>
+                                    <switch name="vo.cooperate_mode">
+                                        <case value="1">常规会员</case>
+                                        <case value="2">新签返</case>
+                                        <case value="3">常规标杆会员</case>
+                                        <case value="4">新签返标杆会员</case>
+                                    </switch>
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        <a href="/vip/vipup?id={$vo.id}">编辑</a>
+                                        <a href="javascript:void(0)" class="edit" data-id="{$vo.id}">日志</a>
+                                        <span data-id="{$vo.id}" class="edit-tag" data-type="edit-tag">编辑标签<if condition="$vo['tags'] NEQ null and $vo['tags'] NEQ ''">(<span style="color: red"><php>echo count(explode(',',$vo['tags']))</php></span>)</if></span>
+                                    </if>
+                                </td>
+                            </tr>
+                        </volist>
+                    </table>
+                    <div class="pull-right">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="myModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        <h4 class="modal-title">操作日志</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <iframe class="tag-mask" src="about:blank" allowtransparency="true" marginheight="0" marginwidth="0"
+            frameborder="0"></iframe>
+    <div class="all-tag-box">
+        <div class="header clearfix"><p>请选择标签：(<span style="font-size: 16px;">最多选5个</span>)</p><span class="close">×</span></div>
+        <div class="body">
+            <ul class="tags clearfix">
+                <volist name="tags" id="vo">
+                <li data-id="{$vo.id}">{$vo.tag}<img class="tag-choose" id="tag-{$vo.id}" src="/assets/common/img/chosed.png" alt=""></li>
+                </volist>
+            </ul>
+        </div>
+        <div class="footer">
+            <button class="reset">重置</button>
+            <button class="confirm saveTags">确认</button>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".datepicker").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "选择城市",
+            language: "zh-CN"
+        });
+        $("#city").select2().val("{$Think.get.city}");
+        $('#city').trigger('change');
+
+        $("input[name=status]").click(function (event) {
+            if ($(this).attr("checked") == "checked") {
+                $(this).attr("checked", false)
+            } else {
+                $(this).attr("checked", "checked");
+            }
+            $("input[name=status]").not($(this)).attr("checked", false);
+            $("#btnSearch").trigger('click');
+        });
+
+        $(".btn-warning").click(function () {
+            $("#searchForm :input").val("");
+            $("#searchForm :select").val("");
+        });
+
+        $(".edit").click(function (event) {
+            $.ajax({
+                url: '/vip/getviplog',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: $(this).attr("data-id"),contract_type: 3}
+            })
+                .done(function (data) {
+                    $("#myModal .modal-body").html(data.tmp);
+                    $("#myModal").modal();
+                });
+        });
+
+    </script>
+    <script type="text/javascript">
+        var company_id = 0;//待编辑的公司
+        var tag_ids = '';//待编辑的公司标签
+        // 编辑标签点击事件
+        $(function () {
+            $("select[name=cooperation]").val("{$Think.get.cooperation}");
+            var $tagBox = $(".all-tag-box"),
+                $tags = $tagBox.find("li"),
+                $close = $tagBox.find(".close"),
+                $mask = $(".tag-mask"),
+                $reset = $tagBox.find(".reset");
+
+            $(".edit-tag").on("click", function (event) {
+                var $target = $(event.target);
+                company_id = $target.attr('data-id');
+                $.ajax({
+                    url: '/vip/getTags',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {'company_id': company_id}
+                })
+                    .done(function (data) {
+                        $(".tag-choose").css("display", 'none');
+                        if (data.status == 1) {
+                            $.each(data.info, function (k, v) {
+                                $("#tag-" + v).css("display", 'block');
+                                tag_ids += v + ',';
+                            })
+                        }
+                        if ($target[0].nodeName.toLowerCase() == "span" && $target.attr("data-type") && $target.attr("data-type").toLowerCase() == "edit-tag") {
+                            $tagBox.fadeIn();
+                            $mask.fadeIn();
+                        }
+                    });
+
+            })
+
+            //选择标签
+            $tags.on("click", function (event) {
+                $(this).find("img").toggle();
+                var tagid = $(this).attr('data-id');
+                //获取当前点击状态
+                var type = $(this).find("img").css("display");
+                if (type == 'block') {
+                    //拼接tag
+                    tag_ids += tagid + ',';
+                } else {
+                    //去除tag
+                    tag_ids = tag_ids.replace((tagid + ','), "");
+                }
+            })
+            $close.on("click", function () {
+                $tagBox.fadeOut(0);
+                $mask.fadeOut(0);
+                resetChosed();
+            });
+            $reset.on("click",function () {
+                resetChosed();
+            });
+
+            //保存
+            $(".saveTags").on('click', function () {
+                if (tag_ids.split(",").length > 6) {
+                    alert("标签最多可选择5项!");
+                    return
+
+                }
+                $.ajax({
+                    url: '/vip/saveTags',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {'company_id': company_id, 'tag_ids': tag_ids}
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $close.click();
+                            resetChosed();
+                            window.location.href = window.location.href;
+                        }
+                    });
+            });
+
+            function resetChosed() {
+                $tags.each(function (index, item) {
+                    $(item).find("img").fadeOut(0);
+                });
+                tag_ids = "";
+            }
+
+        })
+    </script>
+</block>

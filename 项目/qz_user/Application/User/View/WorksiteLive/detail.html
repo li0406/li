@@ -1,0 +1,824 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/zhibo/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/zhibo/css/ht-remind.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugin/bxslider/bxslider.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugin/viewer/css/viewer.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugin/videojs/css/video-js.min.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <input type="hidden" value="{$remind}" id="unmeasure-house">
+    <include file="Home:header"/>
+    <div class="ht-wrap ht-relative clearfix">
+        <include file="Home:comnavleft"/>
+        <div class="ht-main maindw zhibodetailbox">
+            <h2 class="caption">装修现场详情</h2>
+            <div class="zhibo-order-info" data-orderid="{$data.info.order_id}">
+                <p class="zhibo-sub-title">
+                    订单信息
+                    <eq name="data.info.order_type" value="1">
+                        <a href="/orderdetails?id={$data.info.order_id}" target="_blank" class="toorderdetail">订单详情</a>
+                    <else />
+                        <a href="/initiative/-1/{$data.info.tel}" target="_blank" class="toorderdetail">订单详情</a>
+                    </eq>
+                </p>
+                <div class="zhibo-padding clearfix">
+                    <div class="orders-area clearfix">
+                        <p>订单类型：{$data.info.type_name}</p>
+                        <p>签约日期：{$data.info.qiandan_date}</p>
+                        <p>业主：{$data.info.yz_name}</p>
+                        <p>所在区域：{$data.info.area_name}</p>
+                        <p>联系方式：{$data.info.tel}</p>
+                        <p>户型：
+                            <if condition="$data['info']['order_type'] == 1">
+                                {$data.info.huxing_name|default="--"}
+                            <else />
+                                {$data.info.huxing_name} {$data.info.huxing_other_name}
+                            </if>
+                        </p>
+                        <p>小区名称：{$data.info.xiaoqu|default="--"}</p>
+                        <p>面积：{:($data["info"]["mianji"] ? $data["info"]["mianji"] . "㎡" : "--")}</p>
+                        <p class="sgcodebox">
+                            <img src="{$static_host}/assets/user/zhibo/img/wenhao.png" alt="" class="sgcodequestion">施工编号：{$data.info.code}
+                            <img src="{$static_host}/assets/user/zhibo/img/fuzhi.png" class="copy" data-clipboard-action="copy" data-clipboard-target="#sn_code"/>
+                            <span class="sericalcopytip">复制编号</span>
+                            <input id="sn_code" type="text" value="{$data.info.code}">
+                            <span class="sgcode">施工人员可使用微信“<span class="red">齐装网施工跟进</span>”小程序，使用施工 编号绑定施工订单，绑定后可发布装修现场信息。</span>
+                        </p>
+                        <p style="width: 100%;">地址：{$data.info.dz|default="--"}</p>
+                    </div>
+                    <div class="qrcode-area">
+                        <div class="t">
+                            <img src="{$static_host}/assets/user/zhibo/img/wenhao.png" alt="">施工二维码
+                            <div class="qrinstro">施工人员可使用微信扫描下方施工二维码绑定施工订单，绑定后可发布装修现场信息。</div>
+                        </div>
+                        <img data-original='/worksiteLive/liveQrcode?_code={$data.info.code}' src="/worksiteLive/liveQrcode?_code={$data.info.code}" alt="" class="qr sketchqrcode">
+
+                        <span id='sketchqrcode' class="pointer">放大</span>
+                        <a href="/worksiteLive/liveQrcode?_code={$data.info.code}" download="weixin_f.jpg">下载</a>
+                    </div>
+                </div>
+            </div>
+            <div class="shigong-info-box clearfix">
+                <div class="shigong-info">
+                    <p class="zhibo-sub-title">施工信息</p>
+                    <!-- 施工列表就插入在这里 -->
+                </div>
+                <div class="shigong-process">
+                    <p class="zhibo-sub-title">施工阶段</p>
+                    <div class="zhibo-padding">
+                        <p class="allprocess active" data-id="0">全部施工阶段（{:count($data["step_list"])}）</p>
+                        <ul class="decoration-process">
+                            <volist name="data.step_list" id="item">
+                                <li data-id="{$item.id}">{$item.name}</li>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="emptyzhibo emptyshigong" style="display: none;">
+                <img src="{$static_host}/assets/user/zhibo/img/emptyshigong.png" alt="">
+                <p class="title">暂无施工信息</p>
+                <p>提示：已签约并且已审核通过的订单，将会展示给授权的施工人员， 施工人员上传的施工信息将在此处展示</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="repair-shigong-info">
+    <div class="repair-shigong-content">
+        <p class="title">修改施工信息<span class="close">×</span></p>
+        <div class="repair-items-box">
+            <table class="repair-items">
+                <tr>
+                    <td class="name" style="padding-top: 16px;">发布人：</td>
+                    <td>
+                        <div class="avatar"><img src="{$static_host}/assets/common/img/weixin_f.jpg" alt="" ></div>
+                        <span class="nickname">莱昂纳德</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="name" style="padding-top: 8px;">施工阶段：</td>
+                    <td><select name="repair-process" id="repair-process" class="repair-process">
+                    </select></td>
+                </tr>
+                <tr>
+                    <td class="name" style="padding-top: 17px;">施工详情：</td>
+                    <td><textarea name="repair-text" id="repair-text" cols="30" rows="10" placeholder="施工情况详细描述，如此次完成水电改造等施工细节，施工信息将传达给装修公司和业主" class="repair-text"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="name">施工现场：</td>
+                    <td class="clearfix">
+                        <ul class="media-pics clearfix">
+                            <!-- 显示图片 -->
+                        </ul>
+                        <div class="media-video">
+                            <!-- 显示视频 -->
+                        </div>
+                        <p class="emptymediaosource" style="display: none;">暂无现场的图片/视频</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="repair-footer">
+            <div class="fixpadding">
+                <button type="button" class="btn btn-primary layout_close">取消</button>
+                <button type="button" class="btn btn-red" data-hook="save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="copysuccesstip">复制成功</div>
+<!-- S 列表模板 -->
+<script id="tmpl" type="text/x-handlebars-template">
+    {{each data as value index }}
+    <div class="shigongitem">
+        <div class="t-area clearfix">
+            <div class="shigongitem-mt">
+                <img src="{$static_host}/assets/user/zhibo/img/sgprocess-{{value.step}}.png" alt="{{value.step_name}}" style="vertical-align: -3px;">
+                {{value.step_name}}
+            </div>
+            <div class="shigongitem-action-icon" data-id="{{value.id}}" data-step="{{value.step}}">
+                <img src="{$static_host}/assets/user/zhibo/img/xiugai.png" alt="" data-hook="changeshigong">
+                <img src="{$static_host}/assets/user/zhibo/img/shanchu.png" alt="" class="btn_del">
+            </div>
+        </div>
+        <div class="m-area clearfix">
+            <div class="avatar">
+                <div class="restrictavatar"><img src="{{value.wx_headimg}}" alt="{{value.step_name}}"></div>
+            </div>
+            <div class="main-text">
+                <div class="top clearfix">
+                    <div class="name">{{value.wx_nickname}}</div>
+                    <div class="date">{{value.created_date}}</div>
+                </div>
+                <div class="gongdi-intro">{{value.content}}</div>
+                <div class="mediaresource">
+                    {{ if value.media_list.length > 0 && value.media_list[0].type == 1 }}
+                    <ul class="shigongpics clearfix">
+                        {{each value.media_list as subvalue }}
+                        <li><img data-original='{{subvalue.url_full}}' src="{{subvalue.url_thumb}}" alt="" ></li>
+                        {{/each}}
+                    </ul>
+                    {{ else if value.media_list.length > 0 && value.media_list[0].type == 2 }}
+                        {{each value.media_list as subvalue }}
+                        <video id='my-video_{{value.id}}' class="video-js" controls preload="auto" width="239" height="135" poster="">
+                            <source src="{{subvalue.url_full}}" type="video/mp4">
+                            <p class="vjs-no-js">您的浏览器不支持该功能，请升级浏览器</p>
+                        </video>
+                        {{/each}}
+                    {{else}}
+                    {{/if}}
+                </div>
+                <div class="manyidu">
+                    {{if value.check_state == 2}}
+                    <div class="manyi-left">
+                        {{if value.check_ret == 1}}
+                        <div class="biaoqing">
+                            <img src="/assets/user/zhibo/img/laugh.png" width='16' height="16px" />
+                        </div>
+                        <div class="satisfied">业主非常满意</div>
+                        {{/if}}
+                        {{if value.check_ret == 2}}
+                        <div class="biaoqing">
+                            <img src="/assets/user/zhibo/img/smile.png" width='16' height="16px" />
+                        </div>
+                        <div class="satisfied">业主还算满意</div>
+                        {{/if}}
+                        {{if value.check_ret == 3}}
+                        <div class="biaoqing">
+                            <img src="/assets/user/zhibo/img/sad.png" width='16' height="16px" />
+                        </div>
+                        <div class="satisfied">业主很不满意</div>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+                   
+                    <div class="zan-right">
+                        <div class="zan-pic">
+                            <img src="/assets/user/zhibo/img/zan-ash.png" width='16' height="16px" />
+                        </div>
+                        <div class="zam-num">{{value.like}}</div>
+                    </div>
+                </div>
+                {{if value.check_effect_list.length > 0}}
+                    <div class="yinxiang">
+                        <div class="yezhuyx">业主印象：</div>
+                        {{each value.check_effect_list as effect }}
+                        <div class="yixiang-tag">
+                            <div class="tag-bg">{{effect}}</div>
+                        </div>
+                        {{/each}}
+                    </div>
+                {{/if}}
+                {{each value.comment as yz_comment }}
+                <div class="allContent">
+                    <!-- 业主评价 -->
+                    <div class="yzpj">
+                        <div class="yezhuName">
+                            <span class="yz">业主：</span>
+                            <span class="pingyu">{{yz_comment.content}}</span>
+                        </div>
+                        {{if yz_comment.company_comment.length > 0}}
+                        <!-- 商家回复-->
+                        {{each yz_comment.company_comment as c_comment }}
+                            <div class="shangjia">
+                                <span class="sj">商家回复业主：</span>
+                                <span class="sjhf">{{c_comment.content}}</span>
+                            </div>
+                        {{/each}}
+                        {{/if}}
+                    </div>
+                    <!-- 业主评价时间 -->
+                    <div class="pj">
+                        <div class="pj-time">{{yz_comment.created_date}}</div>
+                        <div class="huifu" data-info-id={{value.id}} data-comment-id="{{yz_comment.id}}" data-comment="{{yz_comment.content}}">回复</div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</script>
+<!-- 回复弹窗 -->
+<div class="mask" style="display: none;">
+    <div class="inner">
+        <div class="tank-top">
+            <span class="huifuyezhu">回复业主</span>
+            <span class="close">X</span>
+        </div>
+        <div class="content">
+            <div class="owner-remark">
+                <span class="owner">业主评语：</span>
+                <span class="remark">根据装修配置，家庭人口，生活习惯，审美观念对原有开发商使用的水路，电路全部分更换的装修工序。</span>
+            </div>
+            <div class="construction">
+                <span class="owner">施工详情：</span>
+                <textarea class="textk" placeholder="请填写回复语"></textarea>
+            </div>
+            <div class="tips">提示：*评价内容中，请勿包含联系方式\网址\其他网站LOGO\微博、微信账号\二维码等“相关联系方式”，否则将会删除。</div>
+        </div>
+        <input type="hidden" id="comment_id" value="">
+        <input type="hidden" id="info_id" value="">
+        <div class="btns">
+            <button id="cancel">取消</button>
+            <button class="queding">确定</button>
+        </div>
+    </div>
+</div>
+<!-- E 列表模板 -->
+<include file="Index:footer"/>
+<script type="text/javascript" src="/assets/common/plugin/bxslider/bxslider.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugin/viewer/js/viewer.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugin/viewer/js/jquery-viewer.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugin/jwplayer/jwplayer.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugin/jwplayer/jwpsrv.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugin/videojs/js/video.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/template.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/clipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    var Global_SHIGONG_LIST = '/worksiteLive/infoList'
+    var Global_SHIGONG_DEL = '/worksiteLive/infoDelete'
+    var Global_SHIGONG_DETAIL = '/worksiteLive/infoDetail'
+    var Global_SHIGONG_EDIT = '/worksiteLive/infoEdit'
+    var Global_SHIGONG_COMMENT = '/worksiteLive/infoComment'
+    var page = 1;
+
+    //回复弹窗
+    $('html, body').on('click', '.huifu', function(){
+        $("#info_id").val($(this).attr('data-info-id'))
+        $("#comment_id").val($(this).attr('data-comment-id'))
+        $(".remark").html($(this).attr('data-comment'))
+        $(".textk").val('')
+        $('.mask').show()
+    })
+    $('#business').on('click',function(){
+        $('.mask').show()
+    })
+    $('.close').on('click',function(){
+        $('.mask').hide()
+    })
+    $('#cancel').on('click',function(){
+        $('.mask').hide()
+    })
+
+    //评论
+    $(".queding").on('click',function () {
+        var content = $(".textk").val();
+        var info_id = $("#info_id").val();
+        var comment_id = $("#comment_id").val();
+        if(content == ''){
+            alert('请填写回复语');
+            return
+        }
+        $.ajax({
+            url: Global_SHIGONG_COMMENT,
+            type: 'post',
+            data: {
+                info_id: info_id,
+                comment_id: comment_id,
+                content: content,
+            }
+        })
+            .done(function(res) {
+                if(res.error_code == 0){
+                    //关闭弹窗
+                    $('.mask').hide()
+                    // 更新商家回复
+                    loadSGDetail(info_id, function(res) {
+                        console.log('更新商家回复',res)
+                        var $Items = $('.main-text').find('.allContent')
+                        var res = res.data
+                        $Items.each(function(index, item) {
+                            var currentInfoId = $(item).find('.huifu').attr('data-info-id')  //施工id
+                            if(parseInt(currentInfoId) === parseInt(info_id)) {
+                                var currentCommentId = $(this).find('.huifu').attr('data-comment-id')  //评价回复id
+                                if(parseInt(currentCommentId) == parseInt(comment_id)){
+                                    // 渲染商家回复内容数据
+                                    $(item).find('.yezhuName').append('<div class="shangjia"><span class="sj">商家回复业主：</span><span class="sjhf">'+ content+'</span></div>')
+                                }
+                            }
+                        })
+                    })
+                }else {
+                    alert(res.error_msg)
+                }
+            })
+    });
+
+    if ('{$data.info.id}' == '') {
+        alert("此订单施工信息已删除，请查看其它订单施工信息");
+    }
+
+    // 初始化视频播放
+    videoPlay()
+
+    // 复制施工编号
+    copySericalHandle()
+
+    // 初次加载施工流程数据
+    loadList('', page, function(res) {
+        if(res.data.list.length > 0) {
+            var tempData = {
+                data: res.data.list
+            }
+            var tplStr = template("tmpl", tempData);
+            $('.shigong-info').append(tplStr);
+        }else{
+            $('.shigong-info-box').fadeOut(0)
+            $('.emptyshigong').fadeIn(0)
+        }
+    })
+
+    // 施工二维码点击放大
+    qrCodeShowBig()
+
+    $(function() {
+        // 图片播放变量
+        var $picPlay = null
+        // 某条施工信息id
+        var info_id = ''
+        // 某条施工阶段标识
+        var info_step = ''
+        // 施工信息删除
+        $(".shigong-info").on("click", ".btn_del", function(){
+            var that = this;
+            var info_id = $(that).parent().data("id");
+            if(confirm("确认删除此条施工信息？")) {
+                $.post(Global_SHIGONG_DEL, {
+                    id: info_id
+                }, function(response){
+                    if (response["error_code"] == 0) {
+                        alert("删除成功");
+                        $(that).parents(".shigongitem").remove();
+                    } else {
+                        alert(response["error_msg"]);
+                    }
+                });
+            }
+        });
+        // 施工信息修改，点击笔形图标打开弹窗
+        $(".shigong-info").on("click", function(evt){
+            var $target = $(evt.target)
+            info_id = $target.parent().data("id")
+            info_step = $target.parent().data("step")
+            if(evt.target.nodeName && evt.target.nodeName.toLocaleLowerCase() === 'img' && $target.attr('data-hook') === 'changeshigong') {
+                loadSGDetail(info_id, function(res) {
+                    var $repairShigongInfo = $('.repair-shigong-info')
+                    var ret = res.data
+                    var mediaStr = ''
+                    var optionStr = ''
+                    $repairShigongInfo.fadeIn(0)
+                    $repairShigongInfo.find('.avatar img').attr('src', ret.info.wx_headimg)
+                    $repairShigongInfo.find('.nickname').text(ret.info.wx_nickname)
+                    $repairShigongInfo.find('#repair-text').val(ret.info.content)
+                    ret.step_list.forEach(function(item) {
+                        optionStr+='<option value="'+item.id+'">'+item.name+'</option>'
+                    })
+                    $repairShigongInfo.find('#repair-process').html(optionStr)
+                    $repairShigongInfo.find('#repair-process option[value="'+ret.info.step+'"]').attr("selected", true);
+                    if(ret.info.media_list.length <= 0) {
+                        // 没有任何资源
+                        $repairShigongInfo.find('.media-video').html('')
+                        $repairShigongInfo.find('.media-pics').html('')
+                        $repairShigongInfo.find('.emptymediaosource').fadeIn(0)
+                    }else{
+                        $repairShigongInfo.find('.emptymediaosource').fadeOut(0)
+                        if(ret.info.media_list.length > 0 && ret.info.media_list[0].type == 1) {
+                            // 有图片
+                            $repairShigongInfo.find('.media-video').html('')
+                            ret.info.media_list.forEach(function(item) {
+                                mediaStr+='<li class="sgpics"><img data-submiturl="'+ item.url +'" data-original="' + item.url_full + '" src="'+ item.url_thumb +'" alt=""><span class="close">×</span></li>'
+                            })
+                            $repairShigongInfo.find('.media-pics').html(mediaStr)
+                            // 实现图片轮播
+                            setTimeout(function() {
+                                $picPlay = $repairShigongInfo.find('.media-pics');
+                                var options = {
+                                    url: 'data-original'
+                                };
+                                $picPlay.viewer(options);
+                            }, 0)
+                        }
+                        if(ret.info.media_list.length > 0 && ret.info.media_list[0].type == 2) {
+                            // 有视频
+                            $repairShigongInfo.find('.media-pics').html('')
+                            mediaStr = '<video id="my-video" class="video-js" controls preload="auto" width="239" height="135" poster=""><source data-submiturl="'+ ret.info.media_list[0].url +'" src="'+ret.info.media_list[0].url_full+'" type="video/mp4"><p class="vjs-no-js">您的浏览器不支持该功能，请升级浏览器</p></video><span class="red delvideo">删除</span>'
+                            $repairShigongInfo.find('.media-video').html(mediaStr)
+                        }
+                    }
+                })
+            }
+        });
+        // 点击施工阶段，切换施工
+        $('.decoration-process li, .shigong-process .allprocess').on('click', function() {
+            var $target = $(this);
+            if ($target.hasClass("allprocess")) {
+                $(".decoration-process li").removeClass("active");
+                $('.shigong-process .allprocess').addClass('active')
+            } else {
+                $target.addClass("active");
+                $target.siblings().removeClass("active");
+                $('.shigong-process .allprocess').removeClass('active')
+            }
+
+            loadList($target.attr('data-id'), 1, function(res) {
+                var tempData = {
+                    data: res.data.list
+                }
+                var tplStr = template("tmpl", tempData)
+                $('.shigong-info').html('<p class="zhibo-sub-title">施工信息</p>')
+                $('.shigong-info').append(tplStr)
+            });
+        })
+        // 关闭弹窗
+        $('.repair-shigong-content .title .close,.repair-shigong-content .layout_close').on('click', function() {
+            if($picPlay) {
+                $picPlay.viewer('destroy')
+            }
+            $('.repair-shigong-info').fadeOut(0)
+        })
+        // 删除图片/视频以及保存修改事件委托到弹窗上
+        $('.repair-shigong-content').on('click', function(evt) {
+            var $target = $(evt.target)
+            // 删除图片
+            if($target[0].nodeName && $target[0].nodeName.toLowerCase() === 'span' && $target.attr('class') && $target.attr('class').toLowerCase().indexOf('close') > -1) {
+                $target.closest('li').remove()
+            }
+            // 删除视频
+            if($target[0].nodeName && $target[0].nodeName.toLowerCase() === 'span' && $target.attr('class') && $target.attr('class').toLowerCase().indexOf('delvideo') > -1) {
+                $target.closest('div.media-video').html('')
+            }
+            // 点击保存按钮事件
+            if($target[0].nodeName && $target[0].nodeName.toLowerCase() === 'button' && $target.attr('data-hook') && $target.attr('data-hook').toLowerCase() === 'save') {
+                var mediaType = ''
+                var sourceStr = []
+                if($(this).find('.media-pics').html()) {
+                    // 图片
+                    mediaType = 1
+                    $(this).find('.sgpics').each(function(index, item) {
+                        sourceStr.push($(item).find('img').attr('data-submiturl'))
+                    })
+                }else if($(this).find('.media-video').html()) {
+                    // 视频
+                    mediaType = 2
+                    if($(this).find('#my-video').length > 0) {
+                        sourceStr.push($(this).find('#my-video source').attr('data-submiturl'))
+                    }
+                }
+                if(!$(this).find('#repair-text').val()) {
+                    alert('请填写施工详情')
+                    return
+                }
+                // 提交本次施工信息修改
+                $.ajax({
+                    url: Global_SHIGONG_EDIT,
+                    type: 'post',
+                    data: {
+                        id: info_id,
+                        step: $(this).find('#repair-process').val(),
+                        content: $(this).find('#repair-text').val(),
+                        media_urls: sourceStr.join(','),
+                        media_type: mediaType
+                    }
+                })
+                .done(function(res) {
+                    if(parseInt(res.error_code) === 0) {
+                        // 关闭弹窗
+                        $('.repair-shigong-info').fadeOut(0)
+                        // 更新列表页数据
+                        loadSGDetail(info_id, function(res) {
+                            var $sgItems = $('.shigong-info-box .shigong-info').find('.shigongitem')
+                            var ret = res.data
+                            $sgItems.each(function(index, item) {
+                                var currentInfoId = $(item).find('.shigongitem-action-icon').attr('data-id')
+                                console.log('施工id',currentInfoId)
+                                if(parseInt(currentInfoId) === parseInt(info_id)) {
+                                    var $item = $(item)
+                                    // 渲染阶段数据
+                                    $item.find('.shigongitem-mt').html('<img src="/assets/user/zhibo/img/sgprocess-'+ ret.info.step +'.png" alt="' + ret.step_list[ret.info.step-2].name + '">' + ret.step_list[ret.info.step-2].name)
+                                    // 渲染施工内容数据
+                                    $item.find('.gongdi-intro').text(ret.info.content)
+                                    // 更改施工阶段标记
+                                    $(item).find('.shigongitem-action-icon').attr('data-step', ret.info.step)
+                                    // 根据视频还是图片渲染不同DOM
+                                    if(ret.info.media_list.length > 0) {
+                                        var mediaStr = ''
+                                        if(ret.info.media_list.length > 0 && ret.info.media_list[0].type == 1) {
+                                            // 有图片
+                                            $item.find('.mediaresource').html('')
+                                            mediaStr = '<ul class="shigongpics clearfix">'
+                                            ret.info.media_list.forEach(function(item) {
+                                                mediaStr+='<li><img data-original="' + item.url_full + '" src="'+ item.url_thumb +'" alt=""></li>'
+                                            })
+                                            mediaStr+='</ul>'
+                                            $item.find('.mediaresource').html(mediaStr)
+                                            // 实例化图片轮播，超过5张才实例化
+                                            if(ret.info.media_list.length > 5) {
+                                                swiperHandle($item.find('.shigongpics'))
+                                            }
+                                            // 实现图片放大
+                                            setTimeout(function() {
+                                                var $picPlayList = $item.find('.shigongpics');
+                                                var options = {
+                                                    url: 'data-original'
+                                                };
+                                                $picPlayList.viewer(options);
+                                            }, 0)
+                                        }
+                                        if(ret.info.media_list.length > 0 && ret.info.media_list[0].type == 2) {
+                                            // 有视频
+                                            $item.find('.mediaresource').html('')
+                                            mediaStr = '<video id="my-video_'+ info_id +'" class="video-js" controls preload="auto" width="239" height="135" poster=""><source src="'+ret.info.media_list[0].url_full+'" type="video/mp4"><p class="vjs-no-js">您的浏览器不支持该功能，请升级浏览器</p></video>'
+                                            $item.find('.mediaresource').html(mediaStr)
+                                            // 实例化视频播放
+                                            setTimeout(function() {
+                                                videojs($(item).find('video')[0], {}, function() {
+                                                    this.play()
+                                                });
+                                            }, 0)
+                                        }
+                                    }else{
+                                        $item.find('.mediaresource').html('')
+                                    }
+                                }
+                            })
+                        })
+                    }else{
+                        alert(res.error_msg)
+                    }
+                })
+                .fail(function(res) {
+                    alert(res.error_msg)
+                })
+            }
+        })
+    });
+
+    $(function() {
+        // 滚动事件，施工阶段悬浮/滚动加载数据
+        var rightVal = 0
+        $(document).scroll(function() {
+            rightVal = parseInt($('.shigong-info-box .shigong-info').offset().left) + parseInt($('.shigong-info-box .shigong-info').width()) + 20
+            if($('html,body').scrollTop() > 434) {
+                $('.shigong-process').addClass('fixedprocess').css('left', rightVal)
+            }else{
+                $('.shigong-process').removeClass('fixedprocess')
+            }
+
+            // 防止悬浮的施工流程遮挡footer
+            if($(window).scrollTop() + $('.shigong-process').height() >= $('.shigong-info-box .shigong-info').offset().top + $('.shigong-info-box .shigong-info').height()) {
+                $('.shigong-process').css('top', $('.shigong-info-box .shigong-info').offset().top + $('.shigong-info-box .shigong-info').height() - $(window).scrollTop() - $('.shigong-process').height())
+            }else{
+                $('.shigong-process').css('top', 0)
+            }
+
+            if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+                // 加载数据
+                var page_old = page
+                page++
+                loadList('', page, function(res) {
+                    if(res.data.list && res.data.list.length > 0) {
+                        var tempData = {
+                            data: res.data.list
+                        }
+                        var tplStr = template("tmpl", tempData);
+                        $('.shigong-info').append(tplStr);
+                        if($('.shigong-info-box .shigong-info').find('.loadempty').length>0) {
+                            $('.shigong-info-box .shigong-info').find('.loadempty').fadeOut(0)
+                        }
+                    }else{
+                        if($('.shigong-info-box .shigong-info').find('.loadempty').length<=0) {
+                            $('.shigong-info-box .shigong-info').append('<p class="loadempty">没有数据了。。。</p>')
+                        }else{
+                            $('.shigong-info-box .shigong-info').find('.loadempty').fadeIn(0)
+                        }
+                        page = page_old
+                    }
+                })
+            }
+        })
+
+    })
+
+
+
+    /**
+     * 视频播放，滚动加载时直接执行一次该函数即可
+     * */
+    function videoPlay() {
+        var $videos = $('video')
+        $videos.each(function(index, item) {
+            videojs(item, {}, function() {
+                this.play()
+            });
+        })
+    }
+
+    /**
+     * 异步加载施工列表
+     * @params cb 回调函数
+     **/
+    function loadList(step, page, cb) {
+        step = step || ''
+        page = page || 1
+        $.ajax({
+            url: Global_SHIGONG_LIST,
+            type: 'get',
+            data: {
+                step: step,
+                live_id: '{$data.info.id}',
+                page: page
+            }
+        })
+        .done(function(res) {
+            cb && cb.call(this, res)
+            swiperHandle()
+            clickShowBigPic()
+        })
+        .fail(function(res) {
+            alert('网络异常，请稍后再试')
+        })
+    }
+
+    /**
+     * 异步加载施工详情
+     * @params id 施工信息id
+     * @params cb 回调函数
+     **/
+    function loadSGDetail(id, cb) {
+        $.ajax({
+            url: Global_SHIGONG_DETAIL,
+            type: 'get',
+            data: {
+                id: id
+            }
+        })
+        .done(function(res) {
+            cb && cb.call(this, res)
+        })
+        .fail(function(res) {
+            alert('网络异常，请稍后再试')
+        })
+    }
+
+    /**
+     * 复制功能
+     */
+    function copySericalHandle() {
+        var clipboard = new Clipboard('.sgcodebox .copy');
+        clipboard.on('success', function(e) {
+            $('.copysuccesstip').fadeIn(0)
+            setTimeout(function() {
+                $('.copysuccesstip').fadeOut(0)
+            }, 500)
+        });
+        clipboard.on('error', function(e) {
+            console.log(e);
+        });
+    }
+
+    /**
+     * 实现轮播图效果
+     */
+     function swiperHandle(obj) {
+         if(obj) {
+            $(obj).bxSlider({
+                slideWidth: 106,
+                minSlides: 5,
+                maxSlides: 5,
+                moveSlides: 1,   //此参数只滑动一张图片
+                slideMargin: 10,
+                auto: false,
+                stopAutoOnClick: true,
+                autoHover: true,
+                autoStart: false,
+                speed: 800,
+                pause: 5000,
+                infiniteLoop: true,
+                pager: false,
+                infiniteLoop: false, // 禁用无限循环
+                hideControlOnEnd: true // 必须和infiniteLoop一起使用且infiniteLoop必须设为false才行
+            });
+            return
+         }
+         $('.mediaresource').each(function(index, item) {
+             var $shigongPics = $(item).find('.shigongpics > li')
+             if($shigongPics.length > 5) {
+                $(item).find('.shigongpics').bxSlider({
+                    slideWidth: 106,
+                    minSlides: 5,
+                    maxSlides: 5,
+                    moveSlides: 1,   //此参数只滑动一张图片
+                    slideMargin: 10,
+                    auto: false,
+                    stopAutoOnClick: true,
+                    autoHover: true,
+                    autoStart: false,
+                    speed: 800,
+                    pause: 5000,
+                    infiniteLoop: true,
+                    pager: false,
+                    infiniteLoop: false, // 禁用无限循环
+                    hideControlOnEnd: true // 必须和infiniteLoop一起使用且infiniteLoop必须设为false才行
+                });
+             }
+         })
+     }
+
+    /**
+     * 点击图片放大显示
+     */
+     function clickShowBigPic() {
+        var $images = $('.shigongpics');
+        var options = {
+            url: 'data-original'
+        };
+        $images.viewer(options);
+     }
+
+    /**
+     * 施工二维码点击放大
+     */
+     function qrCodeShowBig() {
+        var options = {
+            url: 'data-original'
+        };
+        $('#sketchqrcode').on('click', function() {
+            $('.sketchqrcode').viewer(options).click();
+        })
+     }
+
+    /**
+     * 所有鼠标悬浮统一放这里
+     **/
+    (function mouseHoverAction() {
+        $('.zhibo-order-info .qrcode-area .t img').hover(function() {
+            $('.zhibo-order-info .qrcode-area .t .qrinstro').fadeIn(0)
+        }, function() {
+            $('.zhibo-order-info .qrcode-area .t .qrinstro').fadeOut(0)
+        })
+        $('.zhibo-order-info .orders-area .sgcodequestion').hover(function() {
+            $('.zhibo-order-info .orders-area .sgcodebox .sgcode').fadeIn(0)
+        }, function() {
+            $('.zhibo-order-info .orders-area .sgcodebox .sgcode').fadeOut(0)
+        })
+        $('.zhibo-order-info .orders-area .sgcodebox .copy').hover(function() {
+            $('.zhibo-order-info .orders-area .sgcodebox .sericalcopytip').fadeIn(0)
+        }, function() {
+            $('.zhibo-order-info .orders-area .sgcodebox .sericalcopytip').fadeOut(0)
+        })
+    })()
+
+</script>
+</body>
+</html>

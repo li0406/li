@@ -1,0 +1,136 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>微信渠道关联设置-控制台</title>
+</block>
+<block name="link">
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>设置默认微信公众号信息</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body" style="padding-top: 0">
+                            <form action="/Wechatmanagement/setDefaultData/" method="post" id="form">
+                            	<div class="col-xs-12 no-padding">
+                            		<div class="h5"><label>微信公众号名称</label></div>
+                                    <div class="col-xs-6 no-padding"><input type="text" class="form-control" name="wxname" value="{$name}"></div>
+                                </div>
+                                <div class="col-xs-12 no-padding">
+                                	<div class="h5"><label>微信公众号简介标题</label></div>
+                                    <div class="col-xs-6 no-padding"><input type="text" class="form-control" name="title" value="{$title}"></div>
+                                </div>
+                                <div class="col-xs-12 no-padding">
+                            		<div class="h5"><label>微信公众号简介详情</label></div>
+                                    <div class="col-xs-6 no-padding">
+                                    	<textarea class="form-control" style="height: 150px;" name="desc"><?php for($i=0; $i<count($desc); $i++){echo $desc[$i];echo "\n"; } ?></textarea>
+                                    	<div class="h6"><font color="red">公众号简介详情最多输入5行，每行最多输入12个汉字字符</font></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 no-padding">
+                                	<div class="h5"><label>微信公众号二维码</label></div>
+                                    <div class="img-selected">
+                                        <if condition="$imgurl neq ''">
+                                            <img src="{$imgurl}" alt="" width="150px" height="150px" id="defimgurl">
+                                        </if>
+                                    </div>
+                                	<div class="h6"><font color="red">二维码图片限制尺寸：500px*500px，此项为选填项，选择之后请上传</font></div>
+                                    <div class="btn btn-danger pull-left del-erweima" style="margin-right: 20px;"><i class="fa fa-trash"></i> 移除</div>
+                                    <div class="col-xs-8 no-padding"><input id="img" name="img" type="file" class="form-control" value=""/></div>
+                                </div>
+                                <input type="hidden" name="imgurl" value="" id="hidden_imgurl">
+                            </form>
+                    </div>
+                    <div class="box-footer">
+                    	<div class="">
+                            <button class="btn btn-success" onclick="subData()"><i class="fa fa-plus"></i> 保存</button>
+                            <a href="/Wechatmanagement/index/"><button class="btn btn-default"><i class="fa fa-mail-reply"></i> 返回</button></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+	<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            var hidden_imgurl = $("#defimgurl").attr("src");
+            if(hidden_imgurl){
+                $("#hidden_imgurl").val(hidden_imgurl);
+            }
+            //点击移除按钮,按钮和默认的二维码隐藏
+            $(".del-erweima").on('click',function () {
+                $('.img-selected img').attr('src','');
+                $(this).hide();
+            })
+            //点击上传,移除按钮和默认的二维码隐藏
+            $("#img").on('click',function () {
+                $('.img-selected img').attr('src','');
+                $(".del-erweima").hide();
+            })
+        	$("#img").fileinput({
+	          language: 'zh', //设置语言,
+	          uploadUrl:"/upload/uploadImg",
+	          showCaption:false,
+	          browseClass:"btn btn-primary",
+	          allowedFileExtensions : ['jpg','png','gif'],
+	          maxFileCount:1,
+	          uploadClass:"btn btn-info",
+	          removeClass:"btn btn-danger",
+	          uploadAsync:true,
+	          dropZoneEnabled:false,
+	          previewSettings:{
+	              image: {width: "150px", height: "150px"}
+	          },
+	          layoutTemplates:{
+	              actionDelete:"",
+	              actionUpload:""
+	          },
+	          uploadExtraData:{
+	              prefix:"zhuanti"
+	          },
+	          minImageWidth: "500",
+	          minImageHeight: "500",
+	          maxImageWidth: "500",
+	          maxImageHeight: "500",
+	          initialPreview:{$info.img|default="'' "},
+	      }).on('fileuploaded', function(event, data) {
+	          var _this = $(this);
+	          if(data.response.status == 1){
+	              var obj = data.response.data;
+                  var imgurl = obj.url;
+                  //$("input[name=img]").val(obj.url);
+                  $("input[name=imgurl]").val(imgurl);
+	          }else{
+	            console.log(data);
+	              _this.Alert({
+	                  msg:data.response.info,
+	                  level:2
+	              });
+	          }
+	      }).on("fileuploaderror",function(event, data){
+	            var _this = $(this);
+	            _this.Alert({
+	                msg:"图片不符合要求!",
+	                level:2
+	            });
+	          return false;
+	      }).on("fileclear",function(){
+	          $("input[name=img]").val("");
+	      });
+        });
+
+        //提交数据
+        function subData(){
+            $("#form").submit();
+        }
+    </script>
+</block>

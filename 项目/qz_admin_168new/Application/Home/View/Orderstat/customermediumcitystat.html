@@ -1,0 +1,123 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装中城市通话统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">装中城市通话统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-xs-12">
+                            <form id="searchform" action="/orderstat/customermediumcitystat" method="get">
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <label>查询时间:</label>
+                                    <input type="text" class="form-control datatimepicker" autocomplete="off"
+                                           name="begin" placeholder="开始时间" value="{$begin}">
+                                </div>
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <label>&nbsp;</label>
+                                    <input type="text" class="form-control datatimepicker" autocomplete="off"
+                                           name="end" placeholder="结束时间" value="{$end}">
+                                </div>
+                                <div class="col-xs-2" style="margin-top:10px">
+                                    <label>城市:</label>
+                                    <select id="city" name="city" >
+                                        <option value="">请选择</option>
+                                        <volist name="city" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <label>&nbsp;</label>
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead>
+                            <tr>
+                                <th>城市</th>
+                                <th>分单量</th>
+                                <th>呼出量</th>
+                                <th>呼通量</th>
+                                <th>呼通率</th>
+                            </tr>
+                            <tr>
+                                <th>总计：</th>
+                                <th>{$all.order_count}</th>
+                                <th>{$all.tel_count}</th>
+                                <th>{$all.call_count}</th>
+                                <th>{$all.call_rate}%</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.order_count}</td>
+                                    <td>{$vo.tel_count}</td>
+                                    <td>{$vo.call_count}</td>
+                                    <td>{$vo.call_rate}%</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#city").select2("val", "{$Think.get.city}");
+
+        $('.datatimepicker').datepicker({
+            autoclose:true,
+        });
+
+
+        $('#all_list').DataTable({
+            paging:false,
+            searching:false,
+            language:{
+                zeroRecords: "没有内容",
+                info:""
+            },
+            scrollY:"600px",
+            fnDrawCallback: function(oSettings ){
+                $('#all_list tbody').prepend("<tr>" + mySpecialRow + "</tr>");
+            },
+            orderCellsTop: true,
+        });
+    </script>
+</block>

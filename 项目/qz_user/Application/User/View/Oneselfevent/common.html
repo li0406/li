@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>通用礼券</title>
+    <include file="Index:resource"/>
+    <include file="Home:resource"/>
+    <script type="text/javascript" src="/assets/user/event/js/jquery.smint.js?v={:C('STATIC_VERSION')}"></script>
+    <link rel="stylesheet" href="{$static_host}/assets/user/home/css/font-awesome.min.css?v={:C('STATIC_VERSION')}">
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/user/event/css/ht-gift-common.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+<include file="Home:header"/>
+
+<div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft"/>
+    <include file="header"/>
+    <div class="ht-main">
+        <div class="table-list">
+            <form action="">
+            <div class="c-event-sefl">
+                <span class="pull-left mr20">礼券状态:</span>
+                <select class="c-event-sefl-sel mr20" name="status">
+                    <option value="">全部</option>
+                    <volist name="status" key="k" id="vo">
+                        <option value="{$Think.lang.$key}">{$vo}</option>
+                    </volist>
+                </select>
+                <input type="submit" value="查询" class="c-gift-search">
+                <a class="c-event-sefl-new" href="/oneselfevent/receivegift">可领用礼券</a>
+            </div>
+            </form>
+            <div class="c-event-tit-sel">
+                <table class="c-event-table">
+                    <thead>
+                    <tr class="c-table-header">
+                        <th>礼券名称</th>
+                        <th class="thead-time">活动时间</th>
+                        <th class="thead-time">有效时间</th>
+                        <th>立减金额</th>
+                        <th>发放数量</th>
+                        <th>已领数量</th>
+                        <th>礼券状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody class="c-table-body">
+                    <volist name="list" id="vo">
+                        <tr>
+                            <td><a href="/oneselfevent/commondetail/?id={$vo.id}" class="c-gift-name">{$vo.name}</a></td>
+                            <td class="c-table-time">
+                                <span>{$vo.activity_start|default=''|date='Y-m-d H:i:s',###}</span>至<span>{$vo.activity_end|default=''|date='Y-m-d H:i:s',###}</span>
+                            </td>
+                            <td class="c-table-time">
+                                <span>{$vo.start|default=''|date='Y-m-d H:i:s',###}</span>至<span>{$vo.end|default=''|date='Y-m-d H:i:s',###}</span>
+                            </td>
+                            <td style="width: 8%">
+                                <if condition="$vo['money1'] EQ 0">
+                                    立减{$vo.money2|intval}
+                                    <else/>
+                                    {$vo.money1|intval}减{$vo.money2|intval}
+                                </if>
+                            </td>
+                            <td>{$vo.amount}</td>
+                            <td><a href="/oneselfevent/getsearchcommon/?id={$vo.id}" class="green_1">{$vo.get_count}</a></td>
+                            <switch name="vo.status" >
+                                <case value="2"><td class="gift-status gray_1">待确认</td></case>
+                                <case value="6"><td class="gift-status blue_1">未生效</td></case>
+                                <case value="7"><td class="gift-status green_1">可用</td></case>
+                                <case value="4"><td class="gift-status gray_1">失效</td></case>
+                                <case value="1"><td class="gift-status gray_1">撤回</td></case>
+                                <case value="3"><td class="gift-status green_1">下架</td></case>
+                                <case value="8"><td class="gift-status orange">未通过</td></case>
+                                <case value="5"><td class="gift-status gray_1">已禁用</td></case>
+                            </switch>
+                            <td class="c-operator">
+                                <switch name="vo.status" >
+                                    <case value="2"><a href="#" class="green_1 operator-btn" status="4" data-id="{$vo.id}">撤回</a></case>
+                                    <case value="7"> <a href="#" class="red operator-btn" status="2" data-id="{$vo.id}">下架</a></case>
+                                    <case value="3"> <a href="#" class="red operator-btn" status="1" data-id="{$vo.id}">上架</a></case>
+                                </switch>
+                            </td>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+                {$page}
+            </div>
+        </div>
+    </div>
+</div>
+<include file="Index:footer"/>
+</body>
+<script type="text/javascript">
+    $('select[name=status]').val('{$Think.get.status}');
+    $('.operator-btn').click(function () {
+        var _this = $(this);
+        var status = _this.attr('status');
+        var cardid = _this.data('id');
+        layui.use('layer', function () {
+            var layer = layui.layer
+            layer.confirm('确认' + _this.text() + '该礼券？', {
+                title: '',
+                btnAlign: 'c',
+                closeBtn: 0,
+                btn: ['确认', '取消']
+            }, function () {
+                layer.closeAll()
+                //    ajax请求
+                $.ajax({
+                    url: '/oneselfevent/common/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {cardid:cardid,status:status}
+                })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                window.location.href='/oneselfevent/common/';
+                            }else{
+                                alert(data.info);
+                                return false;
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+
+//                if (_this.text() == '下架') {
+//                    _this.text('上架')
+//                } else if (_this.text() == '上架') {
+//                    _this.text('下架')
+//                } else if(_this.text() == '撤回'){
+//                    _this.text('重新申请')
+//                }
+            }, function () {
+
+            });
+        })
+    })
+
+</script>
+</html>

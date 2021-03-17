@@ -1,0 +1,163 @@
+<div class="win_box step zb_box_fb">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="zb_box_in">
+            <div class="zb_box_title">
+                <div class="zb_box_hd">
+                    <h2>免费做设计与报价
+                        <em class="zb_box_info">
+                            装修立省30%
+                        </em>
+                    </h2>
+                </div>
+            </div>
+             <span class="win_box_close" title="关闭">
+                </span>
+            <div class="zb_box_form">
+                <div class="input">
+                    <label class="label-control">您的称呼</label>
+                    <input type="text" class="input-control" name="name" placeholder="称呼" />
+                    <div class="input-error"></div>
+                </div>
+                <div class="input">
+                    <label class="label-control">您的手机</label>
+                    <input type="text" class="input-control" name="tel" placeholder="您的手机号码" maxlength="11" />
+                    <input type="hidden" name="fb_type" value="sheji">
+                    <div class="input-error"></div>
+                </div>
+                <div class="input">
+                    <label class="label-control">所在城市</label>
+                    <select id="fb-cs" name="cs" class="input-control">
+                    </select>
+                    <select id="fb-qy" class="input-control" name="qy">
+                    </select>
+                    <div class="input-error"></div>
+                </div>
+                <div class="input" style="text-align:center;">
+                    <button id="stepSave" type="button" class="button">提交</button>
+                </div>
+                <div class="input">
+                    <div class="input-msg">为了您的利益及我们的口碑，您的隐私将被严格保密。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var ip_cityid = '{$Think.cookie.iplookup}';
+    var city_id = '{$theCityId}';
+
+    (city_id == '') ? cityId = ip_cityid : cityId = city_id;
+    if(cityId == ''){
+        getLocation();
+    }else{
+        initCity(cityId);
+    }
+
+    function initCity(cityId){
+        App.citys.init("#fb-cs","#fb-qy",shen,shi,cityId);
+    }
+
+    $(".zb_box_fb .win_box_close").click(function(event) {
+        $(".zb_box_fb").fadeOut(400,function(){
+            $(this).remove();
+        });
+    });
+
+    $(".zb_box_fb #stepSave").click(function(event) {
+        $(".input-error").html("");
+        $(".focus").removeClass("focus");
+        var _this = $(this);
+        if(!App.validate.run($(".zb_box_fb input[name=name]").val())){
+            $(".zb_box_fb input[name=name]").addClass('focus');
+            $(".zb_box_fb input[name=name]").focus();
+            $(".zb_box_fb input[name=name]").parent().find(".input-error").html("请填写您的称呼");
+            return false;
+        } else {
+            var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+            if (!reg.test($(".zb_box_fb input[name=name]").val())) {
+                $(".zb_box_fb input[name=name]").addClass('focus');
+                $(".zb_box_fb input[name=name]").focus();
+                $(".zb_box_fb input[name=name]").val('');
+                $(".zb_box_fb input[name=name]").parent().find(".input-error").html("请输入正确的名称，只支持中文和英文");
+                return false;
+            }
+        }
+
+        if(!App.validate.run($(".zb_box_fb input[name=tel]").val())){
+            $(".zb_box_fb input[name=tel]").addClass('focus');
+            $(".zb_box_fb input[name=tel]").focus();
+            $(".zb_box_fb input[name=tel]").parent().find(".input-error").html("请填写您的手机号码");
+            return false;
+        } else {
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if (!reg.test($(".zb_box_fb input[name=tel]").val())) {
+                $(".zb_box_fb input[name=tel]").addClass('focus');
+                $(".zb_box_fb input[name=tel]").focus();
+                $(".zb_box_fb input[name=tel]").val('');
+                $(".zb_box_fb input[name=tel]").parent().find(".input-error").html("请填写正确的手机号码 ^_^!");
+                return false;
+            }
+        }
+
+        if(!App.validate.run($(".zb_box_fb input[name=tel]").val(),"moblie")){
+            $(".zb_box_fb input[name=tel]").addClass('focus');
+            $(".zb_box_fb input[name=tel]").focus();
+            $(".zb_box_fb input[name=tel]").parent().find(".input-error").html("无效的电话");
+            return false;
+        }
+
+        if(!App.validate.run($(".zb_box_fb select[name=cs]").val())){
+            $(".zb_box_fb select[name=cs]").addClass('focus');
+            $(".zb_box_fb select[name=cs]").focus();
+            $(".zb_box_fb select[name=cs]").parent().find(".input-error").html("请选择您的所在城市");
+            return false;
+        }
+
+        if(!App.validate.run($(".zb_box_fb select[name=qy]").val())){
+            $(".zb_box_fb select[name=qy]").addClass('focus');
+            $(".zb_box_fb select[name=qy]").focus();
+            $(".zb_box_fb select[name=qy]").parent().find(".input-error").html("请选择您的所在城市");
+            return false;
+        }
+
+        window.order({
+            extra:{
+                tel: $(".zb_box_fb input[name=tel]").val(),
+                fb_type: $(".zb_box_fb input[name=fb_type]").val(),
+                name: $(".zb_box_fb input[name=name]").val(),
+                cs: $(".zb_box_fb select[name=cs]").val(),
+                qx: $(".zb_box_fb select[name=qy]").val(),
+                source: "{$source}" || 25,
+                safecode:"{$safecode}",
+                safekey: "{$safekey}",
+                ssid:"{$ssid}",
+                step:2
+            },
+            error:function(){
+                $.pt({
+                    target: _this,
+                    content: '发布失败,请刷新页面！',
+                    width: 'auto'
+                });
+            },
+            success:function(data, status, xhr){
+                if (data.status == 1) {
+                    $(".zb_box_fb").remove();
+                    $("body").append(data.data.tmp);
+                } else {
+                    $.pt({
+                        target: _this,
+                        content: data.info,
+                        width: 'auto'
+                    });
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+</script>

@@ -1,0 +1,321 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>合作商管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/partner/css/index.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+    <style>
+        .dataTables_filter {display:none}
+        tr:hover{
+            background-color: #F0F2F6;
+        }
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <span>合作商管理</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box" style="min-width:500px" id="box-head">
+                    <form action="/partner/hzslist" method="get" id="tiaojian">
+                        <div class="col-sm-2">
+                            <label for="">合作商名称：</label>
+                            <select name="name" class="form-control select2" id="hzs_name">
+                                <option value="">全部</option>
+                                <volist name="hzs_name" id="vi">
+                                    <if condition="$vi eq $input['name']">
+                                        <option value="{$vi}" selected>{$vi}</option>
+                                    <else/>
+                                        <option value="{$vi}">{$vi}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">开启状态：</label>
+                            <select name="status" class="form-control">
+                                <option value="">请选择</option>
+                                <option value="0" <?php echo ($input['status'] == 0 && strlen($input['status']) > 0) ? 'selected' :'';?>>关闭</option>
+                                <option value="1" <?php echo $input['status'] == 1 ?'selected':'';?>>开启</option>
+                            </select>
+                        </div>
+                        <div class="input-group" >
+                            <div class="input-group-btn" id="search">
+                                <button type="submit" class="btn btn-success">查询</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="add">
+                        <div style="width:160px;"  data-toggle="modal" data-target="#myModal" onclick="hzsEdit()">
+                            <a href="javascript:void(0)"><button class="button button-highlight button-square button-large"><i class="fa fa-plus"></i></button>添加合作商</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box" id="hezuoshang">
+                <table>
+                    <thead >
+                        <tr>
+                            <th width="100">序号</th>
+                            <th width="200">合作商名称</th>
+                            <th width="150">简称</th>
+                            <th width="150">总账号</th>
+                            <th width="150">密码</th>
+                            <th width="150">对接人</th>
+                            <th width="150">账户数</th>
+                            <th width="150">渠道标识数</th>
+                            <th width="200">添加日期</th>
+                            <th width="100">开启状态</th>
+                            <th width="200">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="list" id="vo" key="k">
+                        <tr>
+                            <td>{$k}</td>
+                            <td><a href="javascript:void(0)" class="hzsName" data-logo="{$vo.logo}">{$vo.name}</a></td>
+                            <td class="short">{$vo.short}</td>
+                            <td class="account">{$vo.account}</td>
+                            <td>{$vo.psw|default='--'}</td>
+                            <td>{$vo.yy_user_name|default='--'}</td>
+                            <td>{$vo.account_child_count}</td>
+                            <td>{$vo.number}</td>
+                            <td><?php echo !empty($vo['create_time'])?date('Y-m-d',$vo['create_time']):'--';?></td>
+                            <td><eq name="vo.status" value="1">开启<else/>关闭</eq></td>
+                            <td class="p-edit" style="cursor: pointer;" data-toggle="modal" data-target="#myModal" onclick="hzsEdit({$vo.id})">编辑</td>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</div>
+<div class="box-footer clearfix">
+       {$page}
+</div>
+<!-- 添加弹框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bgc_ssw">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">添加合作商</h4>
+            </div>
+            <input type="hidden" name="id">
+            <div class="modal-body">
+                <form id="myForm" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>合作商名称：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="name" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">简称：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="short" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>总帐号：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="account" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>对接人：</label>
+                        <div class="col-xs-6">
+                            <select name="pick_person" class="form-control">
+                                <option value="">请选择</option>
+                                <volist name="pick" id="val" key="ke">
+                                    <option value="{$val.id}">{$val.uname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">开启状态：</label>
+                        <div class="col-xs-6">
+                            <label><input id="selected_open" name="is_use" type="radio" value="1" />开启 </label>
+                            <label><input id="selected_close" name="is_use" type="radio" value="0" checked/>关闭 </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">取消</button>
+                <button id="btnSave" type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $('.select2').select2({
+        allowClear: true,
+        language: "zh-CN"
+    });
+    $('.p-select').select2({
+        allowClear: true,
+        language: "zh-CN"
+    });
+
+     //详情弹框
+     $("#dialog_edit").on('click',function() {
+        $('#myModal').show();
+     })
+
+    $('#btnSave').on('click', function () {
+        var id = $('#myModal input[name="id"]').val();
+        var name = $('#myModal input[name="name"]').val();
+        var short = $('#myModal input[name="short"]').val();
+        var account = $('#myModal input[name="account"]').val();
+        var yy_id = $('#myModal select[name="pick_person"]').val();
+        var status = $('#myModal input[type="radio"]:checked').val();
+        if ($.trim(name) == '') {
+            $('#myModal input[name="name"]').focus();
+            return false;
+        }
+        if ($.trim(account) == '') {
+            $('#myModal input[name="account"]').focus();
+            return false;
+        }
+        if ($.trim(yy_id) == '') {
+            $('#myModal select[name="pick_person"]').focus();
+            return false;
+        }
+
+        //执行提交保存操作
+        $.ajax({
+            url: "/partner/hzssave",
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                id:id,
+                name: name,
+                short: short,
+                account: account,
+                yy_id: yy_id,
+                status: status
+            }
+        }).done(function(data) {
+            if (data.error_code == 0) {
+                window.location.href = '/partner/hzslist';
+            } else {
+                alert(data.error_msg);
+                return false;
+            }
+        })
+        .fail(function(xhr) {
+            layer.msg('发生未知错误，请稍后重试~');
+            return false;
+        });
+    });
+
+    //   $('.detail-close').click(function(event) {
+    //      $('.detail').hide();
+    //   });
+
+    $('.hzsName').on('click',function () {
+        var that = $(this);
+        var account = that.parent().siblings('.account').html();
+        $.ajax({
+            url: '/partner/gotoHzs/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{account:account}
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                // window.location.href='http://168hzs.qizuang.com';
+                window.open('http://168hzs.qizuang.com');
+            } else {
+                alert(data.info);
+                return false;
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生未知错误，请稍后重试~');
+            return false;
+        });
+    });
+
+    function hzsEdit(id) {
+        if(id) {
+            $.ajax({
+                url: '/partner/gethzsinfobyid/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: id}
+            }).done(function (data) {
+                $('#myModal input[name="id"]').val(data.data.id);
+                $('#myModal input[name="name"]').val(data.data.name);
+                $('#myModal input[name="short"]').val(data.data.short);
+                $('#myModal input[name="account"]').val(data.data.account);
+                $('#myModal input[name="account"]').attr("readonly", true);
+                $('#myModal select[name=pick_person]').val(data.data.yy_id);
+
+                if (data.data.status == 1) {
+                    $('#selected_open').prop('checked', true);
+                    $('#selected_close').prop('checked', false);
+                }
+
+                if (data.data.status == 0) {
+                    $('#selected_close').prop('checked', true);
+                    $('#selected_open').prop('checked', false);
+                }
+            })
+            .fail(function (xhr) {
+                alert('发生未知错误，请稍后重试~');
+                return false;
+            });
+        } else {
+            $('#myModal input[name="id"]').val('');
+            $('#myModal input[name="name"]').val('');
+            $('#myModal input[name="short"]').val('');
+            $('#myModal input[name="account"]').val('');
+            $('#myModal input[name="account"]').attr("readonly", false);
+            $('#myModal select[name=pick_person]').val("");
+            
+            $('#selected_close').prop('checked', true);
+            $('#selected_open').prop('checked', false);
+        }
+    }
+</script>
+</block>

@@ -1,0 +1,181 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$static_host}/assets/mobile/zhixuan/css/zxzq_xxtx.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-tit"> 大数据智选装修公司</div>
+</block>
+<block name="content">
+    <div class="sou_ban">
+        <switch name="Think.get.type">
+        <case value="1"><img src="//{:C('QINIU_DOMAIN')}/custom/20201118/Fo90Dd2ph1OBSzL6m9xDBSb6N6q9" alt=""></case>
+        <case value="2"><img src="//{:C('QINIU_DOMAIN')}/custom/20201120/FqOELPf_bSOcu1BG4cYZ62w6CoJS" alt=""></case>
+        <case value="3"><img src="//{:C('QINIU_DOMAIN')}/custom/20201120/Fp0qIzSO6gd8dBal0YRXlYo_IIkc" alt=""></case>
+        <case value="4"><img src="//{:C('QINIU_DOMAIN')}/custom/20201120/Ft-WJEw_d-akzjciHAIB-gs1JEay" alt=""></case>
+        </switch>
+    </div>
+    <div class="title_text">
+        <p>您爱家所在的位置是...</p>
+    </div>
+    <!-- 发单 -->
+    <div class="form-once">
+        <ul class="m-bj-edit ulmar">
+            <li id="area">
+                <div>
+                    <button id="showCityPicker2" class="c-zb-city xiu_city" type="button">
+                        <i class="fa fa-map-marker"></i>
+                        <empty name="defaultCityarea">
+                        请选择您所在的区域
+                        <else />
+                        {$mapUseInfo.provincefull} {$mapUseInfo.name} {$defaultCityarea.name}
+                        </empty>
+                    </button>
+                    <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                    <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                    <input type="hidden" name="area" data-id="{$defaultCityarea.id}">
+                    <input type="hidden" name="source" value="20103034">
+                </div>
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list xiu_city" type="number" name="mianji" pattern="[0-9]*" oninput="if(value.length>4)value=value.slice(0,4)" placeholder="填写您的房屋面积可提升精准度" value="{$Think.get.mianji}">
+                <span class="dw dws">
+                    ㎡
+                </span>
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list xiu_city" type="tel" maxlength="11" name="tel-number" placeholder="请输入您的联系方式以获取结果">
+            </li>
+            <li class="ming">
+               <input type="checkbox" checked="checked" id="mianze">
+               <label for="mianze" id="check" class="fa fa-check"></label>
+               <span>我已阅读并同意齐装网的</span>
+               <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+            </li>
+        </ul>
+        <div class="text_wen">大数据基于地理位置进行匹配</div>
+        <div class="redbgc_btn">
+            <p class="red_p save-submit">马上出结果</p>
+        </div>
+    </div>
+  
+
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var type = sessionStorage.getItem('zx_step1');
+        var content = sessionStorage.getItem('zx_step2');
+        var fengge = sessionStorage.getItem('zx_step3');
+
+        if(!type || !content){
+            window.location.href = '/zxzq'
+        }
+
+        if(content){
+            var contentObj = JSON.parse(content)
+            var content = ''
+            var conts = 0
+            $.each(contentObj, function(i,v){
+                if(conts != 0){
+                    content += '，'
+                }
+                content += v
+                conts++;
+            })
+        }
+
+        if(fengge){
+            var fenggeObj = JSON.parse(fengge)
+            var fengge = ''
+            $.each(fenggeObj, function(i,v){
+                fengge = v;
+            })
+        }
+
+        // 发单
+        $('.save-submit').on('click', function() {
+            var checked = $("#mianze").is(':checked')
+            window.order({
+                url: '/zxzq_fb_order/',
+                extra:{
+                    cs: $("input[name=city]").attr('data-id'),
+                    qx: $("input[name=area]").attr('data-id'),
+                    mianji: $(".m-bj-edit input[name=mianji]").val(),
+                    tel: $(".m-bj-edit input[name=tel-number]").val(),
+                    type: type,
+                    content: content,
+                    fengge: fengge,
+                    source: $('input[name=source]').val(),
+                },
+                submitBtn:{
+                    className: $(this),
+                    type: 'btn'
+                },
+                error:function() {
+                    alert("发生未知的错误，请稍后再试！")
+                },
+                success:function(data,status, xhr) {
+                    if(data.status == 1) {
+                        sessionStorage.setItem('zx_result', 1);
+                        sessionStorage.setItem('zx_order_tel', $(".m-bj-edit input[name=tel-number]").val());
+                        window.location.href = "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/zxzq?p=4&type={$Think.get.type}&cs="+$("input[name=city]").attr('data-id');
+                        return;
+                    }
+                },
+                validate:function(item, value, method, info) {
+                    // 判断没有填写时提示填写
+                    if(('cs' == item || 'qx' == item) && 'notempty' == method) {
+                        alert(info)
+                        return false;
+                    }
+                    if($(".m-bj-edit input[name=mianji]").val()=='') {
+                        alert("请输入您的房屋面积!")
+                        $('.m-bj-edit input[name=mianji').focus();
+                        return false;
+                    }
+                    if($(".m-bj-edit input[name=mianji]").val()<1  || $(".m-bj-edit input[name=mianji]").val()>=10000){
+                        alert('房屋面积请输入1-10000之间的数字!')
+                        $('.m-bj-edit input[name=mianji').focus();
+                        return false;
+                    }
+                    if('tel' == item && '' != method) {
+                        alert(info)
+                        $('.m-bj-edit input[name=tel-number').focus();
+                        return false;
+                    }
+                    if(!checked) {
+                        alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+                        return false;
+                    }
+                    
+                    return true;
+                }
+            })
+        })
+        // 切换免责对勾
+        $("#check").click(function() {
+            $(this).toggleClass('fa-check')
+        })
+        
+    </script>
+    <script type="text/javascript">
+        // 城市选择插件
+        $(function(){
+            selectQz.init({
+                province: $("input[name=province]").attr("data-id"),
+                city: $("input[name=city]").attr("data-id"),
+                area: $("input[name=area]").attr("data-id")
+            });
+        })
+    </script>
+</block>
+  
+  

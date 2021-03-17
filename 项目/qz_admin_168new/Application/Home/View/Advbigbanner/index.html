@@ -1,0 +1,399 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>通栏广告管理-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/icheck/skins/all.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/js/plugins/icheck/skins/flat/grey.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/zoom.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/advbigbanner.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+      <h1>通栏广告管理</h1>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-default">
+              <div class="box-header with-border">
+                <h3 class="box-title">条件查询</h3>
+              </div>
+              <div class="box-body">
+                <div class="row">
+                  <form class="form-horizontal" method="GET" action="/advbigbanner/">
+                    <div class="col-xs-2">
+                      公司名字或ID：<input type="text" name="query" class="form-control"  placeholder="公司名称/ID" value="{$query}">
+                    </div>
+                    <div class="col-xs-2">
+                        所属城市：
+                        <select id="search"   name="cs" type="text" placeholder="所属城市" >
+                            <option value="">全部城市</option>
+                            <volist name="citys" id="vo">
+                            <option value="{$vo.cid}">{$vo.cname}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        通栏位置：
+                        <select name="position" class="form-control">
+                          <option value="">请选择</option>
+                          <if condition="$position EQ 'A'">
+                            <option value="A" selected="selected">通栏A</option>
+                            <option value="B">通栏B</option>
+                            <option value="C">通栏C</option>
+                          <elseif condition="$position EQ 'B'"/>
+                            <option value="A">通栏A</option>
+                            <option value="B" selected="selected">通栏B</option>
+                            <option value="C">通栏C</option>
+                          <elseif condition="$position EQ 'C'"/>
+                            <option value="A">通栏A</option>
+                            <option value="B">通栏B</option>
+                            <option value="C" selected="selected">通栏C</option>
+                          <else/>
+                            <option value="A">通栏A</option>
+                            <option value="B">通栏B</option>
+                            <option value="C">通栏C</option>
+                          </if>
+                        </select>
+                    </div>
+                    <div class="col-xs-1">
+                      <br/>
+                      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>查询</button>
+                    </div>
+
+                    <div class="pull-right col-sm-1">
+                    <br/>
+                      <button id="btnDel" type="button" class="btn btn-block btn-danger">删除</button>
+                    </div>
+                    <div class="pull-right col-sm-1">
+                    <br/>
+                      <button id="btnSort" type="button" class="btn btn-block btn-info">更新排序</button>
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                      <br/>
+                      <a href="/advbigbanner/bigbannerup" class="pull-right"><button class="btn btn-block btn-success normal" type='button' style="width:auto"><i class="fa fa-plus-circle"></i>新增通栏</button></a>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="box box-default">
+                <table class="table table-bordered table-hover dataTable">
+                    <tr>
+                      <th>#</th>
+                      <th class="col-sm-1">ID</th>
+                      <th class="col-sm-2">公司名称</th>
+                      <th class="col-sm-1">所属城市</th>
+                      <th class="col-sm-1">通栏位置</th>
+                      <th class="col-sm-1">通栏顺序</th>
+                      <th class="col-sm-1">开始时间</th>
+                      <th class="col-sm-1">结束时间</th>
+                      <th class="col-sm-1">剩余天数</th>
+                      <th class="col-sm-1">状态</th>
+                      <th width="110px">操作</th>
+                    </tr>
+                  <volist name="list" id="vo">
+                    <tr>
+                      <td>
+                        <input type="checkbox" class="icheck" name="check" value="{$vo['id']}" />
+                      </td>
+                      <td>
+                        <if condition="$vo['company_id'] EQ 0">
+                            -
+                        <else/>
+                          {$vo.company_id}
+                        </if>
+                      </td>
+                      <td>
+                        <if condition="$vo['company_name'] EQ ''">
+                          -
+                        <else/>
+                          {$vo.company_name}
+                        </if>
+                      </td>
+                      <td>{$vo.cname|default='全站'}</td>
+                      <td>
+                        <if condition="$vo['module'] EQ 'home_bigbanner_a'">
+                          通栏A
+                        <elseif condition="$vo['module'] EQ 'home_bigbanner_b'"/>
+                          通栏B
+                        <elseif condition="$vo['module'] EQ 'home_bigbanner_c'"/>
+                          通栏C
+                        </if>
+                      </td>
+                      <td>
+                        <input type="text" class="text-center form-control" value="{$vo.sort}" data-id="{$vo.id}" />
+                      </td>
+                      <td>{$vo.start_time|date="Y-m-d",###}</td>
+                      <td>{$vo.end_time|date="Y-m-d",###}</td>
+                      <td>{$vo.end_day}</td>
+                      <eq name="vo.status" value="1">
+                        <td>使用</td>
+                      <else/>
+                        <td>
+                          <span class="badge bg-gray">停用</span>
+                        </td>
+                      </eq>
+                      <td class="text-center">
+                        <ul class="gallery img-show pull-right" style="padding:0; margin-right:15px">
+                          <li>
+                            <a class="fa fa-photo" href="http://{:OP('QINIU_DOMAIN')}/{$vo.img_url}" title="预览"><img src="//{:OP('QINIU_DOMAIN')}/{$vo.img_url}" style="display:none;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                          </li>
+                        </ul>
+                        <a href="/advbigbanner/bigbannerup?id={$vo.id}" class="fa fa-pencil pull-right" title="编辑"></a>
+                        <a href="javascript:void(0)" class="fa fa-reorder log pull-right" data-id="{$vo.company_id}" data-name="{$vo.company_name}" title="日志"></a>
+                        <eq name="vo.status" value="1">
+                          <a href="javascript:void(0)" data-id="{$vo.id}" data-company="{$vo.company_id}" class="fa fa-toggle-on pull-right" title="停用"></a>
+                        <else/>
+                          <a href="javascript:void(0)" data-id="{$vo.id}" data-company="{$vo.company_id}" class="fa fa-toggle-off pull-right" title="启用"></a>
+                        </eq>
+                      </td>
+                    </tr>
+                  </volist>
+                </table>
+                {$page}
+                <div class="box-footer clearfix">
+                    <div class="col-xs-12">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+      $('.icheck').iCheck({
+          checkboxClass: 'icheckbox_minimal-grey',
+          radioClass: 'iradio_minimal-grey',
+          increaseArea: '' // optional
+      }).on("ifChecked",function(event){
+            var target = $(event.target);
+            $('.icheck').not(target).iCheck('uncheck');
+            target.attr("checked","checked");
+      }).on("ifUnchecked",function(event){
+            var target = $(event.target);
+            target.attr("checked",false);
+      });
+
+      $("#search").select2({
+          allowClear: true,
+          placeholder: "选择城市"
+      });
+      $("#search").select2("val","{$cs}");
+
+      $(".fa-toggle-on").click(function(event) {
+          if (confirm('确定停用此通栏？停用后此通栏将不再显示！')) {
+              var _this = $(this);
+              var id = _this.attr("data-id");
+              var company_id = _this.attr("data-company");
+              $.ajax({
+                url: '/advbigbanner/setstatus',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                  id: id,
+                  company_id:company_id,
+                  status:0
+                }
+              })
+              .done(function(data) {
+                  if(data.status == 1){
+                    window.location.href = window.location.href;
+                  }else{
+                    _this.Alert({
+                      msg:data.info,
+                      level:2
+                  });
+                  }
+              })
+              .fail(function() {
+                _this.Alert({
+                    msg:"操作失败,请联系技术部门！",
+                    level:2
+                });
+              });
+          };
+      });
+
+      $(".fa-toggle-off").click(function(event) {
+          var _this = $(this);
+          var id = _this.attr("data-id");
+          var company_id = _this.attr("data-company");
+          $.ajax({
+            url: '/advbigbanner/setstatus',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+              id: id,
+              company_id:company_id,
+              status:1
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = window.location.href;
+              }else{
+                _this.Alert({
+                  msg:data.info,
+                  level:2
+              });
+              }
+          })
+          .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+          });
+      });
+
+
+      $("#btnDel").click(function(event) {
+          var _this = $(this);
+          var id = $("input[name=check]:checked").val();
+          $.ajax({
+            url: '/advbigbanner/setstatus',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+              id: id
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = window.location.href;
+              }else{
+                _this.Alert({
+                  msg:data.info,
+                  level:2
+              });
+              }
+          })
+          .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+          });
+      });
+      $("#btnSort").click(function(event) {
+          var _this = $(this);
+          var data = new Array();
+          $(".dataTable").find("input[type=text]").each(function(){
+              var subData = {
+                  id:$(this).attr("data-id"),
+                  value:$(this).val()
+              }
+              data.push(subData);
+          });
+
+          $.ajax({
+            url: '/advbigbanner/sortbigbanner',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+              data:data
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = window.location.href;
+              }else{
+                _this.Alert({
+                  msg:data.info,
+                  level:2
+              });
+              }
+          })
+          .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+          });
+      });
+
+        $('.log').click(function(){
+            var id = $(this).attr('data-id');
+            var company = $(this).attr('data-name')
+            var _this = this;
+            $.ajax({
+                url: '/api/getlogslistbyid/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    limit:10,
+                    logtype:'editbigbanner'
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    var data = data.data;
+                    var infos = '';
+                    result ='<table class="table table-bordered"><tbody><tr><th width="180px;">操作时间</th><th>操作人</th><th>公司ID</th><th>公司名</th><th>广告开始时间</th><th>广告结束时间</th><th>操作备注</th></tr>';
+                    $.each(data,function(key,info) {
+                        var obj = $.parseJSON(info.info);
+                        start_time = '';
+                        end_time = '';
+
+                        console.log(obj);
+                        if(obj){
+                            if(obj.start_time){
+                                start_time = obj.start_time;
+                            }
+                            if(obj.end_time){
+                                end_time = obj.end_time;
+                            }
+                        }
+                        infos = infos + '<tr><td>'+info.time+'</td><td>'+info.username+'</td><td>'+id+'</td><td>'+company+'</td><td>'+start_time+'</td><td>'+end_time+'</td><td>'+info.remark+'</td></tr>'
+                    });
+                    if('' == infos){
+                        result = '没有查询到相关的日志记录！';
+                    }else{
+                        result = result + infos + '</tbody></table>'
+                    }
+                    var d = dialog({
+                        quickClose: true,
+                        align: 'left',
+                        content: result,
+                        follow: _this,
+                        onclose: function () {}
+                    });
+                    d.show();
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    </script>
+</block>

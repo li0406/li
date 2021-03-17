@@ -1,0 +1,302 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/orders/css/scheduling.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header">
+    <h1>客服排班管理</h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-default">
+                <div class="box-body">
+                    <form method="get" action="/orders/scheduling/">
+                    <div class="col-xs-1">
+                        <input type="text" class="form-control datepicker" name="date" placeholder="请选择月份" value="{$Think.get.date}">
+                    </div>
+                    <div class="col-xs-1">
+                        <button type="submit" class="btn btn-success">选择</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="col-xs-12">
+                        <div class="log col-sm-1 fr">
+                            <button  class="btn btn-info">操作日志</button>
+                        </div>
+                    </div>
+                    <div class="col-xs-12" >
+                        <table id="myTable" class="table table-hover">
+                            <thead>
+                                <tr>
+                                <td rowspan="2" width="50">序号</td>
+                                <td rowspan="2" width="100">岗位</td>
+                                <td rowspan="2" width="70">姓名</td>
+                                <volist name="list.calendar" id="vo">
+                                <td>{$vo.cn}</td>
+                                </volist>
+                                <td rowspan="2">休</td>
+                                <td rowspan="2">班</td>
+                                <td rowspan="2">操作</td>
+                            </tr>
+                            <tr>
+                                <volist name="list.calendar" id="vo">
+                                <td>{$vo.en}</td>
+                                </volist>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.list" id="vo" key="j">
+                                <tr class="item">
+                                    <td>{$j}</td>
+                                    <td>{$vo.role_name}</td>
+                                    <td>{$vo.name}</td>
+                                    <volist name="vo.scheduling" id="v">
+                                    <if condition="$v EQ 1">
+                                    <td class="calendar yellow">X</td>
+                                    <elseif condition="$v EQ 2" />
+                                    <td class="calendar">A</td>
+                                    <elseif condition="$v EQ 3"/>
+                                    <td class="calendar">B</td>
+                                    <else/>
+                                    <td class="calendar">-</td>
+                                    </if>
+                                    </volist>
+                                    <td class="reset">{$vo.resetCount|default=0}</td>
+                                    <td class="work">{$vo.workCount|default=0}</td>
+                                    <td>
+                                        <if condition="check_user_menu_auth('/orders/schedulingup/')">
+                                            <if condition="$vo['isedit'] EQ 1">
+                                                <i title="编辑" class="fa fa-pencil"></i>
+                                                <i title="保存" class="fa fa-save" data-uid="{$vo.uid}" data-name="{$vo.name}" data-id="{$vo.id}" style="display: none;"></i>
+                                            </if>
+                                        <else/>
+                                        -
+                                        </if>
+                                    </td>
+                                </tr>
+                                </volist>
+                                <tr>
+                                    <td colspan="3">审核专员坐席数</td>
+                                    <volist name="list.kfList" id="vo">
+                                    <td class="kf">{$vo}</td>
+                                    </volist>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 操作日志弹框 -->
+    <div class="bjyy"></div>
+    <div class="operate-log">
+        <div class="o-title">操作日志</div>
+        <div class="o-box">
+            <table class="o-table">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th width="70">操作人</th>
+                        <th>操作内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="log" id="vo">
+                    <tr>
+                        <td>{$vo.time}</td>
+                        <td>{$vo.username}</td>
+                        <td>{$vo.remark}</td>
+                    </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+        <div class="queding">
+             <button  class="btn btn-info o-btn">确定</button>
+        </div>
+    </div>
+    <!-- 导入弹框 -->
+    <div class="leading-box">
+        <div class="l-title">导入客服排班</div>
+        <div class="shangchuan"><button class="btn ">上传EXCEL</button></div>
+        <div class="q-r">
+            <button class="btn l-close">取消</button>
+            <button class="btn btn-info l-btn">上传</button>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        window.addEventListener('scroll',function(e){
+            var scrollTop = document.body.scrollTop|| document.documentElement.scrollTop;
+            if (scrollTop > 200) {
+                scrollTop = parseInt(scrollTop) - 200 - 40;
+            } else {
+                scrollTop = 0;
+            }
+            document.querySelector('thead').style.transform = 'translateY(' + scrollTop + 'px)';
+            document.querySelector('thead').style.background = '#fff';
+        });
+
+        $(function(){
+            // 时间选择
+            $(".datepicker").datetimepicker({
+                startView:3,
+                minView:'decade',
+                format:"yyyy-mm",
+                autoclose:true,
+                pickerPosition: "bottom-left"
+            });
+            // 新增弹框
+            $('.new-edit').click(function(event) {
+                $('.bjyy').show();
+                $('.new-add-box').show();
+            });
+
+
+            // 导入弹框
+            $('.leading-in button').click(function(event){
+                $('.bjyy').show();
+                $('.leading-box').show();
+            })
+            $('.l-close').click(function(event) {
+                $('.bjyy').hide();
+                $('.leading-box').hide();
+            });
+            // 操作日志弹框
+            $('.log').click(function(event) {
+                $('.bjyy').show();
+                $('.operate-log').show();
+            });
+            $('.o-btn').click(function(event) {
+                $('.bjyy').hide();
+                $('.operate-log').hide();
+            });
+            $('body').on('click','.fa-pencil',function(){
+                var _this = $(this);
+                var tr = $(this).parents("tr");
+                _this.hide();
+                tr.find(".fa-save").show();
+                _this.addClass('open');
+                tr.children("td").each(function(i){
+                    var td = $(this);
+                    td.removeClass('yellow');
+                    if (td.hasClass('calendar')) {
+                        var value = td.text();
+                        if (value == "-") {
+                            value = "";
+                        }
+
+                        switch(value){
+                            case "A":
+                                value = "2";
+                                break;
+                            case "B":
+                                value = "3";
+                                break
+                            case "X":
+                                value = "1";
+                            break
+                            default:
+                                value = "0";
+                                break;
+                        }
+
+                        var select = $("<select><option value='0'>-</option><option value='2'>A</option><option value='3'>B</option><option value='1'>X</option></select>");
+                        td.html(select);
+                        select.val(value);
+                    }
+                });
+            });
+
+            $("body").on("click",".fa-save",function(){
+                var _this = $(this);
+                var tr = $(this).parents("tr");
+                _this.hide();
+                tr.find(".fa-pencil").show();
+                var restCount = 0;
+                var workCount = 0;
+                var data = [];
+
+                tr.children("td").each(function(){
+                    var td = $(this);
+                    if (td.hasClass('calendar')) {
+                        var value = td.find("select").val();
+                        data.push(value);
+                        if (value == "") {
+                            value = "-";
+                        }
+
+                        switch(value){
+                            case "2":
+                                value = "A";
+                                workCount ++;
+                                break;
+                            case "3":
+                                value = "B";
+                                workCount ++;
+                                break
+                            case "1":
+                                value = "X";
+                                restCount ++;
+                                td.addClass('yellow');
+                            break
+                            default:
+                                value = "-";
+                                break;
+                        }
+                        td.html(value);
+                    }
+                });
+                tr.find(".reset").html(restCount);
+                tr.find(".work").html(workCount);
+
+                $(".kf").each(function(j){
+                    var kfTD = $(this);
+                    var count = 0;
+                    $(".item").each(function(){
+                        var text = $(this).find(".calendar").eq(j).text();
+                        if (_this.attr("data-uid") == 2) {
+                            if (text == "A") {
+                                count ++;
+                            }
+                            kfTD.html(count);
+                        }
+                    });
+                });
+
+                $.ajax({
+                    url: '/orders/schedulingup/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:_this.attr("data-id"),
+                        data:data,
+                        date:$("input[name=date]").val(),
+                        name:_this.attr("data-name")
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 0){
+                        alert(data.info);
+                    }
+                });
+            })
+        });
+    </script>
+</block>

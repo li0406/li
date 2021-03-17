@@ -1,0 +1,131 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>压单数据分析</title>
+</block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/orderstat/pauseorderstat">压单数据统计</a> 压单数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <form class="no-padding form-horizontal" method="get" action="/orderstat/pauseordersummary">
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-1 control-label">时间：</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control datepicker" name="begin" placeholder="开始时间" autocomplete="off" value="{$begin}">
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="textaa" class="form-control datepicker" name="end" placeholder="结束时间" autocomplete="off" value="{$end}">
+                            </div>
+                            <div class="col-sm-1">
+                                <button id="btnReset" type="button" class="btn-info form-control">重置</button>
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="button" id="export" class="btn-success form-control">导出</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body">
+                <table id="myTable" class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>总压单数</th>
+                        <th>压单中</th>
+                        <th>压单转分单</th>
+                        <th>压单转赠单</th>
+                        <th>压单转无效单</th>
+                        <th>压单转其他</th>
+                        <th>待定周期（1个月内）</th>
+                        <th>待定周期（1-3个月）</th>
+                        <th>待定周期（3-6个月）</th>
+                        <th>待定周期（6个月以上）</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{$info.all_count}</>
+                            <td>{$info.pause_count}</td>
+                            <td>{$info.fen_count}</td>
+                            <td>{$info.zen_count}</td>
+                            <td>{$info.wx_count}</td>
+                            <td>{$info.other_count}</td>
+                            <td>{$info.step_1}</td>
+                            <td>{$info.step_2}</td>
+                            <td>{$info.step_3}</td>
+                            <td>{$info.step_4}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script>
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+        $("#btnReset").click(function (){
+            $(".datepicker").val("");
+        });
+
+        $("#export").click(function(event) {
+            var colums = [];
+            var data = [];
+
+
+            $("#myTable th").each(function() {
+                var text = $(this).text().trim();
+                var sub = [];
+                sub["text"] = text;
+                sub["fontColor"] = $(this).css("color");
+                sub["bgColor"] = $(this).css("background-color");
+                colums.push(sub);
+            });
+            data.push(colums);
+
+            $("#myTable tbody tr").each(function(i) {
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function() {
+                    var text = $(this).text().trim();
+
+                    var _td = {
+                        text: text,
+                        fontColor: $(this).css("color"),
+                        bgColor: $(this).css("background-color")
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data: data,
+                title: "压单数据分析",
+                url: "/export/download",
+                show:false
+            });
+        });
+    </script>
+</block>

@@ -1,0 +1,82 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css"  href="/assets/home/CompanySystem/css/CompanySystem.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="title">
+    <!-- 标题 -->
+    <title>角色管理</title>
+</block>
+<block name="content">
+    <!-- 顶部标题 -->
+    <section class="content-header">
+        <h1>角色管理</h1>
+        <!-- 面包屑导航 -->
+        <ol class="breadcrumb">
+            <li>
+                <a href="/"><i class="fa fa-dashboard"></i> 控制面板</a>
+            </li>
+            <li><a href="/">设置权限</a></li>
+        </ol>
+    </section>
+    <!-- 页面内容 -->
+    <section class="content">
+        <div class="inbox">
+            <!-- 页面顶部跳转 -->
+            <div class="addrole">
+                <button type="button" ><a style="color:#fff;" href="/companysystem/roleup/">添加角色</a></button>
+            </div>
+            <!-- 列表 -->
+            <ul class="rolelist">
+                <li>
+                    <div>角色名称</div>
+                    <div>角色类型</div>
+                    <div>角色描述</div>
+                    <div>添加时间</div>
+                    <div>状态</div>
+                    <div>操作</div>
+                </li>
+                <volist name="list" id="vo">
+                    <li>
+                        <div>{$vo.role_name}</div>
+                        <div>{$vo.role_group}</div>
+                        <div>{$vo.description}</div>
+                        <div>{$vo.created_at|date="Y-m-d H:i:s",###}</div>
+                        <div>
+                            <if condition="$vo['is_enabled'] EQ 1" >
+                                <input class="switch" type="checkbox" checked  data-id="{$vo.id}" />
+                            <else/>
+                                <input class="switch" type="checkbox"  data-id="{$vo.id}" />
+                            </if>
+                        </div>
+                        <div class="edit"><a href="/companysystem/roleup?id={$vo.id}">编辑</a></div>
+                    </li>
+                </volist>
+            </ul>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="application/javascript">
+        $(".switch").click(function(){
+            var _this = $(this);
+            var checked = 1;
+
+            if (_this.attr("checked") == "checked") {
+                checked = 2;
+                _this.attr("checked",false);
+            } else {
+                _this.attr("checked",'checked');
+            }
+
+            $.ajax({
+                url: '/companysystem/rolestatusup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: _this.attr("data-id"),enabled:checked},
+            })
+            .done(function() {
+                window.location.href = window.location.href;
+            });
+        });
+    </script>
+</block>

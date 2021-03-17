@@ -1,0 +1,232 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>运营系统-页面分析 - 页面添加</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <style type="text/css">
+        .select2-container--default .select2-selection--multiple .select2-selection__choice{
+            background-color: #fff !important;
+            border-color: #fff !important;
+            padding: none;
+            color: #333 !important;
+        }
+        .select2-selection__choice__remove{display: none !important;}
+        .select2-search {z-index: 100 !important;}
+    </style>
+</block>
+<block name="content">
+	<section class="content-header">
+        <h4><a href='/yy/pageManagement/'>上线页面管理</a>>页面添加</h4>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                            	<div class="col-xs-12 no-padding h5">
+                            		<div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>页面名称：</span></div>
+                            		<div class="col-xs-4"><input class="form-control" type="text" name="name" ></div>
+                            	</div>
+                                <div class="col-xs-12 no-padding h5">
+                                    <div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>所属分类：</span></div>
+                                    <div class="col-xs-4 page-category-wrap">
+                                        <div class="col-xs-4 no-padding">
+                                            <select class="form-control level-one" data-value="{$vars.info.parent_category_id}">
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-7 no-padding pull-right">
+                                            <select name="yy_page_category_id" class="form-control level-two" data-value="{$vars.info.yy_page_category_id}" id="cid">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            	<div class="col-xs-12 no-padding h5">
+                            		<div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>版本号：</span></div>
+                            		<div class="col-xs-4">
+                            			<select class="select2 form-control" id="vid">
+                                            <option value=''>-请选择-</option>
+                                            <volist name="vars.version" id='v'>
+                                                <option value='{$v.id}'>{$v.version_number}</option>
+                                            </volist>
+                            			</select>
+                            		</div>
+                            	</div>
+                            	<div class="col-xs-12 no-padding h5">
+                            		<div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>上线时间：</span></div>
+                            		<div class="col-xs-4"><input class="form-control" type="text" name="vtime" disabled="true"></div>
+                            	</div>
+                            	<div class="col-xs-12 no-padding h5">
+                            		<div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>页面地址：</span></div>
+                            		<div class="col-xs-4">
+                                        <select id="url" class="col-sm-12" multiple="multiple"></select>
+                            		</div>
+                            	</div>
+                            	<div class="col-xs-12 no-padding h5">
+                            		<div class="col-xs-1 no-padding"><span class="pull-right h5">页面说明：</span></div>
+                            		<div class="col-xs-4"><textarea class="form-control" rows="8" id="text"></textarea></div>
+                            	</div>
+                            	<div class="col-xs-12 no-padding">
+	                    			<div class="col-xs-1"></div>
+	                    			<div class="col-xs-4">
+	                    				<button class="btn btn-primary" id="saveNow">确定</button>
+	                    				<button class="btn btn-default pull-right" id="back">取消</button>
+	                    			</div>
+	                    		</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+	<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    	$(document).ready(function() {
+    		// select选项
+    		$('.select2').select2({
+    			width:'100%'
+    		});
+
+            //页面分类
+            $('.page-category-wrap').cxSelect({
+                selects: ['level-one', 'level-two'],
+                jsonValue: 'id',
+                jsonName: 'name',          // 数据标题字段名称
+                jsonSub: 'children',            // 子集数据字段名称
+                data: {$vars.category}
+            });
+
+            //页面URL
+            $("#url").select2({
+                allowClear: true,
+                placeholder: "请输入要添加的URL",
+                ajax:{
+                    url: "/yy/findurl/",
+                    type:"post",
+                    dataType: 'json',
+                    delay: 1000,
+                    data: function (params) {
+                        return {
+                            query: params.term
+                        };
+                    },
+                    processResults:function (data, params) {
+                        if (data.status ==1) {
+                            var result = {
+                                results: []
+                            };
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text:data.data[i].href
+                                });
+                            }
+                            return{
+                                results:result.results
+                            }
+                        };
+                    },
+                    /*最小需要输入多少个字符才进行查询，与之相关的小需要输入多少个字符才进行查询，与之相关的maximumSelectionLength表示最大输入限制*/
+                    minimumInputLength: 1
+
+                }
+            });
+            //自动更新版本上线时间
+            $("#vid").change(function(){
+                var vid = $("#vid").val();
+                if(vid == ''){
+                    alert("请选择正确的版本");
+                    return false;
+                }
+                //根据选取的版本，查询版本上线时间
+                $.ajax({
+                    url: '/yy/getversiontime/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        vid:vid
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $("input[name=vtime]").val(data.data);
+                    }else{
+                        alert("新增失败，请重试！");
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("网络错误，请稍后重试！");
+                })
+            });
+            //保存
+            $("#saveNow").on('click',function() {
+                var name = $("input[name=name]").val();//页面名称
+                if(name == ''){
+                    alert("请输入页面名称");
+                    return false;
+                }
+                var cid = $("#cid").val();//页面分类
+                if(cid == null || cid == ''){
+                    alert("请选择一个正确的分类");
+                    return false;
+                }
+                var vid = $("#vid").val();//页面版本号
+                if(vid == ''){
+                    alert("请选择版本号");
+                    return false;
+                }
+                var url = $("#url").select2("data");//页面url地址
+                var urls = '';
+                $.each(url,function(n,value) {
+                    urls = urls + value.text;
+                });
+                if(urls == ''){
+                    alert("请填写正确的URL地址");
+                    return false;
+                }
+                var text = $("#text").val();//页面说明
+                $.ajax({
+                    url: '/yy/addpage/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        name:name,
+                        cid:cid,
+                        vid:vid,
+                        urls:urls,
+                        text:text,
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert('添加成功');
+                        window.location.href = '/yy/pageManagement/';
+                    }else{
+                        alert(data.info);
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("网络错误，请稍后重试！");
+                })
+            });
+            $("#back").click(function(){
+                window.location.href = '/yy/pageManagement/';
+            });
+
+    	});
+
+    </script>
+</block>

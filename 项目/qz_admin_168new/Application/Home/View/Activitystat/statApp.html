@@ -1,0 +1,211 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>活动订单数据统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/activity/css/activity.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>活动订单数据统计</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <include file="statSearch" />
+        </div>
+
+        <div class="box stat-by">
+            <div class="box-body " style="padding:0px;">
+                <div class="table-responsive table-wrap-list">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <th>日期</th>
+                            <th>访问量PV</th>
+                            <th>访问数UV</th>
+                            <th>参与人数</th>
+                            <th>抽奖次数</th>
+                            <th>中奖次数</th>
+                            <!-- <th>奖池总数</th> -->
+                            <volist name="stats.prizes" id="item">
+                                <th>{$item.prize_name}的中奖次数</th>
+                            </volist>
+                            <th>实际中奖概率</th>
+                            <th>海报分享数</th>
+                        </thead>
+                        <tbody>
+                            <volist name="stats.time" id="vi">
+                                <tr>
+                                    <td>{$vi}</td>
+                                    <td>{$stats['list'][$vi]['pv']|default=0}</td>
+                                    <td>{$stats['list'][$vi]['uv']|default=0}</td>
+                                    <td>{$stats['list'][$vi]['user_count']|default=0}</td>
+                                    <td>{$stats['list'][$vi]['count']|default=0}</td>
+                                    <td>{$stats['list'][$vi]['count_draw']|default=0}</td>
+                                    <!-- <td>{$stats['list'][$vi]['fen']|default=0}</td> -->
+                                    <volist name="stats.prizes" id="item">
+                                        <td>{$item['stat'][$vi]|default=0}</td>
+                                    </volist>
+                                    <td>{$stats['list'][$vi]['prize_rate']|default=0}</td>
+                                    <td>{$stats['shares'][$vi]['share_count']|default=0}</td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>合计（{:count($stats['time'])}）</td>
+                                <td>{$stats['all']['pv']|default=0}</td>
+                                <td>{$stats['all']['uv']|default=0}</td>
+                                <td>{$stats['all']['user_count']|default=0}</td>
+                                <td>{$stats['all']['count']|default=0}</td>
+                                <td>{$stats['all']['count_draw']|default=0}</td>
+                                <volist name="stats.prizes" id="item">
+                                    <td>{:array_sum($item['stat'])}</td>
+                                </volist>
+                                <td>{$stats['all']['prize_rate']|default=0}</td>
+                                <td>{$stats['all']['share_count']|default=0}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header width-border">
+                <h3 class="box-title">帮助说明</h3>
+            </div>
+            <div class="box-body manunal-info">
+                <blockquote>
+                    <p></p>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+         $(document).ready(function(){
+            $('#src').select2();
+            $("#src").select2("val", "{$Think.get.src}");
+            $(".datepicker").datepicker({
+                format:"yyyy-mm-dd"
+            });
+            $('select[name=activity_id]').change(function(event) {
+                var op = $(this).children('option:selected');
+                var start = op.attr('data-start');
+                if ('' != start) {
+                    $('input[name=time_start]').val(start.substr(0, 10));
+                };
+                var end = op.attr('data-end');
+                var mydate = new Date();
+                var nowtime = mydate.getFullYear() + '-' + (mydate.getMonth() + 1) + '-' + mydate.getDate() + ' ' + mydate.getHours() + ':' + mydate.getMinutes() + ':' + mydate.getSeconds();
+                //判断 1.活动开始时间大于活动时间 则默认显示活动开始结束时间 2.否则 再判断结束时间是否大于现在的时间
+                if(strtotime(start) < strtotime(nowtime)){
+                    if(strtotime(end) > strtotime(nowtime)){
+                        end = nowtime;
+                    }
+                }
+                //取 年月日
+                end = end.split(" ")[0].split("-");
+                if ('' != end) {
+                    $('input[name=time_end]').val(end[0] + '-' + end[1] + '-' + end[2]);
+                };
+            });
+
+            $("#export").click(function(event) {
+                var title = $('select[name=activity_id]')[0].options[$('select[name=activity_id]')[0].selectedIndex].text;
+                var colums = [];
+                var data =[];
+                $('.table-wrap-list table thead th').each(function(){
+                    var sub =[];
+                    sub["text"] = $(this).html().trim();
+                    colums.push(sub);
+                });
+                data.push(colums);
+                $('.table-wrap-list table tbody tr').each(function(i){
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function(){
+                        var _td = {
+                            text:$(this).text().trim()
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+                });
+                $('.table-wrap-list table tfoot tr').each(function(i){
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function(){
+                        var _td = {
+                            text:$(this).text().trim()
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+                });
+
+                $(this).exportExcel({
+                    data:data,
+                    title:'活动订单数据统计-' + title,
+                    url:'/export/download/'
+                });
+            });
+        });
+
+        function strtotime(string) {
+            var f = string.split(' ', 2);
+            var d = (f[0] ? f[0] : '').split('-', 3);
+            var t = (f[1] ? f[1] : '').split(':', 3);
+            return (new Date(
+                parseInt(d[0], 10) || null,
+                (parseInt(d[1], 10) || 1) - 1,
+                parseInt(d[2], 10) || null,
+                parseInt(t[0], 10) || null,
+                parseInt(t[1], 10) || null,
+                parseInt(t[2], 10) || null
+            )).getTime() / 1000;
+        }
+
+        $(function () {
+            var valNum = $('#select_activity').val()
+            $('.select_act').eq(valNum).css('display','block').siblings('.select_act').css('display','none').attr("disabled", true);
+            $('#select_activity').bind('change',function(){
+                valNum = $('#select_activity').val()
+                $('.select_act').eq(valNum).css('display','block').removeAttr("disabled").siblings('.select_act').css('display','none').attr("disabled", true);
+
+                var ap = $('select[name=activity_id]').eq(valNum).children('option:selected');
+                console.log(ap);
+                var start = ap.attr('data-start');
+                if ('' != start) {
+                    $('input[name=time_start]').val(start.substr(0, 10));
+                };
+                var end = ap.attr('data-end');
+                var mydate = new Date();
+                var nowtime = mydate.getFullYear() + '-' + (mydate.getMonth() + 1) + '-' + mydate.getDate() + ' ' + mydate.getHours() + ':' + mydate.getMinutes() + ':' + mydate.getSeconds();
+                //判断 1.活动开始时间大于活动时间 则默认显示活动开始结束时间 2.否则 再判断结束时间是否大于现在的时间
+                if(strtotime(start) < strtotime(nowtime)){
+                    if(strtotime(end) > strtotime(nowtime)){
+                        end = nowtime;
+                    }
+                }
+                //取 年月日
+                end = end.split(" ")[0].split("-");
+                if ('' != end) {
+                    $('input[name=time_end]').val(end[0] + '-' + end[1] + '-' + end[2]);
+                };
+            })
+        })
+    </script>
+</block>

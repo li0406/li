@@ -1,0 +1,431 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>页面指标分析 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/indexoverview.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header pbootom">
+    <div class="box">
+        <div class="box-header boxlh with-border no-padding">
+            <h3 class="box-title bxt pull-left col-xs-5">
+                <a class="historicaltrendReferrerHref" href=""></a> > 历史趋势
+            </h3>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">页面地址 {$url}</h3>
+        </div>
+        <div class="box-body">
+            <div class="search-box">
+                 <div class="col-xs-2">
+                    时间：
+                 </div>
+            </div>
+            <div class="search-box" >
+                <div class="pull-left time-box time-box-select" id="time-box">
+                    <span data-day='1' data-value="{$vars.time.recent_1_day}">
+                        昨天
+                    </span>
+                    <span data-day='7' data-value="{$vars.time.recent_7_day}">
+                        最近7天
+                    </span>
+                    <span data-day='30' data-value="{$vars.time.recent_30_day}">
+                        最近30天
+                    </span>
+                    <span data-day='month' data-value="{$vars.time.last_month}">
+                        上个月
+                    </span>
+                    <span data-day='year' data-value="{$vars.time.this_year}">
+                        本财年
+                    </span>
+                </div>
+                <div class="pull-left time-input">
+                    <input type="text"  name="reservation" id="reservationtime" class="form-control span4" value="{$timerange}" placeholder="选择日期范围" />
+                </div>
+                <div class="pull-left time-box group-wrap" id="time-box2">
+                    <eq name="Think.get.group" value="2">
+                        <span data-way="day" data-group="1">按日</span>
+                        <span data-way="month" class="checked" data-group="2" style="background-color: #e4e4e4">按月</span>
+                    <else />
+                        <span data-way="day" class="checked"  data-group="1" style="background-color: #e4e4e4">按日</span>
+                        <span data-way="month" data-group="2">按月</span>
+                    </eq>
+                </div>
+                <div class="pull-left time-box col-xs-2">
+                  <button type="button" class="btn btn-primary submit-search"><i class="fa fa-search"></i>查询</button>
+                </div>
+            </div>
+        </div>
+        <div class="zdy">
+            <div class="zdy-title">
+                自定义指标
+            </div>
+            <div class="search-box span-box">
+                <span>
+                    <if condition="'1' == cookie('historicaltrend_btn_1')">
+                        <i class="chose-item fa fa-check" data-chcek="1"></i>
+                    <else />
+                        <i class="chose-item fa" data-chcek="0"></i>
+                    </if>
+                    &nbsp;&nbsp;跳出率
+                </span>
+                <span>
+                    <if condition="'1' == cookie('historicaltrend_btn_2')">
+                        <i class="chose-item fa fa-check" data-chcek="1"></i>
+                    <else />
+                        <i class="chose-item fa" data-chcek="0"></i>
+                    </if>
+                    &nbsp;&nbsp;退出率
+                </span>
+                <span>
+                    <if condition="'1' == cookie('historicaltrend_btn_3')">
+                        <i class="chose-item fa fa-check" data-chcek="1"></i>
+                    <else />
+                        <i class="chose-item fa" data-chcek="0"></i>
+                    </if>
+                    &nbsp;&nbsp;平均访问时长
+                </span>
+                <span>
+                    <if condition="'1' == cookie('historicaltrend_btn_4')">
+                        <i class="chose-item fa fa-check" data-chcek="1"></i>
+                    <else />
+                        <i class="chose-item fa" data-chcek="0"></i>
+                    </if>
+                    &nbsp;&nbsp;入口页面次数
+                </span>
+                <span>
+                    <if condition="'1' == cookie('historicaltrend_btn_5')">
+                        <i class="chose-item fa fa-check" data-chcek="1"></i>
+                    <else />
+                        <i class="chose-item fa" data-chcek="0"></i>
+                    </if>
+                    &nbsp;&nbsp;退出页次数
+                </span>
+            </div>
+            <div class="pushout">
+                <button type="button" class="btn btn-info submit-export"> 导出报表 </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="box-header with-border">
+            <table class="zb-box">
+                <tr>
+                    <td>
+                        <div>浏览量PV</div>
+                        <span>{$total.pv}</span>
+                        <p></p>
+                    </td>
+                    <td>
+                        <div>访客数UV</div>
+                        <span>{$total.uv}</span>
+                        <p></p>
+                    </td>
+                    <td>
+                        <div>发单量</div>
+                        <span>{$total.order_count}</span>
+                        <p></p>
+                    </td>
+                    <td>
+                        <div>实际分单量&nbsp;<a href="javascript:;" title="实际分单量说明：因采集不到运营系统上线之前的数据，会在一定范围内造成实际分单量比实际数据少的问题，此差异会随着时间的推移逐渐减小，所需时间大致为3个月—6个月。"><i class="fa fa-question-circle"></i></a></div>
+                        <span>{$total.real_order_count}</span>
+                        <p></p>
+                    </td>
+                    <td>
+                        <div>发单转化率</div>
+                        <span>{:number_format($total['order_count'] / $total['uv'] * 100, 2)}%</span>
+                        <p></p>
+                    </td>
+                    <td>
+                        <div>实际分单转化率</div>
+                        <span>{:number_format($total['real_order_count'] / $total['uv'] * 100, 4)}%</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="box-body">
+            <div class="box-body-contaier">
+            <select name="" id="stat-way" class="chose-stat">
+                <option value="0">浏览量(PV)</option>
+                <option value="1">访客数(UV)</option>
+                <option value="2">发单量</option>
+                <option value="3">实际分单量</option>
+            </select>
+                <div id="main">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box no-border">
+        <table class="table table-hover" id="myTable">
+            <thead>
+                <th class="right-boder">日期</th>
+                <th>浏览量PV </th>
+                <th>访客数量UV</th>
+                <if condition="'1' == cookie('historicaltrend_btn_1')">
+                    <th class="btn_1">
+                        跳出率
+                    </th>
+                <else />
+                    <th class="btn_1 hide">
+                        跳出率
+                    </th>
+                </if>
+                <if condition="'1' == cookie('historicaltrend_btn_2')">
+                    <th class="btn_2">
+                        退出率
+                    </th>
+                <else />
+                    <th class="btn_2 hide">
+                        退出率
+                    </th>
+                </if>
+                <if condition="'1' == cookie('historicaltrend_btn_3')">
+                    <th class="btn_3">
+                        平均访问时长
+                    </th>
+                <else />
+                    <th class="btn_3 hide">
+                        平均访问时长
+                    </th>
+                </if>
+                <th>
+                    发单量
+                </th>
+                <th>
+                    实际分单量&nbsp;<a href="javascript:;" title="实际分单量说明：因采集不到运营系统上线之前的数据，会在一定范围内造成实际分单量比实际数据少的问题，此差异会随着时间的推移逐渐减小，所需时间大致为3个月—6个月。"><i class="fa fa-question-circle"></i></a>
+                </th>
+                <th>
+                    发单转化率
+                </th>
+                <th>
+                    实际分单转化率
+                </th>
+                <if condition="'1' == cookie('historicaltrend_btn_4')">
+                    <th class="btn_4">
+                        入口页次数
+                    </th>
+                <else />
+                    <th class="btn_4 hide">
+                        入口页次数
+                    </th>
+                </if>
+                <if condition="'1' == cookie('historicaltrend_btn_5')">
+                    <th class="btn_5">
+                        退出页次数
+                    </th>
+                <else />
+                    <th class="btn_5 hide">
+                        退出页次数
+                    </th>
+                </if>
+            </thead>
+            <tbody>
+                <volist name="info" id="vi">
+                    <tr>
+                        <td>{$key}</td>
+                        <td>{$vi.pv}</td>
+                        <td>{$vi.uv}</td>
+                        <if condition="'1' == cookie('historicaltrend_btn_1')">
+                            <td class="btn_1">{$vi.bounce_rate}%</td>
+                        <else />
+                            <td class="btn_1 hide">{$vi.bounce_rate}%</td>
+                        </if>
+                        <if condition="'1' == cookie('historicaltrend_btn_2')">
+                            <td class="btn_2">{$vi.exit_rate}%</td>
+                        <else />
+                            <td class="btn_2 hide">{$vi.exit_rate}%</td>
+                        </if>
+                        <if condition="'1' == cookie('historicaltrend_btn_3')">
+                            <td class="btn_3">{$vi.visit_time_avg}</td>
+                        <else />
+                            <td class="btn_3 hide">{$vi.visit_time_avg}</td>
+                        </if>
+                        <td>{$vi.order_count}</td>
+                        <td>{$vi.real_order_count}</td>
+                        <td>{$vi.fd_zh_rate}%</td>
+                        <td>{$vi.sjfd_zh_rate}%</td>
+                        <if condition="'1' == cookie('historicaltrend_btn_4')">
+                            <td class="btn_4">{$vi.entry_count}</td>
+                        <else />
+                            <td class="btn_4 hide">{$vi.entry_count}</td>
+                        </if>
+                        <if condition="'1' == cookie('historicaltrend_btn_5')">
+                            <td class="btn_5">{$vi.exit_count}</td>
+                        <else />
+                            <td class="btn_5 hide">{$vi.exit_count}</td>
+                        </if>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/jscookie/js/jscookie-1.0.2.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(document).ready(function() {
+        //初始化导航
+        if ('1' == '{$Think.get.from}') {
+            localStorage.historicaltrendReferrerHref = referrer();
+            localStorage.historicaltrendReferrerName = '页面上线分析';
+        } else if ('2' == '{$Think.get.from}') {
+            localStorage.historicaltrendReferrerHref = referrer();
+            localStorage.historicaltrendReferrerName = '页面指标概览';
+        }
+        if ('undefined' != typeof(localStorage.uvresourceReferrerHref) && '' != localStorage.historicaltrendReferrerHref) {
+            $('.historicaltrendReferrerHref').attr('href', localStorage.historicaltrendReferrerHref);
+            $('.historicaltrendReferrerHref').text(localStorage.historicaltrendReferrerName);
+        } else {
+            $('.historicaltrendReferrerHref').attr('href', '/yy/indexoverview/');
+            $('.historicaltrendReferrerHref').text('页面指标概览');
+        }
+
+        $('.time-box-select span').each(function(index, el) {
+            if ($(this).attr('data-value') == '{$timerange|default=""}') {
+                $(this).addClass('time-box-chose');
+            };
+        });
+
+        function queryString(){
+            var group = 1;
+            if('2' == $('.group-wrap').find('span.checked').attr('data-group')){
+                group = 2;
+            }
+            return 'url={$url}' + '&timerange=' + $('#reservationtime').val() + '&group=' + group;
+        }
+        //查询按钮
+        $('.submit-search').click(function(event) {
+            window.location.href = '/yy/historicaltrend/?' + queryString();
+        });
+
+        //导出
+        $('.submit-export').click(function(event) {
+            window.open('/yy/historicaltrend/?' + queryString() + '&export=1');
+        });
+
+        //条件选择
+        $(".span-box span i").click(function(){
+            var flag=$(this).attr('data-chcek'),
+                index=$(this).parent('span').index()+1;
+            if(flag==0){
+                $(this).addClass('fa-check');
+                $(this).attr("data-chcek",1);
+                $(".btn_"+index).removeClass("hide");
+                cookies.set('historicaltrend_btn_' + index,1,365);
+            }else{
+                $(this).removeClass('fa-check');
+                $(this).attr("data-chcek",0);
+                $(".btn_"+index).addClass("hide");
+                cookies.set('historicaltrend_btn_' + index,2,365);
+            }
+        });
+
+        //日期设置
+        $("#time-box span").click(function(){
+            $('.time-box span').removeClass('time-box-chose');
+            $(this).addClass('time-box-chose');
+            $("#reservationtime").val($(this).attr('data-value'));
+        });
+
+
+        //按日，按月
+        $("#time-box2 span").click(function(){
+            $("#time-box2 span").removeClass('checked');
+            $(this).addClass('checked');
+            $(this).css("background","#e4e4e4");
+            $(this).siblings().css("background","none")
+        });
+
+        $('#reservationtime').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            format: 'YYYY/MM/DD',
+            timePicker12Hour:false
+        }, function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+        });
+
+        var myChart =echarts.init(document.getElementById('main'));
+        var seriesData = {$seriesData};
+        option = {
+            tooltip : {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+            },
+            legend: {
+                data:["浏览量"],
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    boundaryGap : false,
+                    data : {$xAxisData}
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'浏览量',
+                    type:'line',
+                    stack: '总量',
+                    areaStyle: {normal: {}},
+                    data:seriesData[0]
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+        var legends = ["浏览量","访客数","发单量","实际分担量"];
+
+         $("#stat-way").change(function(){
+            var key=parseInt($(this).val());
+            option={
+                legend: {
+                    data:[legends[key]],
+                },
+                series:[
+                    {
+                        name:legends[key],
+                        type:'line',
+                        stack: '总量',
+                        areaStyle: {normal: {}},
+                        data:seriesData[key]
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        });
+    });
+</script>
+</block>

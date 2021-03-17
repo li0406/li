@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="zh-CN" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="zh-CN" class="ie9"> <![endif]-->
+<!--[if !IE]><![endif]-->
+<html lang="zh-CN">
+<head>
+ <meta charset="utf-8" />
+    <title>{$Think.session.uc_userinfo.name}-用户中心</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="/assets/common/css/bootstrap.min.new.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/bootstrap-responsive.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-metro.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/timeline.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/css/main.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+</head>
+<body>
+    <include file="Main:header" />
+    <div class="container mt10">
+        <div class="row inner-box inner-box-main">
+            <div class="col-sm-2">
+                <div class="inner-box-img">
+                    <img src="{$Think.session.uc_userinfo.logo|default='/assets/common/img/default_logo.gif'}"/>
+                    <div class="inner-box-img-tool">
+                        <a href="/portrait">编辑头像</a>
+                    </div>
+                </div>
+                <div class="inner-box-info">
+                    <a href="/basic">{$Think.session.uc_userinfo.role_name}:{$Think.session.uc_userinfo.name}</a>
+                </div>
+                <div class="inner-box-tool mt10">
+                    <span>账号安全:</span>
+                    <if condition="session('uc_userinfo.safe_tel') EQ  ''">
+                        <a title="安全手机" href="javascript:void(0)"  class="icon-mobile-phone"></a>
+                    <else/>
+                        <a title="安全手机" href="javascript:void(0)"  class="icon-mobile-phone active"></a>
+                    </if>
+                </div>
+            </div>
+            <div class="col-sm-10">
+                <div class="inner-box-right">
+                    <div class="col-sm-6 form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3">所在部门:</label>
+                            <div class="col-sm-9">
+                                {$Think.session.uc_userinfo.department|default='-'}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3">上次登录IP:</label>
+                            <div class="col-sm-9">
+                                {$Think.session.uc_userinfo.ip}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3">上次登录时间:</label>
+                            <div class="col-sm-9">
+                                {$Think.session.uc_userinfo.time_login|default='-'|date="Y-m-d H:i:s",###}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row inner-box mt10">
+            <div class="col-sm-12 inner-box-title">
+                <h4><i class="icon-desktop"></i> 在线系统</h4>
+            </div>
+            <div class="col-sm-12 inner-box-content inner-box-system">
+                <volist name="system" id="vo">
+                    <if condition="$vo['enabled'] and $vo['type'] EQ 'web'">
+                        <div class="col-sm-3">
+                            <a class="thumbnail" href="{$vo.link}">
+                                <img src="{$vo.img}" alt="...">
+                                <div class="caption">
+                                    <h3 class="text-center">{$vo.name}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    <elseif condition="$vo['enabled'] and $vo['type'] EQ 'vue'"/>
+                        <div class="col-sm-3" onclick="goZxs('{$vo.link}','{$vo.id}')">
+                            <a class="thumbnail" href="javascript:;">
+                                <img src="{$vo.img}" alt="...">
+                                <div class="caption">
+                                    <h3 class="text-center">{$vo.name}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    <elseif condition="$vo['enabled'] and $vo['type'] EQ 'sms'"/>
+                        <div class="col-sm-3" onclick="goZxs('{$vo.link}')">
+                            <a class="thumbnail" href="javascript:;">
+                                <img src="{$vo.img}" alt="...">
+                                <div class="caption">
+                                    <h3 class="text-center">{$vo.name}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </if>
+
+                </volist>
+            </div>
+        </div>
+        <div class="row inner-box mt10">
+            <div class="col-sm-12 inner-box-title">
+                <h4><i class="icon-search"></i> 最近一周的登录日志</h4>
+            </div>
+            <div class="col-sm-12">
+                <div class=" inner-timeline">
+                    <ul class="timeline">
+                        <volist name="logs" id="vo">
+                            <if condition="$vo['status'] EQ 1">
+                                <li class="timeline-green">
+                                    <div class="timeline-time">
+                                        <span>{$vo.time|date="Y:m:d",###}</span>
+                                        <span>{$vo.time|date="H:i:s",###}</span>
+                                    </div>
+                                    <div class="timeline-icon">
+                                        <i class="icon-ok-sign"></i>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <h2>登录成功</h2>
+                                        <div class="timeline-content">
+                                            登陆ip:{$vo.ip} 浏览器:{$vo.user_agent}
+                                        </div>
+                                        <div class="timeline-footer">
+
+                                        </div>
+                                    </div>
+                                </li>
+                            <else/>
+                                <li class="timeline-red">
+                                    <div class="timeline-time">
+                                        <span>{$vo.time|date="Y:m:d",###}</span>
+                                        <span>{$vo.time|date="H:i:s",###}</span>
+                                    </div>
+                                    <div class="timeline-icon">
+                                        <i class="icon-remove-circle"></i>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <h2>登录失败</h2>
+                                        <div class="timeline-content">
+                                           登录ip:{$vo.ip} 浏览器:{$vo.user_agent}
+                                        </div>
+                                        <div class="timeline-footer">
+
+                                        </div>
+                                    </div>
+                                </li>
+                            </if>
+                        </volist>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tips-mask">
+        <div class="tips-container">
+            <div class="tips-header"><i class="fa fa-close"></i></div>
+            <p>为了您的账号安全,请每隔60天修改一次密码</p>
+            <div class="btn-box">
+                <span class="btn-item btn-danger"><a href="/password">立即修改</a></span>
+                <span class="btn-item btn-default" id="ignore">忽略</span>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/jquery-migrate-1.2.1.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/jquery-1.5.2.min.js"></script>
+<script type="text/javascript">
+    var check_alert = '{$check_alert}';
+    if(check_alert == 1){
+        $(".tips-mask").fadeIn();
+    }
+$(".inner-box-img").hover(function() {
+    $(".inner-box-img-tool").animate({"bottom":0},500);
+}, function() {
+   $(".inner-box-img-tool").animate({"bottom":"-20px"},500);
+
+});
+ $("#ignore,.fa-close").click(function(event) {
+       $(".tips-mask").fadeOut();
+   });
+
+
+ function goZxs(link,id) {
+     $.ajax({
+         url: '/auth/approval',
+         type: 'POST',
+         dataType: 'JSON',
+         data: {}
+     })
+     .done(function(data) {
+
+         if(data.error_code == 0){
+             if (id == "15"){
+                 window.location.href=link+"?" + 'token='  + data.data.jwt_token;
+             } else {
+                 window.location.href=link+"?" + data.data.info.role_name + data.data.info.nick_name + '='  + data.data.jwt_token;
+             }
+         }else{
+            $(".alert-error").show().html("系统异常！");
+         }
+     })
+     .fail(function() {
+         $(".alert-error").show().html("系统异常,尝试登录失败！");
+     });
+ }
+
+
+</script>
+</html>

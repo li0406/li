@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>媒体报道管理-图片推荐详情</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/mediareport/css/index.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>图片推荐详情</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row b-pb20">
+                    <form method="get" action="/mediareport/detail/" class="form-horizontal" id="post_form">
+                        <div class="col-xs-12">
+                            <div class="col-xs-12 form-group">
+                                <label>标题：</label>
+                                <input name="title" class="form-control" placeholder="请输入标题" maxlength="25" value="{$data.title|default=''}">
+                                <input name="id" type="hidden" value="{$data.id|default=''}">
+                            </div>
+                            <div class="col-xs-12 form-group">
+                                <label>简介：</label>
+                                <textarea name="description" maxlength="1000" class="form-control" placeholder="请输入简介" rows="4" >{$data.description|default=''}</textarea>
+                            </div>
+                            <div class="col-xs-12 form-group">
+                                <label>url：</label>
+                                <input name="url" class="form-control" placeholder="请输入完整url" value="{$data.url|default=''}">
+                            </div>
+                            <div class="col-xs-12 form-group">
+                                <label>图片：</label>
+                                <input name="fileupload" type="file" id="fileupload">
+                                <input name="image" type="hidden" id="image" value="{$data.image|default=''}">
+                                <p class="col-xs-12 red" style="margin-left:70px;">图片尺寸要求：200*150px</p>
+                            </div>
+                            <div class="col-xs-12 form-group">
+                                <label>排序：</label>
+                                <input type="number" name="sequence" class="form-control" placeholder="请输入正整数" value="{$data.sequence}">
+                            </div>
+                            <div class="col-xs-12 form-group">
+                                <label>发布时间：</label>
+                                <input name="publish_time" class="form-control datepicker" placeholder="请选择发布时间" value="{$data.publish_time|default=''}">
+                            </div>
+                            <div class="detail-btn">
+                                <button class="detail-save btn btn-primary" type="button">保存</button>
+                                <a class="detail-return btn btn-default" href="/mediareport/">返回</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            format:"yyyy-mm-dd",
+            weekStart: 1,
+            todayHighlight: 1,
+            todayBtn: true,
+            minView: 0,
+            autoclose: true,
+            language: 'zh-CN'
+        });
+
+        $("#fileupload").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/uploadimg/",
+            showCaption: false,
+            browseClass:"btn btn-primary",
+            allowedFileExtensions : ['jpg','png','gif'],
+            maxFileCount: 1,
+            autoReplace: true,
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            uploadAsync: true,
+            dropZoneEnabled:false,
+            uploadExtraData: {
+                prefix:'media',
+                chars:'true'
+            },
+            minImageWidth: 200, //图片的最小宽度
+            minImageHeight: 150,//图片的最小高度
+            maxImageWidth: 200,//图片的最大宽度
+            maxImageHeight: 150,//图片的最大高度
+            maxFileSize: 1024 * 20,
+            previewSettings:{
+                image: {width: "200px", height: "150px"}
+            },
+            initialPreview: [{$data['full_image']}]
+        }).on('filebatchuploadsuccess', function (event, data, id, index) {
+            if (data.response.status == 0) {
+                layer.msg(data.response.error_msg, {time: 1300}, function () {
+                    $('.progress').remove();
+                });
+                return false;
+            }
+        }).on('fileuploaded', function(event, data, id, index) {
+            if(data.response.status == 1){
+                $('#image').val(data.response.data.name);
+                return false;
+            }else{
+                layer.msg(data.response.info);
+                return false;
+            }
+        }).on("fileuploaderror",function(event, data){
+            layer.msg('文件上传失败,请检查文件格式，规格是否符合要求！');
+            return false;
+        }).on("fileclear", function () {
+            $('#image').val("");
+        });
+        
+        //保存
+        $(".detail-save").click(function () {
+            var id = $("input[name=id]").val();
+            var title = $("input[name=title]").val();
+            var description = $("textarea[name=description]").val();
+            var url = $("input[name=url]").val();
+            var image = $("#image").val();
+            var sequence = $("input[name=sequence]").val();
+            var publish_time = $("input[name=publish_time]").val();
+            var reg_sequence = /^[1-9]\d*$/;
+            if (!title) {
+                layer.msg("请输入标题");
+                return false
+            }
+            if(!description){
+                layer.msg("请输入简介");
+                return false
+            }
+            if (!url) {
+                layer.msg("请输入完整url");
+                return false
+            }
+            if (!image) {
+                layer.msg("请上传图片");
+                return false
+            }
+            if (!sequence) {
+                layer.msg("请填写排序");
+                return false
+            }
+            if (!reg_sequence.test(sequence)) {
+                layer.msg("排序为正整数");
+                return false
+            }
+            if(!publish_time){
+                layer.msg("请选择发布时间");
+                return false
+            }
+            $.ajax({
+                url: '/mediareport/save',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id,
+                    title: title,
+                    description: description,
+                    url: url,
+                    image: image,
+                    sequence: sequence,
+                    publish_time: publish_time
+                },
+                success: function (data) {
+                    layer.msg(data.error_msg, {time: 1300},function () {
+                        if (data.error_code == 0) {
+                            window.location.href = "/mediareport/";
+                        }
+                    });
+                },
+                error: function () {
+                    layer.msg('服务器去火星了~~', {time: 1300});
+                }
+            })
+        })
+    </script>
+</block>

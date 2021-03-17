@@ -1,0 +1,172 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网后台 - 相关标签维护</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .nav .active a{background: #337ab7 !important; color: #fff !important;}
+        .list-group li{float: left; padding: 10px; border: 1px solid #d2d6de; position: relative; margin-right: 10px; margin-bottom: 12px; z-index: 10}
+        .list-group li span{cursor: pointer; position: absolute; right: -10px; top: -10px; border-radius: 10px; background: #367fa9; display: block; line-height: 18px; width: 20px; height: 20px; text-align: center; color: #fff; z-index: 11}
+
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>相关标签维护</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/thematic/labelmaintenance/">相关标签维护</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <ul class="nav nav-tabs">
+                    <li role="presentation" ><a  href="/thematic/labelmaintenance" >内容标签维护</a></li>
+                    <li role="presentation" class="active"><a href="javascript:void(0)">相关标签维护</a></li>
+                </ul>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="collapse navbar-collapse">
+                                <form method="get" action="/thematic/labelrelevant/">
+                                    <div class="col-sm-3">
+                                        <label for="name">标签名：</label><br/>
+                                        <input name="label" type="text" class="form-control col-sm-2" id="name" placeholder="请输入标签名" autocomplete="off" value="{$Think.get.label}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">&nbsp;</label><br/>
+                                        <button class="btn btn-primary">查询</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th class="col-sm-2">标签名</th>
+                                <td style="text-align: left" >{$info.title}</td>
+                            </tr>
+                            <tr>
+                                <th class="col-sm-1" rowspan="3" valign="middle">相关标签</th>
+                                <td>
+                                    <ul class="list-group">
+                                        <volist name="info.labelList" id="vo">
+                                            <li data-id="{$vo.id}">
+                                                {$vo.label}
+                                                <span class="fa fa-times"></span>
+                                            </li>
+                                        </volist>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="col-sm-8">
+                                        <select name="label" class="form-control" style="width: 100%">
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button id="btnAdd" type="button" class="btn btn-primary">添加</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button id="btnSave" type="button" class="btn btn-primary">更新</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $("select[name=label]").select2({
+            placeholder :'请选择',
+            ajax: {
+                url: "/thematic/findlabel/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.data
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 2,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+                return markup;
+            },
+            templateSelection: function(repo) {
+                return repo.text;
+            },
+            allowClear : true
+        });
+
+        $("#btnAdd").click(function () {
+            var len = $(".list-group").find("li").length;
+            if (len > 20) {
+                alert("便签最多添加20个");
+                return ;
+            }
+            var text = $("select[name=label]").select2("data")[0].text;
+            var li = $("<li></li>");
+            li.attr("data-id",$("select[name=label]").select2("data")[0].id)
+            li.append(text)
+            li.append("<span class=\"fa fa-times\"></span>")
+            li.appendTo($(".list-group"));
+        });
+
+        $(".fa-times").click(function(){
+            var parent = $(this).parents("li")
+            parent.remove();
+        });
+
+        $("#btnSave").click(function(){
+            var labels = new Array();
+            $(".list-group").find("li").each(function(){
+                var id = $(this).attr("data-id")
+                labels.push(id)
+            });
+
+            $.ajax({
+                url: '/thematic/labelrelateup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: '{$info.id}',
+                    labels:labels,
+                    module:6
+                },
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                }
+            });
+        });
+    </script>
+</block>

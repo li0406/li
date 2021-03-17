@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>用户中心-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Designer:resource" />
+    <link href="{$static_host}/assets/user/designercase/css/de-blog.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <include file="Designer:header" />
+    <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+        <div class="yh-main">
+            <h1 class="yh-tit">我的作品</h1>
+            <a class="add-btn" href="/descaseup/"><i class="icon-plus mr10"></i>我要发布美图</a>
+            <ul class="collect-list">
+                <volist name="info.cases" id="vo">
+                <li>
+                    <a href="{:C('QZ_YUMING_SCHEME')}://{$vo.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.id}.shtml" target="_blank">
+                        <if condition="$vo['img_host'] EQ 'qiniu'">
+                            <img src="{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/{$vo.img_path}-w240.jpg">
+                        <else/>
+                        <img src="{:C('QZ_YUMING_SCHEME')}://{:C('STATIC_HOST1')}{$vo.img_path}s_{$vo.img}">
+                        </if>
+                    </a>
+                    <p><a href="{:C('QZ_YUMING_SCHEME')}://{$vo.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.id}.shtml" target="_blank">{$vo.title}</a></p>
+                    <p><span>{$vo.fengge}</span><span>创建日期：{$vo.time|date="Y-m-d",###}</span></p>
+                    <if condition="$vo['on'] EQ 2">
+                        <span title="审核中" class="icon-exclamation-sign"></span>
+                    </if>
+                    <if condition="$vo['identity'] EQ 2">
+                    <a href="/descaseup/{$vo.id}" class="collect-edit-btn b1"><i class="icon-edit mr10"></i>编辑</a>
+                    <a href="javascript:void(0)" data-id="{$vo.id}" class="collect-edit-btn b2"><i class="icon-trash mr10"></i>删除</a>
+                    </if>
+                </li>
+                </volist>
+            </ul>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(".b2").click(function(event) {
+        var id = $(this).attr("data-id");
+        if(confirm("确定删除吗?")){
+            var _this = $(this);
+            $.ajax({
+                url: '/deldescase/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = window.location.href;
+                }else{
+                    $.pt({
+                        target: _this,
+                        content:data.info,
+                        width: 'auto'
+                   });
+                }
+            })
+            .fail(function(xhr) {
+               $.pt({
+                target: _this,
+                content:"发生了未知的错误,请刷新重试！",
+                width: 'auto'
+               });
+            });
+        }
+    });
+
+</script>
+</html>

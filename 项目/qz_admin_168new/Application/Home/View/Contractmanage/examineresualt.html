@@ -1,0 +1,73 @@
+<!--审核-->
+<link href="/assets/home/hetong/css/alert_info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/home/hetong/css/assistantreview.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<script  type="text/javascript" src="/assets/home/hetong/js/alert_info.js?v={:C('STATIC_VERSION')}"></script>
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">
+            审核结果
+        </span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line">
+        </span>
+    </div>
+    <div class="step1 step-container kucunshenqwk">
+        <div class="search_box_x150">
+            <span class="serach_title_x150">条件查询：</span>
+            <input type="text" id="searchHasChecked" name="search" placeholder="请输入正确的编号或者销售名称">
+            <button class="button searchHasChecked">查询</button>
+            <br>
+            <span style="color: red;margin-left: 20px; margin-top: 5px;">重要提示：输入格式为7位有效数字</span>
+        </div>
+
+        <div class="result_title_x150">审核结果</div>
+        <div class="tab_content_x150">
+            <table class="table_active_x150 scroll_table">
+                <thead>
+                    <tr class="tab_head_x150">
+                        <td>合同编号</td><td>销售人员</td><td>审核结果</td>
+                    </tr>
+                </thead>
+                <tbody id="checkedResult">
+                    <volist name="haschecked" id="v">
+                        <tr>
+                            <td>{$v.contractid}</td>
+                            <td>{$v.sendout|getSaleUserName}</td>
+                            <td><if condition="$v.beaccept eq 3"><span class="has_end">签约</span><elseif  condition="$v.beaccept eq 4"/><span class="no_start">作废</span><elseif condition="$v.beaccept eq 5"/><span class="re_write">遗失</span></if></td>
+                        </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $('.searchHasChecked').click(function(){
+        var keyword = $("#searchHasChecked").val();
+        $.ajax({
+                url: '/contractmanage/searchforcontract/',
+                type: 'POST',
+                dataType: 'JSON',
+                async: false,
+                data: {
+                    keyword:keyword,
+                    position:2
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    //alert(data.data.qianyue);
+                    //$("#qianyuepart").html(data.data.qianyue);
+                    $("#checkedResult").html(data.data);
+                }else{
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('网络错误，请稍后重试')
+            });
+    });
+})
+</script>

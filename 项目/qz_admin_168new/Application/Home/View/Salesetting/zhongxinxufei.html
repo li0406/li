@@ -1,0 +1,371 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>中心续费月度系数 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="overflow-x">
+                        <div class="overflow-box" style="width: 1710px;">
+                            <div class="box-header">
+                                <h3><i class="xs-icon gangwei-icon"></i> 中心续费月度系数</h3>
+                                <form class="form-horizontal">
+                                    <div class="from-list">
+                                        <div class="from-item">
+                                            <span>财年：</span>
+                                            <input id="cnyf" class="datepicker" type="text" name="cnyf" placeholder="选择日期" value="{$keyword.cnyf}">
+                                        </div>
+                                        <button class="search-btn xs-btn">查询</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="box-body">
+                                <div class="todo-item">
+                                    <a href="/salesetting/downloadmodule?type=4" style="color: #FFF;"><button class="xs-btn hideLoading">模板下载</button></a>
+                                    <button class="xs-btn add-new" id="importAct">导入</button>
+                                    <div class="pull-right position-relative">
+                                        <button class="xs-btn log-info">操作日志</button>
+                                        <i class="xs-icon zhushi-icon"></i>
+                                        <div class="zhushi-info">
+                                            <p>输入人注意事项：本页数据以部门及月份为唯一标识，其他数据均为部门及月份附属信息</p>
+                                            <p>此页数值取值为小数点1位：XX.X%，即取值小数点后1位，比如：90.17%取值90.2%，90.14%取值90.1%四舍五入，90%取值90.0%。</p>
+                                            <p>1、上方区域显示的是筛选条件，当选择相应的筛选条件并点击<查询>按钮时，列表内显示相应的搜索结果信息。</p>
+                                            <p>2、当遇到新增部门月份数据等场景时，需要新增信息，操作如下：点击左上方的<新增>按钮，页面上弹出新的一条空白记录，进行录入信息添加新的设置或者点击导入按钮批量新增记录。</p>
+                                            <p>3、列表内显示的部门/月份设置信息默认显示最新信息。查看历史信息点击城市搜索。</p>
+                                            <p>4、列表内显示的部门设置信息按照城市唯一，例：
+                                            列表内已经有“部门/月份”的设置信息，如果再次点击新增按钮，录入信息为“201802/外销部”，则生成的记录以最新的为准，自动显示最新的记录，数据关联查询时均以最新记录查询，以保证部门/月份设置信息唯一。
+                                            比如：修改”2016-02外销部“信息，则覆盖历史”2016-02外销部“信息。</p>
+                                            <p>5、操作日志：操作信息痕迹化，确保所有修改信息能够查询到记录。</p>
+                                            <p>6、2017财年月度系数：平衡淡旺季，取去年实际续费，当月月度系数=（当月续费率+当月续费月数完成率）/（全年续费率+全年续费月数完成率），作为今年的月度系数。</p>
+                                            <p>7、2018财年开始按照：取去年实际续费，续费率月度系数=当月续费率/全年续费率；续费月数完成率月度系数=当月续费月数完成率/全年续费月数完成率。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-item-count">
+                                    <p><span class="count-list">共<i>{$totalnum}</i>条</span></p>
+                                </div>
+                                <table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                                    <thead class="thead1" style="width: 1710px;">
+                                        <tr role="row">
+                                            <th title="财年月份">财年月份</th>
+                                            <th title="部门">部门</th>
+                                            <th title="续费率月度系数">续费率月度系数</th>
+                                            <th title="续费月数完成率月度系数">续费月数完成率月度系数</th>
+                                            <th title="续费率指标">续费率指标</th>
+                                            <th title="续费月数完成率指标">续费月数完成率指标</th>
+                                            <th title="全年续费率均值">全年续费率均值</th>
+                                            <th title="续费率最高值">续费率最高值</th>
+                                            <th title="全年续费月数完成率均值">全年续费月数完成率均值</th>
+                                            <th title="续费月数完成率封顶值">续费月数完成率封顶值</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="thead2" style="width: 1710px;">
+                                        <tr role="row">
+                                            <th title="财年月份">财年月份</th>
+                                            <th title="部门">部门</th>
+                                            <th title="续费率月度系数">续费率月度系数</th>
+                                            <th title="续费月数完成率月度系数">续费月数完成率月度系数</th>
+                                            <th title="续费率指标">续费率指标</th>
+                                            <th title="续费月数完成率指标">续费月数完成率指标</th>
+                                            <th title="全年续费率均值">全年续费率均值</th>
+                                            <th title="续费率最高值">续费率最高值</th>
+                                            <th title="全年续费月数完成率均值">全年续费月数完成率均值</th>
+                                            <th title="续费月数完成率封顶值">续费月数完成率封顶值</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <volist name="list" id="v">
+                                        <tr role="row" class="odd">
+                                            <td><span>{$v.cnyf}</span></td>
+                                            <td><span>{$v.bm}</span></td>
+                                            <td> <span>{$v.xfxs}</span></td>
+                                            <td><span>{$v.xfywclxs}</span></td>
+                                            <td><span>{$v.xflzb}</span></td>
+                                            <td><span>{$v.xfyswczb}</span></td>
+                                            <td><span>{$v.qnxfjz}</span></td>
+                                            <td><span>{$v.xflzg}</span></td>
+                                            <td><span>{$v.qnxfyswcljz}</span></td>
+                                            <td><span>{$v.xflyswczg}</span></td>
+                                            <td class="revise-time">{$v.lasttime}</td>
+                                            <td><span class="pintuanzhang-text">{$v.manager}</span></td>
+                                            <td class="revise"><i class="fa fa-pencil editnow" data-id="{$v.id}"></i></td>
+                                        </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer text-center">{$page}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="importExcel" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="" id="uploadForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">导入中心续费月度系数</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal .control-label">
+                        <div style="overflow: hidden;">
+                            <div class="col-xs-5 no-padding">
+                                <h3>导入Excel表：</h3>
+                                <input  type="file" name="excel" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="thisId" value="">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="upload">上传指标</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--公用记录模态框-->
+    <style type="text/css">.width-800{width: 800px;}</style>
+    <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog width-800">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title">记录列表</h4>
+                </div>
+                <div class="modal-body common-model-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            //上传
+            $('#importAct').click(function(event){
+                $('#importExcel').modal('show');
+            });
+            $("#upload").click(function () {
+                //var formData = new FormData();
+                //formData.append("excelFile", document.getElementById("file1").files[0]);
+                var formData = new FormData($("#uploadForm")[0]);
+                $.ajax({
+                    url: "/salesetting/uploadZXXFExcel",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.status == 1) {
+                            alert("上传成功！"+data.data);
+                            window.location.reload();
+                        }
+                        if (data.status == 0) {
+                            alert(data.msg);
+                        }
+                    },
+                    error: function () {
+                        alert("上传失败！");
+                    }
+                });
+            });
+
+            $(".datepicker").datepicker({
+                language: "zh-CN",
+                todayHighlight: true,
+                format: 'yyyy',
+                autoclose: true,
+                startView: 'years',
+                maxViewMode:'years',
+                minViewMode:'years'
+            });
+            // 修改 or 保存
+            $('tbody').on('click', function(event){
+                if(event.target.nodeName == 'I'){
+                    var $a = $(event.target);
+                    var val,arr=[];
+                    if($a.hasClass('fa-floppy-o')){
+
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+                            val = $a.parent().parent().find('.info-item').eq(i).val();
+                            arr.push(val);
+                            if(val){
+                                $a.parent().parent().find('td').eq(i+2).find('span').html(val);
+                            }else{
+                                $a.parent().parent().find('td').eq(i+2).find('select,input').focus();
+                                alert("不能留空");
+                                return false;
+                            }
+
+                            if(arr.length < $a.parent().parent().find('.info-item').length){
+
+                                for(var j=0;j<arr.length;j++){
+                                    $a.parent().parent().find('td').eq(j+2).find('span').hide();
+                                }
+                            }else{
+                                for(var j=0;j<arr.length;j++){
+
+                                    $a.parent().parent().find('td').eq(j+2).find('span').show();
+
+                                    $a.parent().parent().find('td').eq(j+2).find('div').hide();
+
+                                    $a.parent().parent().removeClass('new-list');
+                                }
+                                for(var i=0;i<8;i++){
+                                    $a.parent().parent().find('td').eq(i+2).find('div').remove()
+                                }
+                            }
+                        }
+
+                        var id = $a.attr("data-id");
+                        //ajax写入数据
+                        $.ajax({
+                            url: '/salesetting/editZXpoint/',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                id:id,
+                                arr:arr
+                            }
+                        })
+                        .done(function(data) {
+                            if(data.status == '1'){
+                                alert(data.info);
+                                window.location.href = window.location.href;
+                            }else{
+                                alert(data.info);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert('操作失败');
+                        })
+
+
+                        $a.removeClass('fa-floppy-o').addClass('fa-pencil');
+                        $('.add-new').attr('disabled',false).css('background','#359bed');
+                        // 都修改
+                        $('.table tbody tr').each(function(index, el) {
+                            $(this).find('.fa').each(function(index, el) {
+                                $(el).show();
+                            })
+                        });
+                    }else{
+
+                        for(var i=0;i<8;i++){
+                            var spanVal = $a.parent().parent().find('td').eq(i+2).find('span').html();
+                            $a.parent().parent().find('td').eq(i+2).append('<div><input type="text" value="'+spanVal+'" name="" class="info-item"></div>');
+                        }
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+
+                            $a.parent().parent().find('div').eq(i).show();
+
+                            $a.parent().parent().find('div').eq(i).siblings('span').hide();
+                        }
+
+                        $a.removeClass('fa-pencil').addClass('fa-floppy-o');
+
+                        $('.add-new').attr('disabled',true).css('background','#ccc');
+
+                        // 只能编辑当前操作一条
+                        $('.table tbody tr').each(function(index, el) {
+                            if($(this).find('td:last').find('i').hasClass('fa-pencil')){
+                                $(this).find('td:last').find('i').hide();
+                            }
+                        });
+                    }
+                }
+            });
+            // 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = 0;
+            $(document).on('scroll',function(){
+                if($(document).scrollTop() >= 340){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+            });
+
+            //历史记录
+            /*S-最近操作记录*/
+            $('.log-info').click(function(event) {
+                $.ajax({
+                    url: '/salesetting/gethistorylog/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:8
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    } else {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.info);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+        })
+    </script>
+</block>

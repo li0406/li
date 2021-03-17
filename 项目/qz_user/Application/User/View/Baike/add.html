@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="keywords" content="用户中心">
+<meta name="description" content="用户中心">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<title>{$baike.title}装修百科 - 齐装网用户中心</title>
+<include file="Index:resource" />
+<include file="Designer:resource" />
+<link rel="stylesheet" href="/assets/user/home/css/global.css?v={:C('STATIC_VERSION')}">
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript" src="{$static_host}/assets/common/js/plupload/plupload.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<link src="{$static_host}/assets/common/js/plupload/plupload.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<style type="text/css">
+#btn_sub{display: inline-block;}
+.disable{cursor: pointer;}
+.ht-yes {margin-top:10px;}
+</style>
+</head>
+<body>
+    <if condition="$info['user']['classid'] EQ '1' ">
+      <include file="User:header" />
+      <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+    <elseif condition="$info['user']['classid'] EQ '2' "/>
+      <include file="Designer:header" />
+      <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+    <else/>
+    <link rel="stylesheet" href="/assets/user/home/css/ht-public.css?v={:C('STATIC_VERSION')}">
+      <include file="Home:header" />
+      <div class="ht-wrap oflow">
+        <include file="Home:comnavleft" />
+    </if>
+
+    <div class="yh-main">
+      <h1 class="yh-tit">{$baike.title}装修百科</h1>
+      <form action="" method="POST" id="contentBox">
+      <ul class="diary-edit">
+        <li><span>条目：</span><input name="item" type="text" value="{$baike.item}" style="width:250px;" placeholder="百科条目"><i class="err-tips ml10 icon-exclamation-sign"> 条目不能为空</i></li>
+        <li><span>分类：</span>
+          <select name="bigcate" id="bigCate">
+          <option value="0">选择分类</option>
+            <volist name="category" id="v">
+                <option value="{$v.cid}">{$v.name}</option>
+            </volist>
+          </select>
+          <select name="subcate" id="subCate" style="display:none">
+            <if condition="$baike['id'] NEQ '' ">
+                <volist name="subCate" id="vo">
+                    <option value="{$vo.cid}" >{$vo.name}</option>
+                </volist>
+            </if>
+          </select>
+          <i class="err-tips" style="margin-left:7px"></i>
+        </li>
+        <div id="citybox" <if condition="$info['user_classid'] NEQ '3' ">style="display:none"</if>>
+        <li><span>城市：</span>
+            <select name="area_id" id="area_id">
+                <volist name="provinces" id="v">
+                <option value="{$v.qz_provinceid}" {$v.selected}>{$v.qz_province}</option>
+                </volist>
+            </select>
+            <select name="city_id" id="city_box" >
+                <volist name="citys" id="v">
+                <option value="{$v.cityid}" {$v.selected}>{$v.city}</option>
+                </volist>
+            </select>
+        </li>
+        </div>
+        <div id="descBox" <if condition="$info['user_classid'] EQ '3' ">style="display:none"</if>>
+        <li><span>简介：</span>
+        <textarea name="description" placeholder="请输入200字以内的百科简介" style="height:80px;width:700px;" class="textarea">{$baike.description}</textarea><i class="red err-tips"></i></li>
+        </div>
+        <li><span>缩略图：</span><em class="pull-left" id="uploadimg" style="cursor: pointer;border:1px #ccc solid;padding-left:10px;padding-right:10px;padding-top:2px"><i class="icon-picture mr10" style="font-size:18px"></i>上传图片</em></li>
+        <li style="margin-bottom: 0px;"><span>&nbsp;</span><div class="plupload"><ul id="ul_pics" class="ul_pics"></ul></div></li>
+
+
+        <div id="companyDescBox" style="display:none">
+        <li><span>公司介绍：</span>
+        <textarea name="description_1" id="description_1" placeholder="请输入200字以内的百科简介" style="height:80px;width:700px;" class="textarea">{$baike.description}</textarea><i class="red err-tips"></i></li>
+        <li><span>服务及专长：</span>
+        <textarea name="description_2" placeholder="请输入200字以内的百科简介" style="height:80px;width:700px;" class="textarea">{$baike.description}</textarea><i class="red err-tips"></i></li>
+        <li><span>团队及资质：</span>
+        <textarea name="description_3" placeholder="请输入200字以内的百科简介" style="height:80px;width:700px;" class="textarea">{$baike.description}</textarea><i class="red err-tips"></i></li>
+        </div>
+        <div id="editor" <if condition="$info['user_classid'] EQ '3' ">style="display:none"</if>></div>
+        <li class="isAgree"><span>&nbsp;</span>
+        <input type="checkbox" id="isAgree" > 我已遵循《<a href="javascript:;" id="postStandard">百科编辑标准</a>》
+        </li>
+      </ul>
+      <div class="ht-yes">
+      <a href="javascript:;" id="btn_sub">确认{$baike.title}</a><i class="red err-tips" id="error_msg"></i></div>
+      <input name="id" type="hidden" value="{$baike.id}">
+    </form>
+    </div>
+  </div>
+<include file="Index/footer" />
+<script type="text/javascript">
+$(function(){
+    var ue = UE.getEditor('editor', {
+        serialize : {
+            //黑名单，编辑器会过滤掉以下标签
+            blackList:{style:1, link:1,object:1, input:1, meta:1},
+        },
+        enterTag:'',
+        toolbars: [
+        [
+            'undo', //撤销
+            'redo', //重做
+            'bold', //加粗
+            'link', //超链接
+            'unlink', //取消链接
+            '|',
+            'italic', //斜体
+            'underline', //下划线
+            'strikethrough', //删除线
+            'subscript', //下标
+            'superscript', //上标
+            'touppercase', //字母大写
+            'tolowercase', //字母小写
+            'fontborder', //字符边框
+            'horizontal', //分隔线
+            'fontfamily', //字体
+            'fontsize', //字号
+            'forecolor', //字体颜色
+            'backcolor', //背景色
+            '|',
+            'indent', //首行缩进
+            'justifyleft', //居左对齐
+            'justifyright', //居右对齐
+            'justifycenter', //居中对齐
+            'justifyjustify', //两端对齐
+            'insertorderedlist', //有序列表
+            'insertunorderedlist', //无序列表
+            'lineheight', //行间距
+            'autotypeset', //自动排版
+            'anchor', //锚点
+            '|',
+            'blockquote', //引用
+            'formatmatch', //格式刷
+            'pasteplain', //纯文本粘贴模式
+            'selectall', //全选
+            'removeformat', //清除格式
+            '|',
+            'simpleupload', //单图上传
+            'imagenone', //默认
+            'imageleft', //左浮动
+            'imageright', //右浮动
+            'imagecenter', //居中
+            '|',
+            'time', //时间
+            'date', //日期
+            'emotion', //表情
+            'spechars', //特殊字符
+            'map', //Baidu地图
+            'insertvideo', //视频
+            'charts', // 图表
+            'fullscreen', //全屏
+            'cleardoc', //清空文档
+            'preview', //预览
+            ],
+        ],
+        enterTag:'',
+        allowDivTransToP:true,
+        autoHeightEnabled: true,
+        autoFloatEnabled: true
+    });
+    ue.addListener("ready", function () {
+        ue.setContent('{$baike.content}');
+    });
+
+    $("#bigCate").change(function(){
+        var cid = $("#bigCate").val();
+        if(cid == '35'){
+            $('#citybox').show();
+            $('#descBox').hide();
+            $('#companyDescBox').show();
+            $('#editor').hide();
+            $('#subCate').hide();
+        }else{
+            $('#citybox').hide();
+            $('#descBox').show();
+            $('#companyDescBox').hide();
+            $('#editor').show();
+            $('#subCate').show();
+
+        }
+        if(cid !== '0'){
+            $("#subCate").load("/baike/add?pid=" + cid);
+        }else{
+            $('#subCate').hide();
+            $("#subCate").empty();
+        }
+    });
+
+    $("#area_id").change(function(){
+        $("#city_box").load("/baike/add/getcity/"+$("#area_id").val());
+    });
+
+    //发文标准
+    $("#postStandard").click(function(event) {
+        postStandard('百科编辑标准','baike');
+        $('#isAgree').attr("checked", true);
+    });
+
+    $(".ht-yes a").click(function(event) {
+        $(".err-tips").html("");
+        $(".focus").removeClass('focus');
+        var _this = $(this);
+
+        if($('#isAgree').is(':checked')) {
+            //do something
+        }else{
+            alert('您必须要遵守《百科编辑标准》');
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=item]").val())){
+            $("input[name=item]").focus();
+            $("input[name=item]").addClass('focus');
+            $("input[name=item]").parent().find(".err-tips").addClass('red');
+            $("input[name=item]").parent().find(".err-tips").html("请填写百科条目名称");
+            return false;
+        }
+
+        if($("#bigCate").val() == 0 ){
+            alert('请选择一级分类！');
+            return false;
+        }
+        if($("#subCate").val() == 0 ){
+            alert('请选择二级分类！');
+            return false;
+        }
+
+        if($("#bigCate").val() != '35'){
+            var content = ue.getContent();
+            if(!App.validate.run(content)){
+                _this.parent().find(".err-tips").html("亲,您的百科内容总得写点什么吧！");
+                return false;
+            }
+        }else{
+            if(!App.validate.run($("#description_1").val())){
+                $("#description_1").focus();
+                $("#description_1").addClass('focus');
+                $("#description_1").parent().find(".err-tips").addClass('red');
+                $("#description_1").parent().find(".err-tips").html("亲，公司介绍总得写点什么吧！");
+                return false;
+            }
+        }
+
+        if($('.ul_pics').find("input[name=imgId]").val() == undefined || $('.ul_pics').find("input[name=imgId]").val() == ""){
+            alert('必须要上传缩略图哦！');
+            return false;
+        }
+
+        $.ajax({
+            url: '/baike/add/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $("#contentBox").serializeArray()
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.href="/success/baike/"+data.data;
+            }else{
+                _this.parent().find(".err-tips").html(data.info);
+            }
+        })
+        .fail(function() {
+             _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+        });
+    });
+});
+
+var uploader = new plupload.Uploader({
+    runtimes: 'html5,flash,html4',
+    browse_button: 'uploadimg',
+    url: "/baike/upload",
+    flash_swf_url: '{$static_host}/assets/common/js/plupload/plupload/Moxie.swf',
+    filters:{
+        max_file_size: '10240kb',
+        prevent_duplicates : true,
+        mime_types: [
+            {title: "files", extensions: "jpg,png,jpeg"}
+        ]
+    },
+    multi_selection: true,
+    init: {
+        FilesAdded: function(up, files) { //文件上传前
+            if(uploader.files.length > 1){
+                alert('最多只允许上传1个文件');
+                up.removeFile(file);
+            }else{
+                var li = '';
+                plupload.each(files, function(file) { //遍历文件
+                    li += "<li id='" + file['id'] + "'><div class='progress'><span class='bar'></span><span class='percent'>0%</span></div></li>";
+                });
+                $("#ul_pics").append(li);
+                uploader.start();
+            }
+        },
+        UploadProgress: function(up, file) {
+        var percent = file.percent;
+            $("#" + file.id).find('.bar').css({"width": percent + "%"});
+            $("#" + file.id).find(".percent").text(percent + "%");
+        },
+        FileUploaded: function(up, file, info) {
+            var data = JSON.parse(info.response);
+            $("#" + file.id).html("<div class='uploadimg'><img src='{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/" + data.pic + "' height='120'/></div>");
+            $("#" + file.id).append($("<input type='hidden' name='imgId' value='" + data.pic + "'/>"));
+        },
+        Error: function(up, err) {
+            alert(err.message);
+        }
+    }
+});
+uploader.init();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>每月ABC订单分析 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+<style>
+.nav-tabs {border-bottom:none}
+.nav-tabs-custom > .nav-tabs {width:520px;margin: 0 auto;}
+.nav-tabs-custom > .tab-content {border-top: 1px solid #f4f4f4;}
+.nav-tabs-custom > .nav-tabs > li:first-of-type.active > a {border-left-color:#f4f4f4}
+.nav-tabs-custom > .nav-tabs > li {font-size:18px}
+.chartBox {height:320px;width:340px;border:1px #ccc solid;margin-right:15px;margin-bottom:15px}
+</style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>每月ABC订单分析</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body act-box" style="min-width:500px">
+            <form id="searchform" action="" method="get">
+                <div class="col-sm-2">
+                    <select name="year" id="year" class="form-control">
+                        <option value="">年份</option>
+                        <option value="2016">2016年</option>
+                        <option value="2017">2017年</option>
+                        <option value="2018">2018年</option>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <select name="month_start" id="month_start" class="form-control">
+                        <option value="">月份</option>
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <select name="month_end" id="month_end" class="form-control">
+                        <option value="">月份</option>
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <input type="hidden" name="dl" value="0">
+                            <input type="hidden" name="tab" value="city">
+                            <button type="button" id="submitBtn" class="btn btn-success "><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#abcBox" data-toggle="tab" aria-expanded="false">城市类别统计</a></li>
+                    <li><a href="#deptBox" data-toggle="tab" aria-expanded="false">部门统计</a></li>
+                    <li><a href="#cityBox" data-toggle="tab" aria-expanded="false">城市统计</a></li>
+                    <li><a href="#chartTabBox" data-toggle="tab" aria-expanded="false">数据对比</a></li>
+                </ul>
+                <div class="pull-right" id="fieldSelect" style="margin-top:-30px;padding-right:20px">
+                    筛选字段：
+                    <label><input type="checkbox" class="chkbox" checked target="td-fd">分单量</label>
+                    <label><input type="checkbox" class="chkbox" checked target="td-hy">会员数</label>
+                    <label><input type="checkbox" class="chkbox" checked target="td-pj">平均分单量</label>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane" id="chartTabBox" style="height:990px;">
+                        <div class="col-xs-12">
+                            <volist name="list" id="v" key="key">
+                            <div class="col-xs-3 chartBox" id="chart{$key-1}" ></div>
+                            </volist>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane active" id="abcBox">
+                    <table class="table table-hover table-bordered" >
+                        <thead>
+                            <tr id="abcMenu">
+                                <th colspan="1"></th>
+                                <th class="dept" colspan="3">A类城市</th>
+                                <th class="dept" colspan="3">B类城市</th>
+                                <th class="dept" colspan="3">C类城市</th>
+                                <th class="dept" colspan="3">合计</th>
+                            </tr>
+                            <tr style="font-size:14px;font-weight:normal;">
+                                <th width="60">月份</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="v" key="key">
+                            <tr>
+                                <td>{$key-1}</td>
+                                <td class="td-fd">{$v.abc.A.fendan|default=0}</td>
+                                <td class="td-hy">{$v.abc.A.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.abc.A.avg}</td>
+                                <td class="td-fd">{$v.abc.B.fendan|default=0}</td>
+                                <td class="td-hy">{$v.abc.B.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.abc.B.avg}</td>
+                                <td class="td-fd">{$v.abc.C.fendan|default=0}</td>
+                                <td class="td-hy">{$v.abc.C.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.abc.C.avg}</td>
+                                <td class="td-fd">{$v.count.fendan|default=0}</td>
+                                <td class="td-hy">{$v.count.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.count.avg}</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="tab-pane" id="cityBox">
+                    <table class="table table-hover table-bordered" >
+                        <thead>
+                            <tr id="deptMenu">
+                                <th colspan="1"></th>
+                                <th class="dept" colspan="3">外销A类</th>
+                                <th class="dept" colspan="3">外销B类</th>
+                                <th class="dept" colspan="3">外销C类</th>
+                                <th class="dept" colspan="3">商务A类</th>
+                                <th class="dept" colspan="3">商务B类</th>
+                                <th class="dept" colspan="3">商务C类</th>
+                                <th class="dept" colspan="3">合计</th>
+                            </tr>
+                            <tr style="font-size:14px;font-weight:normal;">
+                                <th  width="60">月份</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="v" key="key">
+                            <tr id="dataTable1">
+                                <td>{$key-1}</td>
+                                <td class="td-fd">{$v.city.out.A.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.out.A.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.out.A.avg}</td>
+                                <td class="td-fd">{$v.city.out.B.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.out.B.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.out.B.avg}</td>
+                                <td class="td-fd">{$v.city.out.C.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.out.C.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.out.C.avg}</td>
+                                <td class="td-fd">{$v.city.in.A.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.in.A.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.in.A.avg}</td>
+                                <td class="td-fd">{$v.city.in.B.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.in.B.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.in.B.avg}</td>
+                                <td class="td-fd">{$v.city.in.C.fendan|default=0}</td>
+                                <td class="td-hy">{$v.city.in.C.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.city.in.C.avg}</td>
+                                <td class="td-fd">{$v.count.fendan|default=0}</td>
+                                <td class="td-hy">{$v.count.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.count.avg}</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="tab-pane" id="deptBox">
+                        <table class="table table-hover table-bordered" >
+                        <thead>
+                            <tr id="cityMenu">
+                                <th colspan="1"></th>
+                                <th class="city" colspan="3">外销部</th>
+                                <th class="city" colspan="3">商务部</th>
+                                <th class="city" colspan="3">合计</th>
+                            </tr>
+                            <tr style="font-size:14px;font-weight:normal;">
+                                <th width="60">月份</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                                <th class="td-fd">分单量</th>
+                                <th class="td-hy">会员数</th>
+                                <th class="td-pj">平均分单量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="v" key="key">
+                            <tr>
+                                <td>{$key-1}</td>
+                                <td class="td-fd">{$v.dept.out.fendan|default=0}</td>
+                                <td class="td-hy">{$v.dept.out.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.dept.out.avg}</td>
+                                <td class="td-fd">{$v.dept.in.fendan|default=0}</td>
+                                <td class="td-hy">{$v.dept.in.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.dept.in.avg}</td>
+                                <td class="td-fd">{$v.count.fendan|default=0}</td>
+                                <td class="td-hy">{$v.count.vipNum|default=0}</td>
+                                <td class="td-pj">{$v.count.avg}</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+                <div class="input-group excelbox" style="margin: 0 auto;">
+                    <button type="submit" id="exportExcel" class="btn btn-success hideLoading">
+                        <i class="fa fa-cloud-download"></i>&nbsp;导出Excel
+                    </button>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('select[name=year]').val('{$info.year}');
+    $('select[name=month_start]').val('{$info.start}');
+    $('select[name=month_end]').val('{$info.end}');
+
+    $('#exportExcel').on('click', function(){
+        $('input[name="dl"]').val('1');
+        $('#searchform').submit();
+        $('input[name="dl"]').val('0');
+    });
+
+    $('#submitBtn').on('click', function(){
+        $('input[name="tab"]').val('city');
+        $('#searchform').submit();
+    });
+
+    $('.nav-tabs li').on('click',function(e){
+        var index = $(this).index();
+        if(index == 3){
+            $('#fieldSelect').hide();
+            $('#exportExcel').fadeOut();
+        }else{
+            $('#fieldSelect').show();
+            $('#exportExcel').fadeIn();
+        }
+
+        if(index == 0){
+            $('input[name="tab"]').val('abc');
+        }
+        if(index == 1){
+            $('input[name="tab"]').val('dept');
+        }
+        if(index == 2){
+            $('input[name="tab"]').val('city');
+        }
+    })
+
+    //选择隐藏
+    var colNum = 3;
+    $('.chkbox').on('click',function(){
+        var bool = $(this).prop('checked');
+        var target = $(this).attr('target');
+        if(bool){
+            colNum++;
+            $('.'+target).show();
+        }else{
+            if(colNum == 1){
+                alert('至少要选择一栏数据');
+                return false;
+            }
+            colNum--;
+            $('.'+target).hide();
+        }
+        $('#cityMenu .city').attr('colspan',colNum);
+        $('#deptMenu .dept').attr('colspan',colNum);
+        $('#abcMenu .dept').attr('colspan',colNum);
+    });
+
+    var myXAxis = [
+        {type: 'category',data : ['外销A','外销B','外销C','商务A','商务B','商务C']},
+        {type: 'category',show: false,data: ''}
+    ];
+    var myYAxis = [{type : 'value',},{type : 'value'}];
+    var myLegend = {data:['分单量','会员数','平均分单'],bottom:10};
+
+   <volist name="list" id="v" key="key">
+
+    option{$key-1} = {
+        tooltip : {
+            trigger: 'item',
+            axisPointer : {
+                type : 'shadow'
+            }
+        },
+        title: {text: '{$key-1}月份',left:'center',top: 'top',padding:[20,0,0,0]},
+        legend: myLegend,
+        xAxis: myXAxis,
+        yAxis : myYAxis,
+        grid: {x:40,y:45,x2:15,y2:60,},
+        series: [
+            {
+                name:'分单量',
+                type:'bar',
+                xAxisIndex: 1,
+                itemStyle: {normal: {color: "#70AD47",}},
+                data:[{$v.city.out.A.fendan},{$v.city.out.B.fendan},{$v.city.out.C.fendan},{$v.city.in.A.fendan},{$v.city.in.B.fendan}, {$v.city.in.C.fendan}],
+            },
+            {
+                name:'会员数',
+                type:'bar',
+                xAxisIndex: 1,
+                itemStyle: {normal: {color: "#4472C4",}},
+                data:[{$v.city.out.A.vipNum}, {$v.city.out.B.vipNum},{$v.city.out.C.vipNum},{$v.city.in.A.vipNum},{$v.city.in.B.vipNum}, {$v.city.in.C.vipNum}],
+            },
+            {
+                name:'平均分单',
+                type:'line',
+                yAxisIndex: 1,
+                itemStyle: {normal: {color: "#FFC209",}},
+                data:[{$v.city.out.A.avg},{$v.city.out.B.avg},{$v.city.out.C.avg},{$v.city.in.A.avg},{$v.city.in.B.avg},{$v.city.in.C.avg}]
+            }
+        ]
+    };
+    var myChart{$key-1} = echarts.init(document.getElementById('chart{$key-1}'));
+    myChart{$key-1}.setOption(option{$key-1},true);
+    </volist>
+
+});
+</script>
+</block>

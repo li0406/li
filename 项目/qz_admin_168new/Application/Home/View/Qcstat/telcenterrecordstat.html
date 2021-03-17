@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检-团队录音抽听完成率 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/qcstat/css/telcenterrecordstat.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检-团队录音抽听完成率</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/qcstat/telcenterrecordstat/">质检-团队录音抽听完成率</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row mgb-10">
+                            <div class="col-xs-2">
+                            开始时间：<input type="text" name="time_start" class="form-control datepicker" placeholder="开始时间" value="{$Think.get.time_start}">
+                            </div>
+                            <div class="col-xs-2">
+                            结束时间：<input type="text" name="time_end" class="form-control datepicker" placeholder="结束时间" value="{$Think.get.time_end}">
+                            </div>
+                            <div class="col-xs-2">
+                                质检员：
+                                <select name="zhi_jian_id" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="main.zhi_jian" id="vo">
+                                        <eq name="Think.get.zhi_jian_id" value="$vo.id">
+                                            <option selected="selected" value="{$vo.id}">{$vo.name}</option>
+                                        <else />
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </eq>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form role="form" class="list-form">
+                            <table class="table table-hover table-bordered" align="center" valign="middle" >
+                                <thead>
+                                    <tr>
+                                        <th>质检员</th>
+                                        <th>订单类型</th>
+                                        <th>订单总数</th>
+                                        <th>录音总数</th>
+                                        <th>点击录音总个数</th>
+                                        <th>抽听录音时长</th>
+                                        <th>抽听录音平均时长</th>
+                                        <th>抽听订单平均时长</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2">合计：</td>
+                                        <td>{$main.sum.order_sum|default=0}</td>
+                                        <td>{$main.sum.record_sum|default=0}</td>
+                                        <td>{$main.sum.record_click_number|default=0}</td>
+                                        <td>{$main.sum.listen_record_time|default=0}</td>
+                                        <td>{:setInfNanToN(number_format($main['sum'][listen_record_time] / $main['sum']['record_click_number'], 2))}</td>
+                                        <td>{:setInfNanToN(number_format($main['sum'][listen_record_time] / $main['sum']['order_sum'], 2))}</td>
+                                    </tr>
+                                    <volist name="main.user" id="vi">
+                                        <tr>
+                                            <td rowspan="7">{$vi.name}</td>
+                                            <td>合计：</td>
+                                            <td>{$vi.sum.order_sum|default=0}</td>
+                                            <td>{$vi.sum.record_sum|default=0}</td>
+                                            <td>{$vi.sum.record_click_number|default=0}</td>
+                                            <td>{$vi.sum.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['sum'][listen_record_time] / $vi['sum']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['sum'][listen_record_time] / $vi['sum']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>分单：</td>
+                                            <td>{$vi.info.fen_dan.order_sum|default=0}</td>
+                                            <td>{$vi.info.fen_dan.record_sum|default=0}</td>
+                                            <td>{$vi.info.fen_dan.record_click_number|default=0}</td>
+                                            <td>{$vi.info.fen_dan.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['fen_dan'][listen_record_time] / $vi['info']['fen_dan']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['fen_dan'][listen_record_time] / $vi['info']['fen_dan']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>赠单：</td>
+                                            <td>{$vi.info.zeng_dan.order_sum|default=0}</td>
+                                            <td>{$vi.info.zeng_dan.record_sum|default=0}</td>
+                                            <td>{$vi.info.zeng_dan.record_click_number|default=0}</td>
+                                            <td>{$vi.info.zeng_dan.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['zeng_dan'][listen_record_time] / $vi['info']['zeng_dan']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['zeng_dan'][listen_record_time] / $vi['info']['zeng_dan']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>次新单：</td>
+                                            <td>{$vi.info.ci_xin_dan.order_sum|default=0}</td>
+                                            <td>{$vi.info.ci_xin_dan.record_sum|default=0}</td>
+                                            <td>{$vi.info.ci_xin_dan.record_click_number|default=0}</td>
+                                            <td>{$vi.info.ci_xin_dan.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['ci_xin_dan'][listen_record_time] / $vi['info']['ci_xin_dan']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['ci_xin_dan'][listen_record_time] / $vi['info']['ci_xin_dan']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>待定单：</td>
+                                            <td>{$vi.info.dai_ding.order_sum|default=0}</td>
+                                            <td>{$vi.info.dai_ding.record_sum|default=0}</td>
+                                            <td>{$vi.info.dai_ding.record_click_number|default=0}</td>
+                                            <td>{$vi.info.dai_ding.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['dai_ding'][listen_record_time] / $vi['info']['dai_ding']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['dai_ding'][listen_record_time] / $vi['info']['dai_ding']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>扫单：</td>
+                                            <td>{$vi.info.sao_dan.order_sum|default=0}</td>
+                                            <td>{$vi.info.sao_dan.record_sum|default=0}</td>
+                                            <td>{$vi.info.sao_dan.record_click_number|default=0}</td>
+                                            <td>{$vi.info.sao_dan.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['sao_dan'][listen_record_time] / $vi['info']['sao_dan']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['sao_dan'][listen_record_time] / $vi['info']['sao_dan']['order_sum'], 2))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>无效单：</td>
+                                            <td>{$vi.info.wu_xiao_dan.order_sum|default=0}</td>
+                                            <td>{$vi.info.wu_xiao_dan.record_sum|default=0}</td>
+                                            <td>{$vi.info.wu_xiao_dan.record_click_number|default=0}</td>
+                                            <td>{$vi.info.wu_xiao_dan.listen_record_time|default=0}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['wu_xiao_dan'][listen_record_time] / $vi['info']['wu_xiao_dan']['record_click_number'], 2))}</td>
+                                            <td>{:number_format(setInfNanToN($vi['info']['wu_xiao_dan'][listen_record_time] / $vi['info']['wu_xiao_dan']['order_sum'], 2))}</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    $(document).ready(function(){
+        //初始化插件
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+
+
+        //搜索按钮
+        $('#search').click(function(event) {
+            var time_start = $('input[name=time_start]').val();
+            var time_end = $('input[name=time_end]').val();
+            if (time_start.slice(0,7) != time_end.slice(0,7)) {
+                alert('开始时间和结束时间必须选择同一个月');
+                return false;
+            };
+            window.location.href = '/qcstat/telcenterrecordstat/?time_start=' + time_start + '&time_end=' + time_end + '&zhi_jian_id=' + $('select[name=zhi_jian_id]').val();
+        });
+    })
+    </script>
+</block>

@@ -1,0 +1,187 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>百度账户城市管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+<style>
+.nav-tabs {border-bottom:none}
+.nav-tabs-custom > .nav-tabs {width:520px;margin: 0 auto;}
+.nav-tabs-custom > .tab-content {border-top: 1px solid #f4f4f4;}
+.nav-tabs-custom > .nav-tabs > li:first-of-type.active > a {border-left-color:#f4f4f4}
+.nav-tabs-custom > .nav-tabs > li {font-size:18px}
+.chartBox {height:320px;width:340px;border:1px #ccc solid;margin-right:15px;margin-bottom:15px}
+</style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>新增百度账户</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="nav-tabs-custom">
+                    <form id="form1" action="" method="POST">
+                        <div class="box-body" style="max-width:800px">
+                            <div class="form-group">
+                                <label>账户名称：</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input name="account" id="account" type="text" placeholder="请输入账户名称" value="" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>选择城市：</label>
+                                <div class="row">
+                                    <div class="col-sm-6 h4 mgb-10px">城市列表</div>
+                                    <div class="col-sm-6 h4 mgb-10px">已选城市</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 bd-account-citys">
+                                        <div class="ms-container citys-container">
+                                            <select id="citys" multiple="multiple">
+                                                <optgroup label="商务A">
+                                                    <volist name="list.in.a" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                                <optgroup label="商务B">
+                                                    <volist name="list.in.b" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                                <optgroup label="商务C">
+                                                    <volist name="list.in.c" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                                <optgroup label="外销A">
+                                                    <volist name="list.out.a" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                                <optgroup label="外销B">
+                                                    <volist name="list.out.b" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                                <optgroup label="外销C">
+                                                    <volist name="list.out.c" id="v">
+                                                    <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                                                    </volist>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+                            <button type="submit" id="btnSa" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;保存</button>
+                            <button type="button" id="cancel" class="btn btn-default"><i class="fa fa-mail-reply"></i>&nbsp;取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </div>
+
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+    //城市列表
+    $('#citys').multiSelect({
+        selectableHeader: "<input type='text' class='form-control' autocomplete='off' placeholder='搜索'>",
+        selectionHeader: "<input type='text' class='form-control' autocomplete='off' placeholder='搜索'>",
+        afterInit: function(ms){
+            var that = this,
+            $selectableSearch = that.$selectableUl.prev(),
+            $selectionSearch = that.$selectionUl.prev(),
+            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+            that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+            .on('keydown', function(e){
+                if (e.which === 40){
+                    that.$selectableUl.focus();
+                    return false;
+                }
+            });
+
+            that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+            .on('keydown', function(e){
+                if (e.which == 40){
+                    that.$selectionUl.focus();
+                    return false;
+                }
+            });
+        },
+        afterSelect: function(){
+            this.qs1.cache();
+            this.qs2.cache();
+        },
+        afterDeselect: function(){
+            this.qs1.cache();
+            this.qs2.cache();
+        }
+    });
+
+    $('#cancel').click(function(e){
+        if(!confirm('确定放弃保存并退出吗？')){
+            return false;
+        }else{
+           window.location = "/citybaidu/";
+        }
+    });
+
+    //保存
+    $("#btnSa").click(function(event) {
+        var data = new Object();
+        data.city = $('#citys').val();
+        data.account = $('#account').val();
+
+        $.ajax({
+            url: '/citybaidu/add',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if(data.status == '0'){
+                alert(data.info);
+            }else{
+                alert('保存成功！');
+                window.location = "/citybaidu/";
+            }
+            return false;
+        })
+        .fail(function(xhr) {
+            alert('操作失败！');
+            return false;
+        });
+
+        return false;
+    });
+
+});
+
+</script>
+</block>

@@ -1,0 +1,173 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .signbackedit_nav { padding: 20px; margin-bottom: 20px;}
+        .signbackedit_nav li { font-size: 16px; float: left; padding: 0 5px; line-height: 2; margin-right: 30px;}
+        .signbackedit_nav li a { color: inherit;}
+        .signbackedit_nav li.active {border-bottom: 1px solid #FF0000; color: #FF0000;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box-header with-border">
+                <h3 class="box-title">新签返会员管理/加款明细</h3>
+            </div>
+            
+            <!-- 会员信息部分 -->
+            <include file="account_info" />
+
+            <div class="box">
+                <ul class="signbackedit_nav">
+                    <li><a href="/signbacknew/round_order_list?user_id={$userinfo.id}">签单记录</a></li>
+                    <li><a href="/signbacknew/account_deduction_log?user_id={$userinfo.id}">扣款明细</a></li>
+                    <li class="active">加款明细</li>
+                </ul>
+
+                <div class="box-body">
+                    <form id="searchForm" class="form-horizontal" action="?" method="get">
+                        <input type="hidden" name="user_id" value="{$userinfo.id}" />
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    金额类型:
+                                    <br/>
+                                    <select name="account_type" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="1" {:($input["account_type"] == 1 ? "selected" : "")} >轮单费</option>
+                                        <option value="2" {:($input["account_type"] == 2 ? "selected" : "")} >保证金</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    交易时间:
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control datepicker" id="begin"
+                                                   autocomplete="off" placeholder="请选择查询开始时间" name="begin" value="{$input.begin}">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control datepicker" id="end"
+                                                   autocomplete="off" placeholder="请选择查询结束时间" name="end" value="{$input.end}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    流水编号:
+                                    <input type="text" class="form-control" placeholder="请输入流水编号" name="trade_no" value="{$input.trade_no}">
+                                </div>
+
+                                <div class="col-sm-1 text-center">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary">
+                                        <i class="fa fa-search"></i> 查询
+                                    </button>
+                                </div>
+
+                                <div class="col-sm-1 text-center">
+                                    <br/>
+                                    <button id="btnExport" type="button" class="btn">
+                                        <i class="fa fa-external-link"></i> 导出Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th width="80">序号</th>
+                            <th>流水号</th>
+                            <th>金额类型</th>
+                            <th>金额</th>
+                            <th>付款方式</th>
+                            <th>交易时间</th>
+                            <th>操作人</th>
+                            <th>备注</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="data.list" id="item">
+                            <tr>
+                                <td>{$item.index}</td>
+                                <td>{$item.trade_no}</td>
+                                <td>{$item.account_type_name}</td>
+                                <td>+{$item.trade_amount}</td>
+                                <td>
+                                    <if condition="count($item['log_type_list']) == 0">
+                                        -
+                                    <elseif condition="count($item['log_type_list']) == 1" />
+                                        {$item["log_type_list"][0]["pay_type_name"]}
+                                    <else />
+                                        <volist name="item.log_type_list" id="log">
+                                            ￥{$log.pay_amount} {$log.pay_type_name},<br />
+                                        </volist>
+                                    </if>
+                                </td>
+                                <td>{$item.created_date}</td>
+                                <td>{$item.operator_name}</td>
+                                <td style="max-width: 320px;">{$item.trade_remark|default="-"}</td>
+                            </tr>
+                        </volist>
+
+                        <eq name="data.count" value="0">
+                            <tr>
+                                <td colspan="20" align="center">暂无数据</td>
+                            </tr>
+                        </eq>
+                        </tbody>
+                    </table>
+                    <div>{$data.pageshow}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $(".datepicker").datepicker({
+                format: "yyyy-mm-dd",
+                minViewMode: 0,
+                autoclose: true
+            });
+
+            // 查询
+            $("#btnSearch").click(function(){
+                var begin = $("#searchForm input[name=begin]").val();
+                var end = $("#searchForm input[name=end]").val();
+                if (begin != "" && end != "" && begin > end) {
+                    alert("结束时间不能小于开始时间");
+                    return false;
+                }
+
+                return true;
+            });
+
+            // 导出
+            $("#btnExport").click(function(){
+                var data = {
+                    user_id: "{$userinfo.id}",
+                    account_type: $("select[name=account_type]").val(),
+                    trade_no: $("input[name=trade_no]").val(),
+                    begin: $("input[name=begin]").val(),
+                    end: $("input[name=end]").val()
+                };
+
+                var uri = urlencode(data);
+                window.location.href = "/signbacknew/account_recharge_export?" + uri;
+            });
+        });
+    </script>
+</block>
+

@@ -1,0 +1,380 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新版客服对接行为统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/customerordereffective.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新版客服对接行为统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">新版客服对接行为统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <form class="form-horizontal" method="GET">
+                            <div class="col-xs-12">
+                                <ul class="npoc-tab-wrap">
+                                <li class="npoc-tab" data-tab='1'>
+                                    <span style="font-size: 14px;">按人统计</span>
+                                </li>
+                                <li class="npoc-tab" data-tab='2'>
+                                    按城市统计
+                                </li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab1">
+                <div class="box">
+                    <div class="box-header">
+                        <form action="/orderstat/customerorderdockingstat/" method="get">
+                        <div class="col-xs-2">
+                            <div>客服姓名</div>
+                            <select id="kfList" name="id" data-search='1' class="form-control">
+                                <volist name="kflist" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-开始:</div>
+                            <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-结束:</div>
+                            <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                        </div>
+
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">切换至撤回单统计</div>
+                            <button id="tab" type="button" class="btn-primary form-control" data-tab="1">切换至撤回单统计</button>
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">导出EXCEL</div>
+                            <button type="button" class="btn-success form-control export" data-tab="1">导出EXCEL</button>
+                        </div>
+                          <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">查询</div>
+                            <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                            <input type="hidden" name="index" value="1" />
+                        </div>
+                        </form>
+                    </div>
+                    <div id="table1">
+                    <div class="box-body table-responsive no-padding">
+                        <table id="myTable2" class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">客服姓名</th>
+                                    <th class="col-sm-1">单次对接订单数</th>
+                                    <th class="col-sm-1">单次对接成功率</th>
+                                    <th class="col-sm-1">单次对接成功分单量</th>
+                                    <th class="col-sm-1">单次对接成功赠单量</th>
+                                    <th class="col-sm-1">总分配时长/分钟</th>
+                                    <th class="col-sm-1">单次成功平均分配时长</th>
+                                    <th class="col-sm-1">平均分单分配时长</th>
+                                    <th class="col-sm-1">平均赠单分配时长</th>
+                                </tr>
+                            </thead>
+                        <tbody>
+                            <volist name="users" id="vo">
+                            <tr>
+                                <td class="col-sm-1">{$vo.name}</td>
+                                <td class="col-sm-1">{$vo.once_array.count|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.once_rate|default=0}%</td>
+                                <td class="col-sm-1">{$vo.once_array.fen|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.zen|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.offset_time|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.avg_time|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.avg_fen_time|default=0}</td>
+                                <td class="col-sm-1">{$vo.once_array.avg_zen_time|default=0}</td>
+                            </tr>
+
+                            </volist>
+                        </tbody>
+                        <tfoot>
+                             <tr>
+                                <td class="col-sm-1">汇总:</td>
+                                <td class="col-sm-1">{$userAll.once.once_count|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.once_rate|default=0}%</td>
+                                <td class="col-sm-1">{$userAll.once.fen|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.zen|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.offset_time|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.avg_time|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.avg_fen_time|default=0}</td>
+                                <td class="col-sm-1">{$userAll.once.avg_zen_time|default=0}</td>
+                            </tr>
+                        </tfoot>
+                        </table>
+                    </div>
+
+                    </div>
+                    <div id="table2" style="display: none;">
+                        <div class="box-body table-responsive no-padding">
+                            <table id="myTable2" class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="col-sm-1">客服姓名</th>
+                                        <th class="col-sm-1">撤回订单数</th>
+                                        <th class="col-sm-1">撤回单率</th>
+                                        <th class="col-sm-1">撤回单分单量</th>
+                                        <th class="col-sm-1">撤回单赠单量</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                                <volist name="users" id="vo">
+                                <tr>
+                                    <td >{$vo.name}</td>
+                                    <td >{$vo.back_array.count|default=0}</td>
+                                    <td >{$vo.back_array.back_rate|default=0}%</td>
+                                    <td >{$vo.back_array.fen|default=0}</td>
+                                    <td >{$vo.back_array.zen|default=0}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                            <tfoot>
+                                 <tr>
+                                    <td class="col-sm-1">汇总:</td>
+                                    <td >{$userAll.back.back_count|default=0}</td>
+                                    <td >{$userAll.back.back_rate|default=0}%</td>
+                                    <td >{$userAll.back.fen|default=0}</td>
+                                    <td >{$userAll.back.zen|default=0}</td>
+                                </tr>
+                            </tfoot>
+                            </table>
+                        </div>
+                        <div class="box-footer  no-padding">
+                            <table class="table  table-bordered">
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab2">
+                <div class="box">
+                    <div class="box-header">
+                        <form action="/orderstat/customerorderdockingstat/" method="get">
+                        <div class="col-xs-2">
+                            <div>城市</div>
+                            <select id="city" name="city" data-search='1' class="form-control" type="text">
+                                <volist name="city" id="vo">
+                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-开始:</div>
+                            <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div>查询时间-结束:</div>
+                            <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">查询</div>
+                            <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                            <input type="hidden" name="index" value="2" />
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <div style="opacity:0;">导出EXCEL</div>
+                            <button type="button" class="btn-success form-control export" data-tab="2">导出EXCEL</button>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table id="myTable" class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">城市</th>
+                                    <th class="col-sm-1">撤回订单数</th>
+                                    <th class="col-sm-1">单次对接成功率</th>
+                                    <th class="col-sm-1">平均分配时长/分钟</th>
+                                    <th class="col-sm-1">分单平均分配时长/分钟</th>
+                                    <th class="col-sm-1">赠单平均分配时长/分钟</th>
+                                    <th class="col-sm-1">总分配时长/分钟</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="citys" id="vo">
+                                <tr>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.back_count|default=0}</td>
+                                    <td>{$vo.once_rate|default=0}%</td>
+                                    <td>{$vo.avg_time|default=0}</td>
+                                    <td>{$vo.avg_fen_time|default=0}</td>
+                                    <td>{$vo.avg_zen_time|default=0}</td>
+                                    <td>{$vo.offset_time|default=0}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer  no-padding">
+                        <table class="table  table-bordered">
+                             <tr>
+                                <td class="col-sm-1">汇总:</td>
+                                <td class="col-sm-1">{$cityAll.back_count|default=0}</td>
+                                <td class="col-sm-1">{$cityAll.once_rate|default=0}%</td>
+                                <td class="col-sm-1">{$cityAll.avg_time|default=0}</td>
+                                <td class="col-sm-1">{$cityAll.avg_fen_time|default=0}</td>
+                                <td class="col-sm-1">{$cityAll.avg_zen_time|default=0}</td>
+                                <td class="col-sm-1">{$cityAll.offset_time|default=0}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+            <p>单次对接成功表说明注释：</p>
+            <p>客服姓名：查询时间内坐席客服</p>
+            <p>单次对接成功单数：查询时间内无撤回记录的已分配订单</p>
+            <p>单次对接成功率：查询时间内无撤回记录的已分配订单/已分配订单</p>
+            <p>单次对接成功分单量：单次对接成功单里的分单数量</p>
+            <p>单次对接成功赠单量：单次对接成功单里的赠单数量</p>
+            <p>总分配时长/分钟：查询时间内（所有单次对接成功单）对接时长=分配时间-推送时间</p>
+            <p>单次成功平均分配时长：查询时间段内，总分配时长/单次对接成功单数</p>
+            <p>平均分单分配时长：查询时间段内，单次对接成功分单总时长/单次对接成功分单量</p>
+            <p>平均赠单分配时长：查询时间段内，单次对接成功赠单总时长/单次对接成功赠单量</p>
+            <p>撤回单表说明注释：</p>
+            <p>客服姓名：查询时间内坐席客服</p>
+            <p>撤回订单数：查询时间内有撤回记录的已分配订单</p>
+            <p>撤回单率：查询时间内撤回记录的已分配订单/已分配订单</p>
+            <p>撤回单分单量：撤回单里的分单数量</p>
+            <p>撤回单赠单量：撤回单里的赠单数量</p>
+            <p>撤回单表说明注释：</p>
+            <p>客服姓名：查询时间内坐席客服</p>
+            <p>撤回订单数：查询时间内有撤回记录的已分配订单</p>
+            <p>撤回单率：查询时间内撤回记录的已分配订单/已分配订单</p>
+            <p>撤回单分单量：撤回单里的分单数量</p>
+            <p>撤回单赠单量：撤回单里的赠单数量</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#kfList").select2({
+            allowClear: true,
+            placeholder: "选择客服"
+        });
+        $("#kfList").select2("val","{$Think.get.id}");
+
+        $("#city").select2({
+                    allowClear: true,
+                    placeholder: "选择城市"
+        });
+        $("#city").select2("val","{$Think.get.city}");
+
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+
+        $(".export").click(function(event) {
+             var _this = $(this);
+             var tab =  _this.attr("data-tab");
+             var taget = $("#tab"+tab+" table");
+             var colums = [];
+             var data = [];
+             taget.find("th").each(function() {
+                    var text = $(this).text().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    sub["fontColor"] = $(this).css("color");
+                    sub["bgColor"] = $(this).css("background-color");
+                    colums.push(sub);
+             });
+             data.push(colums);
+             taget.find("tbody tr").each(function(i) {
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function() {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text: text,
+                            fontColor: $(this).css("color"),
+                            bgColor: $(this).css("background-color")
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+            });
+             _this.exportExcel({
+                    data: data,
+                    title: "新客服分单统计",
+                    url: "/export/download",
+                    show:true
+             });
+        });
+
+        $('#myTable').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true
+        });
+
+        $('#myTable2').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           "bSort":true,
+           order:[5,"desc"]
+        });
+
+        $('.npoc-tab-wrap li.npoc-tab').eq({$Think.get.index|default=1}-1).addClass('npoc-tab-active');
+        //tab切换
+        $('.npoc-tab').on('click', function() {
+            $('.npoc-tab').removeClass('npoc-tab-active');
+            $(this).addClass('npoc-tab-active');
+            var tabIndex = $(this).attr('data-tab');
+            $("#tab1,#tab2").hide();
+            $('#tab'+tabIndex).show();
+        });
+
+        $(".npoc-tab-active").trigger('click');
+
+        $("#tab").click(function(event) {
+            if ($("#table1").is(":hidden")) {
+                $("#table1").show();
+                $("#table2").hide();
+                $(this).html("切换至撤回单统计");
+            } else {
+                $("#table2").show();
+                $("#table1").hide();
+                $(this).html("切换至单次成功对接");
+            }
+        });
+    </script>
+</block>

@@ -1,0 +1,251 @@
+<div class="step_item_box">
+    <div class="step_item_name">
+        <if condition="$from eq 1">
+        <span class="pull-left">寄回公司</span>
+        <else />
+        <span class="pull-left">公司寄出</span>
+        </if>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line"></span>
+    </div>
+    <div class="step2 step-container owf">
+        <div class="send_list_box_x150">
+            <table class="scroll_table">
+                <thead>
+                    <tr class="select_head_x150">
+                        <td class="getAll_x150"><i class="fa fa-square-o" data-status="0" id="getAll"></i>&nbsp;全选&nbsp;&nbsp;<i class="fa fa-square-o" data-status="0" id="reverse"></i>&nbsp;反选</td><td>合同编号</td><td>状态</td><td><button class="button small_button noChose send_all" data-status="0">寄回</button></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="sendback" id='v'>
+                        <tr class="select_body_x150">
+                            <td><i class="fa fa-square-o simple_select_x150" data-status="0" data-id="{$v.id}"></i></td>
+                            <td>{$v.contractid}</td>
+                            <if condition="$v.special eq 5"><td class="no_start">作废</td><else /><td class="has_end">签约</td></if>
+                            <td></td>
+                        </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="jichu_x150">
+   <div class="way_chose">
+        <button class="button hasBg jichu_way beChosed" data-sendType='1'>快递配送</button>
+        <div class="peisong_box owf">
+            <span class="pull-left">输入快递单号 ：</span>
+            <input type="text" class="pull-left" name="step2_danhao">
+            <button class="button pull-left" id="save_way">保存</button>
+        </div>
+        <div class="update_peisong_box owf">
+            <span class="pull-left">快递单号 ：</span>
+            <span id="kd_number" class="pull-left" data-status="0"></span>
+            <span class="pull-left change_number">修改</span>
+        </div>
+        <button class="button noChose jichu_way"  data-sendType='2'>其他送达方式</button>
+        <input type="hidden" name="sendIds" value="">
+   </div>
+   <div class="button_box">
+       <button class="button" id="companySendNow">确定</button>
+       &nbsp;&nbsp;&nbsp;&nbsp;
+       <button class="button nobg" id="cancel_send">取消</button>
+   </div>
+</div>
+<script type="text/javascript">
+    var select_result=[];
+    /*全选*/
+    $("#getAll").click(function(){
+        $("#reverse").attr("data-status","0");
+        $("#reverse").attr("class","fa fa-square-o");
+        select_result.length=0;
+        var all_menu=$(".select_body_x150 .simple_select_x150");
+        var length = all_menu.length;
+        if($(this).attr("data-status")=="1"){
+            $(this).attr("data-status","0");
+            $(this).attr("class","fa fa-square-o");
+            for(var i=0; i<length; i++){
+               $(all_menu[i]).attr("data-status","0");
+               $(all_menu[i]).attr("class","fa fa-square-o simple_select_x150");
+            }
+            $(".send_all").attr("class","button small_button noChose send_all");
+            $(".send_all").attr("data-status","0");
+        }else{
+            $(this).attr("data-status","1");
+            $(this).attr("class","fa fa-check-square");
+            for(var i=0; i<length; i++){
+               $(all_menu[i]).attr("data-status","1");
+               $(all_menu[i]).attr("class","fa fa-check-square simple_select_x150 choosedId");
+               select_result.push($(all_menu[i]).data("id"));
+            }
+            $(".send_all").attr("class","button small_button send_all");
+            $(".send_all").attr("data-status","1");
+        }
+        console.log(select_result);
+    });
+
+    /*单选*/
+    $(".select_body_x150 .simple_select_x150").click(function(){
+        $("#reverse").attr("data-status","0");
+        $("#reverse").attr("class","fa fa-square-o");
+        var status=$(this).attr("data-status");
+        if(status=="1"){
+            $(this).attr("data-status","0");
+            $(this).attr("class","fa fa-square-o simple_select_x150");
+            for(var i=0; i<select_result.length;i++){
+                if(select_result[i]==$(this).data("id")){
+                    select_result.splice(i,1);
+                }
+            }
+            $("#getAll").attr("data-status",0).attr("class","fa fa-square-o simple_select_x150");
+            if(select_result.length==0){
+                $(".send_all").attr("class","button small_button noChose send_all");
+                $(".send_all").attr("data-status","0");
+            }
+        }else{
+            $(this).attr("class","fa fa-check-square simple_select_x150 choosedId");
+            $(this).attr("data-status","1");
+            $(".send_all").attr("class","button small_button send_all");
+            $(".send_all").attr("data-status","1");
+            select_result.push($(this).data("id"));
+        }
+        if(select_result.length==$(".select_body_x150").length){
+            $("#getAll").attr("data-status","1").attr("class","fa fa-check-square");
+            $(".send_all").attr("class","button small_button send_all");
+            $(".send_all").attr("data-status","1");
+        }
+        console.log(select_result);
+    });
+
+    /*反选*/
+    $("#reverse").click(function(event) {
+        var status=$(this).attr("data-status");
+        var all_menu=$(".select_body_x150 .simple_select_x150");
+        var length = all_menu.length;
+        if(select_result.length==0){
+            alert_info_x150("您当前还没有选择项~");
+        }else{
+            select_result.length=0;
+            $("#getAll").attr("data-status","0").attr("class","fa fa-square-o simple_select_x150");
+            $(this).attr("data-status","1");
+            $(this).attr("class","fa fa-check-square");
+            for(var i=0;i<length;i++){
+                if($(all_menu[i]).attr("data-status")=="0"){
+                    $(all_menu[i]).attr("data-status","1");
+                    $(all_menu[i]).attr("class","fa fa-check-square simple_select_x150 choosedId");
+                    select_result.push($(all_menu[i]).data("id"));
+                }else{
+                    $(all_menu[i]).attr("data-status","0");
+                    $(all_menu[i]).attr("class","fa fa-square-o simple_select_x150");
+                }
+            }
+        }
+        if(select_result.length==0){
+            $(".send_all").attr("class","button small_button noChose send_all");
+            $(".send_all").attr("data-status","0");
+        }
+        console.log(select_result);
+    });
+
+    /*多个寄回*/
+    $(".send_all").hover(function(event) {
+        var status=$(this).attr("data-status");
+        if(status==0){
+            $(this).css("cursor","not-allowed");
+        }else{
+            $(this).css("cursor","pointer");
+        }
+    });
+    $(".send_all").click(function(event) {
+        var all_select=[];
+        var status=$(this).attr("data-status");
+        $('.choosedId').each(function(){
+            var id = $(this).attr('data-id');
+            all_select.push(id);
+        });
+        if(status!=0){
+            $("input[name=sendIds]").val(all_select);
+            $(".jichu_x150").fadeIn();
+        }
+    });
+
+    /*公司寄出：配送方式选择*/
+    $(".way_chose .jichu_way").click(function(event) {
+        var index=$(this).index();
+        $(this).removeClass('noChose');
+        $(this).siblings('.jichu_way').addClass('noChose');
+        $(this).siblings('.jichu_way').removeClass('beChosed');
+        $(this).addClass('hasBg');
+        $(this).addClass('beChosed');
+        if(index==0){
+            $(".peisong_box").animate({
+                height:"30px"
+            }, 500)
+        }else{
+            $(".peisong_box").animate({
+                height:"0px"
+            }, 500)
+        }
+    });
+    $("#save_way").click(function(){
+        var number=$("input[name='step2_danhao']").val();
+        if(number!=""){
+            $(".peisong_box").fadeOut(0);
+            $("#kd_number").text(number).attr("data-status","1");
+
+            $(".update_peisong_box").fadeIn(0);
+        }
+    });
+    $(".change_number").click(function(){
+        $(".update_peisong_box").fadeOut(0);
+        $(".peisong_box").fadeIn(0);
+    });
+
+    //退出快递配送弹窗
+    $("#cancel_send").click(function(){
+        $(".jichu_x150").fadeOut();
+    });
+    //输入公司寄出内容
+    $("#companySendNow").on('click',function(){
+        var ids = $('input[name=sendIds]').val();
+        var sendType = $('.beChosed').attr('data-sendType');//快递方式 1为默认快递， 2为其他配送方式
+        var danhao = $('input[name=step2_danhao]').val();
+        if(sendType == 1){
+            if(danhao == ''){
+                alert_info_x150("请输入快递单号！");
+                return false;
+            }
+            var kd_number=$("#kd_number").text();
+            if(kd_number==""){
+                alert_info_x150('请保存快递单号');
+                return false
+            }
+        }
+        $.ajax({
+            url: '/contractmanage/sendcontractback/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                ids:ids,
+                sendType:sendType,
+                danhao:danhao,
+                status:{$expressstatus}
+            }
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                alert_info_x150(data.info);
+                window.location.href = window.location.href;
+            } else {
+                alert_info_x150(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert_info_x150("网络错误，请稍后重试~");
+            return false;
+        })
+    });
+
+</script>

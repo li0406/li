@@ -1,0 +1,130 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>分增合规性统计</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/qcstat/css/teamcollectstat.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content-header">
+    <h1><small class="ftjz bdjc">分增合规性统计</small></h1>
+</section>
+<section class="content">
+    <div class="box">
+        <div class="box-header with-border">
+            <div class="col-xs-12 no-padding">条件查询</div>
+        </div>
+        <div class="box-body">
+            <div class="col-xs-12 no-padding">
+                <span class="pull-left lhh">选择时间：</span>
+                <div class="col-xs-2">
+                    <input name="time_start" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}" value="{$Think.get.time_start}">
+                </div>
+                <div class="col-xs-2">
+                    <input name="time_end" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}"  value="{$Think.get.time_end}">
+                </div>
+                <span class="pull-left lh34">质检人：</span>
+                <div class="col-xs-2">
+                    <select name="op_uid" class="form-control">
+                        <option value="">全部</option>
+                        <volist name="main.user" id="vi">
+                            <option value="{$vi.id}">{$vi.name}</option>
+                        </volist>
+                    </select>
+                </div>
+                <span class="pull-left lh34">合规性：</span>
+                <div class="col-xs-2">
+                    <select name="conform_regulation" class="form-control">
+                        <option value="">全部</option>
+                        <option value="1">是</option>
+                        <option value="2">否</option>
+                        <option value="3">分歧</option>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    <button id="search" data-triger="#search"  class="form-control btn btn-primary btn-sm"><i class="fa fa-fw fa-search"></i>查询</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header">
+            <h4 class="sjlb"><small class="bdjc">数据列表</small></h4>
+        </div>
+        <div class="box-body">
+            <table id="" class="table table-bordered table-hover dataTable no-footer" role="grid">
+                <thead>
+                    <tr role="row">
+                        <th class="" tabindex="0">序号</th>
+                        <th class="" tabindex="0">质检时间</th>
+                        <th class="" tabindex="0">订单号</th>
+                        <th class="" tabindex="0">城市</th>
+                        <th class="" tabindex="0">客服</th>
+                        <th class="" tabindex="0">质检人</th>
+                        <th class="" tabindex="0">订单类型</th>
+                        <th class="" tabindex="0">合规性</th>
+                        <th class="" tabindex="0">异议问题</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="main.info.list" id="vi">
+                        <tr role="row" class="odd">
+                            <td><span>{$key+1}</span></td>
+                            <td><span>{:date('Y-m-d H:i:s', $vi['time'])}</span></td>
+                            <td><span>{$vi.order_id}</span></td>
+                            <td><span>{$vi.cname}</span></td>
+                            <td><span>{$vi.kf_name}</span></td>
+                            <td><span>{$vi.op_name}</span></td>
+                            <td><span>{:getOrderStatus($vi['on'], $vi['on_sub'], $vi['type_fw'])}</span></td>
+                            <td>
+                                <span>
+                                    <if condition="$vi['conform_regulation'] == 1">
+                                        是
+                                    <elseif condition="$vi['conform_regulation'] == 2"/>
+                                        否
+                                    <elseif condition="$vi['conform_regulation'] == 3"/>
+                                        分歧
+                                    <else />
+                                        未知
+                                    </if>
+                                </span>
+                            </td>
+                            <td><span>{$vi.conform_regulation_remark}</span></td>
+                        </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+        {$main.info.page}
+    </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+        // 时间选择
+        $(".datepicker").datetimepicker({
+            startView:2,
+            minView:'decade',
+            format:"yyyy-mm-dd",
+            autoclose:true,
+            pickerPosition: "bottom-left"
+        });
+
+        var op_uid = '{$Think.get.op_uid}';
+        if (op_uid != '') {
+            $('select[name=op_uid]').val(op_uid);
+        };
+        var conform_regulation = '{$Think.get.conform_regulation}';
+        if (conform_regulation != '') {
+            $('select[name=conform_regulation]').val(conform_regulation);
+        };
+
+        $('#search').click(function(event) {
+            window.location.href = "/qcstat/zjglfdhgxtj/?op_uid=" + $('select[name=op_uid]').val() + "&conform_regulation=" + $('select[name=conform_regulation]').val() + '&time_start=' + $('input[name=time_start]').val() + '&time_end=' + $('input[name=time_end]').val();
+        });
+    })
+</script>
+</block>

@@ -1,0 +1,229 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}"/>
+
+
+</block>
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <div class="col-xs-2">
+                选择站点：
+                <select name="cs" class="select2">
+                    <option value="">全部城市</option>
+                    <volist name="citys" id="vo">
+                        <option value="{$vo.cid}">{$vo.char_name}</option>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-xs-2">
+                标题：
+                <input name="title" class="form-control" value="{$Think.get.title}" placeholder="标题" />
+            </div>
+           <!-- <div class="col-xs-2">
+                装修案例ID：
+                <input name="cases_id" class="form-control" value="{$Think.get.cases_id}" placeholder="装修案例ID" />
+            </div>
+            <div class="col-xs-1">
+                设计师ID：
+                <input name="designer_id" class="form-control" value="{$Think.get.designer_id}" placeholder="设计师ID" />
+            </div>
+            <div class="col-xs-2">
+                装修公司ID：
+                <input name="company_id" class="form-control" value="{$Think.get.company_id}" placeholder="装修公司ID" />
+            </div>-->
+            <div class="col-xs-2">
+                开始发布时间：
+                <input name="cases_time_start" class="form-control datetimepicker" value="{$Think.get.cases_time_start}" placeholder="开始发布时间" />
+            </div>
+            <div class="col-xs-2">
+                结束发布时间：
+                <input name="cases_time_end" class="form-control datetimepicker" value="{$Think.get.cases_time_end}" placeholder="结束发布时间" />
+            </div>
+            <div class="col-xs-1">
+                选取状态：
+                <select name="is_choice" id="is_choice" class="form-control">
+                    <option value="0">请选择</option>
+                    <option value="1">已选取</option>
+                    <option value="2">未选取</option>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                <br/>
+                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                    <i class="fa fa-search"></i>查询
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th>添加时间</th>
+                    <th>城市</th>
+                    <th>案例ID</th>
+                    <th>标题</th>
+                    <th>装修公司(ID)</th>
+                    <th>设计师(ID)</th>
+                    <th>会员类型</th>
+                    <th>状态</th>
+                    <th width="140px">操作</th>
+                </tr>
+                <volist name="info.list" id="vo">
+                    <tr>
+                        <td>{$vo.time|date="Y-m-d H:i",###}</td>
+                        <td>{$vo.cname}</td>
+                        <td class="img_show_tb" data-path="{$vo.img_path}" data-host="{$vo.img_host}" data-img="{$vo.img}">
+                            <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.id}.shtml" target="_blank">
+                                {$vo.id}
+                            </a>
+                        </td>
+                        <td>{$vo.mianji}平米{$vo.huxing}{$vo.fengge}家装装修图片设计</td>
+                        <td>
+                            <empty name="vo.company_id">
+                                -
+                            <else />
+                                {$vo.company_name}({$vo.company_id})
+                            </empty>
+                        </td>
+                        <td>
+                            <empty name="vo.designer_id">
+                                -
+                            <else />
+                                {$vo.design_name}({$vo.designer_id})
+                            </empty>
+                        </td>
+                        <switch name="vo.on">
+                            <case value="-4">
+                                <td class="fd-bg-error">会员暂停</td>
+                            </case>
+                            <case value="-3">
+                                <td class="fd-bg-error">预约会员</td>
+                            </case>
+                            <case value="-1">
+                                <td class="fd-bg-error">过期会员</td>
+                            </case>
+                            <case value="0">
+                                <td class="fd-bg-error">注册用户</td>
+                            </case>
+                            <case value="1">
+                                <td class="fd-bg-error">认证状态</td>
+                            </case>
+                            <case value="2">
+                                <td class="fd-bg-success">正常会员</td>
+                            </case>
+                            <default />
+                                <td>未知状态</td>
+                        </switch>
+                        <if condition="$vo['cases_on'] == 1">
+                            <td class="fd-bg-success">已审核</td>
+                        <elseif condition = "$vo['cases_on'] == 2" />
+                            <td>未审核</td>
+                        <elseif condition = "$vo['cases_on'] == 3" />
+                            <td class="fd-bg-error">不通过</td>
+                        <else />
+                            <td>未知</td>
+                        </if>
+                        <td><span class="fa {$vo.toggleIcon} choice" data-id="{$vo.id}"></span></td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+    <div class="box-footer no-border fenye">
+        <div class="col-xs-12">{$info.page}</div>
+    </div>
+
+</div>
+<div id="img_show" style="position: fixed; width:800px; height: 600px; left:40%; top:10%;display: none"><img style="border: 2px solid black" width="500" src=""></div>
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    //将老cookie保留到新的cookie上,留着点击取消时还能复用
+    var oldids = '{$oldids}';
+    oldids = JSON.stringify(oldids.replace(/\"|\[|\]/g, '').split(','));
+    Cookies.set('oldcaseList', oldids);
+
+    $('#is_choice').val('{$Think.get.is_choice|default=0}');
+
+    $(".select2").select2();
+    $(".select2").select2("val", '{$Think.get.cs}');
+    $('.datetimepicker').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn:true,
+        minView:0,
+        autoclose: true
+    });
+
+
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('caseList');
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 8){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,8);
+            }
+            Cookies.set('caseList',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('caseList',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+        console.log(Cookies.get('caseList'));
+    });
+
+    //搜索
+    $('#search').click(function(){
+        var cs               = $('select[name=cs]').val();
+        var title            = $('input[name=title]').val();
+        /*var cases_id         = $('input[name=cases_id]').val();
+        var designer_id      = $('input[name=designer_id]').val();
+        var company_id       = $('input[name=company_id]').val();*/
+        var cases_time_start = $('input[name=cases_time_start]').val();
+        var cases_time_end   = $('input[name=cases_time_end]').val();
+        var is_choice        = $('#is_choice').val();
+
+//        window.location.href = '/meituzt/casebox?cs='+cs+'&cases_id='+cases_id+'&designer_id='+designer_id+'&company_id='+company_id+'&cases_time_start='+cases_time_start+'&cases_time_end='+cases_time_end+'&is_choice='+is_choice;
+        window.location.href = '/meituzt/casebox?cs='+cs+'&title=' + title + '&cases_time_start='+cases_time_start+'&cases_time_end='+cases_time_end+'&is_choice='+is_choice;
+    })
+
+    //预览图
+    $('.img_show_tb').mouseover(function (event) {
+        var host = $(this).attr('data-host');
+        var img_path = $(this).attr('data-path');
+        var img = $(this).attr('data-img');
+        if (host == 'qiniu') {
+            img = 'http://{:C("QINIU_DOMAIN")}/' + img_path;
+        } else {
+            img = 'http://{:C("STATIC_HOST1")}' + img_path + 'm_' + img;
+        }
+        $("#img_show").show();
+        $("#img_show img").attr('src', img);
+    });
+
+    $('.img_show_tb').mouseout(function (event) {
+        $("#img_show").hide();
+    });
+})
+</script>
+</block>

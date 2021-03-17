@@ -1,0 +1,228 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>转移公司城市-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>转移公司城市</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">转移操作</h3>
+                    </div>
+                    <form class="form-horizontal">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label">
+                                    公司ID：
+                                </label>
+                                <div class="col-sm-3">
+                                    <input name="id" type="text" class="form-control" placeholder="公司ID号">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label">
+                                    公司名称：
+                                </label>
+                                <div class="col-sm-3">
+                                    <input name="name" type="text" disabled="disabled" class="form-control" placeholder="公司名称">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label">
+                                    原城市：
+                                </label>
+                                <div class="col-sm-2">
+                                    <input name="origin_city" type="text" disabled="disabled" class="form-control" placeholder="原城市">
+                                </div>
+                                <div class="col-sm-2">
+                                    <input name="origin_area" type="text" disabled="disabled" class="form-control" placeholder="原区域">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label">
+                                    转移到：
+                                </label>
+                                <div class="cityAndArea">
+                                    <div class="col-sm-2">
+                                        <select name="target_city" class="form-control target_city"></select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <select name="target_area" class="form-control target_area"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label">
+                                    备注：
+                                </label>
+                                <div class="col-sm-6">
+                                    <textarea name="remark" class="form-control"></textarea>
+                                </div>
+                            </div>
+                            <button type="button" class="col-sm-offset-1 btn btn-info submit-save">确定转移</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">修改日志</h3>
+                    </div>
+                    <div class="box-body">
+                        <form>
+                            <table id="dataTable" class="table table-bordered table-hover dataTable" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>会员ID</th>
+                                        <th>简称</th>
+                                        <th>原城市</th>
+                                        <th>转移城市</th>
+                                        <th>备注</th>
+                                        <th>操作人</th>
+                                        <th>操作时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <volist name="vars.log" id="vi">
+                                        <tr>
+                                            <td>{$vi.operate_member_id}</td>
+                                            <td>{$vi.jc}</td>
+                                            <td>{$vi.origin_city}{$vi.origin_area}</td>
+                                            <td>{$vi.target_city}{$vi.target_area}</td>
+                                            <td>{$vi.remark}</td>
+                                            <td>{$vi.operate_adminuser}</td>
+                                            <td>{$vi.add_time}</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>转移公司城市  例如原本注册苏州的公司,转移到吴江. 转移的东西包括公司网店(案例,文章,评价,设计师, 轮显广告,通栏广告,logo广告，新版首页广告，新版首页设计师)</p>
+                        <p>只需要输入公司ID 公司名称 原城市信息 都会自动呈现  转移城市 与备注 为必选项</p>
+                        <p>修改日志显示操作账号的修改记录，记录维度是：原城市 转移城市 备注 操作人 和 操作时间</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            //城市区域初始化
+            $('.cityAndArea').cxSelect({
+                selects: ['target_city', 'target_area'],
+                jsonValue: 'code',
+                jsonName: 'text',          // 数据标题字段名称
+                jsonSub: 'children',            // 子集数据字段名称
+                data: {$vars.cityAndArea}
+            });
+            //日志列表
+            $('#dataTable').DataTable({
+                language:{
+                    zeroRecords: "没有内容",
+                    info:""
+                },
+                order: []
+            });
+
+            //获取会员信息
+            var company = '';
+            $('input[name=id]').change(function(event) {
+                $('input[name=name]').val('');
+                $('input[name=origin_city]').val('');
+                $('input[name=origin_area]').val('');
+                company = '';
+                var id = $('input[name=id]').val();
+                if ('' == id) {
+                    return false;
+                };
+                clearTimeout(serachtimer);
+                var serachtimer = setTimeout(function(){
+                    $.ajax({
+                        url: '/vip/getmemberbyid/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){\
+                            company = data.data;
+                            $('input[name=name]').val(company.jc);
+                            $('input[name=origin_city]').val(company.cname);
+                            $('input[name=origin_area]').val(company.qz_area);
+                        }else{
+                            alert(data.info);
+                        }
+                    })
+                    .fail(function() {
+                        alert('网络错误，请稍后再试');
+                    });
+                },500)
+            });
+
+            //确认操作
+            $('.submit-save').click(function(event) {
+                if ('' == company) {
+                    alert('请正确填写需要复制的装修公司！');
+                    return false;
+                };
+                var target_city_id = $(".target_city").val();
+                var target_area_id = $(".target_area").val();
+                if ('0' == target_city_id || '0' == target_area_id || 'undefined' == typeof(target_city_id) || 'undefined' == typeof(target_area_id) || null == target_city_id || null == target_area_id || '' == target_city_id || '' == target_area_id) {
+                    alert('请选择目标城市和区域！');
+                    return false;
+                };
+
+                if ('' == $('textarea[name=remark]').val()) {
+                    alert('请填写备注！');
+                    return false;
+                };
+                var str = '确定转移\n公司ID为：' + company.id + '\n公司名称为：' + company.jc + '\n从：' + company.cname + company.qz_area + '\n到：' + $(".target_city option:selected").text() + $(".target_area option:selected").text();
+                if (confirm(str)) {
+                    $.ajax({
+                        url: '/vip/movemembercity/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:company.id,
+                            target_city_id:target_city_id,
+                            target_area_id:target_area_id,
+                            remark:$('textarea[name=remark]').val()
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var info = "转移公司城市成功！\n" + data.info;
+                            alert(info);
+                            window.location.href = window.location.href;
+                        }else{
+                            alert(data.info);
+                        }
+                    })
+                    .fail(function() {
+                        alert('网络错误，请稍后再试');
+                    });
+                };
+            });
+        })
+    </script>
+</block>

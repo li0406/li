@@ -1,0 +1,307 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/auth/css/rolenew.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">角色管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>角色编辑</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <volist name="topDept" id="vo">
+                            {~$link = ($vo['id'] == 17 ? "rolenew" : "role")}
+                            <if condition="($_GET['tab'] EQ $vo['id']) OR (!isset($_GET['tab']) AND $key EQ 0)">
+                            <li role="presentation" class="active"><a href="/auth/{$link}?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            <else/>
+                            <li role="presentation"><a href="/auth/{$link}?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active">
+                                <div class="addrole"><i class="fa fa-plus-circle" ></i>添加顶级角色</div>
+                                <div class="col-sm-8">
+                                    <table class="table table-striped table-bordered table-hover">
+                                        <tr>
+                                            <th style="width:30%;">角色名称</th>
+                                            <th>所属部门</th>
+                                            <th>添加时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        <volist name="list.roles" id="item">
+                                        <tr class="leveltop-{$item.grade} {$item.class_tag}" data-id="{$item.id}">
+                                            <td>
+                                                <gt name="item.childnum" value="0">
+                                                    <i class="fa fa-minus-square-o sub icon_switch"></i>
+                                                </gt>
+                                                {$item.role_name}
+                                            </td>
+                                            <td>{$item.dept_name}</td>
+                                            <td>{$item.created_at}</td>
+                                            <td data-pnames="{$item.pnames}" data-name="{$item.role_name}" data-deptid="{$item.department_id}">
+                                                <lt name="item.grade" value="4">
+                                                    <a href="javascript:void(0)" class="add" style="color:orange;">添加子级</a>
+                                                    &nbsp;&nbsp;
+                                                </lt>
+                                                <a href="javascript:void(0)" class="green edit">编辑</a>
+                                                &nbsp;&nbsp;
+                                                <a href="javascript:void(0)" class="red del">删除</a>
+                                            </td>
+                                        </tr>
+                                        </volist>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加顶级角色</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="myForm" class="form-horizontal">
+                            <div class="parent_box"></div>
+                            <!-- <div class="form-group dialog-level dialog-level1">
+                                <label for="inputEmail3" class="col-sm-3 control-label">一级角色名称：</label>
+                                <div class="col-sm-9 dialog-content">我么回复哈发哈复活卡</div>
+                            </div>
+                            <div class="form-group dialog-level dialog-level2">
+                                <label for="inputEmail3" class="col-sm-3 control-label">二级角色名称：</label>
+                                <div class="col-sm-9 dialog-content">我么回复哈发哈复活卡</div>
+                            </div>
+                            <div class="form-group dialog-level dialog-level2 dialog-level3">
+                                <label for="inputEmail3" class="col-sm-3 control-label">三级角色名称：</label>
+                                <div class="col-sm-9 dialog-content">我么回复哈发哈复活卡</div>
+                            </div> -->
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-3 control-label label-content">顶级角色名称：</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="role_name" id="input_name" placeholder="角色名称">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-3 control-label">所属部门：</label>
+                                <div class="col-sm-9">
+                                    <select id="select_dept" name="dept_id" style="width: 100%;">
+                                        <option value="">请选择</option>
+                                        <volist name="list.departments" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="id" id="input_id" />
+                                <input type="hidden" name="parentid" id="input_parentid" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="btnSave" type="button" class="btn btn-primary pull-left">保存</button>
+                        <input type="hidden" name="id" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#select_dept").select2();
+
+            function setParentElem(pnames, name){
+                var pnameArr = pnames ? pnames.split(",") : [];
+                if (name) pnameArr.push(name);
+
+                var labels = ["一级", "二级", "三级", "四级"];
+                var html = "";
+                for (var i in pnameArr) {
+                    html += '<div class="form-group dialog-level dialog-level1">'+
+                                '<label for="inputEmail3" class="col-sm-3 control-label">'+labels[i]+'角色名称：</label>'+
+                                '<div class="col-sm-9 dialog-content">'+pnameArr[i]+'</div>'+
+                            '</div>';
+                }
+
+                $(".parent_box").html(html);
+                var index = pnameArr.length;
+                $(".label-content").html(labels[index] + "角色名称：");
+
+                if (name) {
+                    $("#myModalLabel").html("添加" + labels[index] + "角色");
+                } else {
+                    $("#myModalLabel").html("编辑" + labels[index] + "角色");
+                }
+            }
+
+            // 添加顶级角色
+            $(".addrole").click(function () {
+                $("#input_id").val("");
+                $("#input_name").val("");
+                $("#input_parentid").val("0");
+                $("#select_dept").select2("val","");
+
+                $(".dialog-level").remove();
+                $(".label-content").html("顶级角色名称：");
+                $("#myModal").modal();
+            });
+
+            // 编辑角色
+            $("body").on("click",".green",function () {
+                var id = $(this).parents("tr").data("id");
+                var name = $(this).parents("td").data("name");
+                var pnames = $(this).parents("td").data("pnames");
+                var dept_id = $(this).parents("td").data("deptid");
+
+                $("#input_id").val(id);
+                $("#input_name").val(name);
+                $("#input_parentid").val("");
+                $("#select_dept").select2("val", dept_id);
+
+                setParentElem(pnames);
+
+                // var name = $(this).attr("data-name");
+                // var id =  $(this).attr("data-id");
+                // var className = $(this).parents("tr")[0].className;
+                // switch (className){
+                //     case "one-leveltop" :{
+                //         $(".dialog-level").hide();
+                //         $(".label-content").html("顶级角色名称：");
+                //         $("#myModal #myModalLabel").html("编辑顶级角色");
+                //     };break;
+                //     case "two-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".dialog-level2").hide();
+                //         $(".label-content").html("二级角色名称：");
+                //         $("#myModal #myModalLabel").html("编辑一级角色");
+                //     };break;
+                //     case "three-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".dialog-level2").show();
+                //         $(".dialog-level3").hide();
+                //         $(".label-content").html("三级角色名称：");
+                //         $("#myModal #myModalLabel").html("编辑二级角色");
+                //     };break;
+                //     case "four-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".label-content").html("四级角色名称：");
+                //         $("#myModal #myModalLabel").html("编辑三级角色");
+                //     };break;
+                // }
+                // $("input[name=id]").val(id);
+                // $(".modal-body input[name=name]").val(name);
+                $("#myModal").modal();
+            });
+    
+            // 添加子级
+            $("body").on("click",".add",function () {
+                var id = $(this).parents("tr").data("id");
+                var name = $(this).parents("td").data("name");
+                var pnames = $(this).parents("td").data("pnames");
+
+                $("#input_id").val("");
+                $("#input_name").val("");
+                $("#input_parentid").val(id);
+                $("#select_dept").select2("val", "");
+
+                setParentElem(pnames, name);
+
+                // var className = $(this).parents("tr")[0].className;
+                // switch (className){
+                //     case "one-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".dialog-level2").hide();
+                //         $(".label-content").html("二级角色名称：");
+                //         $("#myModal #myModalLabel").html("添加二级角色");
+                //     };break;
+                //     case "two-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".dialog-level2").show();
+                //         $(".dialog-level3").hide();
+                //         $(".label-content").html("三级角色名称：");
+                //         $("#myModal #myModalLabel").html("添加三级角色");
+                //     };break;
+                //     case "three-leveltop" :{
+                //         $(".dialog-level").show();
+                //         $(".dialog-level2").show();
+                //         $(".dialog-level3").show();
+                //         $(".label-content").html("四级角色名称：");
+                //         $("#myModal #myModalLabel").html("添加四级角色");
+                //     };break;
+                // }
+                $("#myModal").modal();
+            });
+
+            $("#btnSave").click(function(event) {
+                $.ajax({
+                    url: '/auth/rolenew/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: $("#myForm").serializeArray()
+                })
+                .done(function(data) {
+                    alert(data.info);
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }
+                });
+            });
+
+            // 角色删除
+            $(".del").click(function(event) {
+                var role_id = $(this).parents("tr").data("id");
+
+                if (confirm("确定删除该角色吗？")) {
+                    $.ajax({
+                        url: '/auth/removerole/',
+                        type: 'post',
+                        dataType: 'JSON',
+                        data: {id: role_id}
+                    })
+                    .done(function(data) {
+                        alert(data.info);
+                        if (data.status == 1) {
+                            window.location.href = window.location.href;
+                        }
+                    });
+                }
+            });
+            
+            // 展开关闭切换
+            $(".icon_switch").on("click", function(){
+                var nodeId = $(this).parents("tr").data("id");
+
+                childrenElem = $(".children_" + nodeId);
+                if ($(this).hasClass("fa-minus-square-o")) {
+                    $(this).addClass("fa-plus-square-o").removeClass("fa-minus-square-o");
+                    childrenElem.find(".icon_switch").addClass("fa-plus-square-o").removeClass("fa-minus-square-o");
+                    childrenElem.hide();
+                } else {
+                    $(this).addClass("fa-minus-square-o").removeClass("fa-plus-square-o");
+                    childrenElem.find(".icon_switch").addClass("fa-minus-square-o").removeClass("fa-plus-square-o");
+                    childrenElem.show();
+                }
+            });
+        });
+    </script>
+</block>

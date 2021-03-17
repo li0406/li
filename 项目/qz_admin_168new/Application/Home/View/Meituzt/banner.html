@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>齐装网美图榜管理后台 - 新专题banner管理</title>
+</block>
+<block name="style">
+	<style type="text/css">
+		.enable-state i{font-size: 25px !important;}
+		.fa-pencil{color: #fff;}
+		.modal-body{overflow: hidden;}
+		#form > table > tbody > tr td{
+			display:table-cell;
+			vertical-align:middle;
+		}
+		.tableList{
+			table-layout: fixed;
+		}
+		.tableList tr td.img_url{
+			word-wrap: break-word;
+		}
+	</style>
+</block>
+<block name="content">
+	<section class="content-header">
+		<h1>Banner管理</h1>
+		<ol class="breadcrumb">
+			<li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+		</ol>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-body">
+						<form id="searchForm" action="" method="GET">
+							<div class="row">
+								<div class="col-xs-2">
+									banner名称：
+									<div class="">
+										<input name="title" class="form-control" value="" placeholder="" value="{$title|default=''}">
+									</div>
+								</div>
+								<div class="col-xs-2">
+									所属模块：
+									<div class="">
+										<select class="form-control" name="type">
+											<option value="0">请选择</option>
+											<option value="1" {$type==1?'selected':''}>装修攻略</option>
+											<option value="2" {$type==2?'selected':''}>美图专题</option>
+											<option value="3" {$type==3?'selected':''}>全屋案例</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-xs-2">
+									状态：
+									<div class="">
+										<select class="form-control" name="status" >
+											<option value="0">请选择</option>
+											<option value="1" {$status==1?'selected':''}>已启用</option>
+											<option value="2" {$status==2?'selected':''}>未启用</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-xs-1">
+									<br>
+									<button class="btn btn-primary"><i class="fa fa-search"></i> 查询</button>
+								</div>
+								<div class="col-xs-1">
+									</br>
+									<button type="button" class="btn btn-primary" id="reset" ><i class="fa fa-repeat"></i> 重置</button>
+								</div>
+								<div class="col-xs-1">
+									<br>
+									<a class="btn btn-info" href="/meituzt/banneroperate">新增Banner</a>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="box-body">
+						<form id="form">
+							<table class="table table-hover table-bordered text-center tableList">
+								<thead>
+								<tr>
+									<th class="col-xs-1">排序</th>
+									<th class="col-xs-1">名称</th>
+									<th class="col-xs-1">所属模块</th>
+									<th class="col-xs-2">链接地址</th>
+									<th class="col-xs-2">m端地址</th>
+									<th class="col-xs-2">小程序地址</th>
+									<th class="col-xs-2 ">添加时间</th>
+									<th class="col-xs-1">启用状态</th>
+									<th class="col-xs-1">操作</th>
+								</tr>
+								</thead>
+								<tbody>
+								<volist name="list" id="v">
+									<tr>
+										<td>{$v.order_id}</td>
+										<td>{$v.title}</td>
+										<td><switch name="v['type']" >
+											<case value="1">装修攻略</case>
+											<case value="2">美图专题</case>
+											<case value="3">全屋案例</case>
+											<default />装修攻略
+										</switch></td>
+										<td class="img_url">{$v.url}</td>
+										<td class="img_url">{$v.m_url}</td>
+										<td class="img_url">{$v.bd_url}</td>
+										<td>{$v.time|date="Y-m-d H:m:s",###}</td>
+										<td class="enable-state">
+											<if condition="$v.status EQ '1' ">
+												<i class="fa fa-toggle-on text-primary"></i>
+												<else />
+												<i class="fa fa-toggle-off text-primary"></i>
+											</if>
+										</td>
+										<td>
+											<div style="width:70px">
+												<a href="/meituzt/banneroperate?id={$v.id}" class="p-edit"><i class="fa fa-pencil" style="color:inherit"></i></a>
+												&nbsp;&nbsp;
+												<a href="javascript:void(0)"><i class="fa fa-trash del" data-id="{$v.id}"></i></a>
+											</div>
+
+										</td>
+									</tr>
+								</volist>
+								</tbody>
+							</table>
+						</form>
+					</div>
+					<div class="">
+						<div class="col-xs-12">
+							<div class="page text-center">{$page}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('select[name=status]').val('{$Think.get.status|default=0}');
+			$('input[name=title]').val('{$Think.get.title}');
+
+			//删除按钮
+			$('.del').click(function() {
+				var id = $(this).attr('data-id');
+				layer.confirm("确认删除吗？", {
+					title: "删除美图Banner",
+					btn: ['确定', '取消']
+				}, function () {
+					$.ajax({
+						url: '/meituzt/bannerdelete',
+						type: 'POST',
+						dataType: '',
+						data: {id:id},
+						success:function (data) {
+							layer.msg(data.info,{time: 800},function () {
+								window.location.href = "/meituzt/banner?{$query}";
+							});
+						},
+						error:function (xhr) {
+							layer.msg('服务器去火星了',{time: 800},function () {
+								window.location.href = "/meituzt/banner?{$query}";
+							});
+						}
+					})
+				});
+			});
+			$('#reset').on("click",function(){
+				$('input[name="title"]').val('');
+				$('select[name="type"]').val('0');
+				$('select[name="status"]').val('0');
+			})
+		})
+	</script>
+</block>

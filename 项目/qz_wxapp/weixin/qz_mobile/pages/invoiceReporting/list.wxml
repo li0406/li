@@ -1,0 +1,109 @@
+<!--pages/invoiceReporting/list.wxml-->
+<view class='header'>
+	<view class='search'>
+		<view class='icon'>
+			<image src='../../img/search.png'></image>
+		</view>
+		<input placeholder='发票抬头' bindconfirm="searchWord" confirm-type="search"></input>
+	</view>
+	<view class='select' bindtap='toAddReport'>
+		<image src='../../img/add-big.png'></image>
+		<view>添加</view>
+	</view>
+</view>
+<view class='tab-back'>
+	<view class='tab'>
+		<view class="flex1">
+			<picker class="flex_text" value="{{style[style_index].id}}" range="{{style}}" range-key="{{'name'}}" bindchange="bindPickerChange_style">
+				<view wx:if="{{style_index == 0}}">开票类型</view>
+				<view wx:else="{{style_index != 0}}">{{style[style_index].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+		<view class="flex1">
+			<picker class="flex_text" value="{{status[status_index].id}}" range="{{status}}" range-key="{{'name'}}" bindchange="bindPickerChange_status">
+				<view wx:if="{{status_index == 0}}">状态</view>
+				<view wx:else="{{status_index != 0}}">{{status[status_index].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+	</view>
+</view>
+<view class='list'>
+	<view class='ul'>
+		<view class='li clearfix' wx:for='{{list}}' wx:key="{{ite.id}}">
+			<view class='info clearfix' catchtap='toDetail' data-id='{{item.id}}' data-cooperation_type='{{item.cooperation_type}}'>
+				<view class='w100 invoice-title'>
+					<text class='t1'>发票抬头：</text>
+					<view class='t2'>{{item.invoice_title}}</view>
+					<image src="../../img/no-pass.png" catchtap='popRemark' data-content='{{item.warning_info}}' data-title='预警信息' wx:if="{{item.warning_info}}" class="passImg"></image>
+				</view>
+				<view class="clearfix">
+					<view class='w50 name'>
+						<text class='t1'>开票类型：</text>
+						<text class='t2'>{{item.type_name}}</text>
+					</view>
+					<view class='w50'>
+						<text class='t1'>是否到账：</text>
+						<text class='t2'>{{item.is_in_account_name}}</text>
+					</view>
+				</view>
+				<view class='w50'>
+					<text class='t1'>开票金额：</text>
+					<text class='t2'>{{item.invoice_price}}</text>
+				</view>
+				<view class='w50'>
+					<text class='t1'>开票状态：</text>
+					<text class='t2' style="color: {{item.status==5?'#FF5353':(item.status==4?'#378000':(item.status==3?'#5DBB16':(item.status==2?'#FFB018':'')))}}">{{item.status_name}}</text>
+					<image src="../../img/no-pass.png" catchtap='popRemark' data-content='不通过原因：{{item.check_reason}}' data-title='审核不通过' wx:if="{{item.status === 5 && item.check_reason}}" class="passImg"></image>
+				</view>
+				<view class='w100'>
+					<text class='t1'>开票公司：</text>
+					<text class='t2'>{{item.billing_company_name}}</text>
+				</view>
+				<view class='w100'>
+					<text class='t1'>保存时间：</text>
+					<text class='t2'>{{item.created_date}}</text>
+				</view>
+				<view class='w100'>
+					<text class='t1'>报备人：</text>
+					<text class='t2'>{{item.invoice_report_username}}</text>
+				</view>
+			</view>
+			<view class='log-report clearfix'>
+				<view class='edit' data-id='{{item.id}}' catchtap='toEdit' wx:if="{{item.status == '1'|| item.status == '5'}}">
+					<image src='../../img/bianji.png'></image>
+					<text>编辑</text>
+				</view>
+				<view class='del' data-id='{{item.id}}' catchtap='toSubmit' wx:if="{{item.status == '1' || item.status == '5'}}">
+					<image src='../../img/tijiao.png'></image>
+					<text>提交</text>
+				</view>
+				<view class='chehui' data-id='{{item.id}}' catchtap='toback' wx:if="{{item.status == '2'}}">
+					<image src='../../img/chehui.png'></image>
+					<text>撤回</text>
+				</view>
+			</view>
+		</view>
+	</view>
+	<view class='page' wx:if='{{page}}'>
+		<view class="pre {{pageCurrent==1?'disabled':''}}" bindtap='prevBtn'>上一页</view>
+		<view class='total'>
+			<picker bindchange="toPage" value="" range="{{pageNumber}}">
+				<view class="picker">
+					<view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+				</view>
+			</picker>
+		</view>
+		<view class="next {{pageCurrent == pageTotalNumber?'disabled':''}}" bindtap='nextBtn'>下一页</view>
+	</view>
+	<view class='no-result' wx:if='{{noResult}}'>
+		<image src='../../img/no_result.png'></image>
+		<view>暂无搜索结果</view>
+	</view>
+	<view class='no-result' wx:if='{{noInternet}}'>
+		<image src='../../img/no_internet.png'></image>
+		<view>网络开了小差~请稍等</view>
+		<button bindtap='toMemberReport'>重新加载</button>
+	</view>
+</view>

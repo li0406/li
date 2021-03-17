@@ -1,0 +1,167 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$info.now.id}.html" />
+    <link rel="stylesheet" href="{$static_host}/assets/mobile/meitu/css/meitu.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{$static_host}/assets/mobile/common/css/img-zoom.css?v={:C('STATIC_VERSION')}" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.now.child.0.img_path}-s5.jpg" />
+</block>
+<block name="content">
+    <article>
+        <!--轮播-->
+        <div id="xgt-info">
+            <div class="pageState">
+                <p>{$info.now.title}</p>
+                <span></span>
+            </div>
+            <!-- <div class="btn">
+                <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/sheji/">
+                    <img src="/assets/mobile/common/img/icon11.png" width="32" height="32" alt="免费设计" />免费设计
+                </a>
+                <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/baojia/">
+                    <img src="/assets/mobile/common/img/icon22.png" width="32" height="32" alt="免费报价" />免费报价
+                </a>
+            </div> -->
+            <div id="imgswrap" class="bd mui-content">
+                <ul class="mui-content-padded">
+                    <volist name="info.now.child" id="v">
+                        <li>
+                            <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.img_path}-s5.jpg" alt="{$v.title}" data-preview-src="" data-preview-group="1"/>
+                        </li>
+                    </volist>
+                </ul>
+            </div>
+        </div>
+    </article>
+    <include file="Common/footfadantc"/>
+</block>
+<block name="footer"></block>
+<block name="script">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/jquery.cookie-min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/mobile/common/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.previewimage.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        mui.previewImage();
+        var ahref=document.getElementsByTagName("a");
+        for(var i=0;i<ahref.length;i++){
+            ahref[i].addEventListener("tap",function(){
+                mui.openWindow({
+                    url: this.href
+                })
+            })
+        }
+        //参数绑定
+        function setMeituSelectParams(){
+            if ($.cookie) {
+                $.cookie('meitu_terminal_params_mobile', "{$params}", { expires: 7, path: '/' });
+            };
+        }
+
+        window.onload = function(){
+            //初始化
+            var init = false;
+            var prev = false;
+            var next = false;
+            TouchSlide({
+                slideCell:"#xgt-info",
+                mainCell:".bd ul",
+                effect:"left",
+                autoPlay:false,//自动播放
+                pageStateCell:".pageState span", //自动分页
+                endFun:function(i, c){
+                    i = i + 1;
+                    if ((i == 1) && (c > 1)) {
+                        next = false;
+                    };
+                    if(init == false){
+                        init = true;
+                        prev = true;
+                        if(c == 1){
+                            next = true;
+                        }
+                    }else{
+                        if(i == 1){
+                            prev = true
+                        }else{
+                            prev = false;
+                            next = false;
+                            if(i == c){
+                                next = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            //监听滑动事件，最后一页跳转到下一个图集，第一页跳转到上一个图集
+            var pressX = 0;
+            var obj = document.getElementById("imgswrap");
+            var done = false; //避免一直跳转
+            obj.addEventListener('touchmove', function(event) {
+                // 如果这个元素的位置内只有一个手指的话
+                if (event.targetTouches.length == 1) {
+                    var touch = event.targetTouches[0];
+                    var spanX = touch.pageX - pressX;
+                    if(spanX > 0){
+                        if(prev && done == false){
+                            var id = "{$info.prv.id}";
+                            if(id){
+                                setMeituSelectParams();
+                                window.location.href="/meitu/p"+id+".html";
+                                done = true;
+                            }else{
+                                alert('已经是第一个图集了~~')
+                            }
+                        }
+                    }else if(spanX < 0){
+                        if(next && done == false){
+                            var id = "{$info.next.id}";
+                            if(id){
+                                setMeituSelectParams();
+                                window.location.href="/meitu/p"+id+".html";
+                                done = true;
+                            }else{
+                                alert('已经是最后一个图集了~~')
+                            }
+                        }
+                    }
+                }
+            }, false);
+            obj.addEventListener('touchstart', function(event) {
+                // 如果这个元素的位置内只有一个手指的话
+                if (event.targetTouches.length == 1) {
+                    var touch = event.targetTouches[0];
+                    // 把元素放在手指所在的位置
+                    pressX = touch.pageX;
+                }
+            }, false);
+
+            var prevUrl=document.referrer;
+            var romainUrl=new RegExp("{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}");
+            $(".m-header-his").click(function(){
+
+                if($(this).length>0){
+                    if(!romainUrl.test(prevUrl)){
+                        window.location.href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}";
+                    }else{
+                        window.history.back();
+                    }
+                }
+            });
+
+
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": "{$baidu['optime']}"
+        }
+    </script>
+
+</block>

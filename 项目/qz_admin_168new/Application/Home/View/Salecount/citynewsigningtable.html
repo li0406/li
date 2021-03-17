@@ -1,0 +1,537 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>统计全瞰 - 新签合作时长</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+	<div class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="overflow-x">
+						<div class="overflow-box" style="width: 1320px;">
+							<div class="box-header">
+								<h3><i class="xs-icon quankanxqhzsc-icon"></i> 全瞰-新签合作时长</h3>
+								<form class="form-horizontal">
+									<div class="from-list">
+										<div class="from-item">
+											<span class="width-auto">部门：</span>
+											<select id="department" name="department" type="text">
+												<switch name="department">
+													<case value="0">
+														<option value="0" <if condition="$keyword['department'] eq 0">selected="selected"</if>>营销中心</option>
+														<option value="1" <if condition="$keyword['department'] eq 1">selected="selected"</if>>商务</option>
+														<option value="2" <if condition="$keyword['department'] eq 2">selected="selected"</if>>外销</option>
+													</case>
+													<case value="1">
+														<option value="1" <if condition="$keyword['department'] eq 1">selected="selected"</if>>商务</option>
+													</case>
+													<case value="2">
+														<option value="2" <if condition="$keyword['department'] eq 2">selected="selected"</if>>外销</option>
+													</case>
+												</switch>
+											</select>
+										</div>
+										<div class="from-item" >
+											<span class="timer-tit">财年：</span>
+											<input type="text" name="date" class="form-control datepicker timer-input" placeholder="选择年份" value="{$keyword.time}">
+											<i class="fa fa-calendar timer-icon"></i>
+										</div>
+										<button class="search-btn xs-btn">查询</button>
+									</div>
+								</form>
+							</div>
+							<div class="box-body">
+								<div class="todo-item">
+									<div class="pull-right position-relative">
+										<i class="xs-icon zhushi-icon"></i>
+										<div class="zhushi-info">
+											<p>1、本页数据以部门及月份为唯一标识，其他数据均附属信息。本页数据来源为“销售系统设置”中内数据和后台提取数据</p>
+											<p>2、搜索栏：</p>
+											<p>2.1搜索栏中的“部门”选项包含商务，外销，营销中心三个选项，军长及以下员工登录，对应的员工显示对应的“部门”</p>
+											<p>2.2搜索中的“财年”显示2016,2017,2018,2019，2020，每一财年12个月（固定为当年的2月到次年1月）</p>
+											<p>2.3当员工登录此页面，“部门”显示其所在部门，“财年”默认本财年。</p>
+											<p>5、表格</p>
+											<p>3.1显示财年12行，每行代表1个月，2017财年为2017-02开始到2018-01，显示已过月份的数值，未来月数值为空，已过月份为空则说明数据源未导入。</p>
+											<p>3.2所有“XX数”全部为整数。</p>
+											<p>3.3所有“XX率”全部为：XX.X%，即取值小数点后1位，比如：90.17%取值90.2%，90.14%取值90.1%四舍五入，90%取值90.0%。</p>
+											<p>3.4当月的数据：当日凌晨0:10，之前月数据：统计当次月1日凌晨0：10的数值，所有当月统计数值，取次月1日凌晨0：10的数值定格保存。</p>
+											<p>3.5“营销中心”的“XX数”为：外销部和商务部的总计数值</p>
+											<p>3.6“营销中心”的“XX率”为：外销部和商务部的实际总计XX数值/外销部和商务部的指标总计XX数值</p>
+											<p>3.7“外销”的“XX数”为：外销部城市合计数值；推理“商务”相同逻辑，同样的推理3.6使用部门逻辑。</p>
+											<p>1、新签数≥1年：当月新签会员，本次合同开始日到本次合同结束日≥365天</p>
+											<p>2、1年＞新签数≥0.5年：当月新签会员，本次合同开始日到本次合同结束日，365＞新签数≥182天</p>
+											<p>3、0.5年＞新签数≥0.25年：当月新签会员，本次合同开始日到本次合同结束日，182＞新签数≥90天</p>
+											<p>4、新签数＜0.25年：当月新签会员，本次合同开始日到本次合同结束日，新签数＜90天</p>
+											<p>5、占比：合作时长新签数/总数*100%</p>
+											<p>6、中途暂停：暂停期间内不计入会员数和总数</p>
+											<p>7、退费：退费后不计入会员数和总数</p>
+											<p>8、新签：根据会员ID号取值，本次合同开始日与上次合作的本次合同结束日间隔天数，间隔天数＞180天，或无合作过的会员属于新签</p>
+											<p>9、续费：根据会员ID号取值，本次合同开始日与上次合作的本次合同结束日间隔天数，间隔天数≤180天的会员属于续费</p>
+											<p>4、分析折线图</p>
+											<p>4.1显示：2个财年已知月份的数值。本财年和上一财年的数据，本财年的未来月为空，本财年当月不显示，次月2日显示（次月2日前导入数据）。</p>
+											<p>4.2角色显示：角色负责的城市的数值合计，参与对比分析。城市为唯一识别号，取角色现在负责城市数据的对比，不考虑城市之前是谁负责。</p>
+											<p>5、所有人都可以查看该页面，但是不同角色只能查看自己管辖的城市数据。</p>
+											<p>6、2016财年的数值，“销售系统设置”重新导入相关数据，实际会员数则系统中提取。</p>
+											<p>7、所有列项都以表内容中最大字节尺寸为标准尺寸（字体标准11号），所有的表格每列平均尺寸，不因为显示器大小，字体的变化而改变，如果出现文字较多的表头可最多分两行显示，或表头字体变小，表内容尺寸全部一致只显示一行，文字较多的表格往右延伸。比如，表内容名字“西门吹雪”，则所有的格子列项为四个字节大小。</p>
+										</div>
+									</div>
+								</div>
+								<table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+					                <thead class="thead1">
+					                    <tr role="row">
+					                    	<th class="" tabindex="0" >财年</th>
+					                    	<th class="" tabindex="0" >新签数≥1年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >1年＞新签数≥0.5年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >0.5年＞新签数≥0.25年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >新签数＜0.25年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >新签总数（个）</th>
+					                    </tr>
+					                </thead>
+					                <thead class="thead2">
+					                    <tr role="row">
+					                    	<th class="" tabindex="0" >财年</th>
+					                    	<th class="" tabindex="0" >新签数≥1年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >1年＞新签数≥0.5年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >0.5年＞新签数≥0.25年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >新签数＜0.25年</th>
+					                    	<th class="" tabindex="0" >占比</th>
+					                    	<th class="" tabindex="0" >新签总数（个）</th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                    <volist name="list" id="v">
+						                    <tr role="row" class="odd">
+						                        <td><span>{$v.month}</span></td>
+												<td><span>{$v.gtyear|default=0}</span></td>
+												<td><span>{$v.gtyear_percent|default="0.0%"}</span></td>
+												<td><span>{$v.gthalfyear|default=0}</span></td>
+												<td><span>{$v.gthalfyear_percent|default="0.0%"}</span></td>
+												<td><span>{$v.lthalfyear|default=0}</span></td>
+												<td><span>{$v.lthalfyear_percent|default="0.0%"}</span></td>
+												<td><span>{$v.ltmonth|default=0}</span></td>
+												<td><span>{$v.ltmonth_percent|default="0.0%"}</span></td>
+												<td><span>{$v.realnewsigningvip|default=0}</span></td>
+						                    </tr>
+						                </volist>
+					                </tbody>
+					            </table>
+							</div>
+							<div class="box-footer">
+								<div class="col-xs-12 no-padding max-width-1352">
+						        	<div id="canvas" class="col-xs-6 no-padding canvas-height-300"></div>
+									<div id="canvas1" class="col-xs-6 no-padding canvas-height-300"></div>
+									<div id="canvas2" class="col-xs-6 no-padding canvas-height-300"></div>
+									<div id="canvas3" class="col-xs-6 no-padding canvas-height-300"></div>
+						        </div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</block>
+<block name="script">
+	<script src="/assets/common/js/echarts/3.5.4/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$(function() {
+
+			// canvas图标
+			var dom = document.getElementById("canvas");
+			var dom1 = document.getElementById("canvas1");
+			var dom2 = document.getElementById("canvas2");
+			var dom3 = document.getElementById("canvas3");
+
+			var myChart = echarts.init(dom);
+			var myChart1 = echarts.init(dom1);
+			var myChart2 = echarts.init(dom2);
+			var myChart3 = echarts.init(dom3);
+
+			// 会员数 ≥ 1年占比的同比 [参数项]
+			var option = {
+			    title : {
+			        text: '会员数 ≥ 1年占比的同比',
+			        subtext: '会员数',
+			        textStyle:{
+					    color: '#359bed'
+					}
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}年实际会员数','{$table_last.year}年实际会员数'],
+			        right:'60'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+				    		show:true,
+				    		onGap:'boundaryGap',
+				    		areaStyle:{
+							    color: [
+							        'rgba(250,250,250,0.3)',
+							        'rgba(200,200,200,0.3)'
+							    ]
+							}
+				    	}
+			        }
+			    ],
+			    axis:{
+
+			    },
+			    series : [
+			        {
+			            name:'{$table_data.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.gtyear}],
+                        itemStyle: {
+				            normal: {
+				                color: "#359bed",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.gtyear}],
+                        itemStyle: {
+				            normal: {
+				                color: "#f5994e",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			// 1年 ≥ 会员数 ≥ 0.5年占比的同比 [参数项]
+			var option1 = {
+			    title : {
+			        text: '1年 ≥ 会员数 ≥ 0.5年占比的同比',
+			        subtext: '会员数',
+			        textStyle:{
+					    color: '#359bed'
+					}
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}年实际会员数','{$table_last.year}年实际会员数'],
+			        right:'60'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            smooth:true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+				    		show:true,
+				    		onGap:'boundaryGap',
+				    		areaStyle:{
+							    color: [
+							        'rgba(250,250,250,0.3)',
+							        'rgba(200,200,200,0.3)'
+							    ]
+							}
+				    	}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$table_data.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.gthalfyear}],
+			            itemStyle: {
+				            normal: {
+				                color: "#359bed",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.gthalfyear}],
+			            itemStyle: {
+				            normal: {
+				                color: "#f5994e",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			// 0.5年 ≥ 会员数 ≥ 0.25年占比的同比 [参数项]
+			var option2 = {
+			    title : {
+			        text: '0.5年 ≥ 会员数 ≥ 0.25年占比的同比',
+			        subtext: '会员数',
+			        textStyle:{
+					    color: '#359bed'
+					}
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}年实际会员数','{$table_last.year}年实际会员数'],
+			        right:'60'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            smooth:true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+				    		show:true,
+				    		onGap:'boundaryGap',
+				    		areaStyle:{
+							    color: [
+							        'rgba(250,250,250,0.3)',
+							        'rgba(200,200,200,0.3)'
+							    ]
+							}
+				    	}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$table_data.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.lthalfyear}],
+			            itemStyle: {
+				            normal: {
+				                color: "#359bed",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.lthalfyear}],
+			            itemStyle: {
+				            normal: {
+				                color: "#f5994e",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			// 会员数 ≤ 0.25年占比的同比 [参数项]
+			var option3 = {
+			    title : {
+			        text: '会员数 ≤ 0.25年占比的同比',
+			        subtext: '会员数',
+			        textStyle:{
+					    color: '#359bed'
+					}
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}年实际会员数','{$table_last.year}年实际会员数'],
+			        right:'60'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            smooth:true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+				    		show:true,
+				    		onGap:'boundaryGap',
+				    		areaStyle:{
+							    color: [
+							        'rgba(250,250,250,0.3)',
+							        'rgba(200,200,200,0.3)'
+							    ]
+							}
+				    	}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$table_data.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.ltmonth}],
+			            itemStyle: {
+				            normal: {
+				                color: "#359bed",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}年实际会员数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.ltmonth}],
+			            itemStyle: {
+				            normal: {
+				                color: "#f5994e",  // 会设置点和线的颜色，所以需要下面定制 line
+				            }
+				        },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'},
+			                    // {type : 'min', name: '最小值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			myChart.setOption(option, true);
+			myChart1.setOption(option1, true);
+			myChart2.setOption(option2, true);
+			myChart3.setOption(option3, true);
+
+			// 窗口缩放canvas重新渲染
+			$(window).on('resize',function(){
+				var myChart = echarts.init(dom);
+				var myChart1 = echarts.init(dom1);
+				var myChart2 = echarts.init(dom2);
+				var myChart3 = echarts.init(dom3);
+				myChart.setOption(option, true);
+				myChart1.setOption(option1, true);
+				myChart2.setOption(option2, true);
+				myChart3.setOption(option3, true);
+			});
+			// 时间选择
+			$(".datepicker").datetimepicker({
+				startView:4,
+				minView:'decade',
+				format:"yyyy",
+				autoclose:true,
+				pickerPosition: "bottom-left"
+			});
+			// 注释信息
+			$('.zhushi-icon').click(function() {
+				if($(this).attr('show') == 'show'){
+					$('.zhushi-info').hide();
+					$(this).removeAttr('show')
+				}else{
+					$('.zhushi-info').show();
+					$(this).attr('show','show');
+				}
+			});
+			// 竖向滚动时，表格头部悬浮
+			var scrollLeft = 0;
+			$(document).on('scroll',function(){
+				if($(document).scrollTop() >= 268){
+					$('.thead1').show();
+					$('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-scrollLeft,'z-index':10});
+				}else{
+					$('.thead1').hide();
+					$('.thead2').css({'position':'relative',left:0});
+				}
+			});
+			// 横向滚动时，表格头部悬浮
+			$('.overflow-x').on('scroll',function(){
+				scrollLeft = $(this).scrollLeft();
+				$('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+			})
+		});
+	</script>
+</block>

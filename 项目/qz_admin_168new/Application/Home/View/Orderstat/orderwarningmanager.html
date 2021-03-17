@@ -1,0 +1,236 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>预警通知管理- 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/orderwarningnotice.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>预警通知管理</h1>
+    </section>
+    <section class="content clearfix">
+
+    <div class="button">
+        新增角色
+    </div>
+    <div class="shuju-biao  col-xs-12 clearfix">
+            <div class="shuju-box">
+                <div class="box-body act-box"  style="padding:0">
+                    <table class="col-xs-12 mytable">
+                        <thead>
+                        <tr class="biao-head">
+                            <th class="col-xs-2 ">角色人员</th>
+                            <th class="col-xs-2 ">所属部门</th>
+                            <th class="col-xs-2 ">所属岗位</th>
+                            <th class="col-xs-2 ">手机号</th>
+                            <th class="col-xs-2 ">是否启用</th>
+                            <th class="col-xs-2 " >操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.name}</td>
+                                <td>{$vo.dept_name}</td>
+                                <td>{$vo.role_name}</td>
+                                <td>{$vo.tel}</td>
+                                <td>
+                                   <div class="switch">
+                                        <if condition="$vo['enabled'] EQ 0">
+                                        <input name="enabled" type="checkbox" data-id="{$vo.id}" data-tel="{$vo.tel}"  value="0" />
+                                        <else/>
+                                        <input name="enabled" type="checkbox" data-id="{$vo.id}" data-tel="{$vo.tel}" value="1" checked=checked />
+                                        </if>
+                                    </div>
+                                </td>
+                                <td><i class="fa fa-pencil" data-id="{$vo.id}"></i><i class="fa fa-trash" data-id="{$vo.id}"></i></td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </div>
+
+    <div class="mark"></div>
+    <!-- 新增角色 -->
+    <div class="add-member member-box">
+        <form id="myform">
+        <div class="title">新增角色</div>
+        <div class="group">
+            <span class="group-title"><span class="red">*</span>角色名:</span>
+            <input type="text" name="user" style="margin-left: -2px;">
+        </div>
+        <div class="group">
+            <span class="group-title">所属部门:</span><input type="text" name="dept" disabled>
+        </div>
+        <div class="group">
+            <span class="group-title">所属岗位:</span><input type="text" name="role" disabled>
+        </div>
+        <div class="group">
+            <span class="group-title"><span class="red">*</span>手机号:</span><input type="text" name="tel" maxlength="11">
+        </div>
+        <div class="anniu">
+            <div class="quxiao">取消</div>
+            <div id="btnSave" class="baocun">保存</div>
+            <input type="hidden" name="id" />
+        </div>
+        </form>
+    </div>
+
+    <!-- 确认删除 -->
+    <div class="del">
+        <div class="info">
+            是否确认删除？
+        </div>
+        <div class="d-qx">取消</div>
+        <div class="d-qr">确认</div>
+    </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function() {
+        $('.switch input').bootstrapSwitch({
+            onText: "是",
+            offText: "否",
+            onColor: "info",
+            offColor: "danger",
+            onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                }else{
+                    $el.attr("checked","checked")
+                }
+                $.ajax({
+                    url: '/orderstat/exceptionmanagerup',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        enabled:$el.attr("checked") == "checked"?1:0,
+                        id:$el.attr("data-id"),
+                        tel:$el.attr("data-tel")
+                    }
+                });
+            }
+        });
+        // 新增角色
+        $('.button').click(function(event) {
+            $("#myform")[0].reset();
+            $("input[name=id]").val("");
+            $("input[name=user]").attr("disabled",false);
+            $("#myform .title").html("新增角色");
+            $('.mark').show();
+            $('.add-member').show();
+
+        });
+
+        $('.quxiao').click(function(){
+            $('.mark').hide();
+            $('.add-member').hide();
+        });
+
+        // 编辑角色
+        $('.fa-pencil').click(function(event) {
+            var _this = $(this);
+            $.ajax({
+                url: '/orderstat/findmanagerinfo/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id:_this.attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    $('.mark').show();
+                    $("#myform")[0].reset();
+                    $("#myform .title").html("编辑角色");
+                    $('.add-member').show();
+                    $("input[name=dept]").val(data.data.dept_name);
+                    $("input[name=role]").val(data.data.role_name);
+                    $("input[name=id]").val(data.data.id);
+                    $("input[name=user]").val(data.data.name).attr("disabled","disabled");
+                    $("input[name=tel]").val(data.data.tel);
+                } else {
+                    alert(data.info);
+                }
+            });
+        });
+
+        // 删除角色
+        $('.shuju-biao').on('click','.fa-trash',function(){
+            $('.mark').show();
+            $('.del').show();
+            $("input[name=id]").val($(this).attr("data-id"));
+        });
+
+        $('.d-qx').click(function(){
+            $('.mark').hide();
+            $('.del').hide();
+        });
+
+        $('.d-qr').click(function(){
+            // 删除表中对应一行的数据
+            $.ajax({
+                url: '/orderstat/delmanager/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: $("input[name=id]").val()}
+            })
+            .done(function(data) {
+                alert(data.info);
+                if (data.status == 1) {
+                    $('.mark').hide();
+                    $('.del').hide();
+                    window.location.href = window.location.href;
+                }
+            });
+        })
+
+        $("input[name=user]").bind("input propertychange",function(){
+            var length = $(this).val().length;
+            $("input[name=id]").val("");
+            $("input[name=dept]").val("");
+            $("input[name=role]").val("");
+            if(length > 1){
+               $.ajax({
+                   url: '/adminuser/findUserInfoList/',
+                   type: 'POST',
+                   dataType: 'JSON',
+                   data: {q: $(this).val()}
+               })
+               .done(function(data) {
+                    if (data.status == 1) {
+                        if (data.data != null) {
+                            $("input[name=dept]").val(data.data.dept_name);
+                            $("input[name=role]").val(data.data.role_name);
+                            $("input[name=id]").val(data.data.id);
+                        }
+                    }
+               });
+            }
+        });
+
+        $("#btnSave").click(function(event) {
+            $.ajax({
+                url: '/orderstat/exceptionmanagerup/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: $("#myform").serializeArray()
+            })
+            .done(function(data) {
+                alert(data.info);
+                if (data.status == 1) {
+                    $('.mark').hide();
+                    $('.add-member').hide();
+                    window.location.href = window.location.href;
+                }
+
+            });
+        });
+    })
+</script>
+</block>

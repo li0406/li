@@ -1,0 +1,126 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="/assets/common/js/tooltips/tooltips.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/red-packet.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/meitu/css/meitu-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/baike/css/baike-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+
+<block name="top">
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+    <div class="m-header-tit">装修百科</div>
+</block>
+<block name="content">
+    <!--C 百科列表 S-->
+    <div class="baike-list-box contentnr">
+        <ul class="contentnr_ul xiaogutou-list-wrap">
+            <include file="list-content" />
+        </ul>
+    </div>
+    <!--C 百科列表 E-->
+
+     <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <!--引入红包-->
+    <include file="Common:red-packet" />
+    <!--置顶-->
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/red-packet.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script>
+    $(document).ready(function() {
+        $(".foot-zan").click(function(){
+            var num=parseInt($(this))
+        });
+
+        insertImg();
+
+        //定义固有变量
+        var loading = false;
+        var last_page = '{$totalpage|default=0}';
+        var this_page = '{$pageid}';
+        var alertinfo = false;
+        var list_sums = '{:count($info["cases"])}';
+        var url_no_page = "{$url_no_page}";
+        //下拉无限加载
+        window.onscroll=function(){
+            /*导航栏固定*/
+            var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+            if(top>103){
+                $("#tofixed").addClass('tofixed')
+            }else{
+                $("#tofixed").removeClass('tofixed')
+            }
+            /*下拉刷新加载*/
+            if ($(document).height() - $(this).scrollTop() - $(this).height() < 800){
+                if(this_page >= last_page){
+                    if (alertinfo == false && list_sums > 0) {
+                        $(".contentnr").append('<div class="wrapbt"><div class="spmore">没有更多了，看看别的吧..</div></div>');                        };
+                    alertinfo = true;
+                    return false;
+                }else{
+                    if (loading == true) {
+                        return false;
+                    };
+                    loading = true;
+                    var url = url_no_page + '&p=' + (parseInt(this_page) + 1);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        dataType: 'html',
+                    })
+                    .done(function(result) {
+                        loading = false;
+                        $(".xiaogutou-list-wrap").append($(result).fadeIn(2000));
+                        this_page++;
+                    })
+                    .fail(function(xhr) {
+                        loading = false;
+                        alert("加载失败,请刷新再试！");
+                    });
+                }
+            }
+
+            //回到顶部
+            if($(document).scrollTop()>="1000"){
+                $('#gotop').addClass('show');
+            }else{
+                $('#gotop').removeClass('show');
+            }
+        }
+
+    });
+
+    window.onscroll=function(){
+        var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+        if(top>103){
+            $("#position").addClass('tofixed')
+        }else{
+            $("#position").removeClass('tofixed')
+        }
+    };
+
+
+    function insertImg (argument) {
+        var freeDesign="<div class='free-design'><a href='/sheji/'><img src='/assets/mobile/baike/img/free-design.png' alt=''></a></div>",
+            bkList=$(".baike-list-box ul li");
+        $(bkList[2]).after(freeDesign);
+    }
+
+    $('.foot-zan').click(function(){
+        var num = parseInt($(this).children('.zan-num').text());
+        num++;
+        $(this).children('.zan-num').text(num);
+        $(this).addClass('now');
+
+    });
+    </script>
+</block>

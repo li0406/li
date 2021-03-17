@@ -1,0 +1,188 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/channelmanage/css/add.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>JS代码编辑</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <form action="/channelmanage/edit/" method="post" id="form">
+                        <div class="box-body">
+                            <input type="hidden" name="id" value="{$data.id}">
+                            <div class="style h40">
+                                <div class="col-sm-1 text-right"><label>终端：</label></div>
+                                <input type="radio" name="type" value="1" id="pc" {$data['type']==1?'checked':''}><label for="pc">PC端</label>
+                                <input type="radio" name="type" value="2" id="mb" {$data['type']==2?'checked':''}><label for="mb">M端</label>
+                                <input type="radio" name="type" value="3" id="tz" {$data['type']==3?'checked':''}><label for="tz">淘装m端</label>
+                            </div>
+                            <div class="moban h40">
+                                <div class="col-sm-1 text-right"><label for="templete">模板：</label></div>
+                                <select name="templete" id="templete">
+                                    <if condition="$data['type'] eq 1 ">
+                                        <option value="">请选择模板</option>
+                                        {$v_tpl_pc_html}
+                                        <else/>
+                                        <option value="">请选择模板</option>
+                                        {$v_tpl_mobile_html}
+                                    </if>
+                                </select>
+                            </div>
+                            <div class="lujing h40">
+                                <div class="col-sm-1 text-right"><label for="path">URL路径填写：</label></div>
+                                <input type="text" name="path" id="path" value="{$data['path']}" placeholder="请输入路径(为小写字母构成)">
+                            </div>
+                            <div class="laiyuan h40">
+                                <div class="col-sm-1 text-right"><label for="groupid">渠道来源组{$data['category']}：</label></div>
+                                <select name="category" id="category">
+                                    <option value="1" {$data['category'] ==1  ?'selected':''}>装修</option>
+                                    <option value="2" {$data['category'] ==2 ?'selected':''}>家具</option>
+                                    <option value="3" {$data['category'] ==3 ?'selected':''}>招商</option>
+                                </select>
+                                <select name="groupid" id="groupid" data-select="{$data['groupid']}">
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                            <div class="biaoji h40">
+                                <div class="col-sm-1 text-right"><label for="src">标记代号：</label></div>
+                                <select name="src" id="src" data-select="{$data['src']}">
+                                </select>
+                            </div>
+                            <div class="daima">
+                                <div class="col-sm-1 text-right"><label for="base_code">基础代码：</label></div>
+                                <textarea name="base_code" id="base_code" cols="80" rows="10" placeholder="在页面head中的代码">{$data['base_code']}</textarea>
+                            </div>
+                            <div class="js-daima">
+                                <div class="col-sm-1 text-right"><label for="js_code">JS代码：</label></div>
+                                <textarea name="js_code" id="js_code" cols="80" rows="10" placeholder="关联按钮的代码">{$data['js_code']}</textarea>
+                            </div>
+                            <div class="style h40">
+                                <div class="col-sm-1 text-right"><label>是否启用：</label></div>
+                                <input type="radio" name="status" value="1" id="yes" {$data['status']==1 ?'checked':''}><label for="yes">是</label>
+                                <input type="radio" name="status" value="2" id="no" {$data['status']==2 ?'checked':''}><label for="no">否</label>
+                            </div>
+                            <button class="baocun" type="submit">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script>
+        $(function () {
+            //绑定模板下拉
+            var templete =  "{$data['templete']}";
+            if( templete !== "" ) {
+                $("[name=templete] option[value='"+templete+"']").attr("selected",true);
+            }
+
+            $('#pc').click(function (event) {
+                $('#templete').html('<option value="">请选择模板</option>{$v_tpl_pc_html}')
+            });
+            $('#mb').click(function (event) {
+                $('#templete').html('<option value="">请选择模板</option>{$v_tpl_mobile_html}')
+            });
+            $('#tz').click(function(event) {
+                $('#templete').html('<option value="">请选择模板</option>{$v_tpl_m_tz_html}')
+            });
+            setvalueGroup();
+            setSrc();
+            $('#category').change(function(){
+                var id = $('#category option:selected').val();
+                var data=[];
+                if(id == 1){
+                    data = transArr({$group1|json_encode=true});
+                }else if(id == 2){
+                    data = transArr({$group2|json_encode=true});
+                }else if(id == 3){
+                    data = transArr({$group3|json_encode=true});
+                }
+                var str = '<option value="">请选择</option>';
+                for(var i = 0;i < data.length;i++){
+                    str += '<option value='+data[i].id+'>'+data[i].name+'</option>'
+                }
+                $('#groupid').html(str);
+                var strtemp = '<option value="">请选择</option>';
+                $('#src').html(strtemp);
+            })
+            $('#groupid').change(function () {
+                var id = $(this).val();
+                $.ajax({
+                    url: '/channelmanage/getSrcByGroup',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {id: id}
+                })
+                    .done(function (data) {
+                        var str = '<option value="">请选择</option>';
+                        for (var i = 0; i < data.data.length; i++) {
+                            str += '<option value=' + data.data[i].src + '>' + data.data[i].name + '</option>'
+                        }
+                        $('#src').html(str);
+                    })
+                    .fail(function () {
+                        alert('服务器出问题了')
+                    })
+
+            })
+        });
+
+        function setSrc() {
+            var id = $('#groupid option:selected').val();
+            var selectsrc = $('#src').attr('data-select');
+            $.ajax({
+                url: '/channelmanage/getSrcByGroup',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {id: id}
+            })
+                .done(function (data) {
+                    var str = '<option value="">请选择</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (selectsrc == data.data[i].src){
+                            str += '<option value=' + data.data[i].src + '  selected>' + data.data[i].name + '</option>';
+                        }else{
+                            str += '<option value=' + data.data[i].src + '>' + data.data[i].name + '</option>'
+                        }
+                    }
+                    $('#src').html(str);
+                })
+                .fail(function () {
+                    alert('服务器出问题了')
+                })
+        }
+        function setvalueGroup() {
+            var id = $('#category option:selected').val();
+            var selectGroup = $('#groupid').attr('data-select');
+            var data=[];
+            if(id == 1){
+                data = transArr({$group1|json_encode=true});
+            }else if(id == 2){
+                data = transArr({$group2|json_encode=true});
+            }else if(id == 3){
+                data = transArr({$group3|json_encode=true});
+            }
+            var str = '<option value="">请选择</option>';
+            for(var i = 0;i < data.length;i++){
+                if (selectGroup == data[i].id){
+                    str += '<option value='+data[i].id+' selected>'+data[i].name+'</option>'
+                }else{
+                    str += '<option value='+data[i].id+'>'+data[i].name+'</option>'
+                }
+            }
+            $('#groupid').html(str);
+        }
+        function transArr(obj) {
+            var temp=[];
+            $.each(obj, function(i) {
+                temp[i]=obj[i];
+            });
+            return temp;
+        }
+    </script>
+</block>

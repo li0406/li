@@ -1,0 +1,103 @@
+<!--pages/ordertime/ordertime.wxml-->
+<view class='bg'>
+  <view class="ordertime-box">
+    <view class='ordertime-search'>
+      <image class='search-btn' src='../../img/search.png'></image>
+      <input placeholder='请输入公司名称或ID' bindconfirm="searchWord" confirm-type="search"></input>
+      <image class='address' src='../../img/address.png'></image>
+      <view class='cityinfo' bindtap='toCity'>{{curCity}}</view>
+    </view>
+    <view class='tab'>
+      <view class="flex1">
+        <picker class="flex_text" value="{{sort[sort_index].id}}" data-selecthx="{{sort[sort_index].name}}" range="{{sort}}" range-key="{{'name'}}" bindchange="bindPickerChange_sort">
+          <view wx:if="{{sort_index==-1}}">默认排序</view>
+          <view wx:else="{{sort_index!=-1}}"> {{sort[sort_index].name}}</view>
+
+        </picker>
+        <image src="../../img/jian.png"></image>
+      </view>
+
+      <view class="flex1">
+        <picker class="flex_text" value="{{read[read_index].paixu}}" data-selecthx="{{read[read_index].name}}" range="{{read}}" range-key="{{'name'}}" bindchange="bindPickerChange_read">
+          <view wx:if="{{read_index==-1}}">是否阅单</view>
+          <view wx:else="{{read_index!=-1}}">{{read[read_index].name}}</view>
+        </picker>
+        <image src="../../img/jian.png"></image>
+      </view>
+
+      <view class="flex1">
+        <picker class='date' mode="date" value="{{start}}" start="{{sTime}}" end="{{nowTime}}" bindchange="bindDateChange">
+          <view class="picker">
+            {{start?start:"开始时间"}}
+          </view>
+        </picker>
+        <image src="../../img/jian.png"></image>
+      </view>
+
+      <view class="flex1">
+        <picker class='date' mode="date" value="{{end}}" start="{{start}}" end="{{nowTime}}" bindchange="bindEndDateChange">
+          <view class="picker">
+            {{end?end:"结束时间"}}
+          </view>
+        </picker>
+        <image src="../../img/jian.png"></image>
+      </view>
+    </view>
+  </view>
+  <view style='padding-top:146rpx;'>
+    <view class='ordertime-content' wx:for="{{list}}" wx:key="index">
+      <view class='content'>
+        <view class='order-tit'>
+          <text class='order-num'>{{item.order_id}}</text>
+          <text class="{{item.isread==0?'noread':'isread'}}">{{item.isread==0?'未阅':'已阅'}}</text>
+          <text class='area'>{{item.cname}}</text>
+        </view>
+        <view class='order-detail'>
+          <text>公司名称：</text>
+          <text>{{item.jc+'('+item.company_id+')'}}</text>
+        </view>
+        <view class='order-detail'>
+          <text>订单时间：</text>
+          <text>{{item.orders_time}}</text>
+        </view>
+        <view class='order-detail'>
+          <text>分单时间：</text>
+          <text>{{item.fen_time}}</text>
+        </view>
+        <view hidden="{{item.isread==0?readed:noread}}">
+          <view class='order-detail'>
+            <text>阅单时间：</text>
+            <text>{{item.readtime}}</text>
+          </view>
+          <view class='order-detail'>
+            <text>阅单时间差：</text>
+            <text>{{item.diff_time}}</text>
+          </view>
+        </view>
+        <button class='read-order' bindtap='goOrder' data-id='{{item.order_id}}' data-start='{{item.orders_time}}' data-end='{{item.fen_time}}'>查看订单</button>
+      </view>
+    </view>
+  </view>
+  <view class="fendan-page" hidden="{{isShow}}">
+    <button class="page-bg" bindtap="goPrePage" disabled='{{pageCurrent==1?true:false}}'>上一页</button>
+    <view>
+    <picker bindchange="toPage" value="" range="{{pageNumber}}">
+        <view class="picker">
+          <button class="page-choose" hover-class="btn-hover">{{pageCurrent}}/{{pageTotalNumber}}</button>
+        </view>
+      </picker>
+    </view>
+    <button class="page-bg" bindtap="goNextPage" disabled='{{pageCurrent==pageTotalNumber?true:false}}'>下一页</button>
+  </view>
+</view>
+<view class='no-result' wx:if='{{noResult}}'>
+  <image src='../../img/no_result.png'></image>
+  <view>暂无搜索结果</view>
+</view>
+<view class='no-result' wx:if='{{noInternet}}'>
+  <image src='../../img/no_internet.png'></image>
+  <view>网络开了小差~请稍等</view>
+  <button bindtap='toOrderTime'>重新加载</button>
+</view>
+
+

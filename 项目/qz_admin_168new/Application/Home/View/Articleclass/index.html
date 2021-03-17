@@ -1,0 +1,184 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网品牌榜编辑后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/jstree/themes/default/style.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>文章分类</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/article/">文章管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 分类管理</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div id="categorytree">
+                            <ul>
+                                <volist name="info.categorytree" id="vi">
+                                    <li data-jstree='{ "opened" : true }' id="{$vi.id}" level="0">{$vi.text}
+                                        <notempty name="vi.children">
+                                            <ul>
+                                                <volist name="vi.children" id="vj">
+                                                    <li data-jstree='{ "opened" : true }' id="{$vj.id}" level="1">{$vj.text}
+                                                        <notempty name="vj.children">
+                                                            <ul>
+                                                                <volist name="vj.children" id="vk">
+                                                                    <li data-jstree='{ "opened" : true }' id="{$vk.id}" level="2">{$vk.text}
+                                                                        <notempty name="vk.children">
+                                                                            <ul>
+                                                                                <foreach name="vk.children" item="vx">
+                                                                                    <li id="{$vx.id}" level="3">{$vx.text}</li>
+                                                                                </foreach>
+                                                                            </ul>
+                                                                        </notempty>
+                                                                    </li>
+                                                                </volist>
+                                                            </ul>
+                                                        </notempty>
+                                                    </li>
+                                                </volist>
+                                            </ul>
+                                        </notempty>
+                                    </li>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="categorydetails" class="col-md-9"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/jstree/jstree.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $('#categorytree').jstree({
+            "plugins" : ["contextmenu","state" ],
+            "core" : {
+                "multiple" : false
+            },
+            "contextmenu":{
+                "items":{
+                    "create":null,
+                    "rename":null,
+                    "remove":{
+                        "label":"删除分类",
+                        "action":function(data){
+                            var inst = jQuery.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                            var _this = this;
+                            if(confirm("确定需要删除该分类吗？？此操作需谨慎！")){
+                                $.ajax({
+                                    url: '/articleclass/delarticleclass/',
+                                    type: 'POST',
+                                    dataType: 'JSON',
+                                    data:{
+                                        id:obj.li_attr.id
+                                    }
+                                })
+                                .done(function(data) {
+                                    if (data.status == 1) {
+                                        window.location.href = window.location.href;
+                                    };
+                                })
+                                .fail(function() {
+                                    var e = dialog({
+                                        title: '消息',
+                                        content: '操作失败,请联系技术部门！',
+                                        okValue: '确 定',
+                                        quickClose: true,
+                                        ok: function () {}
+                                    });
+                                    e.show();
+                                });
+                            }
+                        }
+                    },
+                    "ccp":null,
+                    "add":{
+                        "label":"新建分类",
+                        "action":function(data){
+                            var inst = jQuery.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                            var _this = this;
+                            $.ajax({
+                                url: '/articleclass/getarticleclassdetails/',
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data:{
+                                    level:obj.li_attr.level,
+                                    parentid:obj.li_attr.id
+                                }
+                            })
+                            .done(function(data) {
+                                if (data.status == 1) {
+                                    $("#categorydetails").html(data.data);
+                                };
+                            })
+                            .fail(function() {
+                                var e = dialog({
+                                    title: '消息',
+                                    content: '操作失败,请联系技术部门！',
+                                    okValue: '确 定',
+                                    quickClose: true,
+                                    ok: function () {}
+                                });
+                                e.show();
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        $('#categorytree').on("changed.jstree", function (e, data) {
+            if(data.selected.length) {
+                $.ajax({
+                    url: '/articleclass/getarticleclassdetails/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id:data.selected[0]
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $('#categorydetails').html(data.data);
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            }
+        });
+    </script>
+</block>

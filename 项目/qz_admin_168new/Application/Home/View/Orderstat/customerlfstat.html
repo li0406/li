@@ -1,0 +1,385 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服量房统计-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/customerlfstat.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服量房考核统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <ul class="fendan-statistics">
+                                <li data-tab='1'>按人统计</li>
+                                <li data-tab='2'>按组统计</li>
+                                <li data-tab='3'>按师统计</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab1">
+                <div class="box" style="padding-bottom:20px;">
+                    <div class="box-header">
+                        <form action="/orderstat/customerlfstat" method="get">
+                            <div class="col-xs-2">
+                                <div>客服姓名</div>
+                                <select id="kfList" name="kf" class="form-control select2">
+                                    <option value="">选择客服</option>
+                                    <volist name="users" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>客服组</div>
+                                <select id="groups" name="groups" class="form-control select2">
+                                    <option value="">选择客服组</option>
+                                    <volist name="group.groups" id="vo">
+                                    <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <button type="button" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export" data-tab="1">导出</button>
+                                <input type="hidden" name="index" value="1" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table id="myTable" class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>客服人员</th>
+                                <th>客服组</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>分-已量房</th>
+                                <th>分-未量房</th>
+                                <th>赠-已量房</th>
+                                <th>赠-未量房</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.users" id="vo">
+                                <tr>
+                                    <td>{$vo.name}</td>
+                                    <td>{$vo.kfgroup}</td>
+                                    <td>{$vo.all|default=0}</td>
+                                    <td>{$vo.fen|default=0}</td>
+                                    <td>{$vo.zen|default=0}</td>
+                                    <td>{$vo.fen_lf_count|default=0}</td>
+                                    <td>{$vo.fen_un_lf_count|default=0}</td>
+                                    <td>{$vo.zen_lf_count|default=0}</td>
+                                    <td>{$vo.zen_un_lf_count|default=0}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab2">
+                <div class="box" style="padding-bottom:20px;">
+                    <div class="box-header">
+                        <form action="/orderstat/customerlfstat/" method="get">
+                            <div class="col-xs-2">
+                                <div>客服组</div>
+                                <select id="groups2" name="groups" class="select2 form-control" style="width: 100%">
+                                    <option value="">选择客服组</option>
+                                    <volist name="group.groups" id="vo">
+                                    <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>客服师</div>
+                                <select id="manager" name="manager" class="select2 form-control" style="width: 100%">
+                                    <option value="">选择师长</option>
+                                    <volist name="group.manager" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <button type="submit" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export" data-tab="2">导出</button>
+                                <input type="hidden" name="index" value="2" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>客服组</th>
+                                <th>客服师</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>分-已量房</th>
+                                <th>分-未量房</th>
+                                <th>赠-已量房</th>
+                                <th>赠-未量房</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list.group" id="vo">
+                            <tr>
+                                <td>{$key}</td>
+                                <td>{$vo.manager}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.fen_lf_count|default=0}</td>
+                                <td>{$vo.fen_un_lf_count|default=0}</td>
+                                <td>{$vo.zen_lf_count|default=0}</td>
+                                <td>{$vo.zen_un_lf_count|default=0}</td>
+                            </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab3">
+                <div class="box" style="padding-bottom:20px;">
+                    <div class="box-header">
+                        <form action="/orderstat/customerlfstat/" method="get">
+                            <div class="col-xs-2">
+                                <div>客服师</div>
+                                <select id="manager2" name="manager" class="select2 form-control"style="width:100%" >
+                                    <option value="">选择师长</option>
+                                    <volist name="group.manager" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <button type="submit" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export" data-tab="3">导出</button>
+                                <input type="hidden" name="index" value="3" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>客服组数</th>
+                                <th>负责人</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>分-已量房</th>
+                                <th>分-未量房</th>
+                                <th>赠-已量房</th>
+                                <th>赠-未量房</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list.manager" id="vo">
+                            <volist name="vo.child" id="v">
+                            <tr>
+                                <td>{$v.name}</td>
+                                <td>{$vo.name}</td>
+                                <td>{$v.all|default=0}</td>
+                                <td>{$v.fen|default=0}</td>
+                                <td>{$v.zen|default=0}</td>
+                                <td>{$v.fen_lf_count|default=0}</td>
+                                <td>{$v.fen_un_lf_count|default=0}</td>
+                                <td>{$v.zen_lf_count|default=0}</td>
+                                <td>{$v.zen_un_lf_count|default=0}</td>
+                            </tr>
+                            </volist>
+                                <tr class="summary">
+                                <td>汇总</td>
+                                <td>{$vo.name}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.fen_lf_count|default=0}</td>
+                                <td>{$vo.fen_un_lf_count|default=0}</td>
+                                <td>{$vo.zen_lf_count|default=0}</td>
+                                <td>{$vo.zen_un_lf_count|default=0}</td>
+                                </tr>
+                            </volist>
+                            <tr class="summary">
+                                <td>总计</td>
+                                <td>-</td>
+                                <td>{$list.all.all|default=0}</td>
+                                <td>{$list.all.fen|default=0}</td>
+                                <td>{$list.all.zen|default=0}</td>
+                                <td>{$list.all.fen_lf_count|default=0}</td>
+                                <td>{$list.all.fen_un_lf_count|default=0}</td>
+                                <td>{$list.all.zen_lf_count|default=0}</td>
+                                <td>{$list.all.zen_un_lf_count|default=0}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box zhushi">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h4>注释：</h4>
+                            <p>分-已量房：1个分单分配的装修公司中有1家公司点击已量房/到店/见面/签约；</p>
+                            <p>赠-已量房：1个赠单分配的装修公司中有1家公司点击已量房/到店/见面/签约；</p>
+                            <p>分-未量房：1个分单分配4家公司，至少有3家公司点击未量房；分配3家公司，至少有2家公司点击未量房；分配2家公司2家都点击未量房，分配1家公司1家点击未量房。</p>
+                            <p>赠-未量房：1个赠单分配4家公司，至少有3家公司点击未量房；分配3家公司，至少有2家公司点击未量房；分配2家公司2家都点击未量房，分配1家公司1家点击未量房。</p>
+                            <p class="red">注：若1个订单点击未量房公司数量满足，但至少有1家点击已量房/到店/见面/签约，则计入到已量房订单里</p>
+                            <p>计算次数：1个订单被点击多次，只计算1次；例：1个订单既被点击已量房，也被点击已到店/见面，在该归属客服名下只计算1次。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" class="vid">
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+
+            $(".select2").select2({
+                allowClear: true,
+                placeholder: "请选择"
+            });
+            $("select[name=kf]").val("{$Think.get.kf}").trigger('change');
+            $("#groups").val("{$Think.get.groups}").trigger('change');
+            $("#groups2").val("{$Think.get.groups}").trigger('change');
+            $("#manager").val("{$Think.get.manager}").trigger('change');
+            $("#manager2").val("{$Think.get.manager}").trigger('change');
+
+            $('.fendan-statistics li').on('click', function() {
+                var index = $(this).index();
+                $("input[type=text]").val("");
+                $('.fendan-statistics li').removeClass('activity');
+                $(this).addClass('activity');
+                $("#tab1,#tab2,#tab3").hide();
+                $('#tab'+(index+1)).show();
+            });
+            $('.fendan-statistics li').eq({$Think.get.index|default=1}-1).trigger('click');
+
+            $('#myTable').DataTable({
+               paging:false,
+               searching:false,
+               language:{
+                    zeroRecords: "没有内容",
+                    info:""
+               },
+               "bSort":true
+            });
+        });
+
+
+        $("body").on("click",".research-btn",function () {
+            var parent = $(this).parents("form");
+            var begin = parent.find("input[name=begin]").val();
+            var end = parent.find("input[name=end]").val();
+
+            if ( (end == "" && begin != "") ||  toTimeStamp(begin) > toTimeStamp(end)) {
+                alert("结束时间不能小于开始时间");
+                return false;
+            }
+
+            parent.submit();
+        });
+
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        }
+
+        $(".export").click(function(event) {
+             var _this = $(this);
+             var tab =  _this.attr("data-tab");
+             var taget = $("#tab"+tab+" table");
+             var colums = [];
+             var data = [];
+             taget.find("th").each(function() {
+                    var text = $(this).text().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    sub["fontColor"] = $(this).css("color");
+                    sub["bgColor"] = $(this).css("background-color");
+                    colums.push(sub);
+             });
+             data.push(colums);
+             taget.find("tbody tr").each(function(i) {
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function() {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text: text,
+                            fontColor: $(this).css("color"),
+                            bgColor: $(this).css("background-color")
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+            });
+
+             _this.exportExcel({
+                    data: data,
+                    title: "客服量房统计",
+                    url: "/export/download",
+                    show:false
+             });
+        });
+    </script>
+</block>

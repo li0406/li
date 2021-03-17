@@ -1,0 +1,267 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市审单数量统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市分单数量统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">城市分单数量统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-xs-12">
+                            <form id="searchform" action="/orderstat/review" method="get">
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <select id="city" name="city_id" class="select2" multiple>
+                                        <option value="">请选择城市</option>
+                                        <volist name="citys" id="vo">
+                                            <if condition="in_array($vo['cid'],$cs)">
+                                            <option value="{$vo.cid}" selected="selected"> {$vo.cname}</option>
+                                            <else />
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1" style="margin-top:10px">
+                                    <select id="manager" name="manager" >
+                                        <option value="">客服师</option>
+                                        <volist name="users.manager" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1" style="margin-top:10px">
+                                    <select id="group" name="group" >
+                                        <option value="">客服组</option>
+                                        <volist name="users.groups" id="vo">
+                                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1" style="margin-top:10px">
+                                    <select id="kf" name="kf" >
+                                        <option value="">客服</option>
+                                        <volist name="kfList" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="begin" placeholder="开始时间" value="{$Think.get.begin}" readonly="true">
+                                </div>
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="end" placeholder="开始时间" value="{$Think.get.end}" readonly="true">
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" id="search" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" id="export" class="btn btn-info"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="box-tools"></div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead >
+                                <tr style="font-size:14px;color:#000">
+                                    <if condition="count($cs) NEQ 1">
+                                    <th>城市</th>
+                                    <else/>
+                                    <th>客服</th>
+                                    <th>客服组</th>
+                                    </if>
+                                    <th>发单量</th>
+                                    <th>分单量</th>
+                                    <th>分没人跟</th>
+                                    <th>分单率</th>
+                                    <th>赠单量</th>
+                                    <th>赠没人跟</th>
+                                    <th>综合分单率</th>
+                                    <th>总有效率</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataLists">
+                                <volist name="list.child" id="vo">
+                                    <tr>
+                                        <if condition="count($cs) NEQ 1">
+                                        <td>{$vo.cname}</td>
+                                        <else/>
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.kfgroup}</td>
+                                        </if>
+                                        <td>{$vo.all|default="0"}</td>
+                                        <td>{$vo.fen|default="0"}</td>
+                                        <td>{$vo.fen_other|default="0"}</td>
+                                        <td>{$vo.fen_rate|default="0"}%</td>
+                                        <td>{$vo.zen|default="0"}</td>
+                                        <td>{$vo.zen_other|default="0"}</td>
+                                        <td>{$vo.fen_zen_rate|default="0"}%</td>
+                                        <td>{$vo.all_rate|default="0"}%</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-size:14px;color:#000;background:#f5f5f5">
+                                    <if condition="count($cs) NEQ 1">
+                                    <td>总计:</td>
+                                    <else/>
+                                    <td>总计: {$list.cname}</td>
+                                    <td>-</td>
+                                    </if>
+                                    <td>{$list.all|default="0"}</td>
+                                    <td>{$list.fen|default="0"}</td>
+                                    <td>{$list.fen_other|default=0}</td>
+                                    <td>{$list.fen_rate|default="0"}%</td>
+                                    <td>{$list.zen|default="0"}</td>
+                                    <td>{$list.zen_other|default=0}</td>
+                                    <td>{$list.fen_zen_rate|default="0"}%</td>
+                                    <td>{$list.all_rate|default="0"}%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $("#city").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+
+    $("#manager").select2({
+        allowClear: true,
+        placeholder: "客服师级"
+    });
+    $("#manager").select2("val", "{$Think.get.manager}");
+
+    $("#group").select2({
+        allowClear: true,
+        placeholder: "选择客服组"
+    });
+    $("#group").select2("val", "{$Think.get.group}");
+
+    $("#kf").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("#kf").select2("val", "{$Think.get.kf}");
+
+    $('.datetime').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        format: "yyyy-mm-dd",
+        minView: 2,
+        pickerPosition: "bottom-left",
+        autoclose: true,
+    });
+
+    $('#all_list').DataTable({
+       paging:false,
+       searching:true,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+        scrollY:"600px",
+    });
+
+
+    $("#export").click(function(event) {
+        var colums = [];
+        var data = [];
+        $("#all_list th").each(function() {
+            var text = $(this).text().trim();
+            var sub = [];
+            sub["text"] = text;
+            colums.push(sub);
+        });
+        data.push(colums);
+
+        $("#dataLists tr").each(function(i) {
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function() {
+                var text = $(this).text().trim();
+                var _td = {
+                    text: text
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data: data,
+            title: "城市审单数量统计表",
+            url: "/export/download"
+        });
+    });
+
+    $("#searchform #search").click(function(event) {
+        var citys = $("#city").select2("data");
+        var manager = $("#manager").val();
+        var group = $("#group").val();
+        var kf = $("#kf").val();
+        var begin  = $("input[name=begin]").val();
+        var end  = $("input[name=end]").val();
+        var ids = "";
+        if (citys != null) {
+            for(var i in citys){
+                ids += citys[i].id+",";
+            }
+        }
+        window.location.href = "/orderstat/review?city_id="+ids+"&manager="+manager+"&group="+group+"&kf="+kf+"&begin="+begin+"&end="+end;
+
+    });
+    </script>
+</block>

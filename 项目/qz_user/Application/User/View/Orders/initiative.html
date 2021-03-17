@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/laydate.js?v={:C('STATIC_VERSION')}"></script>
+
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Orders:header" />
+        <div class="ht-main">
+            <!--订单列表-->
+            <div class="ht-order-check"><strong>筛选:</strong>
+                <select name="status">
+                  <volist name="info.orderInfo.status" id="vo">
+                    <if condition="$vo['value'] EQ $info['orderInfo']['on']">
+                        <option value="{$vo.value}" selected="selected">{$vo.name}</option>
+                    <else/>
+                        <option value="{$vo.value}">{$vo.name}</option>
+                    </if>
+                  </volist>
+                </select>
+                <a class="add-order" href="javascript:void(0)"><i class="icon-signin mr10"></i>增加主动咨询签单登记</a>
+                <div class="search">
+                    <input name="keyword" type="text" placeholder="电话/业主/小区" value="{$info.orderInfo.keyword}">
+                    <input id="btnSearch" type="button" value="查找订单">
+                </div>
+            </div>
+            <table border="0" cellpadding="0" cellspacing="0" class="ht-order-list">
+                <tr class="order-title">
+                    <td>增加日期</td>
+                    <td>咨询方式</td>
+                    <td>业主</td>
+                    <td>联系电话</td>
+                    <td>所在地区</td>
+                    <td>装修风格</td>
+                    <td>装修预算</td>
+                    <td>签单审核</td>
+                    <td>详细信息</td>
+                    <td>订单操作</td>
+                </tr>
+                <volist name="info.orderInfo.orders" id="vo">
+                <tr class="order-list">
+                    <td>{$vo.time_add|date="Y-m-d",###}</td>
+                    <td>{$vo.zxfs}</td>
+                    <td>{$vo.name}</td>
+                    <td>{$vo.tel168}</td>
+                    <td>{$vo.qz_area}</td>
+                    <td>{$vo.fg}</td>
+                    <td>{$vo.fangshi}</td>
+                    <td>
+                      <if condition="$vo['order_on'] EQ 1">
+                            已审核
+                      <else/>
+                            未审核
+                      </if>
+                    </td>
+                    <td><a href="javascript:void(0)" data-id="{$vo.id}" class="order-look">查看详情</a></td>
+                    <td><a href="javascript:void(0)" data-id="{$vo.id}" data-on="{$vo.order_on}" class="order-del">删除</a></td>
+                </tr>
+                </volist>
+            </table>
+            {$info.orderInfo.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(function(){
+        $("#btnSearch").click(function(event) {
+          var url = "/initiative/"+$("select[name=status]").val()+"/"+$("input[name=keyword]").val();
+          window.location.href = url;
+        });
+
+        $(".order-del").click(function(event) {
+            var order_on = $(this).data("on");
+
+            var tip = "确定取消删除";
+            if (order_on == "1") {
+              tip = "此订单已签约，是否确认删除";
+            }
+
+            if(confirm(tip)){
+              var id = $(this).attr("data-id");
+              var _this = $(this);
+              $.ajax({
+                url: '/delinitiativeorder',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id
+                }
+              })
+              .done(function(data) {
+                  if(data.status == 1){
+                    alert("删除成功");
+                    window.location.href =  window.location.href;
+                  }else{
+                     $.pt({
+                       target: _this,
+                       content:data.info,
+                       width: 'auto'
+                     });
+                  }
+              })
+              .fail(function(xhr) {
+                 $.pt({
+                   target: _this,
+                   content:"发生了未知不到的错误,请稍后再试！",
+                   width: 'auto'
+                 });
+              });
+            }
+        });
+
+        $(".order-look").click(function(event) {
+          var id = $(this).attr("data-id");
+          var _this = $(this);
+          $.ajax({
+            url: '/lookinitiativeorder',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id:id
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                 $("body").append(data.data);
+              }else{
+                $.pt({
+                  target: _this,
+                  content:data.info,
+                  width: 'auto'
+                });
+              }
+          })
+          .fail(function(xhr) {
+              $.pt({
+                  target: _this,
+                  content:"发生了未知不到的错误,请稍后再试！",
+                  width: 'auto'
+              });
+          });
+      });
+
+      $(".add-order").click(function(event) {
+          var _this = $(this);
+          $.ajax({
+            url: '/addinitiativeorder',
+            type: 'GET',
+            dataType: 'JSON'
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                 $("body").append(data.data);
+              }
+          })
+          .fail(function(xhr) {
+              $.pt({
+                  target: _this,
+                  content:"发生了未知不到的错误,请稍后再试！",
+                  width: 'auto'
+              });
+          });
+      });
+    });
+</script>
+</html>

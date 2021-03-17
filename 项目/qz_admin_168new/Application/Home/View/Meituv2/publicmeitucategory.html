@@ -1,0 +1,390 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>公装美图</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>公装美图--类型管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meituv2">公装美图管理</a></li>
+            <li class="active"><a href="/meituv2/publicmeitucategory">类型管理</a></li>
+        </ol>
+    </section>
+    <section class="content-header">
+        <a href="javascript:;" class="btn btn-primary add-type"><i class="fa fa-plus"></i> 添加类型</a>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="">
+                                <div class="col-xs-2 lx">
+                                    <span class="span">类型名称：</span>
+                                    <input type="text" name="categoryname" class="form-control"  placeholder="类型名称" value="{$getdata.categoryname}" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2 lx">
+                                    <span class="span">类型类别：</span>
+                                    <select name="type" id="type" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="pubcategory" id="vo">
+                                            <if condition="$getdata['type'] EQ $vo['id']">
+                                                <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                            <else />
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <button type="submit" class="btn btn-primary submit"><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <section class="content-header">
+                    <h1 class="h1">类型列表</h1>
+                </section>
+                <div class="box box-default">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                            <th class="col-sm-1">类型名称</th>
+                            <th class="col-sm-1">类别</th>
+                            <th class="col-sm-1">排序</th>
+                            <th class="col-sm-1">推荐状态</th>
+                            <th class="col-sm-1">启用状态</th>
+                            <th class="col-sm-1">添加时间</th>
+                            <th class="col-sm-1">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td class="col-sm-1">{$vo.name}</td>
+                                    <td class="col-sm-1">{$vo.parent_name}</td>
+                                    <td class="col-sm-1">{$vo.sort}</td>
+                                    <td class="col-sm-1">
+                                        <if condition="$vo['is_recommend'] EQ 1">
+                                            是
+                                            <else/>
+                                            否
+                                        </if>
+                                    </td>
+                                    <td class="col-sm-1">
+                                        <if condition="$vo['is_enable'] eq 1">
+                                            是
+                                            <else/>
+                                            否
+                                        </if>
+                                    </td>
+                                    <td class="col-sm-1">{$vo.created_at|date='Y-m-d',###}</td>
+                                    <td class="col-sm-1">
+                                        <span title="编辑" class="fa fa-pencil edit" data-id="{$vo.id}"></span>
+                                        <span title="删除标签" class="fa fa-close enabled" data-id="{$vo.id}"></span>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document" style="width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">属性管理</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal tag-form changecategory">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label>属性名</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="hidden" id="id" name="id"  class="form-control" placeholder="id">
+                                        <input type="input" id="name" name="name" maxlength="8"  class="form-control" placeholder="属性名">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>url</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="input" id="url" name="url" class="form-control" placeholder="url">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>类别</label>
+                                <select class="form-control" name="parent" id="parent" >
+                                    <option value="">请选择</option>
+                                    <volist name="pubcategory" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>标题</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="input" name="title" id="title" class="form-control" placeholder="标题">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>关键字</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="input" name="keyword" id="keyword" class="form-control" placeholder="关键字">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>描述</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <textarea name="description" id="description" cols="80" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>排序</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="number" id="sort" name="sort" value="0" min="0" class="form-control" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>是否推荐</label>
+                                <select class="form-control tag-recommend" name="is_recommend" id="is_recommend" >
+                                    <option value="1" selected>是</option>
+                                    <option value="2">否</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>是否启用</label>
+                                <select class="form-control tag-recommend" name="is_enable" id="is_enable" >
+                                    <option value="1" selected>是</option>
+                                    <option value="2">否</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary tag-save-btn">提交更改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+    // 添加类型
+    $('.add-type').click(function(){
+        //重置表单数据
+        $(".changecategory input[name=id]").val('');
+        $(".changecategory input[name=name]").val('');
+        $(".changecategory input[name=url]").val('');
+        $(".changecategory select[name=parent]").val('');
+        $(".changecategory input[name=title]").val('');
+        $(".changecategory input[name=keyword]").val('');
+        $(".changecategory textarea[name=description]").val('');
+        $(".changecategory input[name=sort]").val('');
+        $(".changecategory select[name=is_recommend]").val(1);
+        $(".changecategory select[name=is_enable]").val(1);
+        $('.error-info').html('');
+        $('#myModal').modal('show')
+    })
+
+
+    //编辑美图
+    $(".edit").click(function(event) {
+        var id = $(this).attr('data-id');
+        $("input[name=id]").val(id);
+
+         $.ajax({
+            url: '/meituv2/getcategoryinfobyid/',
+            type: 'get',
+            dataType: 'json',
+            data: {
+                id: id,
+            },
+        })
+        .done(function(data) {
+            if(data.error_code == 1){
+                $(".changecategory input[name=name]").val(data.data.name);
+                $(".changecategory input[name=url]").val(data.data.url);
+                $(".changecategory select[name=parent]").val(data.data.parent);
+                $(".changecategory input[name=title]").val(data.data.title);
+                $(".changecategory input[name=keyword]").val(data.data.keyword);
+                $(".changecategory textarea[name=description]").val(data.data.description);
+                $(".changecategory input[name=sort]").val(data.data.sort);
+                $(".changecategory select[name=is_recommend]").val(data.data.is_recommend);
+                $(".changecategory select[name=is_enable]").val(data.data.is_enable);
+            }else{
+                layer.msg(data.error_msg);
+                $("input[name=id]").val('');
+                return false
+            }
+        })
+        $('#myModal').modal('show');
+    });
+
+
+    $(".tag-save-btn").click(function(){
+
+        var id = $(".changecategory input[name=id]").val();
+        var name = $(".changecategory input[name=name]").val();
+        var url = $(".changecategory input[name=url]").val();
+        var parent = $(".changecategory select[name=parent]").val();
+        var title = $(".changecategory input[name=title]").val();
+        var keyword = $(".changecategory input[name=keyword]").val();
+        var description = $(".changecategory textarea[name=description]").val();
+        var sort = $(".changecategory input[name=sort]").val();
+        var is_recommend = $(".changecategory select[name=is_recommend]").val();
+        var is_enable = $(".changecategory select[name=is_enable]").val();
+
+        if(name == ''){
+            $(".changecategory input[name=name]").parent().parent().siblings('.error-info').html('属性名不能为空');
+            return false
+        }else{
+            $(".changecategory input[name=name]").parent().parent().siblings('.error-info').html('');
+        }
+        if(url == ''){
+            $(".changecategory input[name=url]").parent().parent().siblings('.error-info').html('url不能为空');
+            return false
+        } else {
+            var reg = /^[0-9a-zA-Z]*$/g;
+            if(!reg.test(url)){
+                $(".changecategory input[name=url]").parent().parent().siblings('.error-info').html('请输入正确的url');
+                return false;
+            }else{
+                $(".changecategory input[name=url]").parent().parent().siblings('.error-info').html('');
+            }
+        }
+        if(parent == ''){
+            $(".changecategory select[name=parent]").siblings('.error-info').html('请选择类别');
+            return false
+        }else{
+            $(".changecategory select[name=parent]").siblings('.error-info').html('');
+        }
+        if(title == ''){
+            $(".changecategory input[name=title]").parent().parent().siblings('.error-info').html('标题不能为空');
+            return false
+        }else{
+            $(".changecategory input[name=title]").parent().parent().siblings('.error-info').html('');
+        }
+        if(keyword == ''){
+            $(".changecategory input[name=keyword]").parent().parent().siblings('.error-info').html('关键字不能为空');
+            return false
+        }else{
+            $(".changecategory input[name=keyword]").parent().parent().siblings('.error-info').html('');
+        }
+        if(description == ''){
+            $(".changecategory textarea[name=description]").parent().parent().siblings('.error-info').html('描述不能为空');
+            return false
+        }else{
+            $(".changecategory textarea[name=description]").parent().parent().siblings('.error-info').html('');
+        }
+
+         $.ajax({
+            url: '/meituv2/changecategoryaction/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                type: 1,
+                id: id,
+                name: name,
+                url: url,
+                parent: parent,
+                title: title,
+                keyword: keyword,
+                description: description,
+                sort: sort,
+                is_recommend: is_recommend,
+                is_enable: is_enable,
+            },
+        })
+        .done(function(data) {
+            if(data.error_code == 1){   //1 成功
+                layer.msg(data.error_msg);
+                setTimeout(function(){
+                    history.go(0);
+                },2000)
+            }else{
+                layer.msg(data.error_msg);
+            }
+        })
+
+    });
+
+    //删除
+    $('.enabled').click(function(){
+        var id = $(this).attr('data-id');
+        if(id === ''){
+            alert('数据错误');
+            return;
+        }
+
+        layer.confirm('确认要删除此类型吗？此操作不可挽回！！！', {
+            title: '确认删除！',
+            btn: ['确定','取消'] //按钮
+        }, function(){
+             $.ajax({
+                url: '/meituv2/deletecategoryaction/',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    },
+            })
+            .done(function(data) {
+                if(data.error_code == 1){
+                    layer.msg(data.error_msg)
+                    setTimeout(function(){
+                        history.go(0);
+                    },2000)
+                }else{
+                    layer.msg(data.error_msg);
+                }
+            })
+        });
+
+    });
+    function msg(msg, fn) {
+        layer.msg(
+            msg,
+            {time: 2000,},
+            fn || function () {
+            }
+        )
+    }
+</script>
+</block>

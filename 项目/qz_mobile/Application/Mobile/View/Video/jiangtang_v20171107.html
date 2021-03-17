@@ -1,0 +1,106 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <!--样式表-->
+    <script src="/assets/mobile/js/750rem.js?v={:C('STATIC_VERSION')}"></script>
+    <link href="/assets/mobile/common/css/m-reset.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/video/css/zhuangxiujiangtang.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/video/css/dropload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/common/css/top-appentry.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</block>
+<block name="top">
+    <!-- 页面标题 -->
+    <div class="m-header-tit">{$basic.body.title}</div>
+    <!-- 页面logo -->
+    <a href="/" class="m-header-left"></a>
+</block>
+<block name="content">
+    <!--页面内容 -->
+        <div class="shipintuijian">
+            <div class="wrapbktp">
+                <a href="/video/v{$info.last.id}.html">
+                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.last.cover_img}-w400.jpg" alt="{$info.last.title}">
+                    <img class="playan" src="/assets/mobile/video/img/playanniu.png" alt="">
+                    <div class="wrapsp">
+                    <div class="shipints">{$info.last.title}</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+       <div class="zhuagnxiuxg">
+            <ul class="wrapul">
+                <volist name="info.info" id="vo">
+                    <in name="key" value="0,2,4,6,8,10,12,14,16,18,20">
+                        <li class="zxfgjj">
+                            <a href="/video/v{$vo.id}.html">
+                                <p>
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.cover_img}-w400.jpg" alt="{$vo.title}">
+                                    <span class="qishutime">{$vo.time|date="Y-m-d",###}期</span>
+                                </p>
+                                <p class="xdjyfg">{$vo.title}</p>
+                                <p class="xdjyfg_xq"><!-- <i class="fa fa-play-circle-o"></i> -->{$vo.pv} 次播放</p>
+                            </a>
+                        </li>
+                    <else />
+                        <li class="zxfgjj02">
+                            <a href="/video/v{$vo.id}.html">
+                                <p>
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.cover_img}-w400.jpg" alt="{$vo.title}">
+                                    <span class="qishutime">{$vo.time|date="Y-m-d",###}期</span>
+                                </p>
+                                <p class="xdjyfg">{$vo.title}</p>
+                                <p class="xdjyfg_xq"><!-- <i class="fa fa-play-circle-o"></i> -->{$vo.pv} 次播放</p>
+                            </a>
+                        </li>
+                    </in>
+                </volist>
+            </ul>
+        </div>
+</block>
+<block name="script">
+    <!--脚本-->
+    <script type="text/javascript" src="/assets/mobile/video/js/dropload.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    // 页数
+    var page = 0;
+    // dropload
+    $('.zhuagnxiuxg').dropload({
+        scrollArea : window,
+        loadDownFn : function(me){
+            page++;
+            // 拼接HTML
+            var result = '';
+            $.ajax({
+                type: 'GET',
+                url: '/video/jiangtang/?p=' + page,
+                dataType: 'json',
+                success: function(data){
+                    if (data.status == 1) {
+                        var domain = '{$SCHEME_HOST.scheme_full}{:C("QINIU_DOMAIN")}';
+                        var data = data.data;
+                        for(var i=0; i<data.length; i++){
+                            var css = (i%2 == 0) ? 'zxfgjj' : 'zxfgjj02';
+                            result = result + '<li class="'+css+'"><a href="/video/v'+data[i].id+'.html"><p><img src="'+domain+'/'+data[i].cover_img+'-w400.jpg"><span class="qishutime">'+data[i].time+'期</span></p><p class="xdjyfg">'+data[i].title+'</p><p class="xdjyfg_xq">'+data[i].pv+' 次播放'+'</p></a></li>'
+                        }// <i class="fa fa-play-circle-o"></i>
+                    } else {
+                        // 锁定
+                        me.lock();
+                        // 无数据
+                        me.noData();
+                    }
+
+                    // 插入数据到页面，放到最后面
+                    $('.wrapul').append(result);
+                    // 每次数据插入，必须重置
+                    me.resetload();
+
+                },
+                error: function(xhr, type){
+                    alert('Ajax error!');
+                    // 即使加载出错，也得重置
+                    me.resetload();
+                }
+            });
+        }
+    });
+    </script>
+</block>

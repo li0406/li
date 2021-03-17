@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="zh-CN" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="zh-CN" class="ie9"> <![endif]-->
+<!--[if !IE]><![endif]-->
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <title>基本资料-用户中心</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="/assets/common/css/bootstrap.min.new.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/bootstrap-responsive.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-metro.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/css/main.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+</head>
+
+<body>
+    <include file="Main:header" />
+    <div class="container mt10 inner-box basic-box">
+        <div class="row">
+            <div class="col-sm-3 page-sidebar nav-collapse basic-left">
+                <div class="row">
+                    <ul class="page-sidebar-menu">
+                        <li>
+                            <a href="javascript:void(0)">
+                                <i class="icon-user"></i> 全局设置
+                            </a>
+                            <ul class="sub-menu">
+                                <li class="sub-menu-1"><a href="/globalset">电话提供商设置</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <script type="text/javascript">
+            $(".page-sidebar .sub-menu-" + "{$navIndex}").addClass('active');
+            </script>
+            <div class="col-sm-9 basic-right">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!--                         <div class="basic-setting-title">
+                            <h3>登录设置</h3>
+                        </div> -->
+                        <form class="form-horizontal basic-form mt10">
+                            <div class="form-group">
+                                <div class="col-sm-8 col-sm-offset-2 alert alert-danger text-center hide">
+                                    <button class="close" data-dismiss="alert"></button>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label visible-ie8 visible-ie9">全局电话提供商:</label>
+                                <div class="col-sm-6 input-icon">
+                                    <select class="form-control" name="TelCenter_Channel">
+                                        <volist name="tellChannelList" id="vo" >
+                                            <option value="{$vo.id}">{$vo.full_name} {$vo.status}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label visible-ie8 visible-ie9">用户自定义选择提供商:</label>
+                                <div class="col-sm-6 input-icon">
+
+                                    <input type="text" name="TelCenter_Diy_names" value="{$info.TelCenter_Diy_names}" style="border:1px solid #b6b6b6;width: 100%;;height: 34px;" />自定义账号(多个账号以','隔开)<br />
+                                    <select class="form-control" name="TelCenter_Diy_Channel">
+                                        <volist name="tellChannelList" id="vo" >
+                                            <option value="{$vo.id}">{$vo.full_name} {$vo.status}</option>
+                                        </volist>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-2 col-sm-offset-2">
+                                    <button id="btnSave" type="sbumit" class="btn btn-block blue">保存</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-8 col-sm-offset-2 alert alert-success text-center hide">
+                                    <button class="close" data-dismiss="alert"></button>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/assets/common/js/jquery-migrate-1.2.1.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/home/js/basic.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+Basic.init();
+$(document).ready(function(){
+    $('select[name="TelCenter_Channel"]').val('{$info.TelCenter_Channel}');
+    $('select[name="TelCenter_Diy_Channel"]').val('{$info.TelCenter_Diy_Channel}');
+
+});
+$("#btnSave").click(function(event) {
+    if ($('.basic-form').validate().form()) {
+        var TelCenter_Diy_names = $('input[name="TelCenter_Diy_names"]').val();
+        if(TelCenter_Diy_names == ''){
+            alert("请填写用户姓名");
+            return false;
+        }
+        $.ajax({
+                url: '/globalset',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    "TelCenter_Channel": $('select[name="TelCenter_Channel"]').val(),
+                    "TelCenter_Diy_names": $('input[name="TelCenter_Diy_names"]').val(),
+                    "TelCenter_Diy_Channel": $('select[name="TelCenter_Diy_Channel"]').val(),
+                }
+            })
+            .done(function(data) {
+                $(".alert-success").removeClass('hide').find("span").html(data.info);
+            })
+            .fail(function(xhr) {
+                $(".alert-error").html("系统异常,请联系技术部门！");
+            });
+    }
+    return false;
+});
+</script>
+
+</html>

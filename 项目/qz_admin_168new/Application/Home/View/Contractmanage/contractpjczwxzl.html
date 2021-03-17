@@ -1,0 +1,157 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>合同/票据管理系统-外销助理</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/hetong/css/contractPublic_x150.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/hetong/css/hetongCzwxzl_x150.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/contract/css/hetongshujvswzl_x150.css?v={:C('STATIC_VERSION')}"/>
+    <link href="/assets/home/hetong/css/alert_info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+
+   </block>
+<block name="content">
+<div class="relative">
+    <!-- <div class="yqts">
+        <img src="/assets/home/hetong/images/small_laba.png" alt="" class="pull-left"><span class="pull-left">请尽快寄回本月所有合同票据哦~~</span><span class="pull-right close_laba">关闭</span>
+    </div> -->
+        <div class="main_content" id="target">
+            <div class="zhushi">
+                <span class="shuoming">释<include file="Contractmanage:explain" /></span>
+            </div>
+            <!-- 进度详情 -->
+            <include file="Contractmanage:contractprogress" />
+            <!-- 入库申请 -->
+            <include file="Contractmanage:stockapply_x150" />
+            <!-- 公司寄出 -->
+            <include file="Contractmanage:companysend" />
+            <!-- 助理审核 -->
+            <include file="Contractmanage:assistantreview" />
+            <!-- 确认收货 -->
+            <include file="Contractmanage:confirmreceipt_x150" />
+            <!-- 审核结果 -->
+            <include file="Contractmanage:examineresualt" />
+        </div>
+</div>
+<div id="bg_mask"></div>
+<div class="update_jisong">
+
+</div>
+</block>
+<block name="script">
+    <script  type="text/javascript" src="/assets/home/hetong/js/dargFlex.js?v={:C('STATIC_VERSION')}"></script>
+    <script  type="text/javascript" src="/assets/home/hetong/js/alert_info.js?V2018003051413"></script>
+    <script>
+        $(function(){
+            // $(".yqts").animate({
+            //     top:"10px"
+            // });
+            // $(".close_laba").click(function(){
+            //     $(".yqts").animate({
+            //         top:"-68px"
+            //     });
+            // });
+            $(target).dargFlex('step_item_box');
+
+            /*入库申请:导入合同*/
+            $("#step1_hetong").click(function(){
+                var text=$(this).text();
+                if(text=="提交"){
+                    //do sth
+                    $(this).text("撤销");
+                }else{
+                    //do sth
+                     $(this).text("提交");
+                }
+            });
+            /*入库申请:导入票据*/
+            $("#step1_piaoju").click(function(){
+                var text=$(this).text();
+                if(text=="提交"){
+                    //do sth
+                    $(this).text("撤销");
+                }else{
+                    //do sth
+                     $(this).text("提交");
+                }
+            });
+
+            /*入库申请: 查看更多申请记录*/
+            $("#step1_more").click(function(){
+                openWin(".win_content");
+            });
+            $(".close_win").click(function(){
+                closeWin(".win_content");
+            });
+
+            /*公司寄出：配送方式选择*/
+            $(".way_chose .jichu_way").click(function(event) {
+                var index=$(this).index();
+                $(this).removeClass('noChose');
+                $(this).siblings('.jichu_way').addClass('noChose');
+                $(this).addClass(' hasBg');
+                if(index==0){
+                    $(".peisong_box").animate({
+                        height:"30px"
+                    }, 500)
+                }else{
+                    $(".peisong_box").animate({
+                        height:"0px"
+                    }, 500)
+                }
+            });
+            $("#save_way").click(function(){
+                var number=$("input[name='step2_danhao']").val();
+                if(number!=""){
+                    $(".peisong_box").fadeOut(0);
+                    $("#kd_number").text(number);
+                    $(".update_peisong_box").fadeIn(0);
+                }
+            });
+            $(".change_number").click(function(){
+                $(".update_peisong_box").fadeOut(0);
+                $(".peisong_box").fadeIn(0);
+            });
+
+            /*确认收货*/
+            var index=$(this).parent().index();
+            /*确认收货:单个选择*/
+            $("#shouhuo_box .checkBox").click(function(){
+                var status=$(this).data("status");
+                var id=$(this).parent().data("id");
+                if(status==0){
+                    $(this).data("status",1);
+                    $(this).html("<i class='fa fa-check-square-o'></i>");
+                     /*检查是否有该项数据*/
+                    for(let i=0;i<shData.length;i++){
+                        if(shData[i]==id){
+                            shData.splice(i,1);
+                            return false;
+                        }
+                     }
+                     shData.push(id);
+                }else{
+                    $(this).data("status",0);
+                    $(this).html("<i class='fa fa-square-o'></i>");
+                    /*清除选中的数据*/
+                    for(let i=0;i<shData.length;i++){
+                        if(shData[i]==id){
+                            shData.splice(i,1);
+                            //return false;
+                        }
+                     }
+                }
+                console.log($(this).data("status"));
+            });
+        });
+        function openWin(wind){
+            $("#bg_mask").fadeIn();
+            $(wind).fadeIn();
+            $("body").css("overflow","hidden");
+        }
+        function closeWin(wind){
+            $("#bg_mask").fadeOut();
+            $(wind).fadeOut();
+            $("body").css("overflow","auto");
+        }
+    </script>
+</block>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>自发活动</title>
+<include file="Index:resource" />
+<include file="Home:resource" />
+<script type="text/javascript" src="/assets/user/event/js/jquery.smint.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready( function() {
+//    $('.ht-nav').smint({
+//    	'scrollSpeed' : 1000
+//    });
+
+    //开关
+	$('.c-switch-box').on('click',function (){
+		if($(this).find('.c-switch').hasClass('c-switch-on')){
+        $(this).find('.c-switch').removeClass('c-switch-on');
+		$(this).find('.c-switch-text').text('暂停');
+
+		}
+		else{
+			$(this).find('.c-switch').addClass('c-switch-on');
+			$(this).find('.c-switch-text').text('正在进行');
+
+		}
+	});
+});
+</script>
+
+<!--[if IE 7]>
+<link rel="stylesheet" href="css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+<![endif]-->
+<link rel="stylesheet" href="{$static_host}/assets/user/event/css/ht-event.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <include file="Home:header" />
+
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="header"/>
+       <!-- <ul class="ht-nav-tit">
+            <li class="active"><a href="/oneselfevent/">优惠活动</a></li>
+            <li class="special-gift"><a href="/oneselfevent/special">专用礼券</a></li>
+            <li class="common-gift"><a href="/oneselfevent/common">通用礼券</a></li>
+        </ul>-->
+        <div class="ht-main">
+            <div class="c-event-sefl">
+                <span class="pull-left mr10">活动状态:</span>
+                <select class="c-event-sefl-sel">
+                    <option value="0">全部</option>
+                    <option value="1">正在进行</option>
+                    <option value="2">等待中</option>
+                    <option value="3">过期活动</option>
+                    <option value="4">暂停</option>
+                </select>
+                <a class="c-event-sefl-new" href="/oneselfevent/eventup/"><i class="icon-plus mr10"></i>创建活动</a>
+            </div>
+            <ul class="c-event-tit-self">
+                <li>活动主题</li>
+                <li>活动时间</li>
+                <li>发布时间</li>
+                <li>活动状态</li>
+                <li>操作</li>
+            </ul>
+            <ul class="c-event-info-self">
+                <volist name="event" id="vo">
+                    <li <if condition="$vo['types'] eq '-1'">class="over"</if>>
+                        <a href="#">{$vo.title}</a>
+                        <div class="c-timer">{$vo.start}至{$vo.end}</div>
+                        <div class="c-timer">{$vo.time}</div>
+                        <if condition="$vo['types'] EQ '1' ">
+                            <div class="c-event-op">
+                                <div class="c-switch-box">
+                                    <if condition="$vo['state'] EQ '1'">
+                                        <div class="c-switch c-switch-on event-on" data-state="{$vo.state}" data-id="{$vo.id}">
+                                            <div class="c-switch-check"></div>
+                                        </div>
+                                        <span class="c-switch-text">正在进行</span>
+                                    <else/>
+                                        <div class="c-switch event-on" data-state="{$vo.state}" data-id="{$vo.id}">
+                                            <div class="c-switch-check"></div>
+                                        </div>
+                                        <span class="c-switch-text">暂停</span>
+                                    </if>
+                                </div>
+                            </div>
+                        </if>
+                        <if condition="$vo['types'] EQ '0' ">
+                            <div class="c-event-op">
+                                等待中
+                            </div>
+                        </if>
+                        <if condition="$vo['types'] EQ '-1' ">
+                            <div class="c-event-op">
+                                <div class="c-event-op">
+                                    过期活动
+                                </div>
+                            </div>
+                        </if>
+                        <div class="c-event-edit">
+                            <a href="/oneselfevent/eventup?id={$vo.id}" title="修改"><i class="icon-pencil"></i></a>
+                            <a href="javascript:void(0)" title="删除"><i class="icon-trash" data-id="{$vo.id}"></i></a>
+                        </div>
+                    </li>
+                </volist>
+            </ul>
+            {$page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    //反绑操作
+    var type = '{$Think.get.state|remove_xss}';
+    type = parseInt(type);
+    if (type >=0 && type <= 4) {
+        $(".c-event-sefl-sel").val(type);
+    }else{
+        $(".c-event-sefl-sel").val('0');
+    }
+    //活动暂停开关
+    $(".event-on").click(function(event) {
+        var state = $(this).attr('data-state');
+        var id = $(this).attr('data-id');
+        $.ajax({
+            url: '/oneselfevent/stopevent/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                state: state,
+                id:id
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                //window.location.href="/oneselfevent/";
+            }
+        })
+        .fail(function() {
+            console.log("error");
+        });
+
+    });
+
+    //下载选择活动状态
+    $(".c-event-sefl-sel").change(function(event) {
+        var state = $(this).children('option:selected').val();
+        window.location.href="/oneselfevent/?state=" + state;//页面跳转并传参
+    });
+
+    $(".icon-trash").click(function(event) {
+        var _this = $(this);
+        var id = _this.attr("data-id");
+        openwindow("确定删除活动吗？",function(){
+            $.ajax({
+                url: '/oneselfevent/delevent/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                   id:id
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                }else{
+                    openwindow(data.info);
+                }
+            });
+        });
+    });
+</script>
+</html>

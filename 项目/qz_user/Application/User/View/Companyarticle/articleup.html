@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/article/css/ht-article.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Companyarticle:header" />
+        <div class="ht-main">
+            <ul class="ht-aticle-change">
+                <li><span>文章分类：</span>
+                    <select class="chouse" name="type">
+                      <volist name="info.articleType" id="vo">
+                        <if condition="$info['article']['type'] EQ $vo['id']">
+                            <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                        <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                        </if>
+                      </volist>
+                    </select>
+                </li>
+                <li><span>文章标题：</span>
+                    <input name="title" type="text" placeholder="文章标题" value="{$info.article.title}"><em class="gray ml20"><i class="mr10 icon-exclamation-sign"></i>文章标题不能为空</em>
+                    <em class="red err-tips"></em>
+                    </li>
+                 <li><span class="vtop">文章描述：</span>
+                    <textarea name="subtitle" placeholder="文章描述" >{$info.article.subtitle}</textarea><em class="gray ml20"><i class="mr10 icon-exclamation-sign"></i>文章描述最多100个字符</em>
+                    <em class="red err-tips"></em>
+                    </li>
+                <li><span>文章标签：</span>
+                    <input name="keywords" type="text" placeholder="文章标签" value="{$info.article.gjz}"><em class="gray ml20"><i class="mr10 icon-exclamation-sign"></i>多个关键字请使用半角英文（逗号）隔开</em></li>
+                <li>
+                    <div  id="editor"></div>
+                    <div class="red mt20">
+                        *内容中或图片上,可写联系电话、QQ，但请勿包含 网址\其他网站LOGO\微博、微信帐号\二维码 等"相关联系方式",否则将会被删除。
+                    </div>
+                </li>
+            </ul>
+            <div class="ht-yes">
+                <a href="javascript:void(0)"><i class="icon-ok mr10"></i>确认发布</a>
+                <em class="red err-tips"></em>
+                <input name="id" type="hidden" value="{$info.article.id}" />
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(function(){
+        var ue = UE.getEditor('editor');
+        ue.addListener("ready", function () {
+            // editor准备好之后才可以使用
+            ue.setContent('{$info.article.text}');
+        });
+
+
+        $(".ht-yes a").click(function(event) {
+            $(".err-tips").html("");
+            $(".focus").removeClass('focus');
+            var _this = $(this);
+            if(!App.validate.run($("input[name=title]").val())){
+                $("input[name=title]").focus();
+                $("input[name=title]").addClass('focus');
+                $("input[name=title]").parent().find(".err-tips").html("请填写文章标题");
+                return false;
+            }
+            var content = ue.getContent();
+            if(!App.validate.run(content)){
+                _this.parent().find(".err-tips").html("亲,您的文章内容总得写点什么吧！");
+                return false;
+            }
+
+            if(App.validate.run($("textarea[name=subtitle]").val())){
+                if(!App.validate.run($("textarea[name=subtitle]").val().length,"maxlength",100)){
+                    $("textarea[name=subtitle]").focus();
+                    $("textarea[name=subtitle]").addClass('focus');
+                    $("textarea[name=subtitle]").parent().find(".err-tips").html("请精简您的案例描述！");
+                    return false;
+                }
+            }
+
+            $.ajax({
+                url: '/articleup/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    type:$("select[name=type]").val(),
+                    title: $("input[name=title]").val(),
+                    keywords:$("input[name=keywords]").val(),
+                    content:content,
+                    subtitle:$("textarea[name=subtitle]").val(),
+                    id:$("input[name=id]").val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href="/success/article/"+data.data;
+                }else{
+                    _this.parent().find(".err-tips").html(data.info);
+                }
+            })
+            .fail(function() {
+                 _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+            });
+        });
+    });
+</script>
+</html>

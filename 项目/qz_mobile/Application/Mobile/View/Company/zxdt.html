@@ -1,0 +1,256 @@
+<!--
+ * @Author: your name
+ * @Date: 2020-07-28 09:38:56
+ * @LastEditTime: 2020-08-05 18:32:32
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \qz_admin_centerd:\wamp64\www\qz_mobile\Application\Mobile\View\Company\zxdt.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link href="/assets/mobile/company/css/zxdt.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+  <block name="title">
+    <title>地图展示</title>
+  </block>
+  <block name="keywords">
+    <meta name="keywords" content="{$basic.head.keywords}" />
+  </block>
+  <block name="description">
+    <meta name="description" content="{$basic.head.description}" />
+  </block>
+  <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+  <meta content="telephone=no" name="format-detection" />
+  <meta name="applicable-device" content="mobile" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="full-screen" content="yes" />
+  <meta name="browsermode" content="application" />
+  <meta name="x5-orientation" content="portrait" />
+  <meta name="x5-fullscreen" content="true" />
+  <meta name="x5-page-mode" content="app" />
+  <if condition="$showlocation eq 1">
+    <meta name="location"
+      content="province={$cityInfo.province};city={$cityInfo.name};coord={$cityInfo.lng},{$cityInfo.lat}" />
+  </if>
+  <include file="Common:css" />
+  <block name="link"></block>
+  <include file="Common:sentry" />
+  <block name="headjs"></block>
+</head>
+
+<body>
+  <div class="m-wrap">
+    <block name="top-fadan"></block>
+    <div class="bk_gl_top_gd" style="display: none;">
+      <script type="text/javascript" src="//bd888.qizuang.com/source/x/production/sry/common/kb-ht-b.js"></script>
+    </div>
+    <header class="bor-bom">
+      <block name="top">
+        <div class="m-header-his">
+          <i class="fa fa-angle-left" onclick="goback()"></i>
+        </div>
+        <if condition="empty($cityInfo['bm'])">
+          <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/" class="m-newheader"></a>
+          <else />
+          <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$cityInfo.bm}/" class="m-newheader"></a>
+        </if>
+        <div>地图展示</div>
+      </block>
+      <div class="new-kefu-erji">
+        <div class="new-search-icon none" id="new-search-erji"></div>
+        <div class="new-app-icon app-phone" id="new-app-erji"></div>
+        <div class="new-kefu-icon none" id="new-kefu-erji"></div>
+      </div>
+      <!--头部菜单-->
+      <include file="Common:sidebar" />
+    </header>
+    <block name="content"> </block>
+  </div>
+  <div class="search-input flex">
+    <div class="flex sel-city">
+      <a href="/city">
+        <div class="cityname">{$cityInfo.name}</div>
+      </a>
+      <div class="horn"></div>
+    </div>
+    <div class="search-div">
+      <img class="search-img" src="/assets/mobile/common/img/search.png" alt="" />
+      <input class="input" oninput="watchval()" placeholder="请输入装修公司名称" class="bor-rad" type="text" />
+      <img class="x none" onclick="clearinput()" src="/assets/mobile/common/img/icon-x.png" alt="" />
+    </div>
+    <button class="bor-rad searchoff btn search" disabled>搜索</button>
+  </div>
+  <div id="allmap"></div>
+  <!-- 简要信息 -->
+  <div class="sea-foot">
+    <!-- <div class="font34 bold mar-bot">苏州品诺装饰工程有限公司</div>
+    <div class="col999 mar-bot">
+      <div class="address"></div>
+      江苏省随州市沧浪区宝带西路1188号名啥公司...
+    </div>
+    <div class="comments">
+      <p class="stars">
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+      </p>
+    </div>
+    <div class="flex mar-top font24 labels">
+      <div class="label-sty">52个精选案例</div>
+      <div class="label-sty">10在建工地</div>
+      <div class="label-sty">6名设计师</div>
+    </div> -->
+  </div>
+  <div class="msg-div">
+    <!-- 详细信息 -->
+    <div class="msg-foot">
+      <!-- <div class="detailed">
+      <div class="flex">
+        <div class="div-img">
+          <img class="det-img" src="/assets/mobile/company/img/anligd.jpg" alt="">
+        </div>
+        <div>
+          <div class="font34 bold mar-bot flex">
+            <div>苏州品诺装饰工程有限公司</div>
+            <div class="ticket">查</div>
+          </div>
+          <div class="col999 mar-bot">
+            品质承诺-无环保不装修(公司slogan)
+          </div>
+          <div class="comments">
+            <p class="starsdet">
+              <span class="star"></span>
+              <span class="star"></span>
+              <span class="star"></span>
+              <span class="star"></span>
+              <span class="star"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="flex mar-top mar-bot font24 labelsdet">
+        <div class="label-sty">52个精选案例</div>
+        <div class="label-sty">10在建工地</div>
+        <div class="label-sty">6名设计师</div>
+      </div>
+      <div class="col999">
+        <div class="address"></div>
+        江苏省随州市沧浪区宝带西路1188号名啥公司...
+      </div>
+      <div>
+        <div class="sketch-tb bold font-30">公司简介</div>
+        <div class="col999 mar-bot">
+          苏州品诺装饰工程有限公司是一家专业的室内装饰公司，公司至年成立以来，凭借年轻的设计团队，以简约,时尚,个性化的...
+        </div>
+      </div>
+      <div class="flex">
+        <div class="bold font-30">电话：</div>
+        <div class="tel bold">
+          400-6969-336
+        </div>
+      </div>
+    </div> -->
+    </div>
+    <div class="div-msg-foot tex-ali">
+      <!-- <img class="def-pag" src="/assets/mobile/company/img/def-pag.png" alt="">
+      <div>抱歉，未能搜索到该公司</div> -->
+    </div>
+    <!-- 信息和列表 -->
+    <div class="detaillist">
+      <ul>
+        <li class="det-hei font36 bold tex-ali sev"></li>
+        <div class="li-list">
+          <div class="shortlist">
+            <!-- <li class="flex spa-aro pad bor-b">
+            <div class="ars-msg">
+              <div class="font34 bold">苏州品诺装饰工程有限公司</div>
+              <div class="col999 flex mart">
+                <div class="address"></div>
+                <div>
+                  江苏省随州市沧浪区宝带西路1188号名啥公...
+                </div>
+              </div>
+            </div>
+            <div class="ret short-search">
+              <div class="tex-ali">
+                <img class="search-icon" src="/assets/mobile/company/img/search-icon.png" alt="">
+              </div>
+              <div class="mart">搜查</div>
+            </div>
+          </li> -->
+          </div>
+          <li class="flex jus-con col999 foot-hei loaddet">
+            <!-- <div class="totop">
+            <img class="topping" src="/assets/mobile/company/img/topping.png" alt="" />
+          </div>
+          <div>我也是有底线的哦～</div> -->
+          </li>
+        </div>
+      </ul>
+    </div>
+  </div>
+  <!-- 列表 -->
+  <div class="list">
+    <ul>
+      <div class="li-list-y">
+        <div class="longlist">
+          <!-- <li class="flex spa-aro pad bor-b">
+            <div class="ars-msg">
+              <div class="font34 bold">苏州品诺装饰工程有限公司</div>
+              <div class="col999 flex mart">
+                <div class="address"></div>
+                <div>
+                  江苏省随州市沧浪区宝带西路1188号名啥公...
+                </div>
+              </div>
+            </div>
+            <div class="ret long-search">
+              <div class="tex-ali">
+                <img class="search-icon" src="/assets/mobile/company/img/search-icon.png" alt="">
+              </div>
+              <div class="mart">搜查</div>
+            </div>
+          </li> -->
+        </div>
+        <li class="flex jus-con col999 foot-hei load">
+          <!-- <div class="totop">
+            <img class="topping" src="/assets/mobile/company/img/topping.png" alt="">
+          </div>
+          <div>我也是有底线的哦～</div> -->
+          <!-- <div>加载中...</div> -->
+        </li>
+      </div>
+    </ul>
+  </div>
+  <include file="Common:js" />
+  <script>
+    //   添加搜索图标
+    $('.new-kefu-erji').css('width', '90px')
+    $('#new-search-erji').click(function () {
+      window.location.href =
+        '{$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/search/'
+    })
+  </script>
+  <block name="script"></block>
+  {:OP('baidutongji1','yes')}
+  <block name="bdpush">
+    <include file="Common:baidu_js_push" />
+  </block>
+  <include file="Common:foototherjs" />
+  <if condition="$showTmp EQ 1">
+    <include file="Common:baojia" />
+  </if>
+  <if condition="$showTmp EQ 2">
+    <include file="Common:sheji-1" />
+  </if>
+</body>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/company/js/zxdt.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/mobile/company/js/fly-zomm-img.js"></script>
+
+</html>

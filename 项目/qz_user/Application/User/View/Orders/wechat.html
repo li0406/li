@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+<include file="Home:header" />
+<div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft" />
+    <include file="Orders:header" />
+    <div class="ht-main clearfix xiangdui">
+        <div class="wechat-account">
+            <h4 class="caption">已绑定账号</h4>
+            <div class="member">
+                <p class="caption">管理员1</p>
+                <ul class="member-list">
+                    <if condition="empty($info['users'][0])">
+                        <p class="add-member-icon" data-type="add-btn">+</p>
+                        <else />
+                        <li class="clearfix">
+                            <img src="{$info['users'][0]['img']}" alt="">
+                            <div class="member-info">
+                                <p>微信昵称：{$info['users'][0]['nickname']}{$info['users'][0]['sex']}</p>
+                                <p>所在城市：{$info['users'][0]['city']}</p>
+                                <i class="icon-trash del-icon" data-type="unbindwx" data-id="{$info['users'][0]['wx_unionid']}"></i>
+                            </div>
+                        </li>
+                    </if>
+                </ul>
+            </div>
+            <div class="add-member">
+                <p class="caption">管理员2</p>
+                <ul class="member-list">
+                    <if condition="empty($info['users'][1])">
+                        <p class="add-member-icon" data-type="add-btn">+</p>
+                        <else />
+                        <li class="clearfix">
+                            <img src="{$info['users'][1]['img']}" alt="">
+                            <div class="member-info">
+                                <p>微信昵称：{$info['users'][1]['nickname']}{$info['users'][1]['sex']}</p>
+                                <p>所在城市：{$info['users'][1]['city']}</p>
+                                <i class="icon-trash del-icon" data-type="unbindwx" data-id="{$info['users'][1]['wx_unionid']}"></i>
+                            </div>
+                        </li>
+                    </if>
+                </ul>
+            </div>
+            <div class="add-membernew">
+                <p class="caption">管理员3</p>
+                <ul class="member-list">
+                    <if condition="empty($info['users'][2])">
+                        <p class="add-member-icon" data-type="add-btn">+</p>
+                        <else />
+                        <li class="clearfix">
+                            <img src="{$info['users'][2]['img']}" alt="">
+                            <div class="member-info">
+                                <p>微信昵称：{$info['users'][2]['nickname']}{$info['users'][2]['sex']}</p>
+                                <p>所在城市：{$info['users'][2]['city']}</p>
+                                <i class="icon-trash del-icon" data-type="unbindwx" data-id="{$info['users'][2]['wx_unionid']}"></i>
+                            </div>
+                        </li>
+                    </if>
+                </ul>
+            </div>
+        </div>
+        <div class="wechat-tips">
+                <h4>小齐贴士</h4>
+                <p>1.绑定后微信可接收以及查看订单消息。</p>
+                <p>2.管理者可绑定一个微信，实时了解订单情况。</p>
+                <p><span>特别提示：</span>为了订单的安全性，记得关注绑定账号情况哦！</p>
+        </div>
+
+        <div class="wechat-qrcode absweiz">
+            <input type="hidden" value="{$info.wxcheckpass}" id="logining">
+            <div class="valid-phone" data-type="valid-phone-box">
+                <p class="caption">为了您的账户安全，我们需要验证您的安全手机</p>
+                <div class="simulation-table main-table">
+                    <div style="width: 20%">验证码</div>
+                    <div style="width: 55%"><input type="text" class="phone" data-type="sms"></div>
+                    <div style="width: 25%"><button type="button" class="get-code"data-type="get-code">获取验证码</button></div>
+                </div>
+                <div class="action"><span data-type="valid-action">验证</span><span data-type="valid-cancel">取消</span><i class="line"></i></div>
+            </div>
+            <div class="scan-qrcode" data-type="scan-qrcode-box">
+                <span class="closema">X</span>
+                <img src="{$info.qrimg}" alt="" class="qrcode">
+                <p class="scan" data-type="wechatstate">请使用微信扫描二维码等待用户扫描...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    /**
+     * ajax请求，所有的请求都通过这里发送
+     * @param options
+     */
+    function ajaxAction(options) {
+        var defalutOptions = {
+            url: "",
+            method: "get",
+            data: null,
+            successCallback: null,
+            failCallback: null
+        };
+        options = $.extend({}, defalutOptions, options);
+        $.ajax({
+            url: options.url,
+            data: options.data,
+            method: options.method,
+            success: function (res) {
+                options.successCallback && options.successCallback(res);
+
+            },
+            fail: function (res) {
+                options.failCallback && options.failCallback(res);
+            }
+        });
+    }
+    /**
+     * 倒计时
+     * @param sec 倒计时实现，如60s
+     * @param ele 显示容器
+     * @param callback
+     */
+    function countDown(sec, ele, callback){
+        if( $(ele).length <= 0 ){
+            var $ele = $(document);
+        }else{
+            var $ele = $(ele);
+        }
+        var s = sec || 60;
+        $ele.text(s+"s重新发送");
+        function calc(){
+            timer = setTimeout(function(){
+                s--;
+                $ele.text(s+"s重新发送");
+                if( s > 0 ){
+                    calc();
+                }else{
+                    callback && callback.call();
+                }
+            },1000);
+        }
+        calc();
+    }
+
+    $(function () {
+        var dianjirepeat=true;
+        var $addBtn = $("p[data-type='add-btn']"),
+            $validPhoneBox = $("div[data-type='valid-phone-box']"),
+            $scanQrcodeBox = $("div[data-type='scan-qrcode-box']"),
+            $getCodeBtn = $validPhoneBox.find("button[data-type='get-code']"),
+            $smsCodeInput = $validPhoneBox.find("input[data-type='sms']"),
+            $unBindWxBtn = $("i[data-type='unbindwx']");
+        var initG = function(){
+            $.ajax({
+                url: '/gtverify/initgeet',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    scence:2
+                }
+            })
+            .done(function(data) {
+                initGeetest({
+                    // 以下配置参数来自服务端 SDK
+                    gt: data.data.gt,
+                    challenge: data.data.challenge,
+                    offline: !data.data.success,
+                    new_captcha: true,
+                    product: 'bind'
+                }, function (captchaObj) {
+                    captchaObj.reset();
+                    captchaObj.onReady(function(){
+                        //验证码ready之后才能调用verify方法显示验证码
+                        captchaObj.verify();
+                    }).onSuccess(function(){
+                        var validate = captchaObj.getValidate();
+                        $.ajax({
+                            url: '/gtverify/verifygeetest',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                geetest_challenge: validate.geetest_challenge,
+                                geetest_validate: validate.geetest_validate,
+                                geetest_seccode: validate.geetest_seccode,
+                                scence:2
+                            }
+                        }).done(function(data) {
+                            if (data.status == 1) {
+                                ajaxAction({
+                                    url : "/orders/sendsms/",
+                                    method : "POST",
+                                    data:{
+                                        scence:2
+                                    },
+                                    successCallback:function (res) {
+                                        $getCodeBtn.removeAttr('disabled');
+                                        if(!res.status || res.status === 0){
+                                            $.pt({
+                                                target: $smsCodeInput,
+                                                content: res.info,
+                                                width: 'auto'
+                                            });
+                                            $getCodeBtn.removeAttr('disabled');
+                                        } else {
+                                            countDown(60, $getCodeBtn, function () {
+                                                $getCodeBtn.removeAttr('disabled').text("获取验证码");
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }).onError(function(){
+                        alert("发送失败,请稍后再试!")
+                    })
+                })
+            });
+        }
+        $addBtn.on("click",function () {
+            // 判断是否已经登录过，如果处于登录状态无需获取短信，0/""显示，1不显示
+            if( !$("#logining").val() ){
+                $validPhoneBox.fadeIn(0);
+                $('.absweiz').show();
+            }else{
+                $scanQrcodeBox.fadeIn(0);
+                $('.absweiz').show();
+                if(dianjirepeat==true){
+                    dianjirepeat=false;
+                    polling();
+                }
+                
+            }
+        });
+        $validPhoneBox.find("span[data-type='valid-action']").on("click",validSmsCode)
+        $validPhoneBox.find("span[data-type='valid-cancel']").on("click",function () {
+            $validPhoneBox.fadeOut(0);
+            $('.absweiz').hide();
+        })
+        $getCodeBtn.on("click",function(){
+            initG()
+        });
+        $unBindWxBtn.on("click", unBindWx);
+
+        function validSmsCode() {
+            if( !$smsCodeInput.val() ){
+                alert("请输入验证码");
+                return;
+            }
+            ajaxAction({
+                url : "/orders/checksms/",
+                method : "post",
+                data : {
+                    code : $smsCodeInput.val()
+                },
+                successCallback:function (res) {
+                    if(!res.status && res.status !== 0){
+                        $validPhoneBox.fadeOut(0);
+                        $scanQrcodeBox.fadeIn(0);
+                        polling();
+                    }else{
+                        $.pt({
+                            target: $smsCodeInput,
+                            content:res.info,
+                            width: 'auto'
+                        });
+                    }
+                }
+            });
+        }
+
+        function unBindWx(event) {
+            var $target = $(event.target);
+            // 解除微信绑定
+            if(confirm("确定解除绑定吗？")){
+                var id = $target.attr("data-id");
+                ajaxAction({
+                    url: '/unbindwx',
+                    method: "post",
+                    data: {
+                        id : id
+                    },
+                    successCallback: function (res) {
+                        if(res.status == 1){
+                            window.location.href = window.location.href;
+                        }else{
+                            $.pt({
+                                target: $target,
+                                content:res.info,
+                                width: 'auto'
+                            });
+                        }
+                    },
+                    failCallback: function (res) {
+                        $.pt({
+                            target: $target,
+                            content:"发生了未知的错误,请刷新后再试！",
+                            width: 'auto'
+                        });
+                    }
+                });
+            }
+
+        }
+        // 检测用户是否扫描二维码轮训
+        var timmer;
+        function polling() {
+             timmer =  setInterval(function(){
+                $.ajax({
+                    url: '/polling',
+                    type: 'POST',
+                    dataType: 'JSON'
+                })
+                    .done(function(data) {
+                        $("p[data-type='wechatstate']").html(data.info);
+                        if(data.status == 0){
+                            clearInterval(timmer);
+                        }else if(data.status == 3){
+                            // $scanQrcodeBox.find("img").attr("src",data.data);
+                            location.reload();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $("p[data-type='wechatstate']").html("");
+                        clearInterval(timmer);
+                        dianjirepeat=true;
+                    });
+            },3000);
+        }
+
+        //   关闭二维码
+        $('.scan-qrcode .closema').click(function(){
+            $('.scan-qrcode').hide();
+            $('.absweiz').hide();
+            window.clearInterval(timmer)
+            dianjirepeat=true;
+        })
+
+    })
+</script>
+</html>

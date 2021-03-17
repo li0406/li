@@ -1,0 +1,129 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/taglist.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <form action="">
+                <div class="col-xs-2">
+                    城市：
+                    <input type="text" class="form-control" value="{$tagInfo.cname}" disabled>
+                    <input type="hidden" name="tag_id" value="{$tagInfo.id}">
+                </div>
+                <div class="col-xs-2">
+                    区域：
+                    <select name="qx" class="select2">
+                        <option value="">请选择</option>
+                        <volist name="areaList" id="item">
+                            <option value="{$item.qz_areaid}" <eq name="input.qx" value="$item['qz_areaid']">selected</eq> >{$item.qz_area}</option>
+                        </volist>
+                    </select>
+                </div>
+
+                <div class="col-xs-2">
+                    装修公司：
+                    <input name="keyword" class="form-control" value="{$input.keyword}" placeholder="装修公司简称或ID" />
+                </div>
+                <div class="col-xs-1">
+                    选取状态：
+                    <select name="checked" id="is_choice" class="form-control">
+                        <option value="0">请选择</option>
+                        <option value="1" <eq name="input.checked" value="1">selected</eq> >已选取</option>
+                        <option value="2" <eq name="input.checked" value="2">selected</eq> >未选取</option>
+                    </select>
+                </div>
+                <div class="col-xs-1">
+                    <br/>
+                    <button type="submit" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                        <i class="fa fa-search"></i>查询
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-hover" id="box">
+            <tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>公司名称</th>
+                    <th>所属区域</th>
+                    <th>会员状态</th>
+                    <th>服务类型</th>
+                    <th>标识</th>
+                    <th width="140px">操作</th>
+                </tr>
+                <volist name="data.list" id="item">
+                    <tr>
+                        <td>{$item.id}</td>
+                        <td>{$item.jc}</td>
+                        <td>{$item.area_name}</td>
+                        <td>{$item.on_name}</td>
+                        <td>{$item.fuwuleixing}</td>
+                        <td>{$item.tagnames}</td>
+                        <td>
+                            <div>
+                                <input class="switch" data-id="{$item.id}" type="checkbox" <eq name="item.checked" value="1">checked</eq> >
+                            </div>
+                        </td>
+                    </tr>
+                </volist>
+                <empty name="data.list">
+                    <tr>
+                        <td colspan="7" align="center">暂无数据</td>
+                    </tr>
+                </empty>
+            </tbody>
+        </table>
+    </div>
+    <div class="box-footer no-border fenye">
+        <div class="col-xs-12">{$data.page}</div>
+    </div>
+</div>
+
+</block>
+<block name="script">
+<script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".select2").select2();
+
+        //选取操作
+        $('.table .switch').bootstrapSwitch({
+            onText: "开启",
+            offText: "关闭",
+            onColor: "success",
+            offColor: "default",
+            size: "small",
+            onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked") {
+                    var is_relation = 2;
+                    $el.attr("checked", false);
+                } else {
+                    var is_relation = 1;
+                    $el.attr("checked","checked");
+                }
+
+                $.post("/subtag/set_relation", {
+                    type: "company",
+                    tag_id: "{$tagInfo.id}",
+                    relation_id: $el.data("id"),
+                    is_relation: is_relation
+                }, function(data){
+                    if (data.status == 0) {
+                        alert(dta.info);
+                    }
+                    window.location.reload();
+                });
+            }
+        });
+    });
+</script>
+</block>

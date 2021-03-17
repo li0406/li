@@ -1,0 +1,244 @@
+<div id="myForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">选择城市:</label>
+        <div class="col-sm-3">
+            <if condition="!$link">
+                <input type="text" name="city" class="form-control" placeholder="城市/城市编号"  value="">
+             <else/>
+                <input type="text" name="city" class="form-control" placeholder="城市/城市编号"  value="{$link.cname}" disabled="disabled" real-value="{$link.cs}">
+            </if>
+        </div>
+        <div class="col-sm-5 link-error tips" style="color: red"></div>
+        <div class="col-sm-9 col-sm-offset-2 link-error">输入城市名称或编号,可以自动匹配</div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">选择类型:</label>
+        <div class="col-sm-3">
+            <select id="type" name="type" class="form-control" <if condition="!empty($link)"> disabled="disabled"</if>>
+                <option value="1" <if condition="!$link OR $link['show_class'] EQ 1">selected</if>>友情链接</option>
+                <option value="2" <if condition="$link['show_class'] EQ 2">selected</if>>热门城市</option>
+                <option value="3" <if condition="$link['show_class'] EQ 3">selected</if>>热门标签</option>
+                <option value="4" <if condition="$link['show_class'] EQ 4">selected</if>>附近城市</option>
+                <option value="5" <if condition="$link['show_class'] EQ 5">selected</if>>区域装修公司</option>
+            </select>
+        </div>
+    </div>
+    <div class="tab">
+        <div class="form-group page-tab">
+            <label class="col-sm-2 control-label">链接页面:</label>
+            <div class="col-sm-3">
+                <select name="page" class="form-control">
+                    <option value="">请选择</option>
+                    <volist name="pages" id="vo">
+                        <if condition="$link.link_page EQ $vo['page']">
+                            <option selected="selected" value="{$vo.page}">{$vo.name}</option>
+                        <else/>
+                            <option value="{$vo.page}">{$vo.name}</option>
+                        </if>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-sm-5 link-error tips"></div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">链接名称:</label>
+            <div class="col-sm-5">
+                 <input type="text" name="name" class="form-control" placeholder="链接名称"  value="{$link.link_name}">
+            </div>
+            <div class="col-sm-5 link-error tips"></div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">链接地址:</label>
+            <div class="col-sm-5">
+                 <input type="text" name="urlinput" class="form-control" placeholder="链接地址"  value="{$link.link_url}">
+            </div>
+            <div class="col-sm-5 link-error tips"></div>
+        </div>
+    </div>
+    <div class="tab" style="display:none;">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">推荐城市:</label>
+            <div class="col-sm-3">
+                <select name="citys" id="cityscheck" class="form-control" multiple="multiple">
+                    <volist name="citys" id="vo">
+                        <if condition="strstr($link['show_cs'],$vo['cid']) NEQ false">
+                            <option value="{$vo.cid}" selected="selected">{$vo.cname}</option>
+                        <else/>
+                            <option value="{$vo.cid}" >{$vo.cname}</option>
+                        </if>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-sm-5 link-error tips"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-2 pull-right">
+             <button id="btnCancel" type="button" class="btn btn-danger btn-block"  data-dismiss="modal" >关闭</button>
+        </div>
+        <if condition="!$link">
+            <div class="col-sm-2 pull-right" >
+                 <button id="btnSave" type="button" class="btn btn-success btn-block" >保存</button>
+            </div>
+        <else/>
+            <div class="col-sm-2 pull-right" >
+                 <button id="btnEdit" type="button" class="btn btn-success btn-block" >保存</button>
+            </div>
+        </if>
+    </div>
+</div>
+<script src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(function() {
+        $("#cityscheck").select2({
+            placeholder:'请选择',
+            width:'100%',
+        });
+    })
+    $('input[name=city]').autocomplete({
+        items:10,
+        source:function(query,process){
+            var matchCount = this.options.items;//返回结果集最大数量
+            if(typeof $(".city").attr("readonly") == "undefined"){
+                $.ajax({
+                    url: '/fdlink/findCityInfo',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        matchCount: matchCount,
+                        query:query
+                    },
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        return process(data.data);
+                    }
+                }).fail(function(xhr){
+                    $(".header_error").html("查询失败");
+                });
+            }
+        },
+        formatItem:function(item){
+           return item["cname"]+"( "+item["cid"]+" )";
+        },
+        setValue:function(item){
+            return {"data-value":item["cname"],"real-value":item["cid"]}
+        }
+    });
+
+    $("input[name=enabled]").bootstrapSwitch().on("switchChange.bootstrapSwitch",function(e, data){
+        if(data){
+            $(this).attr("checked","checked");
+        }else{
+            $(this).attr("checked",false);
+        }
+    });
+
+    //选择类型 切换
+    $("select[name=type]").change(function(event) {
+        $(".tab").hide();
+        if(2 == $(this).val() || 4 == $(this).val()){
+            $(".tab").eq(1).show();
+        }else{
+            //选择[区域装修公司] 则不显示 链接页面 ,因为只有分站首页显示
+            $(".tab").eq(0).show();
+            if($(this).val() == 5){
+                $('.page-tab').hide();
+            }else {
+                $('.page-tab').show();
+            }
+        }
+    });
+    $("select[name=type]").trigger('change');
+    //添加
+    $("#btnSave").click(function(event) {
+        if(chkForm()){
+            $.ajax({
+                url: '/fdlink/add',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name:$("input[name=name]").val(),
+                    cs:$("input[name=city]").attr("real-value"),
+                    url:$("input[name=urlinput]").val(),
+                    type:$("#type").val(),
+                    enabled:$("input[name=enabled]").attr("checked") == "checked"?1:0,
+                    page:$("select[name=page]").val(),
+                    citys:$("select[name=citys]").val()
+                },
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    $("#btnCancel").trigger('click');
+                    window.location.href =  window.location.href;
+                }else{
+                    $(".header_error").html(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $(".header_error").html("操作失败,请联系技术部门！");
+            });
+        }
+    });
+    //编辑后保存
+    $("#btnEdit").click(function(event) {
+        if(chkForm()){
+            $.ajax({
+                url: '/fdlink/edit',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name:$("input[name=name]").val(),
+                    url:$("input[name=urlinput]").val(),
+                    enabled:$("input[name=enabled]").attr("checked") == "checked"?1:0,
+                    citys:$("select[name=citys]").val(),
+                    page:$("select[name=page]").val(),
+                    id:"{$link.link_id}"
+                },
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    $("#btnCancel").trigger('click');
+                    window.location.href =  window.location.href;
+                }else{
+                    $(".header_error").html(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $(".header_error").html("操作失败,请联系技术部门！");
+            });
+        }
+    });
+
+    function chkForm() {
+        $(".tips").html("");
+        var type = $("#type").val();
+        if (typeof $("input[name=city]").attr("real-value") == "undefined") {
+            $("input[name=city]").focus();
+            $("input[name=city]").parent().parent().find(".tips").html("请选择城市");
+            return false;
+        }
+
+        if (type == 1 || type == 3 || type == 5) {
+            if ($("input[name=name]").val() == "") {
+                $("input[name=name]").focus();
+                $("input[name=name]").parent().parent().find(".tips").html("请填写链接名称");
+                return false;
+            }
+
+            if ($("input[name=urlinput]").val() == "") {
+                $("input[name=urlinput]").focus();
+                $("input[name=urlinput]").parent().parent().find(".tips").html("请填写链接地址");
+                return false;
+            }
+        } else if (type == 2 || type == 4) {
+            if ($("select[name=citys] option:selected").length == 0) {
+                $("select[name=citys]").focus();
+                $("select[name=citys]").parent().parent().find(".tips").html("请选择推荐城市");
+                return false;
+            }
+        }
+        return true;
+    }
+
+</script>

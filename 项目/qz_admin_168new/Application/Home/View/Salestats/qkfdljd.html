@@ -1,0 +1,366 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+	<title>全瞰-分单量进度</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+	<style type="text/css">table#reset-table thead tr th{line-height: 45px;}</style>
+	<div class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="overflow-x">
+						<div class="overflow-box" style="width: 1580px;">
+							<div class="box-header">
+								<h3><i class="xs-icon logogb quankanfdljd-icon"></i> 全瞰-分单量进度</h3>
+								<form class="form-horizontal" id="searchform">
+									<div class="from-list">
+										<div class="from-item">
+											<span class="width-auto">部门：</span>
+											<select name="dept">
+						                        <switch name="department">
+						                            <case value="0">
+						                                <option value="0" <if condition="$keyword['dept'] eq 0">selected="selected"</if>>营销中心</option>
+						                                <option value="1" <if condition="$keyword['dept'] eq 1">selected="selected"</if>>商务</option>
+						                                <option value="2" <if condition="$keyword['dept'] eq 2">selected="selected"</if>>外销</option>
+						                            </case>
+						                            <case value="1">
+						                                <option value="1" <if condition="$keyword['dept'] eq 1">selected="selected"</if>>商务</option>
+						                            </case>
+						                            <case value="2">
+						                                <option value="2" <if condition="$keyword['dept'] eq 2">selected="selected"</if>>外销</option>
+						                            </case>
+						                        </switch>
+											</select>
+										</div>
+										<div class="from-item" >
+											<span class="timer-tit">年份：</span>
+											<input type="text" name="date" class="form-control datepicker timer-input" placeholder="选择年份" value="{$keyword.year}">
+										</div>
+										<button class="search-btn xs-btn">查询</button>
+									</div>
+								</form>
+							</div>
+							<div class="box-body">
+								<div class="todo-item">
+									<div class="pull-right position-relative">
+										<i class="xs-icon zhushi-icon"></i>
+										<div class="zhushi-info">
+					                        <p>1、本页数据以部门及月份为唯一标识，其他数据均附属信息。本页数据来源为“销售系统设置”中内数据和后台提取数据</p>
+					                        <p>本页只有总裁、副总裁、司令、军长、助理可查看，其他人员不能查看。</p>
+					                        <p>2、搜索栏：</p>
+					                        <p>2.1搜索栏中的“部门”选项包含商务，外销，营销中心三个选项</p>
+					                        <p>2.2搜索中的“财年”显示2016,2017,2018,2019，2020，每一财年12个月（固定为当年的2月到次年1月）</p>
+					                        <p>2.3当员工登录此页面，“部门”显示其所在部门，“财年”默认本财年。</p>
+					                        <p>3、表格</p>
+					                        <p>3.1显示财年12行，每行代表1个月，2017财年为2017-02开始到2018-01，显示已过月份的数值，未来月数值为空，已过月份为空则说明数据源未导入。</p>
+					                        <p>3.2数值取值：为数点后6位的，实际显示1位数（四舍五入）</p>
+					                        <p>3.3所有数值取值小数点后1位，比如：15.8，15.0</p>
+					                        <p>3.4当月的数值：按照表格中的时间点，系统提取数据定格保存。</p>
+					                        <p>3.5“营销中心”的数值为：外销部和商务部的总计均值</p>
+					                        <p>3.6“外销”的数值为：外销部城市合计均值；推理“商务”相同逻辑</p>
+					                        <p>全月会员：当月合作天数≥20天。</p>
+					                        <p>2、计划月分单数均值：读取设置中的所有城市下的会员“计划月分单数”合计的均值，比如：外销部=（外销所有城市下会员的“计划月分单数”合计）/外销所有城市下会员数合计</p>
+					                        <p>3、15日分单数均值（全月会员）：当月1-15日实际累计月分单数均值，比如：外销部=（外销所有城市内会员的“实际月分单数”合计）/外销所有城市内会员数合计；会员分单量按客服实际分单时间为准。</p>
+					                        <p>3、当月数据显示：按照日期节点显示，未到日期节点不显示，显示以日期节点当日凌晨0:00的数值，比如4月16日当天数据显示为4月15日凌晨0：00的数值，不显示4月20日的数值。</p>
+					                        <p>4、所有统计数值，取次月1日凌晨0：10的数值定格保存。</p>
+					                        <p>5、全月会员：当月合作时间≥26天的会员，（可以是多个合同累计时间）</p>
+					                        <p>6、非全月会员：当月合作时间＜26天的会员，（可以是多个合同累计时间）</p>
+					                        <p>7、表格中列项的数值为访问页面角色管辖城市的合计数值，其中“XX率”为XX合计值/XX合计值*100%，角色对应的管辖城市由“销售管理系统”中“权限设置”获取。</p>
+					                        <p>8、环比、同比数据分析，取角色现在负责城市数据的对比，不考虑城市之前是谁负责。</p>
+					                        <p>9、所有列项都以表内容中最大字节尺寸为标准尺寸（字体标准11号），所有的表格每列平均尺寸，不因为显示器大小，字体的变化而改变，如果出现文字较多的表头可最多分两行显示，或表头字体变小，表内容尺寸全部一致只显示一行，文字较多的表格往右延伸。比如，表内容名字“西门吹雪”，则所有的格子列项为四个字节大小。</p>
+										</div>
+									</div>
+								</div>
+								<table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+					                <thead class="thead1" style="width: 1580px;">
+					                    <tr role="row">
+					                    	<th title="月份">月份</th>
+					                    	<th title="部门">部门</th>
+					                    	<th title="实际总会员数">实际总会员数</th>
+					                    	<th title="计划月分单数均值">计划月分单数均值</th>
+					                    	<th title="5日分单数均值(全月)">5日分单数均值(全月)</th>
+					                    	<th title="10日分单数均值(全月)">10日分单数均值(全月)</th>
+					                    	<th title="15日分单数均值(全月)">15日分单数均值(全月)</th>
+					                    	<th title="20日分单数均值(全月)">20日分单数均值(全月)</th>
+					                    	<th title="25日分单数均值(全月)">25日分单数均值(全月)</th>
+					                    	<th title="30日分单数均值(全月)">30日分单数均值(全月)</th>
+					                    	<th title="不足分单城市数(全月)">不足分单城市数(全月)</th>
+					                    	<th title="不足分单会员数(全月)">不足分单会员数(全月)</th>
+					                    </tr>
+					                </thead>
+					                <thead class="thead2" style="width: 1580px;">
+					                    <tr role="row">
+					                    	<th title="月份">月份</th>
+					                    	<th title="部门">部门</th>
+					                    	<th title="实际总会员数">实际总会员数</th>
+					                    	<th title="计划月分单数均值">计划月分单数均值</th>
+					                    	<th title="5日分单数均值(全月)">5日分单数均值(全月)</th>
+					                    	<th title="10日分单数均值(全月)">10日分单数均值(全月)</th>
+					                    	<th title="15日分单数均值(全月)">15日分单数均值(全月)</th>
+					                    	<th title="20日分单数均值(全月)">20日分单数均值(全月)</th>
+					                    	<th title="25日分单数均值(全月)">25日分单数均值(全月)</th>
+					                    	<th title="30日分单数均值(全月)">30日分单数均值(全月)</th>
+					                    	<th title="不足分单城市数(全月)">不足分单城市数(全月)</th>
+					                    	<th title="不足分单会员数(全月)">不足分单会员数(全月)</th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                    <volist name="list" id="v">
+					                        <tr role="row" class="odd">
+					                        <td><span>{$v.time}</span></td>
+											<td><span>{$v.dept}</span></td>
+											<td><span>{$v.vipnum|default="0"}</span></td>
+											<td><span>{$v.avg_jhfds|default="0"}</span></td>
+											<td><span>{$v.avg_fds5|default="0"}</span></td>
+											<td><span>{$v.avg_fds10|default="0"}</span></td>
+											<td><span>{$v.avg_fds15|default="0"}</span></td>
+											<td><span>{$v.avg_fds20|default="0"}</span></td>
+											<td><span>{$v.avg_fds25|default="0"}</span></td>
+											<td><span>{$v.avg_fds30|default="0"}</span></td>
+											<td><span>{$v.isenough|default="0"}</span></td>
+											<td><span>{$v.notenough|default="0"}</span></td>
+					                        </tr>
+					                    </volist>
+					                </tbody>
+					            </table>
+							</div>
+							<div class="box-footer text-center">
+								<div class="col-xs-12 no-padding max-width-1352">
+						        	<div id="canvas" class="col-xs-6 no-padding canvas-height-300"></div>
+									<div id="canvas1" class="col-xs-6 no-padding canvas-height-300"></div>
+						        </div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</block>
+<block name="script">
+	<script src="/assets/common/js/echarts/3.5.4/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$(function() {
+
+            {$info.dept}
+
+			// canvas
+			var dom = document.getElementById("canvas");
+			var dom1 = document.getElementById("canvas1");
+			var myChart = echarts.init(dom);
+			var myChart1 = echarts.init(dom1);
+			var option = {
+			    title : {
+			        text: '分单数环比',
+			        // subtext: '会员数',
+			        x:'left',
+			        itemGap:50,
+			        textStyle: {
+                     color: '#369beb',          // 主标题文字颜色
+                           },
+			    },
+
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$data.time.0}','{$data.time.1}','{$data.time.2}'],
+			        y:'bottom',
+			        align:'left',
+			        // itemGap:15,
+
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['5日','10日','15日','20日','25日','30日']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}',
+			            },
+			            splitArea:{
+                         show:true
+			                  },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$data.time.0}',
+			            type:'line',
+			            smooth:true,
+			            data:[{$data.fds.0}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#369beb',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$data.time.1}',
+			            type:'line',
+			            smooth:true,
+			            data:[{$data.fds.1}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#f5994c',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$data.time.2}',
+			            type:'line',
+			            smooth:true,
+			            data:[{$data.fds.2}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#de6aab'
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			var option1 = {
+			    title : {
+			        text: '分单不足城市数同比',
+			        // subtext: '会员数',
+			        x:'left',
+			        textStyle: {
+                     color: '#369beb'          // 主标题文字颜色
+                           },
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$data1.time.0}分单不足城市数','{$data1.time.1}分单不足城市数'],
+			        y:'bottom'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+                         show:true
+			                  },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$data1.time.0}分单不足城市数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$data1.city.0}],
+			            itemStyle : {
+                                normal : {
+                                        color:'#369beb',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$data1.time.1}分单不足城市数',
+			            type:'line',
+			            smooth:true,
+			            data:[{$data1.city.1}],
+			            itemStyle : {
+                                normal : {
+                                        color:'#f5994c',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			myChart.setOption(option, true);
+			myChart1.setOption(option1, true);
+			// 窗口缩放时canvas重新渲染
+			$(window).on('resize',function(){
+				var myChart = echarts.init(dom);
+				var myChart1 = echarts.init(dom1);
+				myChart.setOption(option, true);
+				myChart1.setOption(option1, true);
+			});
+
+			// 时间选择
+			$(".datepicker").datetimepicker({
+				startView:4,
+				minView:'decade',
+				format:"yyyy",
+				autoclose:true,
+				pickerPosition: "bottom-left"
+			});
+			// 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = 0;
+            $(document).on('scroll',function(){
+                if($(document).scrollTop() >= 300){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+            });
+
+		})
+	</script>
+</block>

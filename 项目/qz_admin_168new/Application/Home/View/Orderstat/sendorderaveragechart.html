@@ -1,0 +1,226 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>发单量数据分析-发单量总览</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>发单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-default">发单量走势</button>
+                            <button type="button" class="btn btn-info">发单量总览</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header text-center">
+                        <div class="box-title">多时段平均发单量柱状图</div>
+                        <a href="/orderstat/sendorderoverview/?begin={$Think.get.begin}&end={$Think.get.end}" class="btn btn-info pull-right">切换至表格</a>
+                        <div class="col-xs-12 no-padding">
+                            <a href="/orderstat/sendordertimechart/?begin={$Think.get.begin}&end={$Think.get.end}" class="btn btn-default btn-sm pull-right" style="margin-top: 10px;">按时间段查看</a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="col-xs-12">
+                            <div class="pull-left" style="line-height: 34px;">
+                                <if condition="$_GET['hb'] == 1">
+                                <input id="addHuanBi" type="checkbox" name="1" checked>
+                                <else/>
+                                <input id="addHuanBi" type="checkbox" name="1">
+                                </if>
+                                <label for="addHuanBi" class="text-warning">加入环比</label>
+                            </div>
+                            <div class="pull-left" style="line-height: 34px;padding: 0 30px;">
+                                <if condition="$_GET['tb'] == 1">
+                                <input id="addTongBi" type="checkbox" name="2" checked>
+                                <else/>
+                                <input id="addTongBi" type="checkbox" name="2">
+                                </if>
+                                <label for="addTongBi" class="text-success">加入同比</label>
+                            </div>
+
+                            <div class="col-xs-3">
+                                <div class="col-xs-11 no-padding">
+                                    <div class="btn btn-info pull-left custom">自定义</div>
+                                    <div class="input-group customTime hide">
+                                        <input type="text" class="form-control pull-right" id="reservation" placeholder="自定义时间段">
+                                        <div class="input-group-addon btn-default">取消</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="canvas" class="col-xs-11 no-padding" style="height: 600px;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    // 图表初始化渲染
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+    var option = {
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            left:'right',
+            data:['现时间段','','',''], //'加入环比','加入同比','自定义时间段'
+            itemGap:10,
+            orient:'vertical'
+        },
+        xAxis: {
+            data:['00：00-01：00', '01：00-02：00', '02：00-03：00', '03：00-04：00', '04：00-05：00', '05：00-06：00', '06：00-07：00', '07：00-08：00', '08：00-09：00', '09：00-10：00',  '10：00-11：00', '11：00-12：00', '12：00-13：00', '13：00-14：00', '14：00-15：00', '15：00-16：00', '16：00-17：00', '17：00-18：00', '18：00-19：00', '19：00-20：00', '20：00-21：00', '21：00-22：00', '22：00-23：00', '23：00-24：00'],
+            axisLabel: {
+                interval: 0,
+                rotate: 60,
+            }
+        },
+        yAxis: {},
+        series: [
+            {
+                name: '现时间段',
+                type: 'bar',
+                data: {$data.now|json_encode}
+            },
+            {
+                name: '加入环比',
+                type: 'bar',
+                // data: [1, 3, 5, 0.5, 4.5, 2, 5, 4, 2.5, 7]
+            },
+            {
+                name: '加入同比',
+                type: 'bar',
+                // data: [7, 1.4, 2.1, 7.4, 1.5, 2.9, 5,2,8, 7]
+            },
+            {
+                name: '自定义时间段',
+                type: 'bar',
+                data: {$data.custom|json_encode}
+            }
+        ]
+    };
+    var customData = {$data.custom|json_encode};
+
+    if (customData != null) {
+        option.series[3].data = {$data.custom|json_encode};
+        option.series[3].name  = '自定义{$data.date.custom.begin}到{$data.date.custom.end}';
+        option.legend.data[3] = '自定义{$data.date.custom.begin}到{$data.date.custom.end}';
+    }
+
+    myChart.setOption(option);
+
+    // 自定义时间段需选择
+    $('.custom').on('click',function(){ // 自定义按钮操作
+        $(this).addClass('hide');
+        $('.customTime').removeClass('hide');
+    });
+    $('.customTime .btn-default').on('click',function(){ // 取消操作
+        $('.custom').removeClass('hide');
+        $('.customTime').addClass('hide');
+        if(option.series[3].data){
+            option.series[3].data = '';
+            option.legend.data[3] = '';
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+    });
+    $('#reservation').daterangepicker( // 时间段选择
+        {
+            format: 'YYYY/MM/DD',
+            "alwaysShowCalendars": true,
+            locale : {
+                applyLabel : '确定',
+                cancelLabel : '取消',
+                fromLabel : '起始时间',
+                toLabel : '结束时间',
+                customRangeLabel : '自定义',
+                daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+                monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                        '七月', '八月', '九月', '十月', '十一月', '十二月' ],
+                firstDay : 1
+            },
+            startDate: "{$substart|default=''}",
+            endDate: "{$subend|default=''}"
+        },
+        function(start, end, label) {
+            var hb = $("#addHuanBi").attr("checked") == "checked"?1:0;
+            var tb = $("#addTongBi").attr("checked") == "checked"?1:0;
+            window.location.href = "/orderstat/sendorderaveragechart?begin={$begin}&end={$end}&substart="+start.format('MM/DD/YY')+"&subend="+end.format('MM/DD/YY')+"&hb="+hb+"&tb="+tb;
+    });
+
+    // 窗口大小改变时，图表重新渲染
+    window.onresize=function(){
+        var myChart = echarts.init(Dom);
+        myChart.setOption(option);
+    }
+
+    // 选择多条数据------加入环比、加入同比
+    $('input[type="checkbox"]').each(function(index, el) {
+        var opt = option;
+        if ($(this).prop('checked')) {
+            if($(this).attr('name') == "1"){
+                option.series[1].data = {$data.before|json_encode};
+                option.series[1].name = '加入环比{$data.date.before.begin}到{$data.date.before.end}';
+                option.legend.data[1] = '加入环比{$data.date.before.begin}到{$data.date.before.end}';
+            }else{
+                option.series[2].data = {$data.lastyear|json_encode};
+                option.series[2].name  = '加入同比{$data.date.lastyear.begin}到{$data.date.lastyear.end}';
+                option.legend.data[2] = '加入同比{$data.date.lastyear.begin}到{$data.date.lastyear.end}';
+            }
+
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+        $(this).on('click', function(){
+            if($(this).prop('checked')){
+                if($(this).attr('name') == "1"){
+                    option.series[1].data = {$data.before|json_encode};
+                    option.series[1].name = '加入环比{$data.date.before.begin}到{$data.date.before.end}';
+                    option.legend.data[1] = '加入环比{$data.date.before.begin}到{$data.date.before.end}';
+
+                }else{
+                    option.series[2].data = {$data.lastyear|json_encode};
+                    option.series[2].name  = '加入同比{$data.date.lastyear.begin}到{$data.date.lastyear.end}';
+                    option.legend.data[2] = '加入同比{$data.date.lastyear.begin}到{$data.date.lastyear.end}';
+                }
+
+                var myChart = echarts.init(Dom);
+                    myChart.setOption(option);
+                $(this).attr("checked","checked");
+            }else{
+                if($(this).attr('name') == "1"){
+                    option.series[1].data = '';
+                    option.legend.data[1] = '';
+                }else{
+                    option.series[2].data = '';
+                    option.legend.data[2] = '';
+                }
+                var myChart = echarts.init(Dom);
+                    myChart.setOption(option);
+                $(this).attr("checked",false);
+            }
+        });
+    });
+</script>
+</block>

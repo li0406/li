@@ -1,0 +1,288 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>发单黑名单</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/home/phoneblack/css/index.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>
+            <span>
+                发单黑名单
+            </span>
+        </h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" action="">
+                                <div class="form-group">
+                                    <div class="col-xs-8">
+                                        <div class="col-xs-2">
+                                            <div>手机号码：</div>
+                                            <input type="text" maxlength="11" name="tel" placeholder="请输入手机号码" class="form-control"value="{$_GET['tel']}">
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div>封禁时间-开始：</div>
+                                            <input type="text" name="start" class="form-control datepicker" autocomplete="off" placeholder="请选择" value="{$_GET['start']}">
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div>封禁时间-结束：</div>
+                                            <input type="text" name="end" class="form-control datepicker" placeholder="请选择" autocomplete="off" value="{$_GET['end']}">
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div>城市：</div>
+                                            <select id="city" name="cs" type="text" class="form-control select2">
+                                                <option value="" >请选择</option>
+                                                <volist name="citys" id="vo">
+                                                <option value="{$vo.cname}" {$_GET['cs']==$vo[cname]?'selected':''}>{$vo.char_name}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div>是否合作：</div>
+                                            <select id="operate" name="status" class="form-control">
+                                                <option value="">请选择</option>
+                                                <option value="1" {$_GET['status']==1?'selected':''}>是</option>
+                                                <option value="2" {$_GET['status']==2?'selected':''}>否</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-4" style="margin-top:18px;margin-left:-100px;">
+                                        <button type="submit" id="search" class="btn btn-info">查询</button>
+                                        <a target="_blank" href="/phoneblack?&export=1&{$_SERVER['QUERY_STRING']}" class="daochu_btn">导出EXCEL</a>
+                                        <button type="button" id="addblack" class="btn btn-info">添加黑名单</button>
+                                        <button type="button" id="daoru" class="btn btn-info">批量导入</button>
+                                        <a target="_blank" href="//{:C('QINIU_DOMAIN')}/custom/20191012/FkMmDMxvDPlD5ACKHW8SCVtAxUGQ.xlsx" class="btn btn-info">模板下载</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <p class="phoneblack">发单黑名单</p>
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>手机号码</th>
+                                <th>手机归属地</th>
+                                <th>所属装修公司</th>
+                                <th>是否合作</th>
+                                <th>封禁时间</th>
+                                <th>操作人</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>{:((I('get.p',1,'intval') - 1) * 20 ) + $key + 1}</td>
+                                <td>{$vo.tel}</td>
+                                <td>{$vo.location_city}</td>
+                                <td>{$vo.jc|default="--"}</td>
+                                <td><notempty name="vo.company_id">
+                                    <if condition="in_array($vo['on'],[2,-4]) && $vo['fake']== 0">是<else/>否</if>
+                                    </notempty>
+                                </td>
+                                <td>{$vo.optime|date="Y-m-d H:i:s",###}</td>
+                                <td>{$vo.opadmin.name}</td>
+                                <td class="release" data-id="{$vo.id}">解禁</td>
+                            </tr>
+                            </volist>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="page">
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--添加黑名单模态框-->
+            <div class="phoneblack-mask">
+                <div class="phoneblack-modal">
+                    <div class="modal-top">
+                        添加黑名单
+                        <span class="modal-closebtn">×</span>
+                    </div>
+                    <div class="modal-content">
+                        <div>
+                            <label><span class="red">*</span>手机号码：</label>
+                            <input type="text" maxlength="11" class="form-control modal-tele" />
+                        </div>
+                        <div>
+                            <label>装修公司名称：</label>
+                            <input class="form-control modal-conpany" />
+                        </div>
+                    </div>
+                    <button type="button" class="modal-save">保存</button>
+                </div>
+            </div>
+            <!--批量导入模态框-->
+            <div class="daoru-mask">
+                <div class="daoru-modal">
+                    <div class="modal-top">
+                        批量导入
+                        <span class="modal-closebtn">×</span>
+                    </div>
+                    <p class="daoru-des">选择要导入的Excel表：</p>
+                    <div style="width:94%;margin-left: 15px">
+                        <form>
+                            <div class="form-group">
+                                <div class=" file-group">
+                                    <input id="fileUp" name="excel" type="file"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(".select2").select2();
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+            $("input[type='radio']").eq(1).attr("checked", true);
+
+            //搜索
+            $("#search").click(function () {
+                var start_time = $("input[name=start]").val();
+                var end_time = $("input[name=end]").val();
+                if(!start_time && end_time){
+                    layer.msg('请选择封禁开始时间');
+                    return false
+                }
+                if(start_time && !end_time){
+                    layer.msg('请选择封禁结束时间');
+                    return false
+                }
+                if(new Date(start_time).getTime() > new Date(end_time).getTime()){
+                    layer.msg('封禁开始时间不能大于封禁结束时间');
+                    return false
+                }
+            });
+
+            //解禁
+            $(".release").click(function () {
+                var id = $(this).data('id')
+                layer.confirm('是否将该手机号码从黑名单中删除？', {
+                    btn: ['确定','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/phoneblack/delblack',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id,
+                        }
+                    }).done(function(data) {
+                        if(data.error_code === 0){
+                            layer.msg('已删除', {time:1500},function () {
+                                location.reload();
+                            });
+                        }
+                    }).fail(function(xhr) {
+
+                    })
+                });
+            });
+
+            //添加黑名单
+            $("#addblack").click(function () {
+                $(".phoneblack-mask").show();
+            });
+            //关闭黑名单弹窗
+            $("body").on("click",".modal-closebtn",function () {
+                $(".phoneblack-mask").hide();
+                $(".daoru-mask").hide();
+                $(".modal-content input").val('');
+                $("#no").attr("checked","checked");
+            });
+
+            //黑名单保存
+            $("body").on("click",".modal-save",function () {
+                var tele = $(".modal-tele").val();
+                var company_name = $(".modal-conpany").val();
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if(tele == ''){
+                    layer.msg('请填写手机号码');
+                    return false
+                }else if(!reg.test(tele)){
+                    layer.msg('请填写正确的手机号码');
+                    return false
+                }
+                $.ajax({
+                    url: '/phoneblack/saveblack/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        tel: tele,
+                        jc: company_name
+                    }
+                }).done(function(data) {
+                    if(data.error_code == 0){
+                        $(".phoneblack-mask").hide();
+                        layer.msg(data.error_msg, {time:1500},function () {
+                            location.reload();
+                        });
+                    } else {
+                        layer.msg(data.error_msg, {time:1500});
+                    }
+                    return false;
+                }).fail(function(xhr) {
+                    layer.msg(data.error_msg);
+                })
+            });
+            //批量导入
+            $("#daoru").click(function () {
+                $(".daoru-mask").show()
+            });
+            $("#fileUp").fileinput({
+                language: 'zh', //设置语言,
+                allowedFileExtensions: ['xls', 'xlsx'],
+                uploadUrl: "/phoneblack/import",
+                browseClass: "btn btn-primary",
+                uploadClass: "btn btn-info",
+                removeClass: "btn btn-danger",
+                showPreview: false,
+                uploadAsync: true,
+                showRemove: true,
+                showCancel: false,
+                showUpload: true,
+                maxFileCount: 1,
+                dropZoneEnabled: false
+            }).on('fileuploaded', function (event, data) {
+                if(data.response.error_code == 0){
+                    layer.msg(data.response.error_msg, {time:1500},function () {
+                        location.reload();
+                    });
+                    return false;
+                }else{
+                    layer.msg(data.response.error_msg)
+                    window.location.href = window.location.href
+                }
+            });
+        })
+    </script>
+</block>

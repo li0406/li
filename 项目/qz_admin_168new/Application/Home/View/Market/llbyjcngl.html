@@ -1,0 +1,266 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>流量部业绩 - 财年概览</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header">
+    <div class="box">
+        <div class="box-header with-border boxlh no-padding">
+            <h3 class="box-title pull-left bxt col-xs-2">流量部业绩</h3>
+            <div class="col-xs-1 text-center  no-padding"><a href="/market/llbyjygl/">月概览</a></div>
+            <div class="col-xs-1 text-center bg-info no-padding"><a href="/market/llbyjcngl/">财年概览</a></div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">条件查询</h3>
+        </div>
+        <div class="box-body">
+            <span class="pull-left lh-34">选择时间：</span>
+            <div class="col-xs-2">
+                <input type="text" name="year" class="form-control datepicker btn-flat" value="{$main.year}">
+            </div>
+            <div class="btn btn-info search-btn"><i class="fa fa-search"></i>&nbsp;查询</div>
+        </div>
+    </div>
+    <div class="box no-border">
+        <div class="box-body no-padding">
+            <div class="col-xs-12 caliang">
+                <!-- canvas -->
+                <div class="col-xs-6" id="canvas2"></div>
+                <div class="col-xs-6" id="canvas3"></div>
+
+            </div>
+        </div>
+    </div>
+    <div class="box no-border">
+        <div class="box-header">
+            <span class="pull-left h4">数据项选择：</span>
+            <div class="col-xs-2">
+                <select class="form-control" name="select-list">
+                    <option value="#uv-body">自然流量(UV)财年达成</option>
+                    <option value="#order-body">分单量财年达成</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="box-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>月份</th>
+                            <th>目标值</th>
+                            <th>完成值</th>
+                            <th>财年累计目标值</th>
+                            <th>财年累计完成值</th>
+                            <th>财年时间进度</th>
+                            <th>财年完成进度</th>
+                            <th>超出财年进度</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uv-body">
+                        <volist name="main.list_uv" id="vi">
+                            <tr>
+                                <th scope="row">{$vi.month}</th>
+                                <td>{$vi.mb}</td>
+                                <td>{$vi.wc}</td>
+                                <td>{$vi.ljmb}</td>
+                                <td>{$vi.ljwc}</td>
+                                <td>{:number_format((($key + 1) / 12 * 100) , 2)}%</td>
+                                <td>{:number_format((($vi['ljwc'] / $vi['ljmb']) * (($key + 1) / 12) * 100) , 2)}%</td>
+                                <td>
+                                    {:number_format(((($vi['ljwc'] / $vi['ljmb']) * (($key + 1) / 12) - (($key + 1) / 12)) * 100) , 2)}%
+                                </td>
+                            </tr>
+                        </volist>
+                    </tbody>
+                    <tbody id="order-body" class="hidden">
+                        <volist name="main.list_order" id="vi">
+                            <tr>
+                                <th scope="row">{$vi.month}</th>
+                                <td>{$vi.mb}</td>
+                                <td>{$vi.wc}</td>
+                                <td>{$vi.ljmb}</td>
+                                <td>{$vi.ljwc}</td>
+                                <td>{:number_format((($key + 1) / 12 * 100) , 2)}%</td>
+                                <td>{:number_format((($vi['ljwc'] / $vi['ljmb']) * (($key + 1) / 12) * 100) , 2)}%</td>
+                                <td>
+                                    {:number_format(((($vi['ljwc'] / $vi['ljmb']) * (($key + 1) / 12) - (($key + 1) / 12)) * 100) , 2)}%
+                                </td>
+                            </tr>
+                        </volist>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+
+        $('select[name=select-list]').change(function(event) {
+            $('table').find('tbody').addClass('hidden');
+            $($(this).val()).removeClass('hidden');
+        });
+
+        $('.search-btn').click(function(event) {
+            window.location.href = '/market/llbyjcngl/?year=' + $('input[name=year]').val();
+        });
+
+        var dom2 = document.getElementById('canvas2');
+        var dom3 = document.getElementById('canvas3');
+
+        var myChart2 = echarts.init(dom2);
+        var myChart3 = echarts.init(dom3);
+
+        var option2 = {
+            title : {
+                text: '自然流量（UV）财年达成',
+                x:'left',
+                y:20,
+                textStyle:{
+                    fontSize: 14,
+                    fontWeight: 'bolder',
+                    color: '#333'
+                }
+            },
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['目标量','完成量'],
+                show:true,
+                y:20,
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    magicType : {show: false, type: ['line', 'bar']},
+                    restore : {show: false},
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    data : {:json_encode($main['echart_uv']['xAxis'])}
+                }
+            ],
+            yAxis : [
+                {
+                type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'目标量',
+                    type:'bar',
+                    data:{:json_encode($main['echart_uv']['series']['mb'])},
+                    itemStyle:{
+                        normal:{color:'#ff7f50'}
+                    }
+                },
+                {
+                    name:'完成量',
+                    type:'bar',
+                    data:{:json_encode($main['echart_uv']['series']['wc'])},
+                    itemStyle:{
+                        normal:{color:'#87cefa'}
+                    }
+                }
+            ]
+        };
+        var option3 = {
+            title : {
+                text: '分单量财年达成',
+                x:'left',
+                y:20,
+                textStyle:{
+                    fontSize: 14,
+                    fontWeight: 'bolder',
+                    color: '#333'
+                }
+            },
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['目标量','完成量'],
+                show:true,
+                y:20,
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    magicType : {show: false, type: ['line', 'bar']},
+                    restore : {show: false},
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    data : {:json_encode($main['echart_order']['xAxis'])}
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'目标量',
+                    type:'bar',
+                    data:{:json_encode($main['echart_order']['series']['mb'])},
+                    itemStyle:{
+                        normal:{color:'#ff7f50'}
+                    }
+                },
+                {
+                    name:'完成量',
+                    type:'bar',
+                    data:{:json_encode($main['echart_order']['series']['wc'])},
+                    itemStyle:{
+                        normal:{color:'#87cefa'}
+                    }
+                }
+            ]
+        };
+
+        myChart2.setOption(option2, true);
+        myChart3.setOption(option3, true);
+
+        // 页面尺寸改变时canvas重新渲染
+        $(window).on('resize',function(){
+
+            var myChart2 = echarts.init(dom2);
+            var myChart3 = echarts.init(dom3);
+
+            myChart2.setOption(option2, true);
+            myChart3.setOption(option2, true);
+        });
+        // 时间选择
+        $(".datepicker").datetimepicker({
+            startView: 4,
+            minView:'decade',
+            format:"yyyy",
+            autoclose:true,
+            pickerPosition: "bottom-left"
+        });
+});
+</script>
+</block>

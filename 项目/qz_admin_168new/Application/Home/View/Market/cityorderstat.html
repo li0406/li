@@ -1,0 +1,146 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>每月访客按城市分析</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content-header">
+    <h1>每月访客按城市分析</h1>
+    <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        <li class="active">每月访客按城市分析</li>
+    </ol>
+</section>
+<section class="content">
+<div class="box">
+    <div class="box-body act-box">
+        <form method="get" action="/market/cityorderstat/">
+        <div class="col-sm-2">
+            <input type="text" name="date" class="form-control datepicker" placeholder="选择月份" value="{$Think.get.date}">
+        </div>
+
+        <div class="col-sm-1">
+            <div class="input-group">
+                <div class="input-group-btn">
+                     <button type="submit"  class="btn btn-info"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                    <button type="button" id="export" class="btn btn-info"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+<div class="box-body table-responsive no-padding">
+    <div class="box">
+        <table id="myTable" class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>城市</th>
+                    <th>月份</th>
+                    <th>UV</th>
+                    <th>发单量</th>
+                    <th>实际分单量</th>
+                    <th>发单转化率</th>
+                    <th>实际分单率</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="vo" >
+                <volist name="vo.date" id="v" key="k" >
+                <if condition="$k EQ 1">
+                <tr data-index="1">
+                    <td rowspan="{:count($vo['date'])+1}" valign="center">{$vo.info.cname}</td>
+                    <td>{$key}</td>
+                    <td>-</td>
+                    <td>{$v.orders|default=0}</td>
+                    <td>{$v.realCount|default=0}</td>
+                    <td>-</td>
+                    <td>{$v.rate|default=0}%</td>
+                </tr>
+                <else/>
+                <tr>
+                    <td>{$key}</td>
+                    <td>-</td>
+                    <td>{$v.orders|default=0}</td>
+                    <td>{$v.realCount|default=0}</td>
+                    <td>-</td>
+                    <td>{$v.rate|default=0}%</td>
+                </tr>
+                </if>
+                </volist>
+                <tr>
+                    <td>平均</td>
+                    <td>-</td>
+                    <td>{$vo.avg|default=0}</td>
+                    <td>{$vo.fen_avg|default=0}</td>
+                    <td>-</td>
+                    <td>{$vo.rate_avg|default=0}%</td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+</div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+ <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".datepicker").datepicker({
+        format:"yyyy-mm",
+        minViewMode:2
+    });
+
+    $("#export").click(function(event) {
+        var colums = [];
+        var data = [];
+        $("#myTable th").each(function() {
+            var text = $(this).text().trim();
+            var sub = [];
+            sub["text"] = text;
+            colums.push(sub);
+        });
+        data.push(colums);
+
+        $("#myTable tbody tr").each(function(i) {
+            var tr = $(this);
+            var sub = [];
+            var index = 0;
+
+            var rowspan = $(this).find("td").eq(0).attr("rowspan");
+            if (typeof rowspan == "undefined") {
+                var _empty = {
+                    text: " "
+                }
+                sub.push(_empty);
+            }
+
+            tr.find("td").each(function(j) {
+                var text = $(this).text().trim();
+                var _td = {
+                    text: text
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data: data,
+            title: "每月访客按城市分析",
+            url: "/export/downloadcityorder"
+        });
+    });
+
+</script>
+</block>

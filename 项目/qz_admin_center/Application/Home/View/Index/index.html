@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>登录-用户中心</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="/assets/common/css/bootstrap.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/bootstrap-responsive.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-metro.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-responsive.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" id="style_color" />
+    <link href="/assets/common/css/uniform.default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/css/login.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+</head>
+<body class="login">
+    <div class="login-list">
+        <div class="logo">
+            <img src="/assets/common/img/logo.png" alt="" />
+        </div>
+        <div class="content">
+            <form class="login-form">
+            <h3 class="form-title">登录</h3>
+            <div class="alert alert-error hide">
+                <button class="close" data-dismiss="alert"></button>
+                <span>登录失败</span>
+            </div>
+            <div class="control-group">
+                <label class="control-label visible-ie8 visible-ie9">用户名</label>
+                <div class="controls">
+                    <div class="input-icon left">
+                        <i class="icon-user"></i>
+                        <input class="m-wrap placeholder-no-fix" type="text" placeholder="登录账号" name="username" />
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label visible-ie8 visible-ie9">密码</label>
+                <div class="controls">
+                    <div class="input-icon left">
+                        <i class="icon-lock"></i>
+                        <input class="m-wrap placeholder-no-fix" type="password" placeholder="登录密码" name="password" />
+                    </div>
+                </div>
+            </div>
+            <div class="control-group verity">
+                {$verify}
+            </div>
+            <div class="form-actions">
+                <button id="btnLogin" type="submit" class="btn green pull-right">
+                    登录 <i class="m-icon-swapright m-icon-white"></i>
+                </button>
+            </div>
+            </form>
+            <div class="forget-password">
+                <h4>忘记密码 ?</h4>
+                <p>
+                    别担心, 点击 <a href="javascript:void(0)" class="" id="forget-password">这里</a> 重置你的密码
+                </p>
+            </div>
+        </div>
+        <div class="copyright">
+           &copy;{:date('Y')} Www.QiZuang.Com. All Rights Reserved
+        </div>
+    </div>
+    <!-- END COPYRIGHT -->
+    <!-- BEGIN CORE PLUGINS -->
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script src="/assets/common/js/jquery-migrate-1.2.1.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+    <script src="/assets/common/js/jquery-ui-1.10.1.custom.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script src="/assets/common/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <!--[if lt IE 9]>
+    <script src="/assets/common/js/excanvas.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/respond.min.js?v={:C('STATIC_VERSION')}"></script>
+    <![endif]-->
+    <!-- END CORE PLUGINS -->
+    <!-- BEGIN PAGE LEVEL SCRIPTS -->
+    <script src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script src="/assets/common/js/login.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <!-- <script src="/assets/common/js/app.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script> -->
+    <!-- END PAGE LEVEL SCRIPTS -->
+    <script>
+        $(function(){
+            Login.init();
+            $("#btnLogin").click(function(event) {
+                if ($('.login-form').validate().form()) {
+                    $.ajax({
+                        url: '/login',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            name:$("input[name=username]").val(),
+                            pwd:$("input[name=password]").val(),
+                            verify:$("input[name=verify]").val()
+                        }
+                    })
+                    .done(function(data) {
+
+                        if(data.status == 1){
+                            $(".alert-error").hide();
+                            window.location.href="/main";
+                        }else{
+                            if(data.data != ""){
+                                $(".verity").html(data.data);
+                            }
+
+                            $(".alert-error").show().html(data.info);
+                        }
+                    })
+                    .fail(function() {
+                        $(".alert-error").show().html("系统异常,尝试登录失败！");
+                    });
+                }
+                return false;
+            });
+        });
+
+        $("#forget-password").click(function(event) {
+           window.location.href = "/forgetpwd";
+           return false;
+        });
+    </script>
+    <!-- END JAVASCRIPTS -->
+</body>
+<!-- END BODY -->
+</html>

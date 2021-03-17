@@ -1,0 +1,209 @@
+<!--开票上传-->
+<link rel="stylesheet" type="text/css" href="/assets/home/contractmanage/css/uploaddocument.css?v={:C('STATIC_VERSION')}">
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">
+            照片上传
+        </span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line">
+        </span>
+    </div>
+    <div class="step1 step-container kaipiaosc upload-document-wrap">
+        <form id="step4_contract_code">
+            <div class="kpscinput">
+                <span class="shuruhet" style="color: red;">重要提示：输入格式为7位有效数字</span>
+            </div>
+            <div class="kpscinput">
+                <span class="shuruhet">输入合同编号：</span>
+                <input type="text" class="upload-document-input-wrap upload-document-input-contract">
+                <button type="button" class="upload-document-search-button">查询</button>
+                <span class="upload-document-search-contract-info"></span>
+            </div>
+            <div class="input_box_line no_height upload-document-contract">
+                <span class="pull-left label_name">
+                    上传合同：
+                </span>
+                <div class="upload-document-preview-wrap" data-id="0">
+                    <div class="upload_img_list pull-left">
+                    </div>
+                </div>
+                <div class="upload_img_list pull-left owf" id="hetong_img_list"></div>
+                <div class="upload_input_box pull-left">
+                    <input data-type="contract"  type="file" id="upload_hetong">
+                </div>
+                <span class="pull-left jingao">
+                    上传图片务必要清晰
+                </span>
+            </div>
+            <div class="kpscinput">
+                <span class="shuruhet">输入票据编号：</span>
+                <input type="text" class="upload-document-input-wrap upload-document-input-piaoju" disabled="disabled">
+                <span class="upload-document-search-piaoju-info"></span>
+            </div>
+            <div class="input_box_line no_height upload-document-piaoju">
+                <span class="pull-left label_name">
+                    上传票据：
+                </span>
+                <div class="upload-document-preview-wrap" data-id="0">
+                    <div class="upload_img_list pull-left">
+                    </div>
+                </div>
+                <div class="upload_img_list pull-left owf" id="hetong_img_list"></div>
+                <div class="upload_input_box pull-left">
+                    <input data-type="piaoju" type="file" id="upload_hetong">
+                </div>
+                <span class="pull-left jingao">
+                    上传图片务必要清晰
+                </span>
+            </div>
+            <div class="qurbcwaik text-center">
+                <button type="button" class="button upload-document-submit-save">
+                    确认保存
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="/assets/common/js/plugins/jquery-attach/js/jquery.attach.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+        //图片上传功能
+        $(".upload-document-wrap :input[type='file']").attachsvr({
+            onComplete:function(json,wrap){
+                $(wrap).parent().parent().find('.upload-document-preview-wrap .upload_img_list').find('.img_box_container:last').find('img').attr('data-key', json.data.name);
+            },
+            onProgress:function(xhr){
+                console.log("progress,在这里可以添加loading 效果",parseInt(xhr.loaded/xhr.totalSize*100)+"%")
+            },
+            onCheck:function(file, wrap){
+                //文件预览
+                var reader = new FileReader();
+                reader.onload = function ( event ) {
+                    //预览样式
+                    var str =  '<div class="img_box_container pull-left">' +
+                                    '<div class="remove_img">' +
+                                        '<i class="fa fa-close"></i>' +
+                                    '</div>' +
+                                    '<div>' +
+                                        '<img class="document-file" src="'+event.target.result+'">' +
+                                    '</div>' +
+                                '</div>';
+                    var previewListObject = $(str);
+                    previewListObject.find('.remove_img').click(function(event) {
+                        $(this).parent().remove();
+                    });
+                    $(wrap).parent().parent().find('.upload-document-preview-wrap .upload_img_list').append(previewListObject);
+                };
+                reader.readAsDataURL(file[0].files[0]);
+                return true;
+            },
+            onError:function(e){console.log("error",e)},
+            ctxdata:{
+                "token":"{$vars.token}"
+            },
+            script:"http://upload.qiniu.com/",
+            uploadkey:"file",
+            filetype:[".jpg",".png",".jpeg"]
+        });
+
+        //友好提示填充
+
+        //查询
+        $(".upload-document-search-button").click(function(){
+
+            //输入重置
+            $('.upload-document-input-piaoju').val("");
+            $('.upload-document-input-piaoju').attr('disabled', 'disabled');
+            //图片重置
+            $('.upload-document-preview-wrap .upload_img_list').empty();
+            //清空错误提示
+            $('.upload-document-search-contract-info').text('');
+            $('.upload-document-search-piaoju-info').text('');
+
+            //查询输入的内容
+            var contractId = $('.upload-document-input-contract').val();
+            $.ajax({
+                url: '/contractmanage/uploaddocumentsearch/',
+                type: 'GET',
+                dataType: 'JSON',
+                async: false,
+                data: {
+                    contractId:contractId
+                }
+            })
+            .done(function(data) {
+                if (data.status == "1") {
+                    //查询成功，移除禁止输入属性
+                    $(".upload-document-contract").attr('data-id', data.data.contract_id);
+                    $('.upload-document-input-piaoju').removeAttr("disabled");
+                    $('.upload-document-contract .upload-document-preview-wrap').attr('data-id', data.data.contract_id);
+
+                    if (null != data.data.voucher_code) {
+                        $(".upload-document-piaoju").attr('data-id', data.data.voucher_id);
+                        $('.upload-document-piaoju .upload-document-preview-wrap').attr('data-id', data.data.voucher_id);
+                        $('.upload-document-input-piaoju').val(data.data.voucher_code);
+                        $('.upload-document-select-piaoju').val(data.data.voucher_type);
+                    };
+
+                    //预览图片样式
+                    $.each(data.data.image, function(index, val) {
+                        var str =  '<div class="img_box_container pull-left">' +
+                                        '<div class="remove_img">' +
+                                            '<i class="fa fa-close"></i>' +
+                                        '</div>' +
+                                        '<div>' +
+                                            '<img class="document-file" src="'+val.src+'" data-key='+val.imgurl+'>' +
+                                        '</div>' +
+                                    '</div>';
+                        var previewListObject = $(str);
+                        previewListObject.find('.remove_img').click(function(event) {
+                            $(this).parent().remove();
+                        });
+                        $('.upload-document-wrap').find('.upload-document-preview-wrap[data-id="'+val.main_id+'"]').find('.upload_img_list').append(previewListObject);
+                    });
+                    $('.upload-document-search-contract-info').text("获取成功，您可以上传图片啦");
+                } else {
+                    $('.upload-document-search-contract-info').text(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('网络错误，请稍后重试')
+            });
+        });
+
+        //上传票据保存
+        $('.upload-document-submit-save').click(function(event) {
+            var contractImage = [];
+            var piaojuImage = [];
+            $('.upload-document-contract').find('.img_box_container').each(function(index, el) {
+                contractImage.push($(this).find('img').attr('data-key'));
+            });
+            $('.upload-document-piaoju').find('.img_box_container').each(function(index, el) {
+                piaojuImage.push($(this).find('img').attr('data-key'));
+            });
+            $.ajax({
+                url: '/contractmanage/uploaddocument/',
+                type: 'POST',
+                dataType: 'JSON',
+                async: false,
+                data: {
+                    contractCode:$(".upload-document-input-contract").val(),
+                    contractImage:contractImage,
+                    piaojuCode:$(".upload-document-input-piaoju").val(),
+                    piaojuImage:piaojuImage
+                }
+            })
+            .done(function(data) {
+                alert(data.info);
+                if (1 == data.status) {
+                    window.location.href = window.location.href;
+                };
+            })
+            .fail(function(xhr) {
+                alert('网络错误，请稍后重试')
+            });
+        });
+    });
+</script>

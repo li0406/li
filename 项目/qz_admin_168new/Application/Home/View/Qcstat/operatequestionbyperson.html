@@ -1,0 +1,354 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>录音操作问题统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>录音操作问题统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/qc/telcenter/">录音库</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row mgb-10">
+                            <div class="col-xs-1">
+                                <a href="/qcstat/operatequestion/" class="btn btn-block btn-default">
+                                    按天统计
+                                </a>
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" class="btn btn-block btn-info">
+                                    按人统计
+                                </button>
+                            </div>
+                            <div class="col-xs-1">
+                                <a href="/qcstat/lyczwthztj/?tab=2" class="btn btn-block btn-default">
+                                    按团统计
+                                </a>
+                            </div>
+                            <div class="col-xs-1">
+                                <a href="/qcstat/lyczwthztj/?tab=3" class="btn btn-block btn-default">
+                                    按师统计
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row mgb-10">
+                            <div class="col-xs-2">
+                            开始时间：<input type="text" name="time_start" class="form-control datepicker" placeholder="开始时间" value="{$Think.get.time_start}">
+                            </div>
+                            <div class="col-xs-2">
+                            结束时间：<input type="text" name="time_end" class="form-control datepicker" placeholder="结束时间" value="{$Think.get.time_end}">
+                            </div>
+                            <div class="col-xs-2">
+                                客服师：
+                                <select name="kf_manager" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="main.info.manager" id="vi">
+                                        <option value="{$vi.id}">{$vi.name}师</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                客服团：
+                                <select name="group" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="main.info.sh_group" id="vi">
+                                        <option value="sh_{$vi.kfgroup}_{$vi.manager_id}">审核{$vi.kfgroup}团({$vi.name})</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                审核客服：
+                                <select name="kf_id" class="select2">
+                                    <option value="">请选择</option>
+                                    <volist name="info.ke_fu" id="vo">
+                                        <if condition="$_GET['kf_id'] EQ $vo['id']">
+                                            <option value="{$vo.id}" selected>{$vo.name}</option>
+                                            <else/>
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </if>
+                                    </volist>
+                                </select>
+
+                            </div>
+                            <div class="col-xs-2">
+                                是否新人：
+                                <select name="is_new" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="1">是</option>
+                                    <option value="2">否</option>
+                                </select>
+                            </div>
+
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="export"  class="btn btn-block btn-info">
+                                    <i class="fa fa-download"></i>导出
+                                </button>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <!--审核团对接团都有-->
+
+                            <form role="form" class="list-form">
+                                <table class="table table-hover position-top">
+                                    <thead class="thead1">
+                                        <tr>
+                                            <th>审核客服</th>
+                                            <th>是否新人</th>
+                                            <th>客服团</th>
+                                            <th>客服师</th>
+                                            <th>抽查总量</th>
+                                            <th>问题合计</th>
+
+                                            <th>问题点占比</th>
+                                            <th>沟通错误</th>
+                                            <th>沟通问题点占比</th>
+                                            <th>记录错误</th>
+                                            <th>记录问题点占比</th>
+
+                                            <th>审核客服操作错误</th>
+                                            <th>审核操作问题点占比</th>
+                                            <th>抽查项目数</th>
+                                            <th>抽查项目问题占比</th>
+                                            <th>问题订单条数</th>
+
+                                        </tr>
+                                    </thead>
+                                    <!--头部悬浮用-->
+                                    <thead class="thead2 hide">
+                                        <tr>
+                                            <th>审核客服</th>
+                                            <th>是否新人</th>
+                                            <th>客服团</th>
+                                            <th>客服师</th>
+                                            <th>抽查总量</th>
+                                            <th>问题合计</th>
+
+                                            <th>问题点占比</th>
+                                            <th>沟通错误</th>
+                                            <th>沟通问题点占比</th>
+                                            <th>记录错误</th>
+                                            <th>记录问题点占比</th>
+
+                                            <th>审核客服操作错误</th>
+                                            <th>审核操作问题点占比</th>
+                                            <th>抽查项目数</th>
+                                            <th>抽查项目问题占比</th>
+                                            <th>问题订单条数</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <volist name="list" id="vi">
+                                            <tr>
+                                                <td>
+                                                    <a target="_blank" href="/qcstat/operatequestiondetail?type=1&kf_id={$vi['kf_id']}&time_start={$_GET['time_start']}&time_end={$_GET['time_end']}">
+                                                        <if condition="($vi['mstate'] EQ 0) OR ($vi['muid'] EQ 84)">
+                                                        <span style="color:#FF6600;">{$vi['kf_name']}</span>
+                                                            <else/>
+                                                            {$vi['kf_name']}
+                                                        </if>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <if condition="$vi['is_new'] eq 1 "> <span style="color:red;">是</span>
+                                                    </if>
+                                                    <if condition="$vi['is_new'] eq 2 "> <span style="color:#00a65a;">否</span>
+                                                    </if>
+                                                </td>
+                                                <td class="text-left">{$info['sh_manager'][$vi['kf_manager']]['groupList'][$vi['kf_group']]['name']}</td>
+                                                <td class="text-left">{$info['sh_manager'][$vi['kf_manager']]['manager']}</td>
+                                                <td>{$vi.zj_dd|default=0}</td>
+                                                <td>{$vi.zj_cw|default=0}</td>
+
+                                                <td>{:number_format($vi[zj_cw] / $vi['zj_dd'] * 100, 2)}%</td>
+                                                <td>{$vi.sh_gt_cw}</td>
+                                                <td>{:number_format($vi[sh_gt_cw] / $vi['zj_cw'] * 100, 2)}%</td>
+                                                <td>{$vi.sh_jl_cw}</td>
+                                                <td>{:number_format($vi[sh_jl_cw] / $vi['zj_cw'] * 100, 2)}%</td>
+
+                                                <td>{$vi.sh_cz_cw}</td>
+                                                <td>{:number_format($vi[sh_cz_cw] / $vi['zj_cw'] * 100, 2)}%</td>
+                                                <td>{$vi['zj_dd'] * 13}</td>
+                                                <td>{:number_format($vi[sh_zj_cw] / ($vi['zj_dd'] * 13) * 100, 2)}%</td>
+                                                <td>{$vi.zj_cw_dd|default=0}</td>
+                                            </tr>
+                                        </volist>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td>合计</td>
+                                            <td>--</td>
+                                            <td>--</td>
+                                            <td>--</td>
+                                            <td>{$sums.zj_dd|default=0}</td>
+                                            <td>{$sums.zj_cw|default=0}</td>
+                                            <td>{:number_format($sums[zj_cw] / $sums['zj_dd'] * 100, 2)}%</td>
+                                            <td>{$sums.sh_gt_cw}</td>
+                                            <td>{:number_format($sums[sh_gt_cw] / $sums['zj_cw'] * 100, 2)}%</td>
+                                            <td>{$sums.sh_jl_cw}</td>
+                                            <td>{:number_format($sums[sh_jl_cw] / $sums['zj_cw'] * 100, 2)}%</td>
+                                            <td>{$sums.sh_cz_cw}</td>
+                                            <td>{:number_format($sums[sh_cz_cw] / $sums['zj_cw'] * 100, 2)}%</td>
+                                            <td>{$sums['zj_dd'] * 13}</td>
+                                            <td>{:number_format($sums[sh_zj_cw] / ($sums['zj_dd'] * 13) * 100, 2)}%</td>
+                                            <td>{$sums.zj_cw_dd|default=0}</td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <!-- 引入排序表格开始 -->
+    <link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <!-- 引入排序表格结束 -->
+
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    $(document).ready(function(){
+        $('.select2').select2({
+            allowClear: true,
+            language: "zh-CN"
+        });
+
+        //初始化插件
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+
+        //排序表格设置
+        $('.list-form table').DataTable({
+            fixedColumns: true,
+            paging:false,
+            searching:false,
+            language:{
+                zeroRecords: "没有内容",
+                info:""
+            },
+            order:[]
+        });
+        // 表格表头---thead悬浮效果
+        $(document).on('scroll', function(event){
+            var height = $('.position-top').offset().top;
+            if($(document).scrollTop() >= height){
+                $('.position-top .thead1').css({"position":"fixed",top:0,"backgroundColor":"#fff"});
+                $('.position-top .thead2').removeClass("hide");
+            }else{
+                $('.position-top .thead1').css({"position":""});
+                $('.position-top .thead2').addClass("hide");
+            }
+        });
+
+        //初始化
+        $('select[name=group]').val('{$Think.get.group|default=""}');
+        $('select[name=kf_manager]').val('{$Think.get.kf_manager|default=""}');
+        $('select[name=is_new]').val('{$Think.get.is_new|default=""}');
+        //搜索按钮
+        $('#search').click(function(event) {
+            window.location.href = '/qcstat/operatequestionbyperson/?kf_manager=' + $('select[name=kf_manager]').val() + '&group=' + $('select[name=group]').val() +'&kf_id=' + $('select[name=kf_id]').val() + '&time_start=' + $('input[name=time_start]').val() + '&time_end=' + $('input[name=time_end]').val()+ '&is_new=' + $('select[name=is_new]').val();
+        });
+
+        //导出功能
+        $('#export').click(function(event) {
+            var colums = [];
+            var data =[];
+            $(".list-form .thead1 th").each(function(){
+                var text = $(this).html().trim();
+                text = text.split("/")[0];
+                var sub =[];
+                sub["text"] = text;
+                sub["fontColor"] = $(this).css("color");
+                sub["bgColor"] = $(this).css("background-color");
+                colums.push(sub);
+            });
+            data.push(colums);
+            $(".list-form tbody tr").each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                   var text = $(this).text().trim();
+                   text = text.split("(")[0];
+                   var _td = {
+                        text:text,
+                        fontColor:$(this).css("color"),
+                        bgColor:$(this).css("background-color")
+                   }
+                   sub.push(_td);
+                });
+                data.push(sub);
+            });
+            $(".list-form tfoot tr").each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                   var text = $(this).text().trim();
+                   text = text.split("(")[0];
+                   var _td = {
+                        text:text,
+                        fontColor:$(this).css("color"),
+                        bgColor:$(this).css("background-color")
+                   }
+                   sub.push(_td);
+                });
+                data.push(sub);
+            });
+            $(this).exportExcel({
+                data:data,
+                title:"客服操作问题统计",
+                url:"/export/download"
+            });
+        });
+    })
+    </script>
+</block>

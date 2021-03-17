@@ -1,0 +1,321 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .signbackedit_nav { padding: 20px; margin-bottom: 20px;}
+        .signbackedit_nav li { font-size: 16px; float: left; padding: 0 5px; line-height: 2; margin-right: 30px;}
+        .signbackedit_nav li a { color: inherit;}
+        .signbackedit_nav li.active {border-bottom: 1px solid #FF0000; color: #FF0000;}
+
+        .layout_operator {display: none;}
+        .layout_operator .layout_bg {position: fixed; top:0;right:0;bottom:0;left:0;background:#000;z-index: 1100;opacity: 0.6;}
+        .layout_operator .layout_body {position: fixed;top: 120px; width: 400px; left: calc(50% - 200px); z-index: 1200;background: #FFF;}
+        .layout_operator .layout_title {text-align: center; font-size: 18px; padding: 10px; position: relative;}
+        .layout_operator .layout_close {font-size: 30px; position: absolute; right: 10px; top: 8px;cursor: pointer;}
+        .layout_operator .layout_content {padding: 10px; min-height: 120px;}
+        .layout_operator .layout_content .btn_box {text-align: center; margin-top: 15px;}
+        .layout_operator .layout_content p label {text-align: right; font-weight: normal; width: 140px;}
+
+        .layout_operator#layoutLog .layout_body {width: 500px;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box-header with-border">
+                <h3 class="box-title">新会员充值/签单记录</h3>
+            </div>
+            
+            <!-- 会员信息部分 -->
+            <include file="account_info" />
+
+            <div class="box">
+                <ul class="signbackedit_nav">
+                    <li class="active">签单记录</li>
+                    <li><a href="/signbacknew/account_trade_log?user_id={$userinfo.id}">收支明细</a></li>
+                </ul>
+
+                <div class="box-body">
+                    <p style="padding: 10px 30px;">
+                        签单{$data["total"]["count"]|default="0"}次，共计签单金额{$data["total"]["qiandan_jine"]|default="0"}，实缴金额{$data["total"]["payment_total_money"]|default="0"}
+                    </p>
+                    
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th width="210">订单编号</th>
+                            <th>申请签单时间</th>
+                            <th>城市/区县</th>
+                            <th>订单类型</th>
+                            <th>签单面积</th>
+                            <th>签单金额</th>
+                            <th>返点</th>
+                            <th>应缴金额</th>
+                            <th>实缴金额</th>
+                            <th>缴纳状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="data.list" id="item">
+                            <tr>
+                                <td class="item_orderid">{$item.order_id}</td>
+                                <td>{:date("Y-m-d",$item["qiandan_addtime"])}</td>
+                                <td>{$item.city_name} - {$item.area_name}</td>
+                                <td>
+                                    <switch name="item.company_type_fw">
+                                        <case value="1" break="1">分单</case>
+                                        <case value="2" break="1">赠单</case>
+                                    </switch>
+                                </td>
+                                <td>{$item.qiandan_mianji}㎡</td>
+                                <td class="item_qiandan_jine">{$item.qiandan_jine_yuan}</td>
+                                <td class="item_back_ratio">{$item.back_ratio}%</td>
+                                <td class="item_back_total_money">{$item.back_total_money}</td>
+                                <td class="item_back_pay_money">{$item.payment_money}</td>
+                                <td>
+                                    <gt name="item.payment_num" value="0">
+                                        已返点
+                                    <else />
+                                        未返点
+                                    </gt>
+                                </td>
+                            </tr>
+                        </volist>
+
+                        <eq name="data.total.count" value="0">
+                            <tr>
+                                <td colspan="20" align="center">暂无数据</td>
+                            </tr>
+                        </eq>
+                        </tbody>
+                    </table>
+                    <div>{$data.pageshow}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout_operator" id="layoutReceive">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">收款</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content">
+                <p>
+                    <label for="">订单编号：</label>
+                    <span class="orderid"></span>
+                </p>
+                <p>
+                    <label for="">签单金额：</label>
+                    <span class="qiandan_jine"></span>
+                </p>
+                <p>
+                    <label for="">返点：</label>
+                    <span class="back_ratio"></span>
+                </p>
+                <p>
+                    <label for="">应缴金额：</label>
+                    <span class="back_total"></span>
+                </p>
+                <p>
+                    <label for="">实缴金额：</label>
+                    <input type="text" name="pay_money" class="pay_money" />
+                </p>
+                
+                <div class="btn_box">
+                    <input type="hidden" name="id" class="id" />
+                    <button type="button" class="btn btn-primary btn_save">保存</button>
+                    <button type="button" class="btn btn_cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_operator" id="layoutCheck">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">审核</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content">
+                <p>
+                    <label for="">订单编号：</label>
+                    <span class="orderid"></span>
+                </p>
+                <p>
+                    <label for="">签单金额：</label>
+                    <span class="qiandan_jine"></span>
+                </p>
+                <p>
+                    <label for="">返点：</label>
+                    <span class="back_ratio"></span>
+                </p>
+                <p>
+                    <label for="">应缴金额：</label>
+                    <span class="back_total"></span>
+                </p>
+                <p>
+                    <label for="">实缴金额：</label>
+                    <span class="pay_money"></span>
+                </p>
+                
+                <div class="btn_box">
+                    <input type="hidden" name="id" class="id" />
+                    <button type="button" class="btn btn-primary" data-status="1">审核通过</button>
+                    <button type="button" class="btn" data-status="2">审核不通过</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_operator" id="layoutLog">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">日志</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content"></div>
+        </div>
+    </div>
+</block>
+
+<block name="script">
+    <script type="text/javascript">
+        $(function() {
+            $(".layout_operator").on("click", ".layout_close", function(){
+                $(".layout_operator").fadeOut(200);
+            });
+
+            $("input[name=pay_money]").change(function(){
+                this.value = this.value.replace(/[^\d.]/g,""); //清除"数字"和"."以外的字符
+                this.value = this.value.replace(/^\./g,""); //验证第一个字符是数字
+                this.value = this.value.replace(/\.{2,}/g,"."); //只保留第一个, 清除多余的
+                this.value = this.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+                this.value = this.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3'); //只能输入两个小数
+            });
+
+            // 收款
+            $("#tablelist").on("click", ".btn_receive", function(){
+                var id = $(this).parent().data("id");
+                var trElement = $(this).parents("tr");
+
+                var orderid = trElement.find(".item_orderid").html();
+                var qiandan_jine = trElement.find(".item_qiandan_jine").html();
+                var back_ratio = trElement.find(".item_back_ratio").html();
+                var back_total = trElement.find(".item_back_total_money").html();
+                var pay_money = trElement.find(".item_back_pay_money").html();
+
+                var layoutElement = $("#layoutReceive");
+                layoutElement.find(".id").val(id);
+                layoutElement.find(".orderid").html(orderid);
+                layoutElement.find(".qiandan_jine").html(qiandan_jine);
+                layoutElement.find(".back_ratio").html(back_ratio);
+                layoutElement.find(".back_total").html(back_total);
+                layoutElement.find(".pay_money").val(pay_money);
+                layoutElement.fadeIn(200);
+            });
+
+            // 收款取消
+            $("#layoutReceive").on("click", ".btn_cancel", function(){
+                $("#layoutReceive").fadeOut(200);
+            });
+
+            // 收款确认
+            $("#layoutReceive").on("click", ".btn_save", function(){
+                var layoutElement = $("#layoutReceive");
+                var id = layoutElement.find(".id").val();
+                var pay_money = layoutElement.find(".pay_money").val();
+
+                if (pay_money == "" || pay_money == "0") {
+                    alert("请先输入实缴金额");
+                    return false;
+                }
+
+                // 收款
+                $.post("/signbacknew/round_order_receive_money", {
+                    id: id,
+                    pay_money: pay_money
+                }, function(response){
+                    if (response.error_code == 0) {
+                        alert("收款成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.error_msg);
+                    }
+                });
+            });
+
+            // 审核
+            $("#tablelist").on("click", ".btn_check", function(){
+                var id = $(this).parent().data("id");
+                var trElement = $(this).parents("tr");
+
+                var orderid = trElement.find(".item_orderid").html();
+                var qiandan_jine = trElement.find(".item_qiandan_jine").html();
+                var back_ratio = trElement.find(".item_back_ratio").html();
+                var back_total = trElement.find(".item_back_total_money").html();
+                var pay_money = trElement.find(".item_back_pay_money").html();
+
+                var layoutElement = $("#layoutCheck");
+                layoutElement.find(".id").val(id);
+                layoutElement.find(".orderid").html(orderid);
+                layoutElement.find(".qiandan_jine").html(qiandan_jine);
+                layoutElement.find(".back_ratio").html(back_ratio);
+                layoutElement.find(".back_total").html(back_total);
+                layoutElement.find(".pay_money").html(pay_money);
+                layoutElement.fadeIn(200);
+            });
+
+            // 审核取消
+            $("#layoutCheck").on("click", ".btn_cancel", function(){
+                $("#layoutReceive").fadeOut(200);
+            });
+
+            // 审核确认
+            $("#layoutCheck").on("click", ".btn", function(){
+                var layoutElement = $("#layoutCheck");
+                var id = layoutElement.find(".id").val();
+                var exam_status = $(this).data("status");
+
+                // 审核
+                $.post("/signbacknew/round_order_check", {
+                    id: id,
+                    exam_status: exam_status
+                }, function(response){
+                    if (response.error_code == 0) {
+                        alert("审核成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.error_msg);
+                    }
+                });
+            });
+
+            // 日志
+            $("#tablelist").on("click", ".btn_log", function(){
+                var id = $(this).parent().data("id");
+
+                $.get("/signbacknew/round_order_log", {
+                    id: id
+                }, function(response){
+                    if (response.error_code == 0) {
+                        $("#layoutLog").find(".layout_content").html(response["data"]["template"]);
+                        $("#layoutLog").fadeIn(200);
+                    } else {
+                        alert(response.error_msg);
+                    }
+                });
+            });
+        });
+    </script>
+</block>
+

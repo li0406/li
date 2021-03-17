@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>用户中心-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Designer:resource" />
+    <link href="{$static_host}/assets/user/designer/css/de-info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/alert.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+
+<body>
+    <include file="Designer:header" />
+    <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+        <div class="yh-main">
+            <h1 class="yh-tit">我的收藏</h1>
+            <ul class="collect-tit">
+                <li><a class="active" href="/descollect/">我收藏的攻略</a></li>
+                <li><a href="/descollect/case/">我收藏的美图</a></li>
+            </ul>
+            <if condition="$info['list']">
+             <if condition="$info['isList']">
+              <ul class="collect-list">
+                  <volist name="info.list" id="vo">
+                  <li>
+                      <a href="{$vo.src}" target="_blank">
+                        <img src="{$vo.img_path}">
+                      </a>
+                      <p><a href="{$vo.src}" target="_blank">{$vo.title}</a></p>
+                      <p><span>{$vo.classname}</span><span>收藏日期：{$vo.time|date="Y-m-d H:i:s",###}</span></p>
+                      <div class="tools">
+                        <a href="javascript:void(0)" class="icon-trash" data-id="{$vo.cid}" title="取消收藏">
+                        </a>
+                      </div>
+                  </li>
+                  </volist>
+              </ul>
+              <else/>
+                <ul class="collect-list">
+                    <volist name="info.list" id="vo">
+                    <li>
+                        <a href="{$vo.src}" target="_blank">
+                          <if condition="$vo['classtype'] EQ 7">
+                          <i class="mark-3d">3D</i>
+                          </if>
+                          <img src="{$vo.img_path}">
+                        </a>
+                        <p><a href="{$vo.src}" target="_blank">{$vo.title}</a></p>
+                        <p><span>{$vo.classname}</span><span>收藏日期：{$vo.time|date="Y-m-d H:i:s",###}</span></p>
+                        <div class="tools">
+                          <a href="javascript:void(0)" class="icon-trash" data-id="{$vo.cid}" data-type="{$vo.classtype}" title="取消收藏">
+                          </a>
+                        </div>
+                    </li>
+                    </volist>
+                </ul>
+              </if>
+              {$info.page}
+            <else/>
+              <p class="none-msg">暂时没有发现您的收藏信息！~</p>
+            </if>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(".collect-tit a").removeClass('active').eq("{$info.active|default=0}").addClass("active");
+  $(".collect-list li").hover(function() {
+    $(this).find(".tools").show();
+  }, function() {
+    $(this).find(".tools").hide();
+  });
+  $(".icon-trash").click(function(event) {
+      var id = $(this).attr("data-id");
+      var _this = $(this);
+      var index  = $(".icon-trash").index(_this);
+      var type = $(this).attr("data-type");
+      $.ajax({
+        url: '/cancelcollect/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+          id: id,
+          type:type
+        }
+      })
+      .done(function(data) {
+          if(data.status == 1){
+              _this.Alert({
+                  css:{
+                      "width":"200px",
+                      "height":"60px",
+                      "background":"#E76363",
+                      "margin-left":"-100px",
+                      "margin-top":"-30px",
+                      "font-size":"20px",
+                      "line-height":"60px"
+                  },
+                  text:"取消成功",
+                  callback:function(){
+                      $(".collect-list li").eq(index).remove();
+                  }
+              });
+          }else{
+             _this.Alert({
+                css:{
+                    "width":"200px",
+                    "height":"60px",
+                    "background":"#E76363",
+                    "margin-left":"-100px",
+                    "margin-top":"-30px",
+                    "font-size":"20px",
+                    "line-height":"60px"
+                },
+                text:data.info
+            });
+          }
+      })
+      .fail(function(xhr) {
+          _this.Alert({
+              css:{
+                  "width":"200px",
+                  "height":"60px",
+                  "background":"#E76363",
+                  "margin-left":"-100px",
+                  "margin-top":"-30px",
+                  "font-size":"20px",
+                  "line-height":"60px"
+              },
+              text:"发生了未知的错误,请刷新重试！"
+          });
+      });
+  });
+</script>
+</html>

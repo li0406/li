@@ -1,0 +1,670 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道数据统计 - 控制台</title>
+</block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/hzsstatistic/css/index.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css">
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>渠道数据统计</h1>
+    </section>
+    <section class="content">
+        <ul class="nav nav-tabs bods" role="tablist" id="tablist">
+            <li role="presentation" class="">
+                <a href="#menutab_1" role="tab" data-toggle="tab" data-tab="menutab_1" onclick="clearTabValue(1,{$Think.get.tab})">按合作商统计</a>
+            </li>
+            <li role="presentation">
+                <a href="#menutab_2" role="tab" data-toggle="tab" data-tab="menutab_2" onclick="clearTabValue(2,{$Think.get.tab})">按合作商账户统计</a>
+            </li>
+            <li role="presentation">
+                <a href="#menutab_3" role="tab" data-toggle="tab" data-tab="menutab_3" onclick="clearTabValue(3,{$Think.get.tab})">按渠道来源统计</a>
+            </li>
+            <li role="presentation">
+                <a href="#menutab_4" role="tab" data-toggle="tab" data-tab="menutab_4" onclick="clearTabValue(4,{$Think.get.tab})">订单详情</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <!-- 按合作商统计 -->
+            <div role="tabpanel" class="tab-pane active" id="menutab_1">
+                <div class="box box-default ssw_top">
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="myform1"  action="?" method="get" class="form-horizontal" onsubmit="return hzsManage()">
+                                <input type="hidden" name="tab" value="1">
+                                <div class="col-xs-2">
+                                    <span>合作商名称：</span>
+                                    <select name="name" class="form-control">
+                                        <option value="">请选择合作商名称</option>
+                                        <volist name="hzs_account" id="va" key="ko">
+                                            <if condition="$va.id eq $input['name']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>开始日期：</span>
+                                    <input type="text" name="begin" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择开始日期" value="{$input.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束日期：</span>
+                                    <input type="text" name="end" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择结束日期" value="{$input.end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit"  class="btn  btn-primary pull-left" id="submit-btn">查询</button>
+                                    <button type="button"  class="btn  btn-primary pull-left" style="margin-left: 10px;" id="btnExport">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <form class="form-horizontal box" onsubmit="return false">
+                    <table class="table menu-table">
+                        <thead class="bgc_head">
+                            <tr>
+                                <th>合作商名称</th>
+                                <th>UV</th>
+                                <th>发单</th>
+                                <th>分单</th>
+                                <th>分单率</th>
+                                <th>实际分单</th>
+                                <th>实际分单率</th>
+                                <th>有效注册量</th>
+                                <th>实际有效注册量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list.list" id="item">
+                                <tr>
+                                <th>{$item['name']}</th>
+                                <th>{$item['uv']}</th>
+                                <th>{$item['fadan']}</th>
+                                <th>{$item['fendan']}</th>
+                                <th>{$item['fendan_rate']}</th>
+                                <th>{$item['real_fendan']}</th>
+                                <th>{$item['real_fedan_rate']}</th>
+                                <th>{$item['zhuche']}</th>
+                                <th>{$item['real_zhuche']}</th>
+                                </tr>
+                            </volist>
+                            <empty name="list.count">
+                                <tr>
+                                    <td colspan="20" style="text-align: center;">暂无数据</td>
+                                </tr>
+                            </empty>
+                        </tbody>
+                    </table>
+                    <if condition="$input.tab eq 1">
+                        {$list.page}
+                    </if>
+                </form>
+            </div>
+
+            <!-- 按合作商统计 -->
+            <div role="tabpanel" class="tab-pane" id="menutab_2">
+                <div class="box box-default ssw_top">
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="myform2"  action="?" method="get" class="form-horizontal" onsubmit="return hzsAccountManage()">
+                                <input type="hidden" name="tab" value="2">
+                                <div class="col-xs-2">
+                                    <span>合作商名称：</span>
+                                    <select name="name1" class="form-control" id="name1">
+                                        <option value="">请选择合作商名称</option>
+                                        <volist name="hzs_account" id="va" key="ko">
+                                            <if condition="$va.id eq $input['name1']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                            <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>合作商账户：</span>
+                                    <select  name="account1" class="form-control" style="margin-right: 0;width: 246px;" id="account1">
+                                        <option value="">请选择合作商账户</option>
+                                        <volist name="hzs_account_child" id="va" key="ko">
+                                            <if condition="$va.id eq $input['account1']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>开始日期：</span>
+                                    <input type="text" name="begin1" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择开始日期" value="{$input['begin1']}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束日期：</span>
+                                    <input type="text" name="end1" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择结束日期" value="{$input['end1']}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit"  class="btn  btn-primary pull-left">查询</button>
+                                    <button type="button"  class="btn  btn-primary pull-left" style="margin-left: 10px;" id="btnExport1">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <form  class="form-horizontal box" onsubmit="return false">
+                    <table class="table menu-table">
+                        <thead class="bgc_head"> 
+                            <tr>
+                                <th>合作商账户</th>
+                                <th>UV</th>
+                                <th>发单</th>
+                                <th>分单</th>
+                                <th>分单率</th>
+                                <th>实际分单</th>
+                                <th>实际分单率</th>
+                                <th>有效注册量</th>
+                                <th>实际有效注册量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list.list" id="item">
+                                <tr>
+                                    <th>{$item['name']}</th>
+                                    <th>{$item['uv']}</th>
+                                    <th>{$item['fadan']}</th>
+                                    <th>{$item['fendan']}</th>
+                                    <th>{$item['fendan_rate']}</th>
+                                    <th>{$item['real_fendan']}</th>
+                                    <th>{$item['real_fedan_rate']}</th>
+                                    <th>{$item['zhuche']}</th>
+                                    <th>{$item['real_zhuche']}</th>
+                                </tr>
+                            </volist>
+                            <empty name="list.count">
+                                <tr>
+                                    <td colspan="20" style="text-align: center;">暂无数据</td>
+                                </tr>
+                            </empty>
+                        </tbody>
+                    </table>
+                    <if condition="$input.tab eq 2">
+                        {$list.page}
+                    </if>
+                </form>
+            </div>
+
+            <!-- 按渠道来源统计 -->
+            <div role="tabpanel" class="tab-pane" id="menutab_3">
+                <div class="box box-default ssw_top">
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="myform3" action="?" method="get" class="form-horizontal" onsubmit="return hzsSource()">
+                                <input type="hidden" name="tab" value="3">
+                                <div class="col-xs-2">
+                                    <span>合作商名称：</span>
+                                    <select  name="name2" class="form-control" style="margin-right: 0;width: 246px;" id="name2">
+                                        <option value="">请选择合作商名称</option>
+                                        <volist name="hzs_account" id="va" key="ko">
+                                            <if condition="$va.id eq $input['name2']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>合作商账户：</span>
+                                    <select  name="account2" class="form-control" style="margin-right: 0;width: 246px;" id="account2">
+                                        <option value="">请选择合作商账户</option>
+                                        <volist name="hzs_account_child" id="va" key="ko">
+                                            <if condition="$va.id eq $input['account2']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>渠道来源：</span>
+                                    <select  name="source2" class="form-control" style="margin-right: 0;width: 246px;">
+                                        <option value="">请选择渠道来源</option>
+                                        <volist name="hzs_source_list" id="va" key="ko">
+                                            <if condition="$va.id eq $input['source2']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>开始日期：</span>
+                                    <input type="text" name="begin2" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择开始日期" value="{$input.begin2}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束日期：</span>
+                                    <input type="text" name="end2" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择结束日期" value="{$input.end2}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit"  class="btn  btn-primary pull-left">查询</button>
+                                    <button type="button"  class="btn  btn-primary pull-left" style="margin-left: 10px;" id="btnExport2">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <form class="form-horizontal box" onsubmit="return false">
+                    <table class="table menu-table">
+                        <thead class="bgc_head">
+                            <tr>
+                                <th>渠道名称</th>
+                                <th>UV</th>
+                                <th>发单</th>
+                                <th>分单</th>
+                                <th>分单率</th>
+                                <th>实际分单</th>
+                                <th>实际分单率</th>
+                                <th>有效注册量</th>
+                                <th>实际有效注册量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list.list" id="item">
+                                <tr>
+                                    <th>{$item['name']}</th>
+                                    <th>{$item['uv']}</th>
+                                    <th>{$item['fadan']}</th>
+                                    <th>{$item['fendan']}</th>
+                                    <th>{$item['fendan_rate']}</th>
+                                    <th>{$item['real_fendan']}</th>
+                                    <th>{$item['real_fedan_rate']}</th>
+                                    <th>{$item['zhuche']}</th>
+                                    <th>{$item['real_zhuche']}</th>
+                                </tr>
+                            </volist>
+                            <empty name="list.count">
+                                <tr>
+                                    <td colspan="20" style="text-align: center;">暂无数据</td>
+                                </tr>
+                            </empty>
+
+                        </tbody>
+                    </table>
+                    <if condition="$input.tab eq 3">
+                        {$list.page}
+                    </if>
+                </form>
+            </div>
+
+            <!-- 订单详情 -->
+            <div role="tabpanel" class="tab-pane" id="menutab_4">
+                <div class="box box-default ssw_top">
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="myform4" action="?" method="get" class="form-horizontal" onsubmit="return hzsOrderManage()">
+                                <input type="hidden" name="tab" value="4">
+                                <div class="col-xs-2">
+                                    <span>合作商名称：</span>
+                                    <select  name="name3" class="form-control" style="margin-right: 0;width: 246px;">
+                                        <option value="">请选择合作商名称</option>
+                                        <volist name="hzs_account" id="va" key="ko">
+                                            <if condition="$va.id eq $input['name3']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>合作商账户：</span>
+                                    <select  name="account3" class="form-control" style="margin-right: 0;width: 246px;">
+                                        <option value="">请选择合作商账户</option>
+                                        <volist name="hzs_account_child" id="va" key="ko">
+                                            <if condition="$va.id eq $input['account3']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>渠道来源：</span>
+                                    <select  name="source3" class="form-control" style="margin-right: 0;width: 246px;">
+                                        <option value="">请选择渠道来源</option>
+                                        <volist name="hzs_source_list" id="va" key="ko">
+                                            <if condition="$va.id eq $input['source3']">
+                                                <option value="{$va.id}" selected>{$va.name}</option>
+                                                <else/>
+                                                <option value="{$va.id}">{$va.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>开始日期：</span>
+                                    <input type="text" name="begin3" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择开始日期" value="{$input.begin3}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束日期：</span>
+                                    <input type="text" name="end3" class="form-control datepicker" autocomplete="off"
+                                            placeholder="请选择结束日期" value="{$input.end3}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit"  class="btn  btn-primary pull-left">查询</button>
+                                    <button type="button"  class="btn  btn-primary pull-left" style="margin-left: 10px;" id="btnExport3">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <form  class="form-horizontal box" onsubmit="return false">
+                    <table class="table menu-table">
+                        <thead class="bgc_head">
+                            <tr>
+                                <th>订单号</th>
+                                <th>发单日期</th>
+                                <th>渠道来源</th>
+                                <th>订单备注</th>
+                                <th>城市区县</th>
+                                <th>手机号</th>
+                                <th>订单状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list.list" id="item">
+                                <tr>
+                                    <th>{$item['id']}</th>
+                                    <th>{$item['time_real']}</th>
+                                    <th>{$item['name']}</th>
+                                    <th>{$item['reamks']}</th>
+                                    <th>{$item['cs']}</th>
+                                    <th>{$item['tel']}</th>
+                                    <th>{$item['on']}</th>
+                                </tr>
+                            </volist>
+                            <empty name="list.count">
+                                <tr>
+                                    <td colspan="20" style="text-align: center;">暂无数据</td>
+                                </tr>
+                            </empty>
+                        </tbody>
+                    </table>
+                    <if condition="$input.tab eq 4">
+                        {$list.page}
+                    </if>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/jquery.tablednd_0_5.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        //选项卡当前设置
+        $(".nav-tabs li").eq({$Think.get.tab|default="1"}-1).addClass('active');
+    
+        $('.select2').select2({
+            allowClear: true,
+            language: "zh-CN"
+        });
+        $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd',
+                closeBtn:true,
+            }).on("change", function () {
+                var date1= toTimeStamp($("input[name=begin]").val());  //开始时间
+                var date2 = toTimeStamp($("input[name=end]").val());    //结束时间
+                var date3 = new Date(date2).getTime() - new Date(date1).getTime();   //时间差的毫秒数
+                //计算出相差天数
+                var days=Math.floor(date3/(24*3600*1000)) 
+                if (toTimeStamp($("input[name=begin]").val()) > toTimeStamp($("input[name=end]").val())) {
+                    msg("开始时间必须小于结束时间", function () {
+                        $("input[name=end]").val("");
+                    });
+                } else if(days > 90) {
+                    msg("查询时间不能大于90天", function () {
+                        $("input[name=end]").val("");
+                    });
+                }
+
+            });
+        })
+        $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd',
+                closeBtn:true,
+            }).on("change", function () {
+                var date1= toTimeStamp($("input[name=begin1]").val());  //开始时间
+                var date2 = toTimeStamp($("input[name=end1]").val());    //结束时间
+                var date3 = new Date(date2).getTime() - new Date(date1).getTime();   //时间差的毫秒数
+                //计算出相差天数
+                var days=Math.floor(date3/(24*3600*1000)) 
+                if (toTimeStamp($("input[name=begin1]").val()) > toTimeStamp($("input[name=end1]").val())) {
+                    msg("开始时间必须小于结束时间", function () {
+                        $("input[name=end1]").val("");
+                    });
+                } else if(days > 90) {
+                    msg("查询时间不能大于90天", function () {
+                        $("input[name=end1]").val("");
+                    });
+                }
+            });
+        })
+        $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd',
+                closeBtn:true,
+            }).on("change", function () {
+                var date1= toTimeStamp($("input[name=begin2]").val());  //开始时间
+                var date2 = toTimeStamp($("input[name=end2]").val());    //结束时间
+                var date3 = new Date(date2).getTime() - new Date(date1).getTime();   //时间差的毫秒数
+                //计算出相差天数
+                var days=Math.floor(date3/(24*3600*1000)) 
+                if (toTimeStamp($("input[name=begin2]").val()) > toTimeStamp($("input[name=end2]").val())) {
+                    msg("开始时间必须小于结束时间", function () {
+                        $("input[name=end2]").val("");
+                    });
+                } else if(days > 90) {
+                    msg("查询时间不能大于90天", function () {
+                        $("input[name=end2]").val("");
+                    });
+                }
+            });
+        })
+        $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd',
+                closeBtn:true,
+            }).on("change", function () {
+                var date1= toTimeStamp($("input[name=begin3]").val());  //开始时间
+                var date2 = toTimeStamp($("input[name=end3]").val());    //结束时间
+                var date3 = new Date(date2).getTime() - new Date(date1).getTime();   //时间差的毫秒数
+                //计算出相差天数
+                var days=Math.floor(date3/(24*3600*1000)) 
+                if (toTimeStamp($("input[name=begin3]").val()) > toTimeStamp($("input[name=end3]").val())) {
+                    msg("开始时间必须小于结束时间", function () {
+                        $("input[name=end3]").val("");
+                    });
+                } else if(days > 90) {
+                    msg("查询时间不能大于90天", function () {
+                        $("input[name=end3]").val("");
+                    });
+                }
+            });
+        })
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+
+        function clearTabValue(tab,get_tab){
+            if (tab != get_tab) {
+                $("#menutab_" + tab + " tbody").html("");
+                $("menutab_" + tab + " .pagination").html("");
+            }
+        }
+
+        // 导出
+        $("#btnExport").click(function(){
+            var data = {
+                begin: "{$input.begin}",
+                end: "{$input.end}",
+                tab: 1,
+                name: "{$input.name}"
+            };
+
+            window.location.href = "/hzsstatistic/exporthzs?" + urlencode(data);
+            return false;
+        });
+        $("#btnExport1").click(function(){
+            var data = {
+                begin: "{$input.begin1}",
+                end: "{$input.end1}",
+                tab: 2,
+                name: "{$input.name1}",
+                account: "{$input.account1}"
+            };
+
+            window.location.href = "/hzsstatistic/exporthzs?" + urlencode(data);
+            return false;
+        });
+        $("#btnExport2").click(function(){
+            var data = {
+                begin: "{$input.begin2}",
+                end: "{$input.end2}",
+                tab: 3,
+                name: "{$input.name2}",
+                account: "{$input.account2}",
+                source: "{$input.source2}"
+            };
+
+            window.location.href = "/hzsstatistic/exporthzs?" + urlencode(data);
+            return false;
+        });
+        $("#btnExport3").click(function(){
+            var data = {
+                begin: "{$input.begin3}",
+                end: "{$input.end3}",
+                tab: 3,
+                name: "{$input.name3}",
+                account: "{$input.account3}",
+                source:"{$input.source3}"
+            };
+
+            window.location.href = "/hzsstatistic/exporthzs?" + urlencode(data);
+            return false;
+        });
+
+        //合作商统计提交表单校验
+        function hzsManage() {
+            var begin = $('#myform1 input[name="begin"]').val();
+            var end = $('#myform1 input[name="end"]').val();
+            if (begin == '' || end == '') {
+                alert("请选择查询起止时间!");
+                $(".mask-self").remove();
+                return false;
+            } else {
+                return true;
+            }
+        }
+        function hzsAccountManage() {
+            var begin = $('#myform2 input[name="begin1"]').val();
+            var end = $('#myform2 input[name="end1"]').val();
+            if (begin == ' ' || end == '') {
+                alert("请选择查询起止时间!");
+                $(".mask-self").remove();
+                return false;
+            } else {
+                return true;
+            }
+        }
+        function hzsSource() {
+            var begin = $('#myform3 input[name="begin2"]').val();
+            var end = $('#myform3 input[name="end2"]').val();
+            if (begin == ' ' || end == '') {
+                alert("请选择查询起止时间!");
+                $(".mask-self").remove();
+                return false;
+            }else{
+                return true;
+            }
+        }
+        function hzsOrderManage() {
+            var begin = $('#myform4 input[name="begin3"]').val();
+            var end = $('#myform4 input[name="end3"]').val();
+            if (begin == ' ' || end == '') {
+                alert("请选择查询起止时间!");
+                $(".mask-self").remove();
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+    </script>
+</block>

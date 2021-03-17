@@ -1,0 +1,291 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新版客服统计图表 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+    <style type="text/css">
+    .btn-group button.active,.btn-group button.active:hover,.btn-group button.active:active{background: #00c0ef !important;color: #fff !important;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新版客服统计图表</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">新版客服统计图表</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <label>搜索:</label>
+                        <form class="form-inline">
+                            <div class="form-group">
+                                <select id="group" class="form-control" >
+                                    <option value="1">按师统计</option>
+                                    <option value="2">按团统计</option>
+                                    <option value="3">按人统计</option>
+                                    <option value="4">按城市统计</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select id="item" class="form-control" multiple="multiple" style="width:300px;">
+                                </select>
+                            </div>
+                            <div class="col-sm-2 nav navbar-nav navbar-right " style="margin-right: 20px; position: relative;padding:0;">
+                                 <input type="text" id="dateRange" class="form-control" style="width: 100%" value="1232">
+                                 <i class="glyphicon glyphicon-calendar fa fa-calendar" style="position: absolute; right: 10px;top: 8px;"></i>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <div style="margin-bottom: 10px; padding-left: 10px; margin-top: 20px;">
+                            <div class="btn-group" role="group" aria-label="...">
+                                <button type="button" class="btn btn-default active mr0" value="1">发单量</button>
+                                <button type="button" class="btn btn-default mr0" value="2">分单量</button>
+                                <button type="button" class="btn btn-default mr0" value="3">分单率</button>
+                                <button type="button" class="btn btn-default mr0" value="4">赠单量</button>
+                                <button type="button" class="btn btn-default mr0" value="5">综合分单量</button>
+                                <button type="button" class="btn btn-default mr0" value="6">综合分单率</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="main" style="height:600px;">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    var json = JSON.parse('{$item}');
+    var val = "";
+    var jsonData = JSON.parse('{$list}');
+    var myChart = echarts.init(document.getElementById('main'));
+    var xAxisData = new Array();
+
+    $("#item").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    }).on("select2:select",function(e){
+        ViewSourceInit();
+    }).on("select2:unselect",function(e){
+        ViewSourceInit();
+    });
+
+    $("#group").change(function(event) {
+        var key = $(this).val();
+        $("#item option").remove();
+        $("#item").select2("destroy");
+        for( var i in json[key]){
+            var option = $("<option value='"+json[key][i].id+"'>"+json[key][i].name+"</option>");
+            if (key == 2) {
+                option = $("<option value='"+json[key][i].kfgroup+"'>"+json[key][i].name+"</option>");
+            }
+            $("#item").append(option);
+        }
+        $("#item").select2({
+            allowClear: true,
+            placeholder: "请选择"
+        });
+        ViewSourceInit();
+    });
+    $("#group").trigger('change');
+
+    $('#dateRange').daterangepicker({
+        "ranges": {
+            '今天': [moment(), moment()],
+            '过去7天': [moment().subtract(6, 'days'), moment()],
+            '过去30天': [moment().subtract(29, 'days'), moment()],
+            '过去60天': [moment().subtract(59, 'days'), moment()]
+        },
+        "alwaysShowCalendars": true,
+        locale : {
+            applyLabel : '确定',
+            cancelLabel : '取消',
+            fromLabel : '起始时间',
+            toLabel : '结束时间',
+            customRangeLabel : '自定义',
+            daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+            monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                    '七月', '八月', '九月', '十月', '十一月', '十二月' ],
+            firstDay : 1
+        },
+        "opens": "left",
+        "startDate": "{$begin}",
+        "endDate": "{$end}",
+        "minDate": "{$minDate}",
+        "maxDate": "{$maxDate}"
+    }, function(start, end, label) {
+        window.location.href = "/orderstat/customerorderanalysis?begin="+start.format('MM/DD/YY')+"&end="+end.format('MM/DD/YY');
+    });
+
+    $(".btn-group button").click(function(event) {
+        $(".btn-group button.active").removeClass('active');
+        $(this).addClass('active');
+        ViewSourceInit();
+    });
+
+    function ViewSourceInit(){
+        myChart.clear();
+        var groupId = $("#group").val();
+        var legend = new Array();
+        var series = new Array();
+        var ids = new Array();
+        var data = new Array();
+        var itemData = $("#item").select2("data");
+        if (xAxisData.length == 0) {
+            for(var i in jsonData["date"]){
+                xAxisData.push(jsonData["date"][i]);
+            }
+        }
+
+        var active = $(".btn-group button.active").val();
+
+        if (itemData.length > 0) {
+            for( var i in itemData){
+                ids.push(itemData[i].id);
+            }
+        }
+
+        switch(groupId){
+            case "1":
+                //按师统计
+                data = jsonData["manager"];
+                if (ids.length > 0) {
+                    data = new Array();
+                    for(var i in ids) {
+                        data.push(jsonData["manager"][ids[i]]);
+                    }
+                }
+            break;
+            case "2":
+                //按团统计
+                data = jsonData["group"];
+                if (ids.length > 0) {
+                    data = new Array();
+                    for(var i in ids) {
+                        data.push(jsonData["group"][ids[i]]);
+                    }
+                }
+            break;
+            case "3":
+                //按人统计
+                if (ids.length > 0) {
+                    for(var i in ids) {
+                        if (typeof jsonData["user"][ids[i]] !== "undefined") {
+                            data.push(jsonData["user"][ids[i]]);
+                        }
+                    }
+                }
+            break;
+            case "4":
+                //按人统计
+                if (ids.length > 0) {
+                    for(var i in ids) {
+                        if (typeof jsonData["city"][ids[i]] !== "undefined") {
+                            data.push(jsonData["city"][ids[i]]);
+                        }
+                    }
+                }
+            break;
+        }
+
+        for(var i in data){
+            if (data[i]["name"] != "") {
+                legend.push(data[i]["name"]);
+                var seriesData = new Array();
+                for(var j in data[i]["date"]){
+                    var item = data[i]["date"][j];
+                    switch(active) {
+                        case "1":
+                        seriesData.push(item.all);
+                        break;
+                        case "2":
+                        seriesData.push(item.fen);
+                        break;
+                        case "3":
+                        seriesData.push(item.fen_rate);
+                        break;
+                        case "4":
+                        seriesData.push(item.zen);
+                        break;
+                        case "5":
+                        seriesData.push(item.fen_zen);
+                        break;
+                        case "6":
+                        seriesData.push(item.fen_zen_rate);
+                        break;
+                    }
+
+                }
+
+                var obj = {
+                    name:data[i]["name"],
+                    type:'line',
+                    data:seriesData,
+                    smooth: true
+                }
+
+                series.push(obj);
+            }
+        }
+
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+            },
+            legend: {
+                data:legend
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xAxisData
+            },
+            yAxis: {
+                type: 'value',
+            },
+            series: series
+        };
+
+        if (active == "6") {
+            option["tooltip"]["formatter"] = "{c}%";
+        }
+
+        myChart.setOption(option);
+    }
+    </script>
+</block>

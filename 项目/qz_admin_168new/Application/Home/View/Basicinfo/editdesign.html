@@ -1,0 +1,793 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>设计师管理</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/home/basicinfo/css/desgin.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>
+            <span>
+                设计师信息
+            </span>
+        </h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <table class="add-table">
+                        <tbody>
+                        <tr id="avatar-warn">
+                            <td class="bold text-align-right" style="width: 115px;"><span class="red">*</span>设计师头像：</td></tr>
+                        <tr>
+                            <td colspan="2">
+                                <if condition="$info['truevip'] eq 1 && $info['logo'] neq ''">
+                                    <img src="{$info.logo}" style="max-width: 100px" />
+                                    <input type="hidden" name="avatar" value="{$info.logo}" />
+                                <else/>
+                                    <input id="avatar" type="file" multiple/>
+                                    <input type="hidden" name="avatar" value="{$info.logo}" />
+                                    <span class="red" data-name="avatar-warn"></span>
+                                </if>
+
+                            </td>
+                        </tr>
+                        <if condition="$_GET['id'] EQ '' || $_GET['id'] EQ NULL ">
+                            <tr id="account-warn">
+                                <td class="bold text-align-right"><span class="red">*</span>账号：</td>
+                                <td>
+                                    <input name="account" type="text" maxlength="20" class="form-control" placeholder="账号" value="">
+                                    <span class="red" data-name="account-warn"></span>
+                                </td>
+                            </tr>
+                            <tr id="pwd-warn">
+                                <td class="bold text-align-right"><span class="red">*</span>密码：</td>
+                                <td>
+                                    <input name="pwd" type="password" maxlength="20" class="form-control" placeholder="密码" value="">
+                                    <span class="red" data-name="pwd-warn"></span>
+                                </td>
+                            </tr>
+                            <tr id="crmpwd-warn">
+                                <td class="bold text-align-right"><span class="red">*</span>确认密码：</td>
+                                <td>
+                                    <input name="re_pwd" type="password" maxlength="20" class="form-control" placeholder="确认密码" value="">
+                                    <span class="red" data-name="repwd-warn"></span>
+                                </td>
+                            </tr>
+                        </if>
+                        <tr id="desginer-warn">
+                            <td class="bold text-align-right"><span class="red">*</span>设计师姓名：</td>
+                            <td>
+                                <input type="hidden" name="designid" value="{$_GET['id']}" />
+                                <if condition="$info['truevip'] eq 1 && $info['name'] neq ''">
+                                    <input name="desginer_name" type="text" maxlength="20" class="form-control" placeholder="设计师姓名" value="{$info.name}" disabled>
+                                <else/>
+                                    <input name="desginer_name" type="text" maxlength="20" class="form-control" placeholder="设计师姓名" value="{$info.name}">
+                                </if>
+
+                                <span class="red" data-name="desginer-warn"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">设计师职位：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['zw'] neq ''">
+                                    <select name="position" id="position" class="form-control" disabled>
+                                <else/>
+                                    <select name="position" id="position" class="form-control">
+                                </if>
+                                    <option <if condition="$info['zw'] eq '设计师'">selected="selected"</if> value="设计师">设计师</option>
+                                    <option <if condition="$info['zw'] eq '精英设计师'">selected="selected"</if> value="精英设计师">精英设计师</option>
+                                    <option <if condition="$info['zw'] eq '主任设计师'">selected="selected"</if> value="主任设计师">主任设计师</option>
+                                    <option <if condition="$info['zw'] eq '首席设计师'">selected="selected"</if> value="首席设计师">首席设计师</option>
+                                    <option <if condition="$info['zw'] eq '高级首席设计师'">selected="selected"</if> value="高级首席设计师">高级首席设计师</option>
+                                    <option <if condition="$info['zw'] eq '设计总监'">selected="selected"</if> value="设计总监">设计总监</option>
+                                    <option <if condition="$info['zw'] eq '艺术总监'">selected="selected"</if> value="艺术总监">艺术总监</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">显示排序：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['px'] neq ''">
+                                    <input name="sort" type="text" class="form-control" value="{$info.px}" placeholder="显示排序" disabled>
+                                <else/>
+                                    <input name="sort" type="text" class="form-control" value="{$info.px}" placeholder="显示排序">
+                                </if>
+
+                                <span class="red">数字越大排名越靠前</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">首页显示：</td>
+                            <td>
+                                <if condition="$_GET['id'] EQ '' || $_GET['id'] EQ NULL">
+                                    <input id="sip_yes" value="1" name="show_index_page" type="radio" checked> <label for="sip_yes">是</label>
+                                    <input id="sip_no" value="0" name="show_index_page" type="radio"> <label for="sip_no">否</label>
+                                <elseif condition="$_GET['id'] NEQ '' && $info['xs'] EQ ''" />
+                                    <input id="sip_yes" value="1" name="show_index_page" type="radio" checked> <label for="sip_yes">是</label>
+                                    <input id="sip_no" value="0" name="show_index_page" type="radio"> <label for="sip_no">否</label>
+                                <elseif condition="$info['truevip'] eq 1" />
+                                    <if condition="$info['xs'] EQ 1">
+                                        <input id="sip_yes" value="1" name="show_index_page" disabled type="radio" checked> <label for="sip_yes">是</label>
+                                        <input id="sip_no" value="0" name="show_index_page" disabled type="radio"> <label for="sip_no">否</label>
+                                        <else/>
+                                        <input id="sip_yes" value="1" name="show_index_page" disabled type="radio"> <label for="sip_yes">是</label>
+                                        <input id="sip_no" value="0" name="show_index_page" disabled type="radio" checked> <label for="sip_no">否</label>
+                                    </if>
+                                <else/>
+                                    <if condition="$info['xs'] EQ 1">
+                                        <input id="sip_yes" value="1" name="show_index_page" type="radio" checked> <label for="sip_yes">是</label>
+                                        <input id="sip_no" value="0" name="show_index_page" type="radio"> <label for="sip_no">否</label>
+                                        <else/>
+                                        <input id="sip_yes" value="1" name="show_index_page" type="radio"> <label for="sip_yes">是</label>
+                                        <input id="sip_no" value="0" name="show_index_page" type="radio" checked> <label for="sip_no">否</label>
+                                    </if>
+                                </if>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">毕业院校：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['school'] neq ''">
+                                    <input name="graduation" type="text" disabled value="{$info.school}" maxlength="40" class="form-control" placeholder="毕业院校">
+                                <else/>
+                                    <input name="graduation" type="text" value="{$info.school}" maxlength="40" class="form-control" placeholder="毕业院校">
+                                </if>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">现就职公司：</td>
+                            <td>
+                                <input type="hidden" value="{$info.comid}" data-comname="{$info.comname}" id="hadcomid" />
+                                <input type="hidden" value="{$info.truevip}" id="truevip" />
+                                <input type="hidden" value="{$info.fgold}" id="fenggeold" />
+                                <input type="hidden" value="{$info.lyold}" id="lingyuold" />
+                                <if condition="$info['truevip'] eq 1 && $info['comid'] neq ''">
+                                    <select name="work_place" id="work_place" disabled class="form-control">
+                                        <option value="{$info.comid}">{$info.comname}</option>
+                                    <elseif condition="$info['comid'] neq ''" />
+                                        <select name="work_place" id="work_place" class="form-control">
+                                            <option value="{$info.comid}">{$info.comname}</option>
+                                <else/>
+                                    <select name="work_place" id="work_place" class="form-control">
+                                </if>
+                                    <!--<if condition="$info['comid'] neq '' || $info['comid'] neq NULL">-->
+                                        <!--<option value="{$info.comid}">{$info.comname}</option>-->
+                                    <!--</if>-->
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">所属区域：</td>
+                            <td>
+                                <select name="cs" id="cs" class="form-control" <if condition="$info['cs'] neq ''">disabled</if> >
+                                    <if condition="$info['cs'] neq ''">
+                                        <option value="{$info.cs}">{$info.cname}</option>
+                                    <else/>
+                                        <option value="">请选择</option>
+                                        <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </if>
+                                </select>
+                                <if condition="$info['truevip'] eq 1 && $info['qx'] neq ''">
+                                    <select name="qx" id="qx" disabled class="form-control">
+                                <else/>
+                                    <select name="qx" id="qx" class="form-control">
+                                </if>
+                                    <volist name="arealist" id="vo">
+                                        <if condition="$info['qx'] EQ $vo['qz_areaid']">
+                                            <option value="{$vo.qz_areaid}" selected>{$vo.qz_area}</option>
+                                            <else/>
+                                            <option value="{$vo.qz_areaid}">{$vo.qz_area}</option>
+                                        </if>
+                                    </volist>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right"><span class="red">*</span>从业时间：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['jobtime'] neq ''">
+                                    <select name="job_year" id="job_year" disabled class="form-control">
+                                <else/>
+                                    <select name="job_year" id="job_year" class="form-control">
+                                </if>
+                                    <option <if condition="$info['jobtime'] eq '应届'">selected="selected"</if> value="应届">应届</option>
+                                    <option <if condition="$info['jobtime'] eq '一年'">selected="selected"</if> value="一年">一年</option>
+                                    <option <if condition="$info['jobtime'] eq '二年'">selected="selected"</if> value="二年">二年</option>
+                                    <option <if condition="$info['jobtime'] eq '三年~五年'">selected="selected"</if> value="三年~五年">三年~五年</option>
+                                    <option <if condition="$info['jobtime'] eq '五年~八年'">selected="selected"</if> value="五年~八年">五年~八年</option>
+                                    <option <if condition="$info['jobtime'] eq '八年~十年'">selected="selected"</if> value="八年~十年">八年~十年</option>
+                                    <option <if condition="$info['jobtime'] eq '十年以上'">selected="selected"</if> value="十年以上">十年以上</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="skill_at_style_warn">
+                            <td class="bold text-align-right"><span class="red">*</span>擅长风格：</td>
+                            <td>
+                                <if condition="$fengge['s_jy'] EQ 1 && $fengge['s_os'] EQ 1 && $fengge['s_zs'] EQ 1 && $fengge['s_gd'] EQ 1 && $fengge['s_ty'] EQ 1 && $fengge['s_dzh'] EQ 1 && $fengge['s_ms'] EQ 1 && $fengge['s_hd'] EQ 1 && $fengge['s_other'] EQ 1">
+                                    <input name="style" id="all_style" type="checkbox" checked="checked" value="0"> <label for="all_style">全部</label>
+                                    <else/>
+                                    <input name="style" id="all_style" type="checkbox" value="0"> <label for="all_style">全部</label>
+                                </if>
+                                <if condition="$fengge['s_jy'] EQ 1">
+                                    <input name="style" id="s_jy" type="checkbox" checked="checked" value="现代简约"> <label for="s_jy">现代简约</label>
+                                <else/>
+                                    <input name="style" id="s_jy" type="checkbox" value="现代简约"> <label for="s_jy">现代简约</label>
+                                </if>
+                                <if condition="$fengge['s_os'] EQ 1">
+                                    <input name="style" id="s_os" type="checkbox" checked="checked" value="欧式风格"> <label for="s_os">欧式风格</label>
+                                <else/>
+                                    <input name="style" id="s_os" type="checkbox" value="欧式风格"> <label for="s_os">欧式风格</label>
+                                </if>
+                                <if condition="$fengge['s_zs'] EQ 1">
+                                    <input name="style" id="s_zs" type="checkbox" checked="checked" value="中式风格"> <label for="s_zs">中式风格</label>
+                                <else/>
+                                    <input name="style" id="s_zs" type="checkbox" value="中式风格"> <label for="s_zs">中式风格</label>
+                                </if>
+                                <if condition="$fengge['s_gd'] EQ 1">
+                                    <input name="style" id="s_gd" type="checkbox" checked="checked" value="古典风格"> <label for="s_gd">古典风格</label>
+                                    <else/>
+                                    <input name="style" id="s_gd" type="checkbox" value="古典风格"> <label for="s_gd">古典风格</label>
+                                </if>
+                                <if condition="$fengge['s_ty'] EQ 1">
+                                    <input name="style" id="s_ty" type="checkbox" checked="checked" value="田园风格"> <label for="s_ty">田园风格</label>
+                                    <else/>
+                                    <input name="style" id="s_ty" type="checkbox" value="田园风格"> <label for="s_ty">田园风格</label>
+                                </if>
+                                <if condition="$fengge['s_dzh'] EQ 1">
+                                    <input name="style" id="s_dzh" type="checkbox" checked="checked" value="地中海风格"> <label for="s_dzh">地中海风格</label>
+                                    <else/>
+                                    <input name="style" id="s_dzh" type="checkbox" value="地中海风格"> <label for="s_dzh">地中海风格</label>
+                                </if>
+                                <if condition="$fengge['s_ms'] EQ 1">
+                                    <input name="style" id="s_ms" type="checkbox" checked="checked" value="美式风格"> <label for="s_ms">美式风格</label>
+                                    <else/>
+                                    <input name="style" id="s_ms" type="checkbox" value="美式风格"> <label for="s_ms">美式风格</label>
+                                </if>
+                                <if condition="$fengge['s_hd'] EQ 1">
+                                    <input name="style" id="s_hd" type="checkbox" checked="checked" value="混搭风格"> <label for="s_hd">混搭风格</label>
+                                    <else/>
+                                    <input name="style" id="s_hd" type="checkbox" value="混搭风格"> <label for="s_hd">混搭风格</label>
+                                </if>
+                                <if condition="$fengge['s_other'] EQ 1">
+                                    <input name="style" id="s_other" type="checkbox" checked="checked" value="其它"> <label for="s_other">其它</label>
+                                    <else/>
+                                    <input name="style" id="s_other" type="checkbox" value="其它"> <label for="s_other">其它</label>
+                                </if>
+                                <span class="red" data-name="style_warn"></span>
+                            </td>
+                        </tr>
+                        <tr id="skill_at_field_warn">
+                            <td class="bold text-align-right"><span class="red">*</span>擅长领域：</td>
+                            <td>
+                                <if condition="$lingyu['f_zz'] EQ 1 && $lingyu['f_xzl'] EQ 1 && $lingyu['f_bs'] EQ 1 && $lingyu['f_zmd'] EQ 1 && $lingyu['f_jd'] EQ 1 && $lingyu['f_cy'] EQ 1 && $lingyu['f_dwb'] EQ 1 && $lingyu['f_other'] EQ 1">
+                                    <input name="skill_at_field" id="all_field" type="checkbox" checked="checked" value="0"> <label for="all_field">全部</label>
+                                    <else/>
+                                    <input name="skill_at_field" id="all_field" type="checkbox" value="0"> <label for="all_field">全部</label>
+                                </if>
+                                <if condition="$lingyu['f_zz'] EQ 1">
+                                    <input name="skill_at_field" id="f_zz" type="checkbox" checked="checked" value="住宅公寓"> <label for="f_zz">住宅公寓</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_zz" type="checkbox" value="住宅公寓"> <label for="f_zz">住宅公寓</label>
+                                </if>
+                                <if condition="$lingyu['f_xzl'] EQ 1">
+                                    <input name="skill_at_field" id="f_xzl" type="checkbox" checked="checked" value="写字楼"> <label for="f_xzl">写字楼</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_xzl" type="checkbox" value="写字楼"> <label for="f_xzl">写字楼</label>
+                                </if>
+                                <if condition="$lingyu['f_bs'] EQ 1">
+                                    <input name="skill_at_field" id="f_bs" type="checkbox" checked="checked" value="别墅"> <label for="f_bs">别墅</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_bs" type="checkbox" value="别墅"> <label for="f_bs">别墅</label>
+                                </if>
+                                <if condition="$lingyu['f_zmd'] EQ 1">
+                                    <input name="skill_at_field" id="f_zmd" type="checkbox" checked="checked" value="专卖展示店"> <label for="f_zmd">专卖展示店</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_zmd" type="checkbox" value="专卖展示店"> <label for="f_zmd">专卖展示店</label>
+                                </if>
+                                <if condition="$lingyu['f_jd'] EQ 1">
+                                    <input name="skill_at_field" id="f_jd" type="checkbox" checked="checked" value="酒店宾馆"> <label for="f_jd">酒店宾馆</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_jd" type="checkbox" value="酒店宾馆"> <label for="f_jd">酒店宾馆</label>
+                                </if>
+                                <if condition="$lingyu['f_cy'] EQ 1">
+                                    <input name="skill_at_field" id="f_cy" type="checkbox" checked="checked" value="餐饮酒吧"> <label for="f_cy">餐饮酒吧</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_cy" type="checkbox" value="餐饮酒吧"> <label for="f_cy">餐饮酒吧</label>
+                                </if>
+                                <if condition="$lingyu['f_dwb'] EQ 1">
+                                    <input name="skill_at_field" id="f_dwb" type="checkbox" checked="checked" value="歌舞迪"> <label for="f_dwb">歌舞迪</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_dwb" type="checkbox" value="歌舞迪"> <label for="f_dwb">歌舞迪</label>
+                                </if>
+                                <if condition="$lingyu['f_other'] EQ 1">
+                                    <input name="skill_at_field" id="f_other" type="checkbox" checked="checked" value="其他"> <label for="f_other">其他</label>
+                                <else/>
+                                    <input name="skill_at_field" id="f_other" type="checkbox" value="其他"> <label for="f_other">其他</label>
+                                </if>
+                                <span class="red" data-name="field_warn"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right">收费标准：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['cost'] neq ''">
+                                    <input name="cost" type="text" disabled value="{$info.cost}" class="form-control" placeholder="收费标准">
+                                <else/>
+                                    <input name="cost" type="text" value="{$info.cost}" class="form-control" placeholder="收费标准">
+                                </if>
+                                <span>元/平米</span>
+                            </td>
+                        </tr>
+                        <tr id="brief_warn">
+                            <td class="bold text-align-right" style="vertical-align: top;"><span class="red">*</span>个人简介：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['text'] neq ''">
+                                    <textarea name="brief" cols="30" rows="10" maxlength="300" disabled class="form-control" placeholder="限定在300个字符以内">{$info.text}</textarea>
+                                    <else/>
+                                    <textarea name="brief" cols="30" rows="10" maxlength="300" class="form-control" placeholder="限定在300个字符以内">{$info.text}</textarea>
+                                </if>
+                                <span class="red" data-name="brief_warn"></span>
+                            </td>
+                        </tr>
+                        <tr id="idea_warn">
+                            <td class="bold text-align-right" style="vertical-align: top;"><span class="red">*</span>设计理念：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['linian'] neq ''">
+                                    <textarea name="linian" cols="30" rows="10" maxlength="100" disabled class="form-control" placeholder="限定在100个字符以内">{$info.linian}</textarea>
+                                <else/>
+                                    <textarea name="linian" cols="30" rows="10" maxlength="100" class="form-control" placeholder="限定在100个字符以内">{$info.linian}</textarea>
+                                </if>
+                                <span class="red" data-name="idea_warn"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold text-align-right" style="vertical-align: top;">代表作：</td>
+                            <td>
+                                <if condition="$info['truevip'] eq 1 && $info['cases'] neq ''">
+                                    <textarea name="cases" cols="30" rows="10" maxlength="100" disabled class="form-control" placeholder="限定在100个字符以内">{$info.cases}</textarea>
+                                <else/>
+                                    <textarea name="cases" cols="30" rows="10" maxlength="100" class="form-control" placeholder="限定在100个字符以内">{$info.cases}</textarea>
+                                </if>
+
+                            </td>
+                        </tr>
+                        </tbody></table>
+                    <div class="btn-area">
+                        <button type="button" class="btn btn-primary" id="save">保存</button>
+                        <a href="/basicinfo/design/" class="btn btn-default">返回</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var Global_Add_Design = "/basicinfo/addoreditdesign",
+            Global_Job_Url = "/api/getnotvipcompanylist"
+        $(function () {
+            var initAvatar = []
+            if('{$info.logo}') {
+                initAvatar.push("<img src='{$info.logo}' class='file-preview-image' alt='{$info.name}' title='{$info.name}'>")
+            }
+            if($("#avatar").length > 0) {
+                // 设计师头像上传
+                $("#avatar").fileinput({
+                    language: 'zh', //设置语言,
+                    uploadUrl:"/upload/uploadimg/",
+                    showCaption:false,
+                    browseClass:"btn btn-primary",
+                    allowedFileExtensions : ['jpg','png','gif', 'jpeg'],
+                    maxFileCount:1,
+                    maxFileSize: 2048,
+                    uploadClass:"btn btn-info",
+                    removeClass:"btn btn-danger",
+                    uploadAsync:true,
+                    dropZoneEnabled:false,
+                    previewSettings:{
+                        image: {width: "auto", height: "100px"}
+                    },
+                    /*minImageWidth: 126,
+                    minImageHeight: 63,
+                    maxImageWidth: 126,
+                    maxImageHeight: 63,*/
+                    layoutTemplates:{
+                        actionDelete:"",
+                        actionUpload:""
+                    },
+                    uploadExtraData:{
+                        prefix:'qzlogo'
+                    },
+                    initialPreview:initAvatar,
+                }).on('fileuploaded', function(event, data) {
+                    if(1 == data.response.status){
+                        $('input[name="avatar"]').val(data.response.data.url);
+                    }else{
+                        return false;
+                    }
+                }).on("fileuploaderror",function(event, data){
+                    return false;
+                }).on("fileclear",function(){
+                    $('input[name="avatar"]').val("");
+                });
+            }
+        })
+        $("#avatar").on("click", function () {
+            if($("#truevip").val() == 1 && $('input[name="avatar"]').val()){
+                alert('真会员不可修改头像')
+                return false
+            }
+        })
+
+        //验证风格和领域是否可选择
+        $(function(){
+            var isvip = $('#truevip').val();
+            var fenggeold = $('#fenggeold').val();
+            var lingyuold = $('#lingyuold').val();
+            if(isvip == 1 && fenggeold == 1){       //表示真会员且已选择风格，需要禁用风格的多选
+                $('input[name="style"]').attr("disabled",true);
+            }
+            if(isvip ==1 && lingyuold == 1){        //表示真会员且已选择领域，需要禁用领域的多选
+                $('input[name="skill_at_field"]').attr("disabled",true);
+            }
+        });
+        $(function () {
+            // 就职公司
+            var hadcomid = $('#hadcomid').val();
+            if(hadcomid){
+                var showcomname = $('#hadcomid').data('comname');
+            }else{
+                var showcomname = '请输入公司名称';
+            }
+            $("select[name='work_place']").select2({
+                language: 'zh-CN',
+                ajax: {
+                    url: Global_Job_Url,
+                    dataType: 'json',
+                    delay: 1000,
+                    method: 'get',
+                    data: function (params) {
+                        return {
+                            query: params.term
+                        };
+                    },
+                    processResults: function (res) {
+                        var items = $.map(res.data, function (value) {
+                            var item = {};
+                            item.id = value.id;
+                            item.name = value.jc;
+                            return item;
+                        });
+                        return {
+                            results: items
+                        };
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                },
+                minimumInputLength: 1,
+                placeholder: showcomname,
+                templateResult: formatRepo,
+                templateSelection: formatRepoSelection
+            });
+            function formatRepo(repo) {
+                if (repo.loading) {
+                    return repo.text;
+                }
+                var markup = '<div>' + repo.name + '</div>';
+                return markup;
+            }
+
+            function formatRepoSelection(repo) {
+                if (repo.user != undefined) {
+                    $('.yaccount').val(repo.user);
+                    $('.city').val(repo.city);
+                }
+                return repo.name || repo.text;
+            }
+        })
+        $(function () {
+            var $designid = $('input[name="designid"]'),
+                $avatar = $('input[name="avatar"]'),
+                $avatarWarn = $('span[data-name="avatar-warn"]'),
+                $account = $('input[name="account"]'),
+                $accountWarn = $('span[data-name="account-warn"]'),
+                $pwd = $('input[name="pwd"]'),
+                $pwdWarn = $('span[data-name="pwd-warn"]'),
+                $rePwd = $('input[name="re_pwd"]'),
+                $rePwdWarn = $('span[data-name="repwd-warn"]'),
+                $desginerName = $("input[name='desginer_name']"),
+                $desginerWarn = $('span[data-name="desginer-warn"]'),
+                $skillAtStyle = $('input[name="style"]'),
+                $skillStyleWarn = $('span[data-name="style_warn"]'),
+                $skillAtField = $('input[name="skill_at_field"]'),
+                $skillFieldWarn = $('span[data-name="field_warn"]'),
+                $brief = $('textarea[name="brief"]'),
+                $briefWarn = $('span[data-name="brief_warn"]'),
+                $idea = $('textarea[name="linian"]'),
+                $ideaWarn = $('span[data-name="idea_warn"]');
+
+            $("#save").on('click', function () {
+                var skillChecked = 0, fieldChecked = 0, skillAtstyle = [], skillAtField = [];
+                $avatarWarn.html('')
+                $accountWarn.html('')
+                $pwdWarn.html('')
+                $rePwdWarn.html('')
+                $desginerWarn.html('')
+                $skillStyleWarn.html('')
+                $skillFieldWarn.html('')
+                $briefWarn.html('')
+                $ideaWarn.html('')
+                $skillAtStyle.each(function (index, item) {
+                    if(item.checked) {
+                        skillChecked++
+                        if($(item).val() != 0) {
+                            skillAtstyle.push($(item).val())
+                        }
+                    }
+                })
+                $skillAtField.each(function (index, item) {
+                    if(item.checked) {
+                        fieldChecked++
+                        if($(item).val() != 0) {
+                            skillAtField.push($(item).val())
+                        }
+                    }
+                })
+                if(!$avatar.val()) {
+                    $avatarWarn.text('请上传设计师头像')
+                    $("html, body").animate({
+                        scrollTop: $('#avatar-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && !$account.val()) {
+                    $accountWarn.text('此处不可空白')
+                    $("html, body").animate({
+                        scrollTop: $('#account-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && $account.val().length < 4) {
+                    $accountWarn.text('账号最少为4位')
+                    $("html, body").animate({
+                        scrollTop: $('#account-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && !$pwd.val()) {
+                    $pwdWarn.text('此处不可空白')
+                    $("html, body").animate({
+                        scrollTop: $('#pwd-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && $pwd.val().length < 6) {
+                    $pwdWarn.text('密码最少为6位')
+                    $("html, body").animate({
+                        scrollTop: $('#pwd-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && !$rePwd.val()) {
+                    $rePwdWarn.text('此处不可空白')
+                    $("html, body").animate({
+                        scrollTop: $('#crmpwd-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$designid.val() && ($pwd.val() != $rePwd.val())) {
+                    $rePwdWarn.text('两次密码不一致')
+                    $("html, body").animate({
+                        scrollTop: $('#crmpwd-warn').offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$desginerName.val()) {
+                    $desginerWarn.text('此处不可空白')
+                    $("html, body").animate({
+                        scrollTop: $desginerWarn.offset().top - 10
+                    });
+                    return false;
+                }
+                if(skillChecked <= 0) {
+                    $skillStyleWarn.text('请至少选择一个擅长风格')
+                    $("html, body").animate({
+                        scrollTop: $skillStyleWarn.offset().top - 10
+                    });
+                    return false;
+                }
+                if(fieldChecked <= 0) {
+                    $skillFieldWarn.text('请至少选择一个擅长领域')
+                    $("html, body").animate({
+                        scrollTop: $skillFieldWarn.offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$brief.val()) {
+                    $briefWarn.text('请输入个人简介')
+                    $("html, body").animate({
+                        scrollTop: $("#brief_warn").offset().top - 10
+                    });
+                    return false;
+                }
+                if(!$idea.val()) {
+                    $ideaWarn.text('请输入设计理念')
+                    $("html, body").animate({
+                        scrollTop: $("#idea_warn").offset().top - 10
+                    });
+                    return false;
+                }
+                // 提交数据
+                $.ajax({
+                    url: Global_Add_Design,
+                    type: 'post',
+                    dataType: 'JSON',
+                    data: {
+                        id:$designid.val(),
+                        logo:$avatar.val(),
+                        user: $account.val(),
+                        pass: $pwd.val(),
+                        desginer_name: $desginerName.val(),
+                        position: $('select[name="position"]').val(),
+                        sort: $('input[name="sort"]').val(),
+                        show_index_page: $("input[name='show_index_page']:checked").val(),
+                        graduation: $('input[name="graduation"]').val(),
+                        comid: $('select[name="work_place"]').val(),
+                        cs: $('select[name="cs"]').val(),
+                        qx: $('select[name="qx"]').val(),
+                        job_year: $('select[name="job_year"]').val(),
+                        style: skillAtstyle.join(','),
+                        skill_at_field: skillAtField.join(','),
+                        cost: $('input[name="cost"]').val(),
+                        text: $brief.val(),
+                        linian: $idea.val(),
+                        cases: $('textarea[name="cases"]').val()
+                    }
+                })
+                    .done(function(data) {
+                        if (data.error_code == 1){     //1表示获取成功
+                            alert('保存成功')
+                            location.href = '/basicinfo/design/'
+                        }else{
+                            alert(data.error_msg)
+                            return
+                        }
+                    })
+                    .fail(function(){
+                        alert("网络异常，请稍后重试")
+                        return
+                    });
+            })
+        })
+        $(function () {
+            // 输入限制
+            $('input').on("keyup",function () {
+                $(this).val($(this).val().replace(/\s+/g,""));
+            });
+            $('input[name="sort"], input[name="cost"]').on("keyup",function () {
+                $(this).val($(this).val().replace(/\D/g,""));
+            });
+            $('input[name="graduation"], input[name="desginer_name"]').on("keyup",function () {
+                $(this).val($(this).val().replace(/\d/g,""));
+            });
+            $('input[name="sort"], input[name="charge"]').on("keyup",function () {
+                $(this).val($(this).val().replace(/\D/g,""));
+            });
+            $("html,body").on("keyup","input[type='text']",function(){
+                var $target = $(this);
+                var value = $target.val();
+                var lastV = value.substring(value.length-1,value.length);
+                var pattern = /[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%&*（）\-+={}|《》？：“”【】、；‘’，。、]/im;
+                var pattern1 = /[……——]/im;
+                if(pattern.test(lastV)){
+                    $target.val(value.slice(0,value.length-1));
+                }
+                if(pattern1.test(lastV)){
+                    $target.val(value.slice(0,value.length-2));
+                }
+            });
+        })
+        $(function () {
+            var $inputStyle = $('input[name="style"]'),
+                $inputFeild = $('input[name="skill_at_field"]');
+            $('#all_style').on('click', function () {
+                if( $(this).is(':checked') ){
+                    $("input[name='style']").each(function(index,item){
+                        $(this)[0].checked = true;
+                    });
+                }else{
+                    $("input[name='style']").each(function(index,item){
+                        $(this)[0].checked = false;
+                    });
+                }
+            })
+            $inputStyle.on("click", function () {
+                var count = 0
+                if(this.id == 'all_style'){
+                    return
+                }
+                if(this.checked == false) {
+                    $('#all_style')[0].checked = false
+                }
+                $inputStyle.each(function (index, item) {
+                    if(item.checked == true) {
+                        count++
+                    }
+                })
+                if(count >= $inputStyle.length-1) {
+                    $('#all_style')[0].checked = true
+                }
+            })
+            $('#all_field').on('click', function () {
+                if( $(this).is(':checked') ){
+                    $("input[name='skill_at_field']").each(function(index,item){
+                        $(this)[0].checked = true;
+                    });
+                }else{
+                    $("input[name='skill_at_field']").each(function(index,item){
+                        $(this)[0].checked = false;
+                    });
+                }
+            })
+            $inputFeild.on("click", function () {
+                var count = 0
+                if(this.id == 'all_field'){
+                    return
+                }
+                if(this.checked == false) {
+                    $('#all_field')[0].checked = false
+                }
+                $inputFeild.each(function (index, item) {
+                    if(item.checked == true) {
+                        count++
+                    }
+                })
+                if(count >= $inputFeild.length-1) {
+                    $('#all_field')[0].checked = true
+                }
+            })
+        })
+
+        //----- 城市获取二级区域  开始 -----
+        $('#cs').change(function(){
+            var cityid = $(this).val();
+            $.ajax({
+                url: '/basicinfo/getquyulistbycityid/',
+                type: 'get',
+                dataType: 'JSON',
+                data: {
+                    cityid: cityid
+                }
+            })
+                .done(function(data) {
+                    if (data.error_code == 1){     //1表示获取成功
+                        $('#qx').empty();
+                        var html = '<option value="">请选择</option>';
+                        $.each(data.data.list,function(i,val){
+                            html = html + '<option value='+val.qz_areaid+'>'+val.qz_area+'</option>';
+                        });
+                        $('#qx').append(html);
+
+                    }else{
+                        $('#qx').empty();
+                        var html = '<option value="">请选择</option>';
+                        $('#qx').append(html);
+                        return false;
+                    }
+                });
+        });
+        //----- 城市获取二级区域  结束 -----
+
+    </script>
+</block>

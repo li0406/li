@@ -1,0 +1,396 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/ht-photo.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/jia-suggest.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="{$static_host}/assets/common/js/baidu/uploader/dist/webuploader.css?v={:C('STATIC_VERSION')}">
+    <link href="{$static_host}/assets/common/js/baidu/css/upload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="{$static_host}/assets/common/js/baidu/css/caseup.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/threedup.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/baidu/uploader/dist/webuploader.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="{$static_host}/assets/common/js/baidu/uploader/3dupload.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="{$static_host}/assets/common/js/jquery.dragsort.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Cases:header" />
+        <div class="ht-main">
+            <form id="myForm" onsubmit="return false">
+            <ul  class="ht-moreinfo">
+            	<li>
+                    <span><i class="red">*</i>标题名称：</span>
+                    <input name="biaoti" type="text" id="biaoti" maxlength="18" value="">
+                    <div class="tishi"></div>
+                </li>
+                <li>
+                    <span><i class="red">*</i>装修风格：</span>
+                    <select name="fengge" class="select">
+                        <volist name="info.fengge" id="vo">
+                            <if condition="$info['case'] AND $info['case']['fengge'] EQ $vo['id']">
+                            <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </if>
+                        </volist>
+                    </select>
+                    <div class="tishi"></div>
+                </li>
+                <li>
+                    <span><i class="red">*</i>房屋面积：</span>
+                    <input name="mianji" type="text" id="housemj" value="">
+                    <div class="tishi"></div>
+                </li>
+                <li>
+                    <span><i class="red">*</i>设计师：</span>
+                    <select name="designer" class="select">
+                        <volist name="info.designers" id="vo">
+                            <if condition="$info['case'] AND $info['case']['userid'] EQ $vo['id']">
+                            <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </if>
+                        </volist>
+                    </select>
+                    <div class="tishi"></div>
+                </li>
+                <li>
+                    <span><i class="red">*</i>案例图片：</span>
+                    <div class="ht-comp-phot">
+                        <div id="uploader" class="uploader" data-data='{$info.case.imgs}'>
+                        </div>
+                    </div>
+                    <input type="hidden" name="imgs"/>
+                    <input type="hidden" name="path"/>
+                    <input name="caseid" type="hidden" value="{$info.case.id}"/>
+                </li>
+            </ul>
+            </form>
+            <div class="ht-yes">
+                <ul class="red" style="margin-bottom:20px;">
+                    <li> 1、带*为必填项</li>
+                    <li> 2、案例信息、图片上,请勿包含 联系方式\网址\其他网站LOGO\微博、微信帐号\二维码 等"相关联系方式",否则将会封号处理。</li>
+                    <li> 3、请上传高清优质图片，齐装网会重点推荐高清优质的图片，增加您的曝光率，像素底质量差的图片将审核不通过。</li>
+                </ul>
+                <button id="btnSave" type="button"><i class="icon-ok mr10"></i>提交</button>
+                <i class="red err-tips"></i>
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+
+</body>
+<script type="text/javascript">
+//实现搜索输入框的输入提示js类
+function oSearchSuggest(searchFuc){
+    var input = $('#gover_search_key');
+    var suggestWrap = $('#gov_search_suggest');
+    var key = "";
+    var init = function(){
+        input.bind('keyup',sendKeyWord);
+        input.bind('blur',function(){setTimeout(hideSuggest,500);})
+    }
+    var hideSuggest = function(){
+        suggestWrap.hide();
+    }
+
+    //发送请求，根据关键字到后台查询
+    var sendKeyWord = function(event){
+
+        //键盘选择下拉项
+        if(suggestWrap.css('display')=='block'&&event.keyCode == 38||event.keyCode == 40){
+            var current = suggestWrap.find('li.hover');
+            if(event.keyCode == 38){
+                if(current.length>0){
+                    var prevLi = current.removeClass('hover').prev();
+                    if(prevLi.length>0){
+                        prevLi.addClass('hover');
+                        input.val(prevLi.html());
+                        input.attr("lang",prevLi.attr('lang'));
+                    }
+                }else{
+                    var last = suggestWrap.find('li:last');
+                    last.addClass('hover');
+                    input.val(last.html());
+                    input.attr("lang",last.attr('lang'));
+                }
+
+            }else if(event.keyCode == 40){
+                if(current.length>0){
+                    var nextLi = current.removeClass('hover').next();
+                    if(nextLi.length>0){
+                        nextLi.addClass('hover');
+                        input.val(nextLi.html());
+                        input.attr("lang",nextLi.attr('lang'));
+                    }
+                }else{
+                    var first = suggestWrap.find('li:first');
+                    first.addClass('hover');
+                    input.val(first.html());
+                    input.attr("lang",first.attr('lang'));
+                }
+            }
+
+        //输入字符
+        }else{
+            var valText = $.trim(input.val());
+            if(valText ==''||valText==key){
+                return;
+            }
+            searchFuc(valText);
+            key = valText;
+        }
+
+    }
+    //请求返回后，执行数据展示
+    this.dataDisplay = function(data,ids){
+        if(data.length<=0){
+            suggestWrap.hide();
+            return;
+        }
+
+        //往搜索框下拉建议显示栏中添加条目并显示
+
+        suggestWrap.find('ul').html('');
+        for(var i=0; i<data.length; i++){
+            var li = $('<li></li>');
+            li.attr("lang",ids[i]);
+            li.html(data[i]);
+            suggestWrap.find('ul').append(li);
+        }
+
+        suggestWrap.show();
+        //为下拉选项绑定鼠标事件
+        suggestWrap.find('li').hover(function(){
+                suggestWrap.find('li').removeClass('hover');
+                $(this).addClass('hover');
+
+            },function(){
+                $(this).removeClass('hover');
+        }).bind('click',function(){
+            input.attr("lang",$(this).attr('lang'));
+            input.val(this.innerHTML);
+            suggestWrap.hide();
+        });
+    }
+    init();
+};
+
+//实例化输入提示的JS,参数为进行查询操作时要调用的函数名
+// var searchSuggest =  new oSearchSuggest(sendKeyWordToBack);
+// function sendKeyWordToBack(keyword){
+//     var obj = {
+//         "keyword" : keyword
+//     };
+//     $.ajax({
+//         url: '/getjias/',
+//         type: 'GET',
+//         dataType: 'JSON',
+//         data: obj
+//     })
+//     .done(function(data) {
+//         if(data.status == 1){
+//             //如果搜索出为空，则小区lang为空
+//             if(data.info == '0'){
+//                 $("input[name=xiaoqu]").removeAttr('lang');
+//             }
+//             var datas = data.data;
+//             var aData = [];
+//             var ids = [];
+//             $.each(datas,function(name,value) {
+//                 if(value!=""){
+//                     ids.push(value.id);
+//                     aData.push(value.name);
+//                 }
+//             });
+//             //将返回的数据传递给实现搜索输入框的输入提示js类
+//             searchSuggest.dataDisplay(aData,ids);
+//         }
+//     })
+// }
+</script>
+
+<script type="text/javascript">
+
+
+
+    //绑定元素
+    //日期范围限制
+      var start = {
+          elem: '#start',
+          format: 'YYYY-MM-DD',
+          max: '{:date("Y-m-d")}', //最大日期
+          istime: true,
+          istoday: false
+      };
+
+      var end = {
+          elem: '#end',
+          format: 'YYYY-MM-DD',
+          //min: laydate.now(),
+          istime: true,
+          istoday: false,
+          choose: function(datas) {
+              start.max = datas; //结束日选好后，充值开始日的最大日期
+          }
+      };
+
+
+      $(".ht-comp-phot").uploader({
+            host:"{:C('QINIU_DOMAIN')}",
+            old_host:"{:C('STATIC_HOST1')}",
+            server:"/uploader/uploadthreedimensional/",
+            drag:true,
+            prefix:"zxgscase",
+            formData:{
+                prefix:"zxgscase"
+            },
+            removePath:"/removeImg/",
+            callback:function(res){
+                 // $("input[name=imgs]").data("data",res.data);
+                 $("input[name=path]").data("data",res.path);
+                var data =  $("input[name=imgs]").data("data",res.data);
+                // if(typeof data == "undefined"){
+                //     data = [];
+                // }
+                // img = {
+                //     id:res["id"],
+                //     img:res.data["hash"],
+                //     path:res.data["key"],
+                //     tabIndex:res.tabIndex
+                // }
+                // data.push(img);
+                // $("input[name=imgs]").data("data",data);
+            }
+      });
+
+      $("#btnSave").click(function(event) {
+            var _this = $(this);
+            $(".tishi").html("");
+            $(".focus").removeClass('focus');
+            if(!App.validate.run($("input[name=biaoti]").val())){
+                $("input[name=biaoti]").addClass('focus');
+                $("input[name=biaoti]").focus();
+                $("input[name=biaoti]").parent().find(".tishi").html("请填写标题");
+                return false;
+            }
+
+            if($("select[name=fengge]").val() == null || !App.validate.run($("select[name=fengge]").val())){
+                $("select[name=fengge]").addClass('focus');
+                $("select[name=fengge]").focus();
+                $("select[name=fengge]").parent().find(".tishi").html("请选择装修风格");
+                return false;
+            }
+
+            if(!App.validate.run($("input[name=mianji]").val())){
+                $("input[name=mianji]").addClass('focus');
+                $("input[name=mianji]").focus();
+                $("input[name=mianji]").parent().find(".tishi").html("请填写面积");
+                return false;
+            }
+
+            if(!App.validate.run($("input[name=mianji]").val(),"decimal")){
+                $("input[name=mianji]").addClass('focus');
+                $("input[name=mianji]").focus();
+                $("input[name=mianji]").parent().find(".tishi").html("无效的面积");
+                return false;
+            }
+
+            if($("select[name=designer]").val() == null || !App.validate.run($("select[name=designer]").val())){
+                $("select[name=designer]").addClass('focus');
+                $("select[name=designer]").focus();
+                $("select[name=designer]").parent().find(".tishi").html("请选择设计师");
+                return false;
+            }
+
+            // if($("input[name=start]").val() != "" && $("input[name=end]").val() != ""){
+            //     if($("input[name=start]").val() > $("input[name=end]").val()){
+            //         $("input[name=start]").addClass('focus');
+            //         $("input[name=start]").focus();
+            //         $("input[name=start]").parents("#ht-date").next(".err-tips").html("装修开始时间不能超过装修结束时间");
+            //         return false;
+            //     }
+            // }
+
+            var imgData = $("input[name=imgs]").data("data");
+
+            if(typeof imgData == "undefined" && $("input[name=caseid]").val() == ""){
+                $(".ht-comp-phot").find(".uploader-info").html("请上传案例图片");
+                return false;
+            }else{
+                if($(".filelist li").length == 0){
+                    $(".ht-comp-phot").find(".uploader-info").html("请上传案例图片");
+                    return false;
+                }
+            }
+
+            var data = $("#myForm").serializeArray();
+            // var xiaoquid = $("input[name=xiaoqu]").attr('lang');
+            // data.push({name:"xiaoquid",value:xiaoquid});
+            var imgs = [];
+            $(".ht-comp-phot li").each(function(){
+                var li = $(this);
+                if(typeof li.attr("data-id") != "undefined"){
+                    imgs.push({
+                        id:li.attr("data-id"),
+                        index:li.attr("tabIndex"),
+                        on:li.hasClass("img_on")?2:0
+                    });
+                }
+            });
+            data.push({name:"imgs",value:JSON.stringify(imgs)});
+            data.push({name:"newImgs",value:JSON.stringify(imgData)});
+            data.push({name:"path",value:$("input[name=path]").data("data")});
+            if(typeof imgData != "undefined"){
+                for(var i = 0; i< imgData.length;i++ ){
+                    var index = $("#"+imgData[i].id).attr("tabIndex");
+                    imgData[i].tabIndex = index;
+                    imgData[i].on = typeof $("#"+imgData[i].id).attr("data-on") =="undefined"?0:2;
+                }
+                data.push({name:"newData",value:JSON.stringify(imgData)});
+            }
+            _this.attr("disabled","disabled");
+            $.ajax({
+                url: '/threedup/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    alert('成功');
+                    window.location.href="/threed";
+                }else{
+                    alert('失败');
+                     $(".ht-yes").find(".err-tips").html(data.info);
+                     _this.attr("disabled",false);
+                }
+            })
+            .fail(function(xhr) {
+                 $(".ht-yes").find(".err-tips").html("上传案例操作失败,请刷新再试！");
+                 _this.attr("disabled",false);
+            });
+      });
+
+     // $("select[name=class]").change(function(event) {
+     //    $("select[name=leixing]").parent().hide();
+     //    $("select[name=huxing]").parent().hide();
+
+     //    if($(this).val() == 2){
+     //        $("select[name=leixing]").parent().show();
+     //    }else{
+     //        $("select[name=huxing]").parent().show();
+     //    }
+     // });
+</script>
+</html>

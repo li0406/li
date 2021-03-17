@@ -1,0 +1,90 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>合同票据管理-商务销售 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/hetong/css/contractPublic_x150.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/contract/css/hetongshujvswzl.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/contractmanage/css/commercesaler.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/hetong/css/hetongCzwxzl_x150.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <div class="relative zhutigaodu">
+        <div class="main_content" id="target">
+            <div class="zhushi">
+                <span class="shuoming">
+                    释<include file="Contractmanage:explain"/>
+                </span>
+            </div>
+            <!-- 获取编号 -->
+            <div class="step_item_box">
+                <div class="step_item_name">
+                    <span class="pull-left">获取编号</span>
+                </div>
+                <div class="drag_handle">
+                    <span class="center_line"></span>
+                </div>
+                <div class="step7 step-container pt10">
+                    <div class="input_box_line to_center">
+                        <span class="pull-left label_name">签约城市：</span>
+                        <span class="pull-left">
+                            <input type="text" name="sign_city_name" value="">
+                            <span class="jingao">*</span>
+                        </span>
+                        <span class="pull-left label_name">签约会员(简称)：</span>
+                        <span class="pull-left">
+                            <input type="text"  name="sign_vip_name" value="">
+                            <span class="jingao">*</span>
+                        </span>
+                    </div>
+                    <div class="qurbcwaik text-center">
+                        <button type="button" class="button submit-get-contract-code">点击获取</button>
+                    </div>
+                    <div class="qurbcwaik text-center pt10 get-contract-code-resutlt">
+                    </div>
+                </div>
+            </div>
+
+            <!--合同管理-->
+            <include file="Contractmanage:contractmanager" />
+            <!-- 开票上传 -->
+            <include file="Contractmanage:uploaddocument_x150"/>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/home/hetong/js/dargFlex.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function() {
+            $(target).dargFlex('step_item_box');
+            //获取编号
+            $('.submit-get-contract-code').click(function(event) {
+                $.ajax({
+                    url: '/contractmanage/commercesaler/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    async: false,
+                    data: {
+                        operate:1,
+                        //type:$("select[name=getContractIdType]").val(),
+                        sign_city_name:$("input[name=sign_city_name]").val(),
+                        sign_vip_name:$("input[name=sign_vip_name]").val()
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        $('.get-contract-code-resutlt').html('获取成功! 您的编号是:<span class="jingao">'+data.data.contractid+'</span>');
+                        if(data.data.contractid != ''){
+                            $('.bhgl').prepend('<div class="pull-left three_item"><span>'+ $("input[name=sign_city_name]").val() +'</span><span>'+ $("input[name=sign_vip_name]").val() +'</span><span>'+ data.data.contractid +'</span></div>');
+                        }
+                    } else {
+                        $('.get-contract-code-resutlt').html('<span class="jingao">'+data.info+'</span>');
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('网络错误，请稍后重试')
+                });
+            });
+        });
+    </script>
+</block>

@@ -1,0 +1,327 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/baike/css/addbaike.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="content-header hed">
+            <h1>
+                <small class="ftjz">
+                    <empty name="Think.get.id">
+                        新增百科
+                    <else />
+                        编辑百科
+                    </empty>
+                </small>
+            </h1>
+        </div>
+        <div class="box tabletb">
+            <div>
+                <div class="content-half">
+                    <div class="btdy">
+                        百科条目
+                    </div>
+                    <div class="wenbk1">
+                        <input type="text" name="item" placeholder="输入百科条目" value="{$info.item}">
+                    </div>
+                </div>
+                <br>
+                <div class="content-half">
+                    <div class="btdy">
+                        百科标题
+                    </div>
+                    <div class="wenbk1">
+                        <input type="text" name="title" placeholder="输入百科标题" value="{$info.title}">
+                    </div>
+                </div>
+            </div>
+            <div class="xzfenlei">
+                选择分类
+            </div>
+            <div id="categoryWrap" class="xuanzxlakz">
+                <select data-value="{$info.cid|default=0}" class="category" name="category"></select>
+                <select data-value="{$info.sub_category_id|default=0}" class="sub_category" name="sub_category"></select>
+            </div>
+            <div class="tianjiatup">
+                添加图片
+            </div>
+            <div class="form-group shangctp">
+                <div class="kv-main col-sm-12">
+                    <input id="cover" type="file" multiple/>
+                    <input type="hidden" name="thumb" value="{$info.thumb}" />
+                </div>
+            </div>
+            <div class="tianxiejianje">
+                填写简介
+            </div>
+            <div class="wzshuruyuzh">
+                <textarea name="description" id="" cols="30" rows="10" maxlength="100" placeholder="请输入100字以内百科简介，填写简介更容易让人了解你的内容哦(*^__^*) ！">{$info.description}</textarea>
+            </div>
+            <div class="form-group dibu">
+                <label>文章详情（<span style="color:red;">*&nbsp;一级词条目录限制2-4个</span>）</label>
+                <div id="editor" name="content"></div>
+            </div>
+            <div class="tianxiejianje">
+
+                <if condition="$info.visible EQ 2 || !isset($_GET['id'])">
+                <div class="col-sm-3">
+                    <label class="col-sm-12 text-left">预发布日期：</label>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <!--预发布才能修改时间-->
+                            <if condition="$info.visible EQ 2 or $info.visible EQ null ">
+                                <input type="text" class="form-control datepicker w70" name="preview-time"  value="{$info.post_time|default=''|date='Y-m-d H:i:s',###}"/>
+                                <else/>
+                                <input type="text" class="form-control datepicker w70" name="preview-time"  disabled="disabled"  value="{$info.info.post_time|default=''|date='Y-m-d H:i:s',###}"/>
+                            </if>
+                        </div>
+                    </div>
+                </div>
+                </if>
+                <div class="col-sm-3">
+                    <label class="col-sm-12 text-left">是否推送原创：</label>
+                    <if condition="isset($info)">
+                    <select id="isoriginal" name="isoriginal" readonly="readonly" class="form-control w60" disabled>
+                        <option value="0">推送为非原创</option>
+                        <option value="1">推送为原创</option>
+                    </select>
+                    <else/>
+                    <select id="isoriginal" name="isoriginal" class="form-control w60">
+                        <option value="0">推送为非原创</option>
+                        <option value="1">推送为原创</option>
+                    </select>
+                    </if>
+                </div>
+                <div class="col-sm-2">
+                    <label class="col-sm-12 text-left">是否推送熊掌号：</label>
+                    <if condition="isset($info)">
+                    <select id="isxiongzhang" name="isxiongzhang" readonly="readonly" class="form-control w60" disabled>
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                    <else/>
+                    <select id="isxiongzhang" name="isxiongzhang" class="form-control w60">
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                    </if>
+                </div>
+                <br style="clear: both;" />
+            </div>
+
+            <div class="tuisong"><span>预发布数剩余：{$baike_number}</span></div>
+            <div class="addanniu">
+                <if condition="$info.visible EQ 2 || !isset($_GET['id'])">
+                <button type="button" class="btn btn-success btn-save" data-operate="true" data-direct-post="0" data-type="yufabu">
+                    保存
+                </button>
+                </if>
+                <button type="button" class="btn btn-info btn-save" data-operate="true" data-direct-post="0" data-type="fabu">
+                    直接发布
+                </button>
+                <a class="fanhui"  onclick="history.back(-1)"><i class="fa fa-mail-reply" aria-hidden="true"></i>返回</a>
+            </div>
+        </div>
+        <div class="box zhuti">
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#isoriginal").val("{$info.isoriginal|default='0'}");
+            $("#isxiongzhang").val("{$info.isxiongzhang|default='0'}");
+            //分类
+            $('#categoryWrap').cxSelect({
+                selects: ['category', 'sub_category'],
+                jsonValue: 'cid',
+                jsonName: 'name',          // 数据标题字段名称
+                jsonSub: 'children',       // 子集数据字段名称
+                required:true,
+                data: {$category}
+            });
+
+            //富文本
+            var ue = UE.getEditor('editor', {
+                autoClearinitialContent: false,
+                serverUrl: '/ueditor/upload/?ext=s3.jpg',
+                toolbars: [['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|', 'rowspacingtop', 'rowspacingbottom', 'lineheight', '|', 'paragraph', 'fontfamily', 'fontsize', '|', 'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|', 'imagecenter', 'simpleupload', 'insertimage', 'link', 'unlink', 'searchreplace']],
+                maximumWords: 10000
+            });
+            ue.ready(function() {
+                //设置编辑器的内容
+                ue.setContent('{$info.content}');
+            });
+            //封面图
+            $("#cover").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption:false,
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount:1,
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync:true,
+                dropZoneEnabled:false,
+                previewSettings:{
+                    image: {width: "auto", height: "100px"}
+                },
+                uploadExtraData:{
+                    prefix:'baike'
+                },
+                initialPreview:[{$info.cover}],
+            }).on('fileuploaded', function(event, data) {
+                if(1 == data.response.status){
+                    $('input[name="thumb"]').val(data.response.data.name);
+                }else{
+                    var d = dialog({
+                        title: '消息',
+                        content: data.response.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    d.show();
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                var e = dialog({
+                    title: '消息',
+                    content: '文件上传失败,请检查文件格式，规格是否符合要求，或联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }).on("fileclear",function(){
+                $("input[name=thumb]").val("");
+                $(".img-upload .fileinput-upload-button").removeClass('disabled');
+            });
+            var dd = true;
+            //保存
+            $('.btn-save').click(function(event) {
+                if(!dd){
+                    return false;
+                }
+                dd = false;
+                var _this = $(this);
+                var data = {
+                    id:'{$info.id}',
+                    title:$('input[name=title]').val(),
+                    item:$('input[name=item]').val(),
+                    cid:$('select[name=category]').val(),
+                    sub_category:$('select[name=sub_category]').val(),
+                    isoriginal:$('select[name=isoriginal]').val(),
+                    isxiongzhang:$('select[name=isxiongzhang]').val(),
+                    thumb:$('input[name=thumb]').val(),
+                    description:$('textarea[name=description]').val(),
+                    preview_time:$('input[name=preview-time]').val(),
+                    content:ue.getContent(),
+                    type:$(this).attr('data-type')
+                };
+                $.ajax({
+                    url: '/baike/operate/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                })
+                .done(function(data) {
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                            dd = true;
+                            if (data.status == 1) {
+                               window.location.href = '/baike/';
+                            }
+                        }
+                    });
+                    e.show();
+                })
+                .fail(function(xhr) {
+//                    var e = dialog({
+//                        title: '消息',
+//                        content: '操作失败,网络错误！',
+//                        okValue: '确 定',
+//                        quickClose: true,
+//                        ok: function () {
+//                            window.location.href = '/baike/';
+//                        }
+//                    });
+//                    e.show();
+                })
+            });
+            // 日期
+            // $(".datepicker").datetimepicker({
+            //     format: "yyyy-mm-dd",
+            //     minViewMode: 0,
+            //     autoclose: true,
+            // });
+
+
+            $('.datepicker').datetimepicker({
+                /* minView: "month",  *///选择日期后，不会再跳转去选择时分秒 
+                language:  'zh-CN',
+                dateFormat: 'yyyy-mm-dd',//日期显示格式
+                timeFormat:'HH:mm:ss',//时间显示格式
+                todayBtn:  1,
+                autoclose: 1,
+                minView:0,  //0表示可以选择小时、分钟   1只可以选择小时
+                minuteStep:5,//分钟间隔1分钟
+                clearBtn: true,
+            });
+
+            $('input[name=title]').blur(function(){
+                var title = $(this).val();
+                var baike_id = "{$_GET['id']}";
+                if(title != ''){
+                    $.ajax({
+                        url: '/baike/verifytitle/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            title:title,baike_id:baike_id
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status != '1'){
+                                var e = dialog({
+                                    title: '消息',
+                                    content: data.info,
+                                    okValue: '确 定',
+                                    quickClose: true,
+                                    ok: function () {}
+                                });
+                                e.show();
+                                $(".btn-save").prop('disabled','disabled')
+                            }else {
+                                $(".btn-save").prop('disabled','')
+                            }
+                        })
+                        .fail(function(xhr) {
+                            var e = dialog({
+                                title: '消息',
+                                content: '操作失败,请联系技术部门！',
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        })
+                }
+            })
+        })
+    </script>
+</block>

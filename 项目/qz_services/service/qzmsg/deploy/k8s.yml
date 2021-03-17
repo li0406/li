@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qzmsg
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: qzmsg
+  template:
+    metadata:
+      labels:
+        app: qzmsg
+    spec:
+      imagePullSecrets:
+        - name: "container-registry-a"
+      containers:
+      - name: qzmsg
+        # image: registry.cn-shanghai.aliyuncs.com/qizuang/qzmsg:master-040ce9e
+        image: <K8S_IMAGE>
+        imagePullPolicy: Always
+        # command: [ "echo", "SUCCESS" ]
+        ports:
+        - containerPort: 18100
+          name: 18100tcp00
+          protocol: TCP
+        # envFrom:
+        # - configMapRef:
+        #     name: env-app-config
+        volumeMounts:
+          - mountPath: /data/app/qzmsg/config
+            name: app-volume
+      volumes:
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: qzmsg
+                path: config.toml
+            name: app-config
+            optional: false
+          name: app-volume
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: qzmsg
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: qzmsg
+  ports:
+    - protocol: TCP
+      port: 18100
+      targetPort: 18100
+  type: ClusterIP

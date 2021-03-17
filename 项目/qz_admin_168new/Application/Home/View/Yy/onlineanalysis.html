@@ -1,0 +1,471 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>页面指标分析 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" type="text/css" href="/assets/home/yy/css/indexoverview.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header pbootom">
+    <div class="box">
+        <div class="box-header boxlh with-border no-padding">
+            <h3 class="box-title bxt pull-left col-xs-2">页面上线分析</h3>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">条件查询</h3>
+        </div>
+        <div class="box-body">
+            <div class="col-xs-3">
+                <div class="search-title">页面名称：</div>
+                <div class="select-box">
+                    <select class="select2" id="name">
+                        <option value="">全部</option>
+                        <volist name="vars.names" id='v'>
+                            <option value='{$v.name}'>{$v.name}</option>
+                        </volist>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-5 no-padding">
+                <div class="pull-left" style="margin-right: 15px;">
+                    <div class="search-title">所属分类：</div>
+                    <div class="select-box">
+                        <select class="select2" name="fcate" id="parentType">
+                            <option value="">请选择</option>
+                            <volist name="vars.category" id="v">
+                                <option value="{$v.id}">{$v.name}</option>
+                            </volist>
+                        </select>
+                        <select name="ccate" id="childrenType">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-6 no-padding">
+                    <div class="search-title"><span style="color:red;">*</span>上线时间：</div>
+                    <div class="select-box">
+                        <input type="text"  name="reservation" id="reservationtime" class="form-control" value="" placeholder="选择日期范围" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-3">
+                <div class="search-title">页面地址：</div>
+                <div class="page-addr">
+                    <input type="text" id="page-addr" value="">
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="col-xs-3">
+                <div class="search-title"><span style="color:red;">*</span>对比方式：</div>
+                <div class="select-box">
+                     <span class="contrast chooseType col-xs-6 no-padding qianhou" data-type="1">对比上线前后天数</span>
+                     <span class="contrast col-xs-6 no-padding ziyou" data-type="2">自由时间段内对比</span>
+                </div>
+            </div>
+            <div class="col-xs-5 no-padding">
+                <span class="contrast-way no-padding">
+                    <div class="search-title" id="changeWay">
+                        <div class="col-xs-6 tiandb"><span style="color:red;">*</span>上线前天数：</div>
+                        <div class="col-xs-6 tiandb"><span style="color:red;">*</span>上线后天数：</div>
+                    </div>
+                    <div class="select-box col-xs-12 no-padding">
+                        <select name="" id="before" class="col-xs-5">
+                            <option value="">请选择</option>
+                            <option value="3">3天</option>
+                            <option value="5">5天</option>
+                            <option value="7">7天</option>
+                            <option value="10">10天</option>
+                            <option value="15">15天</option>
+                            <option value="30">30天</option>
+                        </select>
+                        <span class="duibi pull-left">对比</span>
+                        <select name="" id="after" class="col-xs-5">
+                            <option value="">请选择</option>
+                            <option value="3">3天</option>
+                            <option value="5">5天</option>
+                            <option value="7">7天</option>
+                            <option value="10">10天</option>
+                            <option value="15">15天</option>
+                            <option value="30">30天</option>
+                        </select>
+                    </div>
+                </span>
+                <span class="contrast-way col-xs-12 no-padding">
+                    <div class="search-title" id="changeWay"><span style="color:red;">*</span>自由时间段：</div>
+                    <div class="select-box">
+                        <input type="text"  name="reservation" id="free-start" class="span4 col-xs-5 no-padding" value="" placeholder="选择日期范围" />
+                        <span class="duibi pull-left">对比</span>
+                        <input type="text"  name="reservation" id="free-end" class="span4 col-xs-5" value="" placeholder="选择日期范围" />
+                    </div>
+                </span>
+            </div>
+            <div class="col-xs-1" style="margin-top: 20px;">
+                <br>
+                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                    <i class="fa fa-search"></i> 查询
+                </button>
+            </div>
+        </div>
+        <div class="zdy">
+            <div class="zdy-title">
+                自定义指标
+            </div>
+            <div class="search-box span-box">
+                <span><i class="chose-item fa" data-chcek="0"></i>&nbsp;&nbsp;跳出率</span>
+                <span><i class="chose-item fa" data-chcek="0"></i>&nbsp;&nbsp;退出率</span>
+                <span><i class="chose-item fa" data-chcek="0"></i>&nbsp;&nbsp;平均访问时长</span>
+                <span><i class="chose-item fa" data-chcek="0"></i>&nbsp;&nbsp;入口页面次数</span>
+                <span><i class="chose-item fa" data-chcek="0"></i>&nbsp;&nbsp;退出页次数</span>
+            </div>
+            <div class="pushout">
+                <a href="/export/exportOnlineanalysis/"><button class="btn btn-info hideLoading"> 导出报表 </button></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="box no-border">
+        <table class="table table-hover" id="myTable">
+            <thead>
+                <th></th>
+                <th>页面名称</th>
+                <th>所属<br>分类</th>
+                <th>上线时间</th>
+                <th class="right-boder">页面地址</th>
+                <th>日均PV </th>
+                <th>日均UV</th>
+                <th class="btn_1 hide">跳出率</th>
+                <th class="btn_2 hide">退出率</th>
+                <th class="btn_3 hide">平均访问时长</th>
+                <th>日均发单量</th>
+                <th>日均实际分单量&nbsp;<a href="javascript:;" title="实际分单量说明：因采集不到运营系统上线之前的数据，会在一定范围内造成实际分单量比实际数据少的问题，此差异会随着时间的推移逐渐减小，所需时间大致为3个月—6个月。"><i class="fa fa-question-circle"></i></a></th>
+                <th>发单转化率</th>
+                <th>实际分单转化率</th>
+                <th class="btn_4 hide">入口页次数</th>
+                <th class="btn_5 hide">退出页次数</th>
+            </thead>
+            <tbody>
+                <volist name="list" id="v">
+                <tr>
+                    <td>{$key + 1}</td>
+                    <td style="min-width: 255px;">
+                        <p>{$v.name}</p>
+                        <p>{$v.starttime}<a href="/yy/historicaltrend/?url={$v.url}&timerange={$v.starttime}&from=1" class="details">趋势</a></p>
+                        <p>{$v.endtime}<a href="/yy/historicaltrend/?url={$v.url}&timerange={$v.endtime}&from=1" class="details">趋势</a></p>
+                        <p>变化率</p>
+                    </td>
+                    <td>{$v.cname}</td>
+                    <td>{$v.day}</td>
+                    <td class="right-boder" style="max-width: 160px;word-wrap:break-word;">{$v.url}</td>
+                    <td>
+                        <!--pv-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.pv|default=0}</p>
+                        <p>{$v.lastdata.pv|default=0}</p>
+                        <p class="proportion">{$v.p_pv|default=0}%</p>
+                    </td>
+                    <td style="min-width: 100px;">
+                        <!--uv-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.uv|default=0} <a href="/yy/uvresource/?url={$v.url}&timerange={$v.starttime}&from=1" class="details" target="_blank">来源</a></p>
+                        <p>{$v.lastdata.uv|default=0} <a href="/yy/uvresource/?url={$v.url}&timerange={$v.endtime}&from=1" class="details" target="_blank">来源</a></p>
+                        <p class="proportion">{$v.p_uv|default=0}%</p>
+                    </td>
+                    <td class="btn_1 hide">
+                        <!--跳出率-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.tiaochu|default=0}%</p>
+                        <p>{$v.lastdata.tiaochu|default=0}%</p>
+                        <p class="proportion">{$v.p_tiaochu|default=0}%</p>
+                    </td>
+                    <td class="btn_2 hide">
+                        <!--退出率-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.tuichu|default=0}%</p>
+                        <p>{$v.lastdata.tuichu|default=0}%</p>
+                        <p class="proportion">{$v.p_tuichu|default=0}%</p>
+                    </td>
+                    <td class="btn_3 hide">
+                        <!--访问时长-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.shichang|default=0}</p>
+                        <p>{$v.lastdata.shichang|default=0}</p>
+                        <p class="proportion">{$v.p_shichang|default=0}%</p>
+                    </td>
+                    <td>
+                        <!--日均发单量-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.fdl|default=0}</p>
+                        <p>{$v.lastdata.fdl|default=0}</p>
+                        <p class="proportion">{$v.p_fdl|default=0}%</p>
+                    </td>
+                    <td>
+                        <!--日均实际分单量-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.rfdl|default=0}</p>
+                        <p>{$v.lastdata.rfdl|default=0}</p>
+                        <p class="proportion">{$v.p_rfdl|default=0}%</p>
+                    </td>
+                    <td>
+                        <!--发单转化率-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.fdzhl|default=0}%</p>
+                        <p>{$v.lastdata.fdzhl|default=0}%</p>
+                        <p class="proportion">{$v.p_fdzhl|default=0}%</p>
+                    </td>
+                    <td>
+                        <!--实际分单转化率-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.sjzhl|default=0}%</p>
+                        <p>{$v.lastdata.sjzhl|default=0}%</p>
+                        <p class="proportion">{$v.p_sjzhl|default=0}%</p>
+                    </td>
+                    <td class="btn_4 hide">
+                        <!--入口页次数-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.rukou|default=0}</p>
+                        <p>{$v.lastdata.rukou|default=0}</p>
+                        <p class="proportion">{$v.p_rukou|default=0}%</p>
+                    </td>
+                    <td class="btn_5 hide">
+                    <!--退出页次数-->
+                        <p>&nbsp;</p>
+                        <p>{$v.predata.tcycx|default=0}</p>
+                        <p>{$v.lastdata.tcycx|default=0}</p>
+                        <p class="proportion">{$v.p_tcycx|default=0}%</p>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+    <div class="page-num-box">
+        {$page}
+     </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+     // 时间选择
+
+    $(document).ready(function() {
+        //搜索下拉框
+        $("#name").select2();
+        // $("#before").select2();
+        // $("#after").select2();
+
+        //设置默认值
+        $("#name").select2('val','{$keyword.name}');
+        $("#parentType").val('{$keyword.ptype}');
+        $("#childrenType").html('{$optionstr}');
+        $("#reservationtime").val('{$keyword.oltime}');
+        $("#page-addr").val('{$keyword.pageaddr}');
+        $("#before").val('{$keyword.before}');
+        $("#after").val('{$keyword.after}');
+        $("#free-start").val('{$keyword.freestart}');
+        $("#free-end").val('{$keyword.freeend}');
+        var chooseTp = "{$keyword.chooseType}";
+        if(chooseTp == 2){
+            var index=$('.ziyou').index();
+            $('.ziyou').css("background","#e4e4e4");
+            $('.ziyou').addClass('chooseType');
+            $('.ziyou').siblings().removeClass('chooseType');
+            $('.ziyou').siblings().css("background","none");
+            $($(".contrast-way")[index]).css("display","block");
+            $($(".contrast-way")[index]).siblings().css("display","none")
+        }else{
+            var index=$('.qianhou').index();
+            $('.qianhou').css("background","#e4e4e4");
+            $('.qianhou').addClass('chooseType');
+            $('.qianhou').siblings().removeClass('chooseType');
+            $('.qianhou').siblings().css("background","none");
+            $($(".contrast-way")[index]).css("display","block");
+            $($(".contrast-way")[index]).siblings().css("display","none")
+        }
+
+        //条件选择
+        $(".span-box span i").click(function(){
+            var flag=$(this).attr('data-chcek'),
+            index=$(this).parent('span').index()+1;
+            if(flag==0){
+                $(this).addClass('fa-check');
+                $(this).attr("data-chcek",1);
+                $(".btn_"+index).removeClass("hide");
+            }else{
+                $(this).removeClass('fa-check');
+                $(this).attr("data-chcek",0);
+                $(".btn_"+index).addClass("hide");
+            }
+        });
+
+        //日期设置
+        $(".time-box span").click(function(){
+            var level=parseInt($(this).attr("data-day")),
+                nows= Date.parse(new Date()),
+                date=new Date(),
+                today=0,
+                lastDay=0;
+            lastDay=new Date(nows-level*24*3600*1000);
+
+            var today_year=date.getFullYear();
+            var today_month=function(){
+                var month=date.getMonth()+1;
+                if(month<10){
+                    month="0"+month;
+                }
+                return month;
+            }();
+            var today_date=function(){
+                var day=date.getDate();
+                if(day<10){
+                    day="0"+day;
+                }
+                return day;
+            }();
+            lastDay=getDate(lastDay);
+            today=today_year+"/"+today_month+"/"+today_date+"/";
+            $("#reservationtime").val(lastDay+" - "+today);
+        });
+
+        function getDate(last){
+            var year=last.getFullYear();
+            var month=function(){
+                var month=last.getMonth()+1;
+                if(month<10){
+                    month="0"+month;
+                }
+                return month;
+            }();
+            var day=function(){
+                var date=last.getDate();
+                if(date<10){
+                    date="0"+date;
+                }
+                return date;
+            }();
+            var lastDate=year+"/"+month+"/"+day+"/";
+            return lastDate;
+        }
+        //上线时间
+        $('#reservationtime').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            format: 'YYYY/MM/DD',
+            timePicker12Hour:false
+        },
+        function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+        });
+        //自由对比---开始时间
+        $('#free-end').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            format: 'YYYY/MM/DD',
+            timePicker12Hour:false
+        },
+        function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+        });
+        //自由对比---结束时间
+        $('#free-start').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            format: 'YYYY/MM/DD',
+            timePicker12Hour:false
+        },
+        function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+        });
+
+        $(".contrast").click(function(){
+            var index=$(this).index();
+            $(this).css("background","#e4e4e4");
+            $(this).addClass('chooseType');
+            $(this).siblings().removeClass('chooseType');
+            $(this).siblings().css("background","none");
+            $($(".contrast-way")[index]).css("display","block");
+            $($(".contrast-way")[index]).siblings().css("display","none")
+        });
+
+        //获取子分类
+        $("#parentType").change(function(){
+            var bigcate = $("#parentType").val();
+            $.ajax({
+                url: '/yy/getchildcate/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    bigcate:bigcate
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    $("#childrenType").html(data.data);
+                }else{
+                    alert("新增失败，请重试！");
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                alert("网络错误，请稍后重试！");
+            })
+        });
+
+        //条件查询
+        $("#search").on('click',function(){
+            var name = $("#name").val();
+            var ptype = $('#parentType').val();
+            var ctype = $('#childrenType').val();
+            var oltime = $("#reservationtime").val();
+            var pageaddr = $('#page-addr').val();
+            var chooseType = $('.chooseType').attr('data-type');
+            var before = $('#before').val();
+            var after = $('#after').val();
+            var freestart = $('#free-start').val();
+            var freeend = $('#free-end').val();
+            //判断搜索必选条件 oltime  before after freestart freeend
+            if(oltime == ''){
+                alert('请选择要查询的上线时间范围！');
+                return false;
+            }
+            if(chooseType == 1){
+                if(before == ''){
+                    alert('请选择上线前对比时间！');
+                    return false;
+                }
+                if(after == ''){
+                    alert('请选择上线后对比时间！');
+                    return false;
+                }
+            }else{
+                if(freestart == ''){
+                    alert('请选择上线前对比时间！');
+                    return false;
+                }
+                if(freeend == ''){
+                    alert('请选择上线后对比时间！');
+                    return false;
+                }
+            }
+            //console.log('name:'+name+',ptype:'+ptype+',ctype:'+ctype+',oltime:'+oltime+',pageaddr:'+pageaddr+',chooseType:'+chooseType+',before:'+before+',after:'+after+',freestart:'+freestart+',freeend:'+freeend);
+            //发送请求
+            window.location.href = "/yy/onlineanalysis/?name="+name+'&ptype='+ptype+'&ctype='+ctype+'&oltime='+oltime+'&pageaddr='+pageaddr+'&chooseType='+chooseType+'&before='+before+'&after='+after+'&freestart='+freestart+'&freeend='+freeend;
+
+        })
+    });
+
+</script>
+</block>

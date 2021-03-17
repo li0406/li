@@ -1,0 +1,335 @@
+<div class="panel-body packageTemp">
+    <form>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                订单数量
+            </div>
+
+            <div class="panel-body">
+                <div style="border: 1px dashed #ccc; color: #0099FF; margin: 5px 30px 15px; text-align: center; padding: 5px 0;cursor:pointer;"
+                    onclick="signBackActive.get_package_new_temp()"> + 添加订单包</div>
+
+                <div style="margin: 5px 30px; border: 1px solid #CCCCCC;">
+                    <div class="row" style="margin: 15px;">
+                    <input type="hidden" id="now_package_id" value="{$nowInfo.id}">
+                        <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">
+                            <switch name="nowInfo.use_status">
+                                <case value="1" break="1">新订单包</case>
+                                <case value="2" break="1">本次订单包</case>
+                            </switch>
+                        </label>
+                    </div>
+                    <div class="row" style="margin: 15px;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">分单量:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" readonly value="{$nowInfo.fen_number}" />
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">赠单量:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" readonly value="{$nowInfo.zen_number}"/>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin: 15px;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">保证金:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" readonly value="{:floatval($nowInfo['deposit_money'])}" />
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">返点:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" readonly value="{$nowInfo.back_ratio}%" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin: 15px;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">更改合同:</label>
+                        <div class="col-sm-2">
+                            <select class="form-control" name="change_type" id="">
+                                <option value="">请选择</option>
+                                <option value="2">补包</option>
+                                <option value="3">退费</option>
+                                <option value="4">转让</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row change_item change_item_2" style="margin: 15px; display: none;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">分单:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" id="budan_fen_number" placeholder="补单的分单数量" />
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">赠单:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" id="budan_zen_number" placeholder="补单的赠单数量" />
+                        </div>
+
+                        <div class="col-sm-5">
+                            <button id="btnBudan" type="button" class="btn btn-success">
+                                <i class="fa fa-floppy-o"></i> 保存
+                            </button>
+                            <button type="button" class="btn btn-danger change_cancel">
+                                <i class="fa fa-floppy-o"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row change_item change_item_3" style="margin: 15px; display: none;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">退费:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" id="refund_date" placeholder="退费日期" />
+                            <br>退费后保证金自动清退
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">确认:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" id="refund_date_confirm" placeholder="二次确认退费日期" />
+                        </div>
+
+                        <div class="col-sm-5">
+                            <button id="btnRefund" type="button" class="btn btn-success">
+                                <i class="fa fa-floppy-o"></i> 保存
+                            </button>
+                            <button type="button" class="btn btn-danger change_cancel">
+                                <i class="fa fa-floppy-o"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row change_item change_item_4" style="margin: 15px; display: none;">
+                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">剩余订单:</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control datepicker" readonly
+                                value="分单：{$nowInfo.fen_left_number}   赠单：{$nowInfo.zen_left_number}" />
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">转让公司:</label>
+                        <div class="col-sm-2">
+                            <select id="search_trans_company" class="form-control" style="width: 220px;"></select>
+                            <input type="hidden" id="trans_company_id" />
+                        </div>
+
+                        <div class="col-sm-5">
+                            <button id="btnTrans" type="button" class="btn btn-success">
+                                <i class="fa fa-floppy-o"></i> 保存
+                            </button>
+                            <button type="button" class="btn btn-danger change_cancel">
+                                <i class="fa fa-floppy-o"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <volist name="list" id="item">
+                    <div style="margin: 5px 30px; border: 1px solid #CCCCCC;">
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">新订单包</label>
+                        </div>
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">分单量:</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control datepicker" readonly value="{$item.fen_number}" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">赠单量:</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control datepicker" readonly value="{$item.zen_number}"/>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">保证金:</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control datepicker" readonly value="{:floatval($item['deposit_money'])}" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">返点:</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control datepicker" readonly value="{$item.back_ratio}%" />
+                            </div>
+                        </div>
+                    </div>
+                </volist>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        $(".packageTemp select[name=change_type]").change(function(){
+            var type = $(this).val();
+            $(".packageTemp .change_item").hide();
+            $(".packageTemp .change_item_" + type).show();
+        });
+
+        $(".packageTemp").on("click", ".change_cancel", function(){
+            $(".packageTemp #refund_date").val("");
+            $(".packageTemp #refund_date_confirm").val("");
+
+            $(".packageTemp #budan_fen_number").val("");
+            $(".packageTemp #budan_zen_number").val("");
+
+            $(".packageTemp #trans_company_id").val("");
+            $("#search_trans_company").select2("val", "");
+
+            $(".packageTemp select[name=change_type]").val("");
+            $(".packageTemp .change_item").hide();
+        });
+
+        $(".packageTemp #refund_date,.packageTemp #refund_date_confirm").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        // 会员公司选择
+        $("#search_trans_company").select2({
+            ajax: {
+                url: "/signbackuser/findcomnapnyinfo/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.items
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 3,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.id + " " + repo.jc + " (" + repo.cname + ")</div>";
+
+                return markup;
+            },
+            templateSelection: function(repo) {
+                $(".packageTemp #trans_company_id").val(repo.id);
+                return repo.jc;
+            }
+        });
+
+        // 补单
+        $(".packageTemp #btnBudan").click(function(){
+            var _this = $(this);
+            var package_id = $(".packageTemp #now_package_id").val();
+            var fen_number = $(".packageTemp #budan_fen_number").val();
+            var zen_number = $(".packageTemp #budan_zen_number").val();
+
+            var reg = /^(0|\+?[1-9][0-9]*)$/;
+
+            if(fen_number == ''){
+                alert("请输入分单量")
+                return false;
+            }else if(!reg.test(fen_number)){
+                alert("分单量只能输入正整数")
+                return false;
+            }
+            if(zen_number == ''){
+                alert("请输入赠单量")
+                return false;
+            }else if(!reg.test(zen_number)){
+                alert("赠单量只能输入正整数")
+                return false;
+            }
+
+            $.ajax({
+                url: '/signbackuser/setPackageBudan',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    package_id: package_id,
+                    fen_number: fen_number,
+                    zen_number: zen_number
+                }
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    alert("补单成功");
+                    signBackActive.get_package_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            });
+        });
+
+        // 退费
+        $(".packageTemp #btnRefund").click(function(){
+            var _this = $(this);
+            var package_id = $(".packageTemp #now_package_id").val();
+            var refund_date = $(".packageTemp #refund_date").val();
+            var refund_date_confirm = $(".packageTemp #refund_date_confirm").val();
+
+            if (refund_date == "") {
+                alert("请先选择退费日期");
+                return false;
+            }
+
+            if (refund_date_confirm == "") {
+                alert("请先选择二次确认退费日期");
+                return false;
+            }
+
+            if (refund_date != refund_date_confirm) {
+                alert("两次日期选择不一致");
+                return false;
+            }
+
+            $.ajax({
+                url: '/signbackuser/setPackageRefund',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    package_id: package_id,
+                    refund_date: refund_date,
+                    refund_date_confirm: refund_date_confirm
+                }
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    alert("退费成功");
+                    signBackActive.get_package_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            });
+        });
+
+        // 转让
+        $(".packageTemp #btnTrans").click(function(){
+            var _this = $(this);
+            var package_id = $(".packageTemp #now_package_id").val();
+            var trans_company_id = $(".packageTemp #trans_company_id").val();
+
+            if (trans_company_id == "") {
+                alert("请先选择转让公司");
+                return false;
+            }
+
+            $.ajax({
+                url: '/signbackuser/setPackageTrans',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    package_id: package_id,
+                    trans_company_id: trans_company_id
+                }
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    alert("转让成功");
+                    signBackActive.get_package_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });;
+        });
+    });
+</script>

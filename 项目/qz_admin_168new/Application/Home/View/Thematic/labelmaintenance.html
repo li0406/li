@@ -1,0 +1,272 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网后台 - 文章标签</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .nav .active a{background: #337ab7 !important; color: #fff !important;}
+        .list-group li{display: inline-block; padding: 10px; border: 1px solid #d2d6de; position: relative; margin-right: 10px; margin-bottom: 12px; z-index: 10}
+        .list-group li span{cursor: pointer; position: absolute; right: -10px; top: -10px; border-radius: 10px; background: #367fa9; display: block; line-height: 18px; width: 20px; height: 20px; text-align: center; color: #fff; z-index: 11}
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>文章标签</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/thematic/labelmaintenance/">文章标签</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <ul class="nav nav-tabs">
+                    <li role="presentation" class="active"><a href="javascript:void(0)">内容标签维护</a></li>
+                    <li role="presentation"><a href="/thematic/labelrelevant">相关标签维护</a></li>
+                </ul>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="collapse navbar-collapse">
+                                <form method="get" action="/thematic/labelmaintenance/">
+                                    <div class="col-sm-3">
+                                        <label for="name">文章标题/ID：</label><br/>
+                                        <input name="title" type="text" class="form-control col-sm-2" id="name" placeholder="请输入文章标题/ID" autocomplete="off" value="{$Think.get.title}">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label for="exampleInputEmail1">文章栏目：</label><br/>
+                                        <select name="module" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1">装修攻略</option>
+                                            <option value="2">装修百科</option>
+                                            <option value="3">装修问答</option>
+                                            <option value="4">分站资讯</option>
+                                            <option value="5">美图</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">&nbsp;</label><br/>
+                                        <button id="btnsearch" type="submit" class="btn btn-primary">查询</button>
+                                        <button id="btnexport" type="button" class="btn btn-success">导出</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               <div class="col-sm-12">
+                   <div class="row">
+                   <table class="table table-bordered table-hover table-striped">
+                       <tr>
+                           <th class="col-sm-1">文章ID</th>
+                           <th class="col-sm-3">文章标题</th>
+                           <th >标签名</th>
+                           <th class="col-sm-1">操作</th>
+                       </tr>
+                       <if condition="isset($info)">
+                           <tr>
+                               <td class="col-sm-1">{$info.id}</td>
+                               <td class="col-sm-2">{$info.title}</td>
+                               <td >{$info.labels}</td>
+                               <td class="col-sm-1"><a id="btnUp" href="javascript:void(0)" >更新</a></td>
+                           </tr>
+                       </if>
+                   </table>
+                   </div>
+               </div>
+            </div>
+        </div>
+    </section>
+    <div id="modal" class="modal fade" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">更新标签</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">文章标题</label>
+                            <div class="col-sm-10">
+                               {$info.title}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">标签名</label>
+                            <div class="col-sm-8">
+                                <select name="label" class="form-control" style="width: 100%">
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnAdd" type="button" class="btn btn-primary">添加</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">&nbsp;</label>
+                            <div class="col-sm-10">
+                                <ul class="list-group">
+                                    <volist name="info.labelList" id="vo">
+                                    <li data-id="{$vo.id}">
+                                        {$vo.label}
+                                        <span class="fa fa-times"></span>
+                                    </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSave" type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div  id="exportmodel" class="modal fade" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">导出</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">开始时间：</label>
+                            <div class="col-sm-10">
+                                <input  name="start" type="text" placeholder="请选择" class="datetimepicker form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">结束时间</label>
+                            <div class="col-sm-10">
+                                <input name="end" type="text" placeholder="请选择" class="datetimepicker form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnExp" type="button" class="btn btn-primary">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $('select[name=module]').val("{$Think.get.module}");
+
+        $("#btnUp").click(function(){
+            $("#modal").modal();
+        });
+
+        $("select[name=label]").select2({
+            placeholder :'请选择',
+            ajax: {
+                url: "/thematic/findlabel/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.data
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 2,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+                return markup;
+            },
+            templateSelection: function(repo) {
+                return repo.text;
+            },
+            allowClear : true
+        });
+
+        $("#btnAdd").click(function () {
+            var len = $(".list-group").find("li").length;
+            if (len > 20) {
+                alert("便签最多添加20个");
+                return ;
+            }
+            var text = $("select[name=label]").select2("data")[0].text;
+            var li = $("<li></li>");
+            li.attr("data-id",$("select[name=label]").select2("data")[0].id)
+            li.append(text)
+            li.append("<span class=\"fa fa-times\"></span>")
+            li.appendTo($(".list-group"));
+        });
+
+        $(".fa-times").click(function(){
+            var parent = $(this).parents("li")
+            parent.remove();
+        });
+
+        $("#btnSave").click(function(){
+            var labels = new Array();
+            $(".list-group").find("li").each(function(){
+                var id = $(this).attr("data-id")
+                labels.push(id)
+            });
+
+            $.ajax({
+                url: '/thematic/labelrelateup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: '{$info.id}',
+                    labels:labels,
+                    module:'{$Think.get.module}'
+                    },
+                })
+              .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                }
+             });
+        });
+
+        $("#btnsearch").click(function(){
+            if ($("[name=title]").val() == "" || $("[name=module]").val() == ""){
+                alert("请输入查询条件");
+                return false;
+            }
+        });
+
+        $("#btnexport").click(function(){
+            console.log("adf");
+            $("#exportmodel").modal();
+        });
+
+        $("#btnExp").click(function(){
+            window.location.href = "/export/exportlabelmaintenance?start="+$("input[name=start]").val()+"&end="+$("input[name=end]").val()+"&module="+$("[name=module]").val();
+        });
+
+        $('.datetimepicker').datepicker({
+            format:"yyyy-mm-dd",
+            minViewMode:3,
+            autoclose: true,
+            todayBtn:false
+        });
+    </script>
+</block>

@@ -1,0 +1,391 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/" rel="canonical"/>
+    <link href="/assets/mobile/meitu/css/swiper-3.3.1.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/worksite/css/list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/common/css/dropload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <empty name="cityInfo.bm">
+        <a class="m-header-left" href="/"></a>
+        <else/>
+        <a class="m-header-left" href="/{$cityInfo.bm}/"></a>
+    </empty>
+    <div class="worksite-tit">装修现场</div>
+</block>
+<block name="content">
+    <article>
+        <div class="worksite-box">
+            <volist name="list" id="vo">
+                <a href="/worksite/detail?live_id={$vo.id}&page=1&limit=3" class="worksite-list">
+                    <div class="list-tit">
+                        <span class="list-dir">{: mb_substr($vo['yz_name'],0,1)}{$vo.sex|default='先生'}新家的装修现场</span>
+                        <span class="list-pro">{$vo.last_work}</span>
+                    </div>
+                    <div class="list-detail">
+                        <if condition="$vo['order_type'] eq 1">
+                            <span>{$vo.huxing_name|default="实用户型"}</span>
+                            <else/>
+                            <span>{$vo.huxing_other_name|default="实用户型"}</span>
+                        </if>
+                        <span>{$vo.mianji|default=96}㎡</span>
+                        <span>{$vo.fengge_name|default="宜家宜居"}</span>
+                        <span>
+                            {$vo.fangshi_name|default="全包"}
+                        </span>
+                        <span>{$vo.qiandan_jine}万元</span>
+                    </div>
+                    <div class="list-des">{$vo.content}</div>
+                    <!--媒体部分-->
+                    <if condition="$vo['media_type'] eq 1">
+                        <!--图片-->
+                        <div class="list-imgs">
+                            <if condition="count($vo['media_list']) eq 1">
+                                <!--一图-->
+                                <volist name="vo['media_list']" id="i">
+                                    <div class="imgs-1 imgsclick">
+                                        <img onclick="return false" src="{$i.url_thumb}"/>
+                                    </div>
+                                </volist>
+                                <elseif condition="count($vo['media_list']) eq 2"/>
+                                <!--二图-->
+                                <volist name="vo['media_list']" id="i">
+                                    <div class="imgs-2 imgsclick">
+                                        <img onclick="return false" src="{$i.url_thumb}"/>
+                                    </div>
+                                </volist>
+                                <else/>
+                                <!--三图-->
+                                <volist name="vo['media_list']" id="i">
+                                    <if condition="$key lt 3">
+                                        <div class="imgs-3 imgsclick">
+                                            <img onclick="return false" src="{$i.url_thumb}"/>
+                                        </div>
+                                    </if>
+                                </volist>
+                            </if>
+                            <div class="imgs-url">
+                                <volist name="vo['media_list']" id="i">
+                                    <img src="{$i.url_full}"/>
+                                </volist>
+                            </div>
+                            <if condition="count($vo['media_list']) gt 3">
+                                <span class="imgs-num">{:count($vo['media_list'])}图</span>
+                            </if>
+                        </div>
+                        <elseif condition="$vo['media_type'] eq 2" />
+                        <!--视频-->
+                        <div class="list-imgs">
+                            <volist name="vo['media_list']" id="i">
+                                <div class="imgs-1 videoclick">
+                                    <img onclick="return false" src="{$i.url_thumb}"/>
+                                    <img onclick="return false" src="/assets/mobile/worksite/images/play.png" class="playbtn"/>
+                                </div>
+                            </volist>
+                            <div class="imgs-url">
+                                <div class="imgs-1">
+                                    <img src="{$i.url_full}"/>
+                                </div>
+                            </div>
+                        </div>
+                        </if>
+                    </if>
+
+                    <div class="list-weiguan">
+                        <span>围观：</span>
+                        <if condition="count($vo['fans']) gt 0 && $vo['fans'] neq ''">
+                            <div class="weiguan-img">
+                                <volist name="vo['fans']" id="f">
+                                    <if condition="$key lt 6">
+                                    <img src="{$f.avatar|default='/assets/mobile/worksite/images/fensi_logo.png'}" />
+                                    </if>
+                                </volist>
+                            </div>
+                            <span>等{:count($vo['fans'])}位粉丝</span>
+                            <else/>
+                            <span>围观现场，实时掌握施工动态 ></span>
+                        </if>
+                    </div>
+                </a>
+            </volist>
+        </div>
+        <!--图片-->
+        <div class="bigimg-mask">
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+
+                </div>
+            </div>
+        </div>
+        <!--视频-->
+        <div class="video-mask">
+
+        </div>
+
+    </article>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/mobile/common/js/swiper/swiper.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/dropload.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/zepto.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // 图片放大
+            $('body').on('click','.imgsclick',function () {
+                $(".swiper-wrapper").html('');
+                mySwiper.init();
+                var index = $(this).index();
+                mySwiper.slideTo(index, 500, false);
+                var imgs = $(this).parent().find('.imgs-url img');
+                var html = '';
+                if(imgs.length > 1) {
+                    imgs.each(function (index,item) {
+                        html += '<div class="swiper-slide">\n' +
+                            '                        <img src="'+ item.currentSrc +'" />\n' +
+                            '                    </div>'
+                    })
+                } else {
+                    html = '<div class="swiper-slide">\n' +
+                        '                        <img src="'+ imgs[0].currentSrc +'" />\n' +
+                        '                    </div>'
+                }
+                $(".swiper-wrapper").append(html);
+                $(".bigimg-mask").show();
+            })
+            var mySwiper = new Swiper('.swiper-container', {
+                //移动端轮播
+                loop : true,
+                observer:true,//修改swiper自己或子元素时，自动初始化swiper
+                observeParents:true,//修改swiper的父元素时，自动初始化swiper
+            });
+            // 点击图片阴影，关闭弹窗
+            $('body').on('click','.bigimg-mask',function (e) {
+                var target = $(".swiper-container .swiper-slide img");
+                if(!target.is(e.target) && target.has(e.target).length === 0){
+                    $(".bigimg-mask").hide()
+                }
+            });
+
+            // 视频播放
+            $('body').on('click','.videoclick',function () {
+                var video = $(this).parent().find('.imgs-url img')[0].currentSrc
+                var html = '';
+                html = '<video autoplay="autoplay" id="video1" preload="auto" controls="" name="media" >\n' +
+                    '                <source src="'+ video +'" type="video/mp4">\n' +
+                    '            </video>'
+                $(".video-mask").html(html);
+                $(".video-mask").show();
+            });
+
+            // 点击视频阴影，关闭弹窗
+            $('body').on('click','.video-mask',function (e) {
+                var target = $("#video1");
+                if(!target.is(e.target) && target.has(e.target).length === 0){
+                    $(".video-mask").hide()
+                }
+            });
+
+            // 判断是否有值
+            function isHaveValue(isValue,newValue){
+                if(!isValue || isValue == '' || isValue == '其他' || isValue == '其它' || isValue == '面议' || isValue === null){
+                    return newValue
+                } else {
+                    return isValue
+                }
+            }
+
+            // 户型判断是否有值
+            function isHuXingHaveValue(isValue,newValue){
+                if(!isValue || isValue == '' || isValue == '面议' || isValue == null){
+                    return newValue
+                } else {
+                    return isValue
+                }
+            }
+
+            // 下拉加载下拉刷新
+            var page = 1;  //页数
+            var size = 10;  // 每页展示5个
+
+            // dropload
+            $('.worksite-box').dropload({
+                scrollArea : window,
+                domDown : {
+                    //上拉加载时的提示文字
+                    domRefresh : '<div class="dropload-refresh">上拉加载更多</div>',
+                    domLoad    : '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
+                    domNoData  : '<div class="dropload-noData">没有更多数据了~</div>'
+                },
+                loadDownFn : function(me){
+                    page++;
+                    // 拼接HTML
+                    var result = '';
+                    $.ajax({
+                        url: '/worksite',
+                        type: 'get',
+                        dataType:'json',
+                        data:{company_id:'{$_GET["company_id"]}',page:page,limit:10,fans:1,media:1},
+                        success: function(data){
+                            if(data.error_code == 0){
+
+                            }
+                            var arrLen = data.data.list.length;
+                            var img_html = '';
+                            if(arrLen > 0){
+                                result = '';
+                                $.each(data.data.list,function (index,item) {
+                                    if(item.fans){
+                                        img_html = '';
+                                        if(item.fans.length > 6){
+                                            var brr = [];
+                                            for(i = 0; i < 6; i++){
+                                                brr.push(item.fans[i])
+                                            }
+                                            $.each(brr,function (index,item) {
+                                                img_html += '<img src="'+ item.avatar +'" />'
+                                            })
+                                            img_html += '<span>等'+ item.fans.length +'位粉丝</span>'
+                                        }else{
+                                            $.each(item.fans,function (index,item) {
+                                                if(item.avatar){
+                                                    img_html += '<img src="'+ item.avatar +'" />'
+                                                }else{
+                                                    img_html += '<img src="/assets/mobile/worksite/images/fensi_logo.png" />'
+                                                }
+                                            })
+                                            img_html += '<span>'+ item.fans.length +'位粉丝</span>'
+                                        }
+                                    }else{
+                                        img_html = '<span style="left:0;top:-5px;font-size:0.11rem;">围观现场，实时掌握施工动态 ></span>'
+                                    }
+
+                                    // 图片或视频
+                                    if(item.media_type == 1){
+                                        var video_html = '';
+                                        if(item.media_list.length == 1){
+                                            video_html += '<div class="imgs-1 imgsclick">\n' +
+                                                '              <img onclick="return false" src="'+ item.media_list[0].url_thumb +'"/>\n' +
+                                                '           </div>\n' +
+                                                '           <div class="imgs-url">\n' +
+                                                '                <img src="'+ item.media_list[0].url_full +'"/>\n' +
+                                                '            </div>'
+                                        } else if(item.media_list.length == 2){
+                                            var img2_html = '';
+                                            var img2_hidden_html = ''
+                                            $.each(item.media_list,function (index,item) {
+                                                img2_html += '<div class="imgs-2 imgsclick">\n' +
+                                                    '              <img onclick="return false" src="'+ item.url_thumb +'"/>\n' +
+                                                    '           </div>'
+                                                img2_hidden_html += '<img src="'+ item.url_full +'"/>'
+                                            })
+                                            video_html = img2_html + '<div class="imgs-url">'+ img2_hidden_html +'</div>'
+                                        } else {
+                                            var img3_html = '';
+                                            var img3_hidden_html = ''
+                                            if(item.media_list.length >= 3){
+                                                var arr = [];
+                                                for (i = 0; i < 3; i++) {
+                                                    arr.push(item.media_list[i])
+                                                }
+                                            }else{
+                                                arr = item.media_list
+                                            }
+                                            $.each(arr,function (index,item) {
+                                                img3_html += '<div class="imgs-3 imgsclick">\n' +
+                                                    '              <img onclick="return false" src="'+ item.url_thumb +'"/>\n' +
+                                                    '           </div>'
+                                            })
+                                            $.each(item.media_list,function (index,item) {
+                                                img3_hidden_html += '<img src="'+ item.url_full +'"/>'
+                                            })
+
+                                            if(item.media_list.length == 3){
+                                                video_html = img3_html + '<div class="imgs-url">'+ img3_hidden_html +'</div>'
+                                            }else{
+                                                video_html = img3_html + '<div class="imgs-url">'+ img3_hidden_html +'</div>\n' +
+                                                '            <span class="imgs-num">'+ item.media_list.length +'图</span>'
+                                            }
+                                        }
+                                    } else {
+                                        video_html = '  <div class="imgs-1 videoclick">\n' +
+                                            '                <img onclick="return false" src="'+ item.media_list[0].url_thumb +'"/>\n' +
+                                            '                <img onclick="return false" src="/assets/mobile/worksite/images/play.png" class="playbtn"/>\n' +
+                                            '            </div>\n' +
+                                            '            <div class="imgs-url">\n' +
+                                            '                <div class="imgs-1">\n' +
+                                            '                    <img src="'+ item.media_list[0].url_full +'"/>\n' +
+                                            '                </div>\n' +
+                                            '            </div>'
+                                    }
+                                    var huxing_html = '';
+                                    if(item.order_type == 2){
+                                        huxing_html = item.huxing_other_name
+                                    }else{
+                                        huxing_html = item.huxing_name
+                                    }
+                                    result +=   '<a style="display: block;" href="/worksite/detail?live_id='+ item.id +'&page=1&limit=3" class="worksite-list">\n' +
+                                        '            <div class="list-tit">\n' +
+                                        '                <span class="list-dir">'+ item.yz_name.substring(0,1) + isHaveValue(item.sex,'先生') +'新家的装修现场</span>\n' +
+                                        '                <span class="list-pro">'+ item.last_work +'</span>\n' +
+                                        '            </div>\n' +
+                                        '            <div class="list-detail">\n' +
+                                        '                <span>'+ isHuXingHaveValue(huxing_html,'实用户型') +'</span>\n' +
+                                        '                <span>'+ isHaveValue(item.mianji,'96') +'㎡</span>\n' +
+                                        '                <span>'+ isHaveValue(item.fengge_name,'宜家宜居') +'</span>\n' +
+                                        '                <span>'+ isHaveValue(item.fangshi_name,'全包') +'</span>\n' +
+                                        '                <span>'+ item.qiandan_jine +'万元</span>\n' +
+                                        '            </div>\n' +
+                                        '            <div class="list-des">'+ item.content +'</div>\n' +
+                                        '            <div class="list-imgs">'+ video_html +'\n' +
+                                        '            </div>\n' +
+                                        '            <div class="list-weiguan">\n' +
+                                        '                <span>围观：</span>\n' +
+                                        '                <div class="weiguan-img">'+ img_html +'\n' +
+                                        '                </div>\n' +
+                                        '            </div>\n' +
+                                        '        </a>';
+                                })
+                                // 如果没有数据
+                            }else{
+                                // 锁定
+                                me.lock();
+                                // 无数据
+                                me.noData();
+                            }
+                            // 为了测试，延迟1秒加载
+                            setTimeout(function(){
+                                // 插入数据到页面，放到最后面
+                                $(result).insertBefore('.dropload-down');
+                                // 每次数据插入，必须重置
+                                me.resetload();
+                            },1000);
+                        },
+                        error: function(xhr, type){
+                            alert('Ajax error!');
+                            // 即使加载出错，也得重置
+                            me.resetload();
+                        }
+                    });
+                }
+            });
+
+
+            /*$.ajax({
+                url: '/worksite',
+                type: 'get',
+                dataType:'json',
+                data:{company_id:'{$_GET["company_id"]}',page:1,limit:10,fans:1,media:1},
+            })
+                .done(function(result) {
+                    console.log(result);return;
+                })
+                .fail(function(xhr) {
+                    loading = false;
+                    alert("加载失败,请刷新再试！");
+                });*/
+        });
+    </script>
+</block>

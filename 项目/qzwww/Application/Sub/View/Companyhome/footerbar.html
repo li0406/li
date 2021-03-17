@@ -1,0 +1,204 @@
+<script type="text/javascript" src="{$cityfile}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/order.js?v={:C('ORDER_JS_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/App.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/tooltips/jquery.pure.tooltips.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/cors.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/jquery.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/popwin.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+var shen = null,shi = null;
+shen = citys["shen"];
+shi = citys["shi"];
+
+$(function(){
+
+
+		$(".sjbjbtn").click(function(event) {
+			var _this = $(this);
+			var container = $(".c-long-zb");
+			//检查姓名
+            if (!App.validate.run($("input[name=name]",container).val())) {
+                $.pt({
+					target: _this,
+					content: "请输入您的称呼",
+					width: 'auto'
+				});
+				return false;
+            } else {
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if (!reg.test($("input[name=name]",container).val())) {
+                    $("input[name=name]",container).focus();
+                    $("input[name=name]",container).val('');
+                    $.pt({
+						target: _this,
+						content: "请输入正确的名称，只支持中文和英文",
+						width: 'auto'
+					});
+					return false;
+                }
+            }
+
+
+			if (!App.validate.run($("input[name=tel]", container).val())) {
+					$.pt({
+							target: _this,
+							content: "请填写正确的手机号码 ^_^!",
+							width: 'auto'
+					});
+					return false;
+			} else {
+								var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if (!reg.test($("input[name=tel]", container).val())) {
+                    $("input[name=tel]", container).addClass('focus').focus();
+                    $("input[name=tel]", container).val('');
+                    alert("请填写正确的手机号码 ^_^!");
+                    return false;
+                }
+            }
+			var data = {
+					tel: $("input[name=tel]",container).val(),
+					fb_type: $("input[name=fb_type]",container).val(),
+					name: $("input[name=name]",container).val(),
+					cs: "{$cityInfo.id}",
+					select_comid : '{$userInfo.user.id}',
+					source: '167',
+					step:2
+			};
+
+			window.order({
+			    extra:data,
+			    error:function(){},
+			    success:function(data, status, xhr){
+			    	if (data.status == 1) {
+							$("body").append(data.data.tmp);
+					} else {
+						$.pt({
+								target: _this,
+								content: data.info,
+								width: 'auto'
+						});
+					}
+			    },
+			    validate:function(item, value, method, info){
+			        return true;
+			    }
+			});
+		});
+
+
+		$('.icheck').iCheck({
+				checkboxClass: 'icheckbox_minimal-red',
+				radioClass: 'iradio_minimal-red',
+				increaseArea: ''
+		});
+
+		$(".allserve").mouseover(function(event) {
+				$('#stepall').show();
+		});
+
+		$(".fstep dt").mouseover(function(event) {
+				$(".fstep-int").hide();
+				$(this).find(".fstep-int").show();
+				$('.fstep-int-right').show();
+				$(".fstep-int-right").find(".btn").html($(this).attr("data-title"));
+				$(".fstep-int-right").find("input[name=name]").focus();
+		});
+
+		$(".allserve").mouseleave(function(event) {
+				$('.fstep-int-right').hide();
+				$(".fstep-int").hide();
+				$('#stepall').hide();
+		});
+
+		$("#fstep-btn").click(function(event) {
+			var  _this = $(this);
+			$(".secbox_focus").removeClass('secbox_focus');
+			if (!App.validate.run($(".fstep-int-right input[name=tel]").val())) {
+				 	$(".fstep-int-right input[name=tel]").focus().addClass('secbox_focus');
+					//显示提示
+					$.pt({
+							target: $(".fstep-int-right input[name=tel]"),
+							content: '请填写正确的手机号码 ^_^!',
+							width: 'auto'
+					});
+					return false;
+			} else {
+				      var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+	            if (!reg.test($(".fstep-int-right input[name=tel]").val())) {
+	                $(".fstep-int-right input[name=tel]").focus().addClass('secbox_focus');
+	                $(".fstep-int-right input[name=tel]").val('');
+					//显示提示
+					$.pt({
+							target: $(".fstep-int-right input[name=tel]"),
+							content: '请填写正确的手机号码 ^_^!',
+							width: 'auto'
+					});
+					return false;
+	            }
+	        }
+
+	        window.order({
+			    extra:{
+			    	cs:"{$cityInfo.id}",
+					name:$(".fstep-int-right input[name=name]").val(),
+					tel:$(".fstep-int-right input[name=tel]").val(),
+					fb_type:$(".fstep-int-right input[name=fb_type]").val(),
+					lx:$(".fstep-int-right input[name=lx]").val(),
+					source: 166,
+					safecode: $("#safecode").val(),
+					safekey: $("#safekey").val(),
+					ssid: "{$ssid}",
+					select_comid : '{$userInfo.user.id}',
+					step: 2
+			    },
+			    error:function(){
+			    	$.pt({
+							target: _this,
+							content: "发布失败,请刷新页面！",
+							width: 'auto'
+					});
+			    },
+			    success:function(data, status, xhr){
+			    	$("#safecode").val(data.data.safecode);
+					$("#safekey").val(data.data.safekey);
+					if (data.status == 1) {
+							$("body").append(data.data.tmp);
+					} else {
+							$.pt({
+									target: _this,
+									content: data.info,
+									width: 'auto'
+							});
+					}
+			    },
+			    validate:function(item, value, method, info){
+			        return true;
+			    }
+			});
+		});
+
+		$("#btnTop").click(function(event) {
+				$.ajax({
+						url: '/dispatcher/',
+						type: 'POST',
+						dataType: 'JSON',
+						data: {
+								type:"step1",
+								cid:"{$cityInfo.id}",
+								select_comid : '{$userInfo.user.id}',
+								source:169
+						}
+				})
+				.done(function(data) {
+						if(data.status == 1){
+								$("body").append(data.data);
+						}
+				});
+		});
+
+		$(".c-nav-box >ul> li").removeClass('active').eq({$tabIndexOld}).addClass('active');
+})
+</script>

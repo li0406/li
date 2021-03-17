@@ -1,0 +1,419 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/CityOrders/css/cityqudao.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h4>城市渠道发单统计</h4>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <form action="">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <input class="form-control datepicker" name="start" type="text"
+                                           value="{$Think.get.start}"
+                                           placeholder="开始时间" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <input class="form-control datepicker" type="text" name="end"
+                                           value="{$Think.get.end}" placeholder="结束时间" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <select class="select2" id="city" name="city" placeholder="选择城市">
+                                    	<option value="">城市</option>
+                                        <volist name="city" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <select class="select2" id="group" name="group" placeholder="渠道来源组">
+                                        <volist name="group" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <select class="select2" id="src" name="src" placeholder="渠道标识">
+                                        <option value="">渠道标识</option>
+                                        <volist name="src" id="vo">
+                                            <option value="{$vo.src}">{$vo.src}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <button class="btn btn-block btn-primary normal">查询</button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <a target="_blank" id="explode" href="javascript:void(0)"
+                                       class="btn btn-block btn-primary normal">导出</a>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+                <!--S-新增版块-->
+                 <div class="box">
+                    <div class="box-body">
+                        <table class="table border-table" style="table-layout: fixed;">
+                            <td style="border:none">
+                                <p>发单</p>
+                                <h4>{$statistics.fa_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>分单</p>
+                                <h4>{$statistics.fen_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>实际分单</p>
+                                <h4>{$statistics.real_fendan|default=0}</h4>
+                            </td>
+                             <td>
+                                <p>分——已量房</p>
+                                <h4>{$statistics.fen_liang_order|default=0}</h4>
+                            </td>
+                             <td>
+                                <p>分——实际量房</p>
+                                <h4>{$statistics.fen_liang_rel_order|default=0}</h4>
+                            </td>
+                             <td>
+                                <p>赠单</p>
+                                <h4>{$statistics.zeng_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>赠——已量房</p>
+                                <h4>{$statistics.zeng_liang_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>赠——实际量房</p>
+                                <h4>{$statistics.zeng_liang_rel_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>总签单</p>
+                                <h4>{$statistics.qian_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>总量房</p>
+                                <h4>{$statistics.all_liang_order|default=0}</h4>
+                            </td>
+                            <td>
+                                <p>实际总量房</p>
+                                <h4>{$statistics.all_liang_rel_order|default=0}</h4>
+                            </td>
+                        </table>
+                    </div>
+
+                 </div>
+                 <div class="box">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                <select name="" id="select_bar" class="form-control">
+                                    <option value="fa_order">发单</option>
+                                    <option value="fen_order">分单</option>
+                                    <option value="fen_liang_order">分量房</option>
+                                    <option value="fen_qian_order">分签单</option>
+                                    <option value="zeng_order">赠单</option>
+                                    <option value="zeng_liang_order">赠量房</option>
+                                    <option value="zeng_qian_order">赠签单</option>
+                                    <option value="qian_order">总签单</option>
+                                    <option value="all_liang_order">总量房</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div id="echarts-box"></div>
+                    </div>
+                 </div>
+                <!--E-新增版块-->
+                <div class="box">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                           <!--  <th>时间</th> -->
+                            <th>城市</th>
+                            <th>渠道来源组</th>
+                            <th>渠道标识</th>
+                            <th>已发单
+                                <i class="fa fa-caret-down paixupic fa_order" data-type="fa_order" data-val="asc"></i>
+                            </th>
+                            <th>分单<i class="fa fa-caret-down paixupic fen_order" data-type="fen_order" data-val="asc"></i></th>
+                            <th>分签单<i class="fa fa-caret-down paixupic fen_qian_order" data-type="fen_qian_order" data-val="asc"></i>
+                            </th>
+                            <th>分签单率</th>
+                            <th>分-量房（去重）<i class="fa fa-caret-down paixupic fen_liang_order" data-type="fen_liang_order" data-val="asc"></i></th>
+                            <th>分-量房（未去重）<i class="fa fa-caret-down paixupic fen_liang_all_order" data-type="fen_liang_all_order" data-val="asc"></i></th>
+                            <th>分-实际量房<i class="fa fa-caret-down paixupic fen_liang_rel_order" data-type="fen_liang_rel_order" data-val="asc"></i></th>
+                            <th>赠单<i class="fa fa-caret-down paixupic zeng_order" data-type="zeng_order" data-val="asc"></i></th>
+                            <th>赠签单<i class="fa fa-caret-down paixupic zeng_qian_order" data-type="zeng_qian_order" data-val="asc"></i>
+                            </th>
+                            <th>赠签单率</th>
+                            <th>赠-量房（去重）<i class="fa fa-caret-down paixupic zeng_liang_order" data-type="zeng_liang_order" data-val="asc"></i></th>
+                            <th>赠-量房（未去重）<i class="fa fa-caret-down paixupic zeng_liang_all_order" data-type="zeng_liang_all_order" data-val="asc"></i></th>
+                            <th>赠-实际量房<i class="fa fa-caret-down paixupic zeng_liang_rel_order" data-type="zeng_liang_rel_order" data-val="asc"></i></th>
+                            <th>总签单<i class="fa fa-caret-down paixupic qian_order" data-type="qian_order" data-val="asc"></i></th>
+                            <th>总签单率</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                               <!--  <td>{$vo.time}</td> -->
+                                <td>{$vo.cname}</td>
+                                <td>{$vo.group_name}</td>
+                                <td>{$vo.src}</td>
+                                <td>{$vo.fa_order}</td>
+                                <td>{$vo.fen_order}</td>
+                                <td>{$vo.fen_qian_order}</td>
+                                <td>{$vo.fen_qian_lv|number_format=1}%</td>
+                                <td>{$vo.fen_liang_order|default=0}</td>
+                                <td>{$vo.fen_liang_all_order|default=0}</td>
+                                <td>{$vo.fen_liang_rel_order|default=0}</td>
+                                <td>{$vo.zeng_order}</td>
+                                <td>{$vo.zeng_qian_order}</td>
+                                <td>{$vo.zeng_qian_lv|number_format=1}%</td>
+                                <td>{$vo.zeng_liang_order|default=0}</td>
+                                <td>{$vo.zeng_liang_all_order|default=0}</td>
+                                <td>{$vo.zeng_liang_rel_order|default=0}</td>
+                                <td>{$vo.qian_order}</td>
+                                <td>{$vo.qian_lv|number_format=1}%</td>
+                                <td>
+                                    <a href="/CityOrders/detail?src={$vo.src}&start={$Think.get.start}&end={$Think.get.end}&city={$vo.cs}">详情</a>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body tips">
+                        <h3 class="tips-title">注释说明</h3>
+                        <div>
+                            <ul class="tips-list">
+                                <li>1、发单：查询时间内的客服发单数量</li>
+                                <li>2、分单：查询时间内的发单中已分配出去的单量</li>
+                                <li>3、实际分单：分单时间在查询时间内的单量</li>
+                                <li>4、分-量房：查询时间段内分配出去的订单中的量房数量</li>
+                                <li>5、分-实际量房：量房时间在查询时间内的分单中的量房量</li>
+                                <li>6、赠单：查询时间内的发单中已分配出去的赠单量</li>
+                                <li>7、赠-量房：查询时间段内分配出去的赠单订单中的量房数量</li>
+                                <li>8、赠-实际量房：量房时间在查询时间内的赠单中的量房量</li>
+                                <li>9、总签单：查询时间内的发单中已经签约的订单数量</li>
+                                <li>10、总量房：分-量房与赠-量房之和</li>
+                                <li>11、实际总量房：分-实际量房与赠-实际量房之和</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        //设置默认显示效果
+        var sort = '{$Think.get.sort}';
+        var sort_type = '{$Think.get.sort_type}';
+        //如果是正序排序 , 则改成倒序
+        if(sort){
+            if(sort_type == 'asc'){
+                $('.'+sort).attr('data-val','desc');
+                $('.'+sort).addClass('paixupic2');
+            }
+        }
+
+        $(".datepicker").datepicker({
+            startView: 3,
+            minView: 'decade',
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            pickerPosition: "bottom-left",
+            todayHighlight: 1,
+            todayBtn: true
+        });
+
+        $('.select2').select2({
+            language: "zh-CN",
+            placeholder:'城市'
+        })
+        /*城市选择*/
+        $('#city').select2();
+        $("#city").select2('val', '{$Think.get.city}');
+
+        /*渠道组*/
+        $('#group').select2();
+        $("#group").select2('val', '{$Think.get.group}');
+
+        $('#src').select2();
+        $("#src").select2('val', '{$Think.get.src}');
+
+        $("#city").on('change',function(e){
+        	if($("#city").val()==""){
+	        $(".select2-choice").css("color","#9c9f9f")
+	        }else{
+	       $(".select2-choice").css("color","#333")
+	        }
+        })
+
+
+        $(function () {
+            //点击排序
+            $(".fa").on('click', function () {
+                //将页面原有参数作为默认参数
+                var data = {
+                    'src': '{$Think.get.src}',
+                    'start': '{$Think.get.start}',
+                    'end': '{$Think.get.end}',
+                    'city': '{$Think.get.city}',
+                    'group': '{$Think.get.group}'
+                };
+                var sort = $(this).attr('data-type');
+                var sort_type = $(this).attr('data-val');
+                data.sort = sort;
+                data.sort_type = sort_type;
+                var uri = parseParam(data);
+                window.location.href = '/CityOrders?' + uri;
+            });
+
+            //获取对应渠道来源
+            $("#group").on('click', function () {
+                $.ajax({
+                    url: '/CityOrders/ajaxSrcList',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {group: $("#group").val()}
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var html = '';
+                        $.each(data.info, function (k,v) {
+                            html += '<option value="' + v.src + '">' + v.src + '</option>';
+                        })
+                        $('#src').html(html);
+                        /*渠道格式化*/
+                        // $('#src').select2();
+                        $("#src").select2('val', '{$Think.get.src}');
+                    }
+                });
+            });
+
+            //导出操作
+            $("#explode").on('click',function () {
+                var data = {
+                    'src': '{$Think.get.src}',
+                    'start': '{$Think.get.start}',
+                    'end': '{$Think.get.end}',
+                    'city': '{$Think.get.city}',
+                    'group': '{$Think.get.group}',
+                    'sort': '{$Think.get.sort}',
+                    'sort_type': '{$Think.get.sort_type}'
+                };
+                var uri = parseParam(data);
+                window.open('/export/exportCityOrders?' + uri);
+            });
+        });
+
+        //将对象转成url 参数
+        var parseParam = function (param, key) {
+            var paramStr = "";
+            if (param instanceof String || param instanceof Number || param instanceof Boolean) {
+                paramStr += "&" + key + "=" + encodeURIComponent(param);
+            } else {
+                $.each(param, function (i) {
+                    var k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
+                    paramStr += '&' + parseParam(this, k);
+                });
+            }
+            return paramStr.substr(1);
+        };
+
+
+        //echarts
+        $(function(){
+            var myChart = echarts.init(document.getElementById('echarts-box'));
+            var graph = '{$graph}';
+            console.log(JSON.parse(graph));
+            var option = {
+                tooltip: {},
+                grid:{
+                    x:60,
+                    x2:40,
+                    borderWidth:1
+                },
+                 label: {
+                  normal: {
+                      show: true,
+                      position: 'top',
+                      textStyle: {
+                        color: 'black'
+                      }
+                  }
+                },
+                legend: {
+                    data:['发单']
+                },
+                xAxis: {
+                    data: [],
+                    axisLabel: {
+                       interval:0,
+                       rotate:60
+                    }
+                },
+                yAxis: {},
+                series: [{
+                    name: '发单',
+                    type: 'bar',
+                    barWidth:20,
+                    data: []
+                }]
+            };
+            console.log(echarts);
+            $.each(JSON.parse(graph),function (k,v) {
+                option.xAxis.data.push(v.group_name);
+                option.series[0].data.push(v.fa_order);
+            });
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+            var legendArray={
+                "fa_order":"发单",
+                "fen_order":"分单",
+                "fen_liang_order":"分量房",
+                "fen_qian_order":"分签单",
+                "zeng_order":"赠单",
+                "zeng_liang_order":"赠量房",
+                "zeng_qian_order":"赠签单",
+                "qian_order":"总签单",
+                "all_liang_order":"总量房"
+            };
+            $("#select_bar").on("change",function(){
+                option.series[0].data=[];
+                var value=$(this).val();
+                option.legend.data[0]=legendArray[value]; //图例名
+                option.series[0].name=legendArray[value]; //柱状图名
+                $.each(JSON.parse(graph),function (k,v) {
+                    option.series[0].data.push(v[value]);
+                });
+                myChart.setOption(option);
+            });
+
+        });
+    </script>
+</block>

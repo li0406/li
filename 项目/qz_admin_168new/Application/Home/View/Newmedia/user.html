@@ -1,0 +1,176 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+  <title>考核人员管理</title>
+</block>
+<block name="style">
+  <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+  <style>
+      .pointer {  cursor: pointer;  color: #0099FF;  }
+  </style>
+</block>
+<block name="content">
+  <section class="content-header">
+    <h1><a href="/newmedia/statistics_group">新媒体业绩统计</a> <i class="fa fa-angle-right"></i> 考核人员管理</h1>
+  </section>
+  <section class="content">
+      <div class="row">
+          <div class="col-xs-12">
+              <div class="box">
+                  <div class="box-body act-box">
+                      <div class="row">
+                        <div class="col-xs-12">
+                          <form id="searchform" action="/newmedia/user" method="get">
+                              <div class="col-xs-2">
+                                  <div>考核人员姓名：</div>
+                                  <input type="text" name="name" class="form-control" placeholder="请输入考核人员姓名" value="{:I('get.name','')}">
+                              </div>
+                              <div class="col-xs-2">
+                                  <div>所在团：</div>
+                                  <select class="form-control" name="team" id="select_team">
+                                      <option value="">请选择</option>
+                                      <volist name="team" id="v">
+                                      <option value="{$v.id}" {:I('get.team')==$v['id']?'selected':''}>{$v.user}</option>
+                                      </volist>
+                                  </select>
+                              </div>
+                              <div class="col-xs-2">
+                                  <div>所在组：</div>
+                                  <select class="form-control" name="group" id="select_group">
+                                      <option value="">请选择</option>
+                                      <volist name="group" id="v">
+                                      <option value="{$v.id}" {:I('get.group')==$v['id']?'selected':''}>{$v.name}</option>
+                                      </volist>
+                                  </select>
+                              </div>
+                              <div class="col-xs-2">
+                                  <div>在职状态：</div>
+                                  <select class="form-control" name="state">
+                                      <option value="">请选择</option>
+                                      <option value="1" {:I('get.state')==1?'selected':''}>是</option>
+                                      <option value="2" {:I('get.state')==2?'selected':''}>否</option>
+                                  </select>
+                              </div>
+                              <div class="col-sm-1">
+                                  <div>&nbsp;</div>
+                                  <div>
+                                      <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询
+                                      </button>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-header">
+              <div class="l"><h4>考核人员列表</h4></div>
+              <div class="r"><button type="button" class="btn btn-success add-target" id="tfrm-btn">分配 / 转移人员</button></div>
+          </div>
+          <div class="box-body table-responsive no-padding">
+            <table class="table table-hover table-bordered">
+              <thead >
+              <tr style="font-size:14px;color:#000">
+                <th>序号</th>
+                <th>考核人员姓名</th>
+                <th>所在组</th>
+                <th>所在团</th>
+                <th>是否在职</th>
+                <th>添加时间</th>
+                <th>操作</th>
+              </tr>
+              </thead>
+              <tbody id="dataLists">
+              <volist name='list' id='vo'>
+              <tr>
+                  <td>{:((I('get.p',1,'intval') - 1) * 20 ) + $key + 1}</td>
+                  <td>{$vo.user}</td>
+                  <td>{$vo.group_name}</td>
+                  <td>{$vo.team_admin.user}</td>
+                  <td>{$vo['state']==1?'是':'否'}</td>
+                  <td>{:date("Y-m-d H:i:s",$vo['create_time'])}</td>
+                  <td><span class="pointer edit-row" data-id="{$vo.id}">编辑</span></td>
+              </tr>
+              </volist>
+              </tbody>
+            </table>
+              {$page}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.edit-row').click(function () {
+                var reletion_id = $(this).attr('data-id');
+                layer.open({
+                    type: 2,
+                    title: '分配 / 转移人员',
+                    area: ['600px', '370px'], //宽高
+                    move: false,
+                    content: ["/newmedia/usertransferdetail/?reletion_id=" + reletion_id],
+                    success: function () {
+                        $(':focus').blur();
+                    }
+                });
+            });
+
+            $('#tfrm-btn').on('click', function () {
+                layer.open({
+                    type: 2,
+                    title: '分配 / 转移人员',
+                    area: ['1080px', '650px'],
+                    content: ["/newmedia/usertransfer"],
+                    success: function () {
+                        $(':focus').blur();
+                    },
+                    cancel: function(){
+                        window.location.reload();
+                        return false;
+                    }
+                });
+            })
+        });
+        $(function () {
+            // 用户组下拉框
+            function setSelectGroup(team_id, first){
+                $.post("/newmedia/team_group", {
+                    team_id: team_id
+                }, function(resp){
+                    if (resp.status == 1) {
+                        var list = resp.info;
+                        var optionHtml = '<option value="">请选择</option>';
+                        for (var i in list) {
+                            optionHtml += '<option value="'+list[i]["id"]+'">'+list[i]["name"]+'</option>';
+                        }
+
+                        $("#select_group").html(optionHtml);
+
+                        if (first == true) {
+                            $("#select_group").val("{$group_id}");
+                        }
+                    }
+                });
+            }
+
+            // 选择团事件
+            $("#select_team").on("change", function(){
+                var team_id = $(this).val();
+                setSelectGroup(team_id, false);
+            });
+
+            if ("{$team_id}" != "") {
+                setSelectGroup("{$team_id}", true);
+                $("#select_team").val("{$team_id}");
+            }
+        })
+    </script>
+</block>

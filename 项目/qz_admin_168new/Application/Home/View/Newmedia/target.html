@@ -1,0 +1,404 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>月目标设置</title>
+</block>
+<block name="style">
+  <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <style>
+        .pointer {
+            cursor: pointer
+        }
+
+        .blue {
+            color: #0099FF;
+        }
+
+        .target-item {
+            padding: 5px 0;
+        }
+
+        .target-item select, .target-item input {
+            width: 100%;
+        }
+
+        .target-item label {
+            width: 150px;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .target-item .option-item {
+            display: inline-block;
+            width: 300px;
+        }
+        .form-control[readonly]{background-color: white;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/newmedia/statistics_group">新媒体业绩统计</a> <i class="fa fa-angle-right"></i> 月目标设置</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="row">
+                            <div class="col-xs-12">
+                            <form id="searchform" method="get">
+                                <div class="col-xs-2">
+                                    <div>选择团：</div>
+                                    <select class="form-control" id="select_team" name="team_id">
+                                        <option value="">请选择</option>
+                                        <volist name="team" id="vo">
+                                            <if condition="$_GET['team_id'] eq $vo['id']">
+                                                <option value="{$vo.id}" selected>{$vo.user}</option>
+                                                <else/>
+                                                <option value="{$vo.id}">{$vo.user}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>选择组：</div>
+                                    <select class="form-control" id="select_group" name="group_id">
+                                        <option value="">请选择</option>
+                                        <volist name="group" id="vo">
+                                            <if condition="$_GET['group_id'] eq $vo['id']">
+                                                <option value="{$vo.id}" selected>{$vo.name}</option>
+                                                <else/>
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>月份：</div>
+                                    <input class="form-control datepicker fix-readonly" readonly type="text" name="time"
+                                           placeholder="请选择"
+                                           autocomplete="off" value="{$_GET['time']}">
+                                </div>
+                                <div class="col-sm-1">
+                                    <div>&nbsp;</div>
+                                    <div>
+                                        <button type="submit" class="btn btn-success search-from"><i
+                                                class="fa fa-search"></i>&nbsp;查询
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="l"><h4>月目标列表</h4></div>
+                        <div class="r">
+                            <button type="button" class="btn btn-success add-target">新增月目标</button>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr style="font-size:14px;color:#000">
+                                <th>序号</th>
+                                <th>组/团</th>
+                                <th>月目标</th>
+                                <th>考核月份</th>
+                                <th>添加人</th>
+                                <th>添加时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="dataLists">
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td><php>echo ((isset($_GET['p'])?$_GET['p']:1)-1)*20 + $key+1</php></td>
+                                    <td>{$vo.group_name|default=""}/{$vo.team_name|default=""}</td>
+                                    <td>{$vo.target_num|default="0"}</td>
+                                    <td>{$vo.month|default=""}月</td>
+                                    <td>{$vo.op_name|default=""}</td>
+                                    <td>{$vo.add_time|default=""}</td>
+                                    <td data-id="{$vo.id}"><span class="pointer blue edit-row"
+                                                                 style="margin-right: 10px;">编辑</span><span
+                                            class="pointer blue target-del">删除</span></td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="myModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title"><span class="var-title">新增</span>月目标</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="target-main">
+                        <div class="target-item">
+                            <label><span class="red">*</span>考核月份</label>
+                            <div class="option-item">
+                                <input class="form-control datepicker-month " id="months" readonly type="text" name="time"
+                                       placeholder="请选择"
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="target-item">
+                            <label><span class="red">*</span>考核团</label>
+                            <div class="option-item">
+                                <select name="team" id="team" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="team" id="vo">
+                                        <option value="{$vo.id}">{$vo.user}</option>
+                                    </volist>
+                                </select></div>
+                        </div>
+                        <div class="target-item">
+                            <label><span class="red">*</span>考核组</label>
+                            <div class="option-item">
+                                <select name="group" id="group" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="target-item">
+                            <label><span class="red">*</span>月目标</label>
+                            <div class="option-item"><input class="form-control" name="month_num" id="month_num" type="text"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary save-option" data-id="">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+  <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript">
+    $(function () {
+        $('.datepicker, .datepicker-month').datetimepicker({
+            format: 'yyyy-mm',  //  这两个参数一起使用可以保证只选到月份
+            startView: 3, //  这两个参数一起使用可以保证只选到月份
+            minView: 3,   // 这两个参数一起使用可以保证只选到月份
+            weekStart: 1,
+            todayHighlight: 1,
+            todayBtn: true,
+            autoclose: true,
+            language: 'zh-CN'
+        });
+      $('html, body').on('click', '.edit-row', function () {
+        $('#myModal').fadeIn(0)
+        $('#myModal').find('.var-title').text('编辑')
+      })
+      $('button.add-target').on('click', function () {
+        $('#myModal').fadeIn(0)
+        $('#myModal').find('.var-title').text('新增')
+      })
+    })
+  </script>
+    <script type="text/javascript">
+        $(function () {
+            //编辑操作
+            $('body').on('click', '.edit-row', function () {
+                var id = $(this).parent().attr('data-id');
+                $.ajax({
+                    url: '/newmedia/edit_target',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $("#months").val(data.info.month);
+                            $("#months").attr('disabled', true)
+                            $("select[name=team]").attr('disabled', true)
+                            $("select[name=team]").val(data.info.team_admin_id);
+                            $("select[name=group]").attr('disabled', true)
+                            $("select[name=group]").html("<option>" + data.info.group_name + "</option>");
+                            $("input[name=month_num]").val(data.info.target_num);
+                            $(".save-option").attr('data-id',id);
+                            $('#myModal').fadeIn(0)
+                            $('#myModal').find('.var-title').text('编辑')
+                        } else {
+                            alert(data.info);
+                        }
+                    });
+            })
+            //新增操作
+            $('button.add-target').on('click', function () {
+                $("#months").attr('disabled', false)
+                $("select[name=team]").attr('disabled', false)
+                $("select[name=team]").val("");
+                $("select[name=group]").attr('disabled', false)
+                $("select[name=group]").html("<option id=''>请选择</option>");
+                $("input[name=month_num]").val("");
+                $(".save-option").attr('data-id','');
+                $('#myModal').fadeIn(0)
+                $('#myModal').find('.var-title').text('新增')
+            })
+            $('#myModal').on('click', 'button[data-dismiss="modal"]', function () {
+                $('#myModal').fadeOut(0)
+            })
+            //联动操作
+            $('select[name="team_id"],select[name="team"]').on('change',function () {
+                var _this = $(this);
+                $.ajax({
+                    url: '/newmedia/team_group',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {
+                        team_id: _this.val()
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            var html = '<option value="">请选择</option>';
+                            if (data.info.length > 0) {
+                                $.each(data.info, function (k,v) {
+                                    html += '<option value="' + v.id + '">' + v.name + '</option>';
+                                })
+                            }
+                            if (_this.attr('name') == 'team_id') {
+                                $('select[name=group_id]').html(html);
+                            } else {
+                                $('select[name="group"]').html(html);
+                            }
+                        }else {
+                            alert(data.info)
+                        }
+                        $("select[name=group]").html();
+                    });
+            })
+            //保存操作
+            $(".save-option").on('click', function () {
+                var edit_id = $(this).attr('data-id');
+                var data = {};
+                data.edit_id = edit_id;
+                if (edit_id) {
+                    //编辑
+                } else {
+                    //新增
+                    //验证参数
+                    data.months = $("#months").val();
+                    if (!data.months) {
+                        alert('请选择考核月份!');
+                        return;
+                    }
+                    data.team = $("#team").val();
+                    if (!data.team) {
+                        alert('请选择考核团!');
+                        return;
+                    }
+                    data.group = $("#group").val();
+                    console.log(data.group);
+                    if (!data.group) {
+                        alert('请选择考核组!');
+                        return;
+                    }
+                }
+                //验证公共参数
+                data.month_num = $("#month_num").val();
+                if (!data.month_num) {
+                    alert('请输入月目标!');
+                    return;
+                }
+                $.ajax({
+                    url: '/newmedia/save_target',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                })
+                    .done(function (data) {
+                        if(data.status == 1){
+                            window.location.href = window.location.href;
+                        }else {
+                            alert(data.info)
+                        }
+                    })
+            });
+            //删除操作
+            $(".target-del").on('click',function () {
+                var edit_id = $(this).parent().attr('data-id');
+                if(confirm('确认删除 !')){
+                    $.ajax({
+                        url: '/newmedia/del_target',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {edit_id:edit_id}
+                    })
+                        .done(function (data) {
+                            if(data.status == 1){
+                                window.location.href = window.location.href;
+                            }else {
+                                alert(data.info)
+                            }
+                        })
+                }
+            });
+        })
+        $(function () {
+            // 用户组下拉框
+            function setSelectGroup(team_id, first){
+                $.post("/newmedia/team_group", {
+                    team_id: team_id
+                }, function(resp){
+                    if (resp.status == 1) {
+                        var list = resp.info;
+                        var optionHtml = '<option value="">请选择</option>';
+                        for (var i in list) {
+                            optionHtml += '<option value="'+list[i]["id"]+'">'+list[i]["name"]+'</option>';
+                        }
+
+                        $("#select_group").html(optionHtml);
+
+                        if (first == true) {
+                            $("#select_group").val("{$group_id}");
+                        }
+                    }
+                });
+            }
+
+            // 选择团事件
+            $("#select_team").on("change", function(){
+                var team_id = $(this).val();
+                setSelectGroup(team_id, false);
+            });
+
+            if ("{$team_id}" != "") {
+                setSelectGroup("{$team_id}", true);
+                $("#select_team").val("{$team_id}");
+            }
+        })
+        $(function () {
+            var $monthNum = $('#month_num')
+            $monthNum.on('keyup', function (evt) {
+                $(this).val($(this).val().replace(/\D/,''))
+            })
+        })
+    </script>
+</block>

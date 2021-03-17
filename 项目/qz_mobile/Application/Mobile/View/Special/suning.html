@@ -1,0 +1,164 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/" rel="canonical"/>
+    <link href="/assets/home/special/css/suning-hd-year.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+</block>
+<block name="top">
+	<div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/{$cityInfo.bm}/" class="m-header-left"></a>
+    <div class="m-header-city"><a href="/city/">{$cityInfo.name|default="全国"}<i class="fa fa-sort-desc"></i></a></div>
+</block>
+<block name="content">
+	<div class="m-wrap">
+		<article>
+	        <div class="body-box">
+				<div class="img-1">
+					<img src="//{:C('QINIU_DOMAIN')}/mobile/assets/home/special/img/suning/1.jpg">
+				</div>
+	            <div class="img-form" style="overflow: hidden;margin-top: -1px;">
+	            	<img src="//{:C('QINIU_DOMAIN')}/mobile/assets/home/special/img/suning/form-bj.jpg">
+	                <div class="form-box">
+                        <div id="city_2">
+                            <button id="showCityPicker2" class="c-zb-city-qixi" type="button">
+                                <i class="fa fa-map-marker"></i>
+                                <empty name="info.cityarea">
+                                    请选择您所在的区域
+                                    <else/>
+                                    {$cityInfo.provincefull} {$cityInfo.name} {$cityInfo.cityarea}
+                                </empty>
+                            </button>
+                            <input type="hidden" name="province" data-id="{$cityInfo.pid}">
+                            <input type="hidden" name="city" data-id="{$cityInfo.id}">
+                            <input type="hidden" name="area" data-id="{$cityInfo.areaid}">
+                        </div>
+                        <div class="input_box1">
+                            <input class="m-row-int1 m-bj-edit-list" type="text" name="name" maxlength="13"
+                               placeholder="请输入您的称呼">
+                        </div>
+                        <div class="input_box1">
+                             <input class="m-row-int1 m-bj-edit-list" type="tel" name="tel" maxlength="11"
+                               placeholder="请输入您的手机号">
+                        </div>
+                        <input type="hidden" name="fb_type" value="sheji">
+                        <button id="saveNow">立即报名</button>
+	                </div>
+	            </div>
+	            <div class="img-2">
+					<img src="//{:C('QINIU_DOMAIN')}/mobile/assets/home/special/img/suning/{$bm}/2.jpg">
+				</div>
+				<div class="img-3">
+					<img src="//{:C('QINIU_DOMAIN')}/mobile/assets/home/special/img/suning/{$bm}/3.jpg">
+				</div>
+				<div class="img-4">
+					<img src="//{:C('QINIU_DOMAIN')}/mobile/assets/home/special/img/suning/{$bm}/4.jpg">
+				</div>
+	        </div>
+            <div class="error">
+                <div class="close">
+                    <p></p>
+                    <div class="make-sure" data-state="">确定</div>
+                </div>
+            </div>
+	    </article>
+	</div>
+    <input type="hidden" name="source" value="{$bms[$bm]['source']}">
+</block>
+<block name="script">
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".error .close .make-sure").on('click',function(){
+            if($(this).attr('data-state') =='name'){
+                $(".error").hide()
+                $("input[name=name]").focus();
+            }else if($(this).attr('data-state') == 'tel'){
+                $(".error").hide()
+                $("input[name=tel]").focus();
+            }
+        });
+        $("#saveNow").click(function(event) {
+
+            var name = $("input[name=name]").val();
+            var tel = $("input[name=tel]").val();
+
+            var cs = $('input[name=city]').attr('data-id');
+            var qx = $('input[name=area]').attr('data-id');
+             
+
+            if (!App.validate.run(name)) {
+                $(".error").fadeIn().find(".close p").html('请输入您的称呼');
+                $('.error .close .make-sure').attr('data-state','name');
+                return false;
+            }else{
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if(!reg.test(name)){
+                    $(".error").fadeIn().find(".close p").html('请输入正确的名称，只支持中文和英文');
+                    $(".error .close .make-sure").attr('data-state','name');
+                    return false;
+                }
+            }
+
+            if (!App.validate.run(tel)) {
+                $(".error").fadeIn().find(".close p").html('请填写正确的手机号码 ^_^!');
+                $(".error .close .make-sure").attr('data-state','tel');
+                return false;
+            }else{
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if(!reg.test(tel)){
+                    $(".error").fadeIn().find(".close p").html('请填写正确的手机号码 ^_^!');
+                    $(".error .close .make-sure").attr('data-state','tel');
+                    return false;
+                }
+            }
+
+            if('' == cs || '' == qx){
+                alert('请选择您所在的区域 ≧▽≦')
+                return false;
+            }
+            $("#saveNow").attr('disabled',true);
+             
+            window.order({
+                extra:{
+                    cs: cs,
+                    qx: qx,
+                    name:$("input[name=name]").val(),
+                    tel:$("input[name=tel]").val(),
+                    source: $("input[name=source]").val(),
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+                     
+                },
+                success:function(data, status, xhr){
+                     
+                    if(data.status == 1){
+                        window.location.href = "{$bms[$bm]['back_url']}";
+                    }else{
+                        alert(data.info);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+        window.onload = function(){
+            // 城市选择插件
+            setTimeout(function(){
+                selectQz.init({
+                    province: $("input[name=province]").attr("data-id"),
+                    city: $("input[name=city]").attr("data-id"),
+                    area: $("input[name=area]").attr("data-id")
+                });
+            },800)
+        }
+    </script>
+</block>

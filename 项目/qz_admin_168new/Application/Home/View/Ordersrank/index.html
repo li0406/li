@@ -1,0 +1,319 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>平均订单排行-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/ordersrank/css/ordersrank.css?v={:C('STATIC_VERSION')}">
+    <style type="text/css" media="screen">
+        .fa-check-circle {color:#00a65a;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>平均订单排行</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <form id="searchForm" action="" method="get">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <div class="box-title">条件查询</div>
+                    </div>
+                    <div class="box-body">
+                        <div class="pull-left h5">选择时间：</div>
+                        <div class="col-xs-2">
+                            <input type="text" name="date" class="form-control datatimepicker" value="{$info.date|date="Y-m-d",###}">
+                        </div>
+                        <div class="pull-left h5">城市选择：</div>
+                        <div class="col-xs-2">
+                            <select class="form-control" name="city">
+                                <option value="0">全部</option>
+                                <option value="1" <if condition="$info.cityABC EQ '1' ">selected</if>>重点城市</option>
+                                <option value="2" <if condition="$info.cityABC EQ '2' ">selected</if> >A类城市</option>
+                                <option value="3" <if condition="$info.cityABC EQ '3' ">selected</if> >B类城市</option>
+                                <option value="4" <if condition="$info.cityABC EQ '4' ">selected</if> >C类城市</option>
+                            </select>
+                        </div>
+
+                        <div class="pull-left h5">部门选择：</div>
+                        <div class="col-xs-1 select-bumen">
+                            <select class="form-control" name="dept">
+                                <option value="0">全部</option>
+                                <option value="1" <if condition="$info.dept EQ '1' ">selected</if> >外销</option>
+                                <option value="2" <if condition="$info.dept EQ '2' ">selected</if> >商务</option>
+                                <option value="3" <if condition="$info.dept EQ '3' ">selected</if> >商务外销</option>
+                            </select>
+                        </div>
+
+                        <div class="pull-left h5">标识选择：</div>
+                        <div class="col-xs-1 select-riqi">
+                            <select class="form-control" name="month">
+                                <option value="0">全部</option>
+                                <option value="1" <if condition="$info.monthType EQ '1' ">selected</if> >整月</option>
+                                <option value="2" <if condition="$info.monthType EQ '2' ">selected</if> >非整月</option>
+                                <option value="3" <if condition="$info.monthType EQ '3' ">selected</if> >过期</option>
+                            </select>
+                        </div>
+                        <div class="pull-left">
+                            <input type="hidden" value="0" name="dl">
+                            <input type="hidden" value="0" name="cidList">
+                            <button type="submit" class="btn btn-primary flat"><i class="fa fa-search"></i>&nbsp;查询</button>
+                            <button type="button" id="export" class="btn btn-success flat hideLoading"><i class="fa fa fa-download"></i>&nbsp;导出查询</button>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive">
+                        <table class="table table-hover table-bordered first-table">
+                            <thead>
+                                <tr>
+                                    <th>部门</th>
+                                    <th>城市级别</th>
+                                    <volist name="dateArray" id="v">
+                                    <th>{$key}</if></th>
+                                    </volist>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <if condition="$info.cityTypeOut NEQ 'empty' ">
+                                <tr><th class="th-line-height" rowspan="4">外销</th></tr>
+                                <tr>
+                                    <td>A类城市 {$cityTypeNum.out.A|default=0}</td>
+                                    <volist name="cityType.out.A.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <td>B类城市 {$cityTypeNum.out.B|default=0}</td>
+                                    <volist name="cityType.out.B.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <td>C类城市 {$cityTypeNum.out.C|default=0}</td>
+                                    <volist name="cityType.out.C.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                </if>
+
+                                <if condition="$info.cityTypeIn NEQ 'empty' ">
+                                <tr><th class="th-line-height" rowspan="4">商务</th></tr>
+                                <tr>
+                                    <td>A类城市 {$cityTypeNum.in.A|default=0}</td>
+                                    <volist name="cityType.in.A.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <td>B类城市 {$cityTypeNum.in.B|default=0}</td>
+                                    <volist name="cityType.in.B.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <td>C类城市 {$cityTypeNum.in.C|default=0}</td>
+                                    <volist name="cityType.in.C.date" id="v">
+                                    <td><div>少({$v.min|default=0})</div><div>多({$v.max|default=0})</div></td>
+                                    </volist>
+                                </tr>
+                                </if>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer text-right no-border">
+                        <h6 class="no-padding">说明：“少”不够城市数量；“多”高于城市数量</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <div class="box-title">数据列表</div>
+                    </div>
+                    <div class="box-body table-responsive">
+                        <table class="table table-hover table-bordered" id="example1">
+                            <thead>
+                                <tr>
+                                    <th><span>城市</span></th>
+                                    <th><span>帐户</span></th>
+                                    <th style="display:none"><span>类型</span></th>
+                                    <th><span>重点</span></th>
+                                    <th><span>级别</span></th>
+                                    <th><span>标识</span><i class="fa fa-question-circle text-primary biaoshi-icon" data-toggle="tooltip" data-placement="left" title="说明" data-content=""></i></th>
+                                    <th><span>{$info.threeMonth}分单量</span><i class="fa fa-question-circle text-primary allfendanliang-icon" data-toggle="tooltip" data-placement="left" title="说明" ></i></th>
+                                    <th><span>{$info.prevMonth}月分单率</span></th>
+                                    <th><span>{$info.prevMonth}月平均分单</span><i class="fa fa-question-circle text-primary fendanliang7-icon" data-toggle="tooltip" data-placement="left" title="说明" ></i></th>
+                                    <th><span>{$info.today}号平均分单</span></th>
+                                    <th><span>{$info.today}号分单率</span><i class="fa fa-question-circle text-primary fendanlv-icon" data-toggle="tooltip" data-placement="left" title="说明"></i></th>
+                                    <th><span>会员动态</span><i class="fa fa-question-circle text-primary huiyuan-icon" data-toggle="tooltip" data-placement="left" title="说明"></i></th>
+                                    <th style="width:80px"><span>操作</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            <volist name="list" id="v">
+                                <eq name="v.little" value="1"><tr style="background: #fff"><else/><tr ></eq>
+                                    <td>
+                                        <if condition="in_array($v['cid'],$red)">
+                                            <span style="color: red">{$v.cname}</span>
+                                        <else/>
+                                            <span>{$v.cname} </span>
+                                        </if>
+                                        <if condition="isset($v['upDownVip']['expire'])">
+                                            <span style="color:red;">(到{$v['upDownVip']['expire']})</span>
+                                        </if>
+                                        <if condition="isset($v['upDownVip']['new'])">
+                                            <span style="color:green;">(新{$v['upDownVip']['new']})</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="isset($v['account'])">
+                                            <span style="color:#666;font-size:12px">{$v.account}</span>
+                                        <else />
+                                            <span>-</span>
+                                        </if>
+                                    </td>
+                                    <td style="display:none">
+                                        <input type="hidden" name="cid[]" value="{$v.cid}">
+                                        <switch name="v.manager"><case value="0">2</case>
+                                        <default/>1</switch>
+                                    </td>
+                                    <td><span>{$v.point}</span></td>
+                                    <td>
+                                        <span><switch name="v.little"><case value="1">B</case><case value="2">C</case>
+                                        <default/>A</switch></span>
+                                    </td>
+                                    <td>
+                                        <span><if condition="$v['half']">非整月<else/>整月</if>
+                                        <eq name="v.endMark" value="1">过期</eq></span>
+                                    </td>
+                                    <td><span>{$v.threeMonthOrder|default=0}</span></td>
+                                    <td><span>{$v.prevMonthRate|default=0}%</span></td>
+                                    <td><span style="color:{$v.color}">{$v.prevMonthOrderAvg|default=0}</span></td>
+                                    <td><span class="fendan-info" style="color:{$v.todayColor}" title="分单详细数据" data-toggle="tooltip" data-placement="right" pingjun="{$v.todayOrderAvg|default=0}" zongfendan="{$v.todayOrderCount|default=0}" zonghuiyuan="{$v.todayVipCount|default=0}">{$v.todayOrderAvg|default=0}</span></td>
+                                    <td><span>{$v.thisMonthFDL|default=0}%</span></td>
+                                    <td><span>{$v.vipTrends|default=0}</span></td>
+                                    <td class="text-primary"><a title="编辑城市的县级/地级" href="http://168.qizuang.com/adminquyu/editquyu?id={$v.cid}" target="_blank"><span class="modal-click"><i class="fa fa-edit"></i> 城市设置</span></a></td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box shuoming-info">
+                    <div class="box-body">
+                        <p>说明</p>
+                        <p>显示内容为当月有真会员城市</p>
+                        <p>字体颜色：绿色字体表示分单数量高于标准；红色字体表示分单数量低于标准 ；灰色正常。</p>
+                        <p>标识说明： 1. 整月 会员时间满足一个月；2. 非整月 当前城市会员时间不满足一个月为非整月；3. 城市名称为红色则表示该城市为重点城市；</p>
+                        <p>自然月计算（天数）：如2月固定28天，3月31天；</p>
+                        <p>分单标准：15≤A类城市≤20单，6≤B类城市≤10单，3≤C类城市≤5单。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $(function(){
+
+        $('#export').on('click', function(){
+            $('input[name="dl"]').val('1');
+            var cid = $("input[name='cid[]']").map(function () {
+                return $(this).val();
+            }).get();
+            $("input[name='cidList']").val(cid.toString(cid));
+            $('#searchForm').submit();
+            $('input[name="dl"]').val('0');
+        });
+
+        // 说明
+        $('.biaoshi-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content"><p>整月：会员时间满足一个月;</p><p>非整月：当前城市会员时间不满足一个月为非整月</p></div></div>'
+        });
+        $('.allfendanliang-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content">当前月倒推3个整月汇总分单量；</div></div>'
+        });
+        $('.fendanliang7-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content">上个月的分单数据；</div></div>'
+        });
+        $('.fendanlv-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content">1号至查询日的分单量÷发单量</div></div>'
+        });
+        $('.huiyuan-icon').tooltip({
+            template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">说明</h3><div class="popover-content">会员动态：5天（≤5天）上/下会员数的差额；</div></div>'
+        });
+        // 分单详细数据
+        $('.fendan-info').each(function(index, el) {
+            var pingjun = $(this).attr('pingjun');
+            var zongfendan = $(this).attr('zongfendan');
+            var zonghuiyuan = $(this).attr('zonghuiyuan');
+            $(this).tooltip({
+                template:'<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title">分单详细数据</h3><div class="popover-content"><p>平均分单量:'+pingjun+'</p><p>总分单量:'+zongfendan+'</p><p>总会员数:'+zonghuiyuan+'</p></div></div>'
+            });
+        });
+
+
+        // 时间选择
+        $('.datatimepicker').datetimepicker({
+            format:'yyyy-mm-dd',
+            autoclose:true,
+            minView:'2',
+            maxView:'2'
+        });
+        // 城市选择
+        $('.select2').select2();
+
+        // 表格排序
+        $('#example1').dataTable({
+            // sDom: '<"top"fli>rt<"bottom"p><"clear">',
+            // aaSorting: [[ 1, "desc" ]],
+            displayLength: 1000,
+            oLanguage: {
+                sLengthMenu: '',
+                sZeroRecords: '抱歉， 没有找到',
+                sInfo: '共 _TOTAL_ 条记录',
+                sInfoEmpty: '没有数据',
+                sInfoFiltered: '(从 _MAX_ 条数据中检索',
+                sSearch:'快速搜索：',
+                oPaginate: {
+                    sFirst: '首页',
+                    sPrevious: '&laquo;',
+                    sNext: '&raquo;',
+                    sLast: '尾页'
+                }
+            },
+            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 10] }],
+            "order": [[ 2, 'asc' ], [ 4, 'asc' ], [ 9, 'desc' ]],
+            /*"columnDefs": [
+                {"orderData":2,"targets":2},
+                {"orderData":[2,7],"targets":7}
+            ]*/
+        });
+    })
+    </script>
+</block>

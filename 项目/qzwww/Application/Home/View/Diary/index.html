@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/riji" />
+    <title>{$keys.title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <notempty name="info.header.canonical">
+    <link rel="canonical" href="{$info.header.canonical}"/>
+    </notempty>
+    <include file="Index:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+    <!--[if IE 7]>
+      <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/detail.css?v={:C('STATIC_VERSION')}" />
+    <link href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="{$static_host}/assets/common/css/nextStep.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {$headerTmp}
+    <div class="wrap oflow">
+        <div class="newbread"></div>
+        <div class="de-main">
+            <dl class="de-chose">
+                <dt>
+                    <a class="all-dairy-btn" href="/riji/">全部日记<i class="ml10 icon-double-angle-right"></i></a>
+                    <volist name="fengge" id="vo">
+                        <if condition="$vo['id'] eq $f">
+                            <span>{$vo.name}<a rel="nofollow" href="/riji/list-f0h{$h}m{$m}s{$s}/">X</a></span>
+                        </if>
+                    </volist>
+                    <volist name="huxing" id="vo">
+                        <if condition="$vo['id'] eq $h">
+                            <span>{$vo.name}<a rel="nofollow" href="/riji/list-f{$f}h0m{$m}s{$s}/">X</a></span>
+                        </if>
+                    </volist>
+                    <volist name="mianji" id="vo">
+                        <if condition="$vo['id'] eq $m">
+                            <span>{$vo.name}<a rel="nofollow" href="/riji/list-f{$f}h{$h}m0s{$s}/">X</a></span>
+                        </if>
+                    </volist>
+                </dt>
+                <dd><span>风格：</span>
+                    <ul>
+                        <volist name="fengge" id="vo">
+                            <li><a rel="nofollow" href="/riji/{$vo.link}/">{$vo.name}</a></li>
+                        </volist>
+                    </ul>
+                </dd>
+                <dd><span>户型：</span>
+                    <ul>
+                        <volist name="huxing" id="vo">
+                            <li><a rel="nofollow" href="/riji/{$vo.link}/">{$vo.name}</a></li>
+                        </volist>
+                    </ul>
+                </dd>
+                <dd><span>面积：</span>
+                    <ul>
+                        <volist name="mianji" id="vo">
+                            <li><a rel="nofollow" href="/riji/{$vo.link}/">{$vo.name}</a></li>
+                        </volist>
+                    </ul>
+                </dd>
+            </dl>
+            <ul class="de-list-box">
+                <volist name="diary_list" id="vo">
+                    <li>
+                        <div class="user-head"><a rel="nofollow" href="/riji/s{$vo.id}/" target="_blank"><span><img src="{$vo.user_info.logo}"></span>{$vo.user_info.name}</a></div>
+                        <div class="de-list">
+                            <div class="de-list-info"><a rel="nofollow" title="浏览数" href="/riji/home{$vo.user_id}" ><i class="icon-eye-open"></i>{$vo.page_view}</a><a rel="nofollow" title="关注数" href="/riji/s{$vo.id}"><i class="icon-star-empty"></i>{$vo.concern_count}</a></div>
+                            <div class="diary-item">
+
+                                <a href="/riji/d{$vo.subid}.html" target="_blank">{$vo.subtitle|mbstr=0,18}</a>
+
+                                <span>{$vo.diary_count}篇</span><span>{$vo.diary_time|date='Y-m-d',###}</span></div>
+                            <p>
+                            <volist name="huxing" id="huxing_vo">
+                                <if condition="$huxing_vo['id'] eq $vo['huxing']">
+                                {$huxing_vo.name}
+                                </if>
+                            </volist>
+                            <volist name="fengge" id="fengge_vo">
+                                <if condition="in_array($fengge_vo['id'],$vo['fengge'])">
+                                {$fengge_vo.name}&nbsp;
+                                </if>
+                            </volist>
+                            {$vo.mianji}㎡</p>
+                            <div class="de-list-text">
+                                <div class="diray-block">
+                                <if condition="$vo['stage'] eq 1">准备阶段<elseif condition="$vo['stage'] eq 2" />施工阶段<else/>入住阶段</if>
+                                </div>
+                                <p>{$vo.content|strip_tags}</p>
+                                <ul>
+                                    <volist name="vo.img_list" id="list" offset="0" length='6'>
+                                        <li>
+                                            <a rel="nofollow" href="/riji/d{$vo.subid}.html" target="_blank"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$list.img_path}-w300.jpg" width="334" height="400"></a>
+                                        </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                            <?php
+                                if(time()-$vo['update_time'] <  86400 && time()-$vo['update_time'] >3600)
+                                {
+                                    echo sprintf("<p>%s小时前更新..</p>",(time()-$vo['update_time'])/3600);
+                                }
+                            ?>
+                        </div>
+                    </li>
+                </volist>
+            </ul>
+            {$page}
+        </div>
+        <div class="de-lesser">
+           {$orderTmp}
+            <div class="de-sider-box">
+                <h1>日记分类</h1>
+                <dl class="de-step-list">
+                    <volist name="diary_type" id="list">
+                        <dt>{$list.type_name}</dt>
+                        <dd>
+                            <if condition="$list['child']">
+                                <volist name="list.child" id="vo">
+                                    <a rel="nofollow" href="/riji/{$vo.link}/">{$vo.type_name}</a>
+                                </volist>
+                                <else/>
+                                <a rel="nofollow" href="/riji/{$list.link}/">{$list.type_name}</a>
+                            </if>
+                        </dd>
+                    </volist>
+                </dl>
+            </div>
+            {$hot_diary}
+            {$decorate}
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script type="text/javascript">
+    // 加载省市 为了弹窗做准备
+    var shen = null,
+    shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+
+    // 设计报价滚动到2100px 悬浮
+    $(window).scroll(function(event) {
+        if($(window).scrollTop() >= 2100){
+            $('.secbox_form').css({
+                "width":"260px",
+                "margin-top":"0",
+                "position":"fixed",
+                "top":"85px",
+                "zIndex":2
+            });
+        }else{
+            $('.secbox_form').css({
+                "margin-top":"15px",
+                "position":"",
+                "top":"",
+                "zIndex":''
+            });
+        }
+    });
+    </script>
+</body>
+</html>

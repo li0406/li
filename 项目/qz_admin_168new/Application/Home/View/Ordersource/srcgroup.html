@@ -1,0 +1,253 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+<style type="text/css">
+    .item{cursor: pointer;}
+    .active-item{font-weight: bold;}
+</style>
+</block>
+<block name="content">
+<section class="content-header">
+    <h1 class="">渠道来源组管理</h1>
+    <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        <li>渠道来源组管理</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-sm-12 ">
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="col-sm-3">
+                        <button id="addFirst" class="btn btn-success normal" type='button'><i class="fa fa-plus-circle"></i>添加一级来源组</button>
+                        <button id="addSecond" class="btn btn-success normal" type='button'><i class="fa fa-plus-circle"></i>添加二级来源组</button>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="col-sm-6">
+                        <table class="table user-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-3">来源组名称</th>
+                                    <th class="col-sm-3">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr class="item" data-category="{$vo.category}">
+                                    <td class="col-sm-3" data-id="{$vo.id}" style="text-align: left;">
+                                       <if condition="count($vo['child']) EQ 0">
+                                       <i class="fa fa fa-minus-circle"></i>
+                                       <else/>
+                                       <i class="fa fa-plus-circle"></i>
+                                       </if>
+                                       {$vo.name}
+                                    </td>
+                                    <td class="col-sm-3">
+                                        <a href="javascript:void(0)" class="edit" data-id="{$vo.id}" data-parent="" data-name="{$vo.name}">编辑</a>
+                                        <a data-id="{$vo.id}" class="del">删除</a>
+                                    </td>
+                                </tr>
+                                <tr class="sub-item" style="display: none;">
+                                    <td colspan="2">
+                                        <table class="col-sm-12" >
+                                        <volist name="vo.child" id="v">
+                                        <tr data-group="group-{$vo.id}">
+                                            <td class="col-sm-3" data-id="{$v.id}" style="text-align: left; padding: 10px; padding-left: 100px;"><span>{$v.name}</span></td>
+                                            <td class="col-sm-3" style="padding: 10px;">
+                                                <a href="javascript:void(0)" class="edit" data-id="{$v.id}" data-parent="{$v.parentid}" data-name="{$v.name}">编辑</a>
+                                                <a data-id="{$v.id}" class="del">删除</a>
+                                            </td>
+                                        </tr>
+                                        </volist>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">来源组操作</h4>
+            </div>
+            <div class="modal-body">
+                <form id="myform" class="form-horizontal">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-3 control-label">来源：</label>
+                        <div class="col-sm-9 categorychoose">
+                            <select id="category" name="category" style="width: 100%;">
+                                <option value="1">装修</option>
+                                <option value="2">家具</option>
+                                <option value="3">招商</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-3 control-label">来源组：</label>
+                        <div class="col-sm-9">
+                            <select id="addGroup" name="group" style="width: 100%;">
+                                <option value="">请选择</option>
+                                <volist name="list" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-3 control-label">来源组名称：</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="name" id="inputEmail3" placeholder="来源组名称">
+                        </div>
+                    </div>
+                    <input type="hidden" name="id" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button  type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button id="btnSave" type="button" class="btn btn-primary pull-left">确认</button>
+            </div>
+        </div>
+    </div>
+    <!--添加来源组(一级或二级)-->
+    <input type="hidden" class="choose_category" value="1">
+</div>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#addGroup").select2();
+    $("#category").select2();
+
+    var getChooseGroup = 1;//获取添加来源组(一级或二级)
+    $("#btnSave").click(function(event) {
+        $.ajax({
+            url: '/ordersource/srcgroupup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data : $("#myform").serializeArray()
+        })
+        .done(function(data) {
+            alert(data.info);
+            if (data.status == 1) {
+                window.location.href = window.location.href;
+            }
+        });
+    });
+
+    $(".edit").click(function(event) {
+        var _this = $(this);
+        var parentid = _this.attr("data-parent");
+        $("#addGroup").attr("disabled",false);
+        if (parentid != "") {
+            $("#addGroup").select2("val",parentid);
+        } else {
+            $("#addGroup").select2("val",null);
+        }
+        $("input[name=name]").val(_this.attr("data-name"));
+        $("input[name=id]").val(_this.attr("data-id"));
+        $("#myModal").modal();
+    });
+
+    $("#addFirst").click(function(event) {
+        $(".choose_category").val(1);
+        $("#addGroup").select2("val","")
+        $("#addGroup").attr("disabled","disabled");
+        $("#myform")[0].reset();
+        $("#myModal").modal();
+    });
+
+    $("#addSecond").click(function(event) {
+        $(".choose_category").val(2);
+        $("#addGroup").select2("val","")
+        $("#addGroup").attr("disabled",false);
+        $("#myform")[0].reset();
+        var parentid = $(".active-item").children('td').eq(0).attr("data-id");
+        if (typeof parentid != "undefined") {
+            $("#addGroup").select2("val",parentid);
+        }
+        $("#myModal").modal();
+    });
+
+    $(".item").click(function(event) {
+        //将选择的渠道组 , 放回隐藏域中,用于区分 装修/家具
+        $('.choose_category').val($(this).attr('data-category'));
+        $("#category").select2('val',$(this).attr('data-category'));
+
+        var _this = $(this);
+        var icon = _this.find("i");
+        var id = _this.attr("data-id");
+        var count = _this.next(".sub-item").find("tr").length;
+        if (count > 0) {
+            $(".active-item").find("i").not(icon).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+            $(".active-item").removeClass('active-item');
+
+            $(".sub-item").hide();
+
+            if (icon.hasClass('fa-minus-circle')) {
+                icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
+                _this.next(".sub-item").hide();
+                _this.removeClass('active-item;');
+            } else {
+                icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
+                _this.next(".sub-item").show();
+                _this.addClass('active-item');
+            }
+        }
+    });
+
+    $(".del").click(function(event) {
+        if (confirm("确认删除该该来源组？")) {
+            $.ajax({
+                url: '/ordersource/delsourcegroup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id:$(this).attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                } else {
+                    alert(data.info);
+                }
+            });
+        }
+    });
+    //筛选渠道来源时,获取对应渠道的来源组(装修/家具)
+    $(".categorychoose").on('change', function () {
+        var choose_category = $(".choose_category").val();
+        var category = $("#category").val()
+        if (choose_category == 2) {
+            $.ajax({
+                url: '/ordersource/getSrcGroup',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {category: category}
+            })
+                .done(function (data) {
+                    if (data.error_code == 0) {
+                        var html = '<option value="">请选择</option>';
+                        $("#addGroup").html('');
+                        $.each(data.info, function (k, v) {
+                            html += '<option value=' + v.id + '>' + v.name + '</option>';
+                        })
+                        $("#addGroup").html(html);
+                    } else {
+                        alert(data.info)
+                    }
+                });
+        }
+    });
+</script>
+</block>

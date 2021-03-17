@@ -1,0 +1,310 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>
+<empty name="info['id']">
+    新增活动
+    <else />
+    编辑活动
+</empty>
+</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/home/cooperate/css/edit.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>
+            <span>
+               <empty name="info['id']">
+                新增活动
+               <else />
+               编辑活动
+               </empty>
+            </span>
+        </h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="wid_60">
+                            <label><span class="red">*</span>活动标题：</label>
+                            <input type="text" maxlength="100" name="activity_tit" class="activity_tit form-control" placeholder="请输入活动标题" value="{$info.name}"/>
+                        </div>
+                        <div class="wid_60">
+                            <label><span class="red">*</span>活动城市：</label>
+                            <select id="city" class="form-control select2" multiple>
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="wid_60">
+                            <div class="col-xs-6" id="startTime">
+                                <label><span class="red">*</span>活动时间（起）：</label>
+                                <input type="text" name="time_start" class="form-control datepicker clear-target" placeholder="请输入活动开始时间" autocomplete="off" value="{$info.start_at|default=''}">
+                            </div>
+                            <div class="col-xs-6" id="endTime">
+                                <label><span class="red">*</span>活动时间（止）：</label>
+                                <input type="text" name="time_end" class="form-control datepicker clear-target" placeholder="请输入活动结束时间" autocomplete="off" value="{$info.end_at|default=''}">
+                            </div>
+                        </div>
+                        <div class="wid_60">
+                            <label><span class="red">*</span>商家名称：</label>
+                            <input type="text" name="shop_name" class="form-control" maxlength="100" placeholder="请输入商家名称"  value="{$info.business_name|default=''}"/>
+                        </div>
+                        <div class="wid_60">
+                            <label><span class="red">*</span>活动奖品：</label>
+                            <input type="text" name="activity_gift" class="form-control" maxlength="100" placeholder="请输入活动奖品"  value="{$info.prize|default=''}"/>
+                        </div>
+                        <div class="wid_60">
+                            <label>参与数量：</label>
+                            <input type="number" name="join_num" class="form-control"  value="{$info.add_num|default=''}"/>
+                        </div>
+                        <div class="wid_60">
+                            <label>商家logo：</label>
+                            <input id="mer_logo" type="file" />
+                            <input type="hidden" name="mer_logo_img" value="{$info.business_logo}">
+                        </div>
+                        <div class="eidt_caution wid_60">
+                            <span class="caution">注意事项：</span><br>
+                            尺寸要求240*135px，图片大小不超过2m
+                        </div>
+                        <div class="wid_60">
+                            <label><span class="red">*</span>活动详情：</label>
+                            <div id="editor" name="content"></div>
+                        </div>
+                        <div class="wid_60">
+                            <label>排序值：</label>
+                            <input type="number" name="sort" class="edit-sort form-control" value="{$info.px|default=0}"/>
+                            <span>默认为0，前台活动列表页排序值由大到小排序</span>
+                        </div>
+                        <div class="wid_60">
+                            <label>启用状态：</label>
+                            <select id="status" name="status" class="form-control edit-sort">
+                                <option value="1">启用</option>
+                                <option value="2">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-area">
+                        <button type="button" class="btn btn-primary" id="save">保存</button>
+                        <a href="/cooperate/index/" class="btn btn-default">返回</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            var cids = "{$info.cids}";
+            var url = location.href;
+            if(url.indexOf('id') > -1 && cids == ''){
+                $("#city").val(0).trigger('change');
+            }else{
+                var cidsArry = cids.split(',');
+                $("#city").val(cidsArry).trigger('change');
+            }
+            $("#status").val("{$info.state|default=1}");
+
+            $("#city").select2({
+                allowClear: true,
+                placeholder: "请选择活动城市",
+                language: "zh-CN"
+            });
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd'
+            }).on("change", function () {
+                if (toTimeStamp($("input[name=time_start]").val()) > toTimeStamp($("input[name=time_end]").val())) {
+                    msg("请选择正确的活动时间", function () {
+                        $("input[name=time_end]").val("");
+                    });
+                }
+            });
+            //富文本
+            var ue = UE.getEditor('editor', {
+                autoClearinitialContent: false,
+                serverUrl: '/ueditor/upload/?ext=s3.jpg',
+                toolbars: [['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|', 'rowspacingtop', 'rowspacingbottom', 'lineheight', '|', 'paragraph', 'fontfamily', 'fontsize', '|', 'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|', 'imagecenter', 'simpleupload', 'insertimage', 'link', 'unlink', 'searchreplace']],
+                maximumWords: 10000
+            });
+            ue.ready(function() {
+                //设置编辑器的内容
+                ue.setContent('{$info.detail}');
+            });
+
+            $("#mer_logo").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption: false,
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount: 1,
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync: true,
+                autoReplace: true,
+                dropZoneEnabled:false,
+                uploadExtraData:{
+                    prefix:'cooperatebanner',
+                    chars:'true'
+                },
+                minImageWidth: 240, //图片的最小宽度
+                minImageHeight: 135,//图片的最小高度
+                maxImageWidth: 240,//图片的最大宽度
+                maxImageHeight: 135,//图片的最大高度
+                maxFileSize:2048,
+                previewSettings:{
+                    image: {width: "323px", height: "164px"}
+                },
+                initialPreview:[ //预览图片的设置
+                    {$info['business_logo_url']}
+                ],
+            }).on('fileuploaded', function(event, data, id, index) {
+                if(1 == data.response.status){
+                    $('input[name="mer_logo_img"]').val(data.response.data.name);
+                }else{
+                    alert(data.response.info);
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                alert('文件上传失败,请检查文件格式，规格是否符合要求！')
+                return false;
+            }).on("fileclear", function () {
+                $('input[name="mer_logo_img"]').val("");
+            }).on("filebatchselected", function (event, files) {
+                if ($('input[name="mer_logo_img"]').val()) {
+                    layer.msg('只能上传一张图片')
+                    var length = $(".file-preview-thumbnails>div").length;
+                    $(".file-preview-thumbnails>div").addClass("img-child");
+                    $(".file-preview-thumbnails").find(":last-child").removeClass("img-child");
+                    if(length>=2){
+                        $(".file-preview-thumbnails").find(".img-child").remove();
+                    }
+                }
+            });
+            //todo-城市反选
+
+            //保存
+            $("#save").click(function () {
+                var activity_tit = $("input[name=activity_tit]").val();
+                var cityVal = $("#city").val();
+                var time_start = $("input[name=time_start]").val();
+                var time_end = $("input[name=time_end]").val();
+                var shop_name = $("input[name=shop_name]").val();
+                var activity_gift = $("input[name=activity_gift]").val();
+                var content = ue.getContent();
+                var person_num = $("input[name=join_num]").val()
+                var reg_num = /^(?!0)\d{1,5}$/
+                var logo = $("input[name=mer_logo_img]").val()
+                var status = $("#status").val()
+                var sort =  $("input[name=sort]").val()
+                if(activity_tit == '' || activity_tit == undefined){
+                    msg('请输入活动标题');
+                    return false
+                }
+                if(cityVal == '' || cityVal == null){
+                    msg('请选择活动城市');
+                    return false
+                }
+                //todo-选了全站就不能再选城市了
+                if($.inArray('0',cityVal)>=0 && cityVal.length>1){
+                    msg('已选全站,不能再选其他城市');
+                    return false
+                }
+
+                if(time_start == ''){
+                    msg('请选择活动开始时间');
+                    return false
+                }
+                if(time_end == ''){
+                    msg('请选择活动结束时间');
+                    return false
+                }
+                if(shop_name == ''){
+                    msg('请输入商家名称');
+                    return false
+                }
+                if(activity_gift == ''){
+                    msg('请输入活动奖品');
+                    return false
+                }
+                if(person_num != 0 && person_num != '' && !reg_num.test(person_num)){
+                    msg('参与数量有误');
+                    return false
+                }
+                if(content == ''){
+                    msg('请输入活动详情');
+                    return false
+                }
+                if(sort != 0 && sort != '' && !reg_num.test(sort)){
+                    msg('排序值有误');
+                    return false
+                }
+
+                var id = '{$info.id}';
+                $.ajax({
+                    url: '/cooperate/editInfo',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        name:activity_tit,
+                        start_time:time_start,
+                        end_time:time_end,
+                        prize:activity_gift,
+                        detail:content,
+                        add_num:person_num,
+                        sj_name:shop_name,
+                        logo:logo,
+                        status:status,
+                        px:sort,
+                        city_ids:cityVal
+                    },
+                    success: function (res) {
+                        if(res.error_code == 0){
+                            layer.msg('保存成功', {icon: 1});
+                            window.location.href = '/cooperate/index';
+                        }
+                    },
+                    error: function (res) {
+                        layer.msg('服务器异常',function () {
+                        });
+                    }
+            })
+        })
+        })
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                    msg,
+                    {time: 2000,},
+                    fn || function () {
+                    }
+            )
+        }
+    </script>
+</block>

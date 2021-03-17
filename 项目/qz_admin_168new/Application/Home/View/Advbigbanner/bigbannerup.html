@@ -1,0 +1,292 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网website管理后台-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/icheck/skins/all.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/js/plugins/icheck/skins/flat/grey.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+      <h1 class="">通栏管理
+        <a href="/advbigbanner/" class="fa fa-reply reply" title="返回列表"></a>
+      </h1>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-sm-12">
+          <form id="myForm" class="form-horizontal box" onsubmit="return false">
+            <div class="box-body">
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">公司名称</label>
+                <div class="col-sm-2">
+                     <input id="search" type="text" placeholder="公司名称/ID"   />
+                </div>
+                <lable class="pull-left control-label">&nbsp;&nbsp;&nbsp;&nbsp;</lable>
+                <div class="col-sm-2">
+                    <select id="comid">
+                      <option value="">请选择城市</option>
+                      <volist name="citys" id="vo">
+                        <option value="{$vo.cid}">{$vo.cname}</option>
+                      </volist>
+                    </select>
+                </div>
+                <label class="control-label">如果是公司通栏，可以不选择装修公司</label>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">广告时间</label>
+                <div class="col-sm-2">
+                    <input  name="start_time" class="form-control datepicker" type="text" placeholder="开始时间" value="{$adv.start_time|default=""|date='Y-m-d',###}" autocomplete="off" />
+                </div>
+                <lable class="pull-left control-label">至</lable>
+                <div class="col-sm-2">
+                    <input  name="end_time" class="form-control datepicker" type="text" placeholder="结束时间" value="{$adv.end_time|default=""|date='Y-m-d',###}" autocomplete="off" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">通栏位置</label>
+                <div class="col-sm-4">
+                  <if condition="!$adv OR $adv['module'] EQ 'home_bigbanner_a'">
+                    <label class="control-label">
+                      <input  class="icheck" type="radio" name="position" checked="checked" value="A" />&nbsp;&nbsp;通栏A&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="B"  />&nbsp;&nbsp;通栏B&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="C"  />&nbsp;&nbsp;通栏c
+                    </label>
+                  <elseif condition="$adv['module'] EQ 'home_bigbanner_b'"/>
+                    <label class="control-label">
+                      <input  class="icheck" type="radio" name="position"  value="A" />&nbsp;&nbsp;通栏A&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="B" checked="checked" />&nbsp;&nbsp;通栏B&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="C"  />&nbsp;&nbsp;通栏c
+                    </label>
+                  <elseif condition="$adv['module'] EQ 'home_bigbanner_c'"/>
+                      <input  class="icheck" type="radio" name="position"  value="A" />&nbsp;&nbsp;通栏A&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="B" />&nbsp;&nbsp;通栏B&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="position" value="C" checked="checked" />&nbsp;&nbsp;通栏c
+                  </if>
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">链接地址</label>
+                <div class="col-sm-2">
+                    <input type="text" name="url" class="form-control" placeholder="链接地址,请以http://开头" value="{$adv.url}"  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">通栏顺序</label>
+                <div class="col-sm-1">
+                    <input  name="sort" type="text" class="form-control" placeholder="通栏顺序" value="{$adv.sort}"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">启用状态</label>
+                <div class="col-sm-2">
+                  <label class="control-label">
+                    <if condition="!$adv OR $adv['status'] EQ 1">
+                      <input  class="icheck" type="radio" name="status" checked="checked" value="1" />&nbsp;&nbsp;启用&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="status"  value="0" />&nbsp;&nbsp;关闭
+                    <else/>
+                      <input  class="icheck" type="radio" name="status"  value="1" />&nbsp;&nbsp;启用&nbsp;&nbsp;
+                      <input  class="icheck" type="radio" name="status"  value="0" checked="checked" />&nbsp;&nbsp;关闭
+                    </if>
+                    </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">上传图片</label>
+                <div class="col-sm-11">
+                    <input id="fileinput"  type="file" class="form-control" />
+                    <input type="hidden" name="img" value="{$adv.img}"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-offset-1 col-sm-4">
+                  <div class="alert alert-warning">
+                    通栏尺寸:1210px * 110px
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label  class="col-sm-1 control-label">通栏备注</label>
+                <div class="col-sm-4">
+                <textarea name="description" class="form-control">{$adv.description}</textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-11 col-sm-offset-1">
+                  <button id="btnSave" class="btn btn-success"><i class="fa fa-plus-circle"></i>&nbsp;保存</button>
+                  <a href="/advbigbanner/" class="btn btn-default"><i class="fa fa-mail-reply"></i>&nbsp;返回</a>
+                  <input type="hidden" name="id" value="{$adv.id}" />
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+      $("#search").select2({
+          allowClear: true,
+          placeholder: "公司名称/ID",
+          minimumInputLength: 1,
+          maximumInputLength:10,
+          dropdownAutoWidth:true,
+          query: function(query) {
+              var result = null;
+              $.ajax({
+                  url: '/api/getCompanyInfo',
+                  type: 'GET',
+                  dataType: 'JSON',
+                  data: {
+                      query: query.term
+                  }
+              })
+              .done(function(data) {
+                  if(data.status == 1){
+                      var result = {
+                          results: []
+                      };
+                      for(var i in data.data){
+                          console.log(data.data[i].id);
+                          result.results.push({
+                              id:data.data[i].id,
+                              text: data.data[i].jc,
+                              cs:data.data[i].cs
+                          });
+                      }
+                      query.callback(result);
+                  }
+              });
+           }
+      });
+
+      $("#search").on("change",function(event) {
+          if(typeof $("#search").select2("data").cs != "undefined"){
+               $("#comid").select2("val",$("#search").select2("data").cs);
+          }
+      });
+
+      $("#search").select2("data",{$advData|default="''"});
+
+      $("#comid").select2({
+          allowClear: true,
+          placeholder: "选择城市"
+      });
+      $("#comid").select2("val","{$adv.city_id}");
+      $(".datepicker").datepicker({
+              format:"yyyy-mm-dd",
+              minViewMode:0
+      });
+
+      $('input[name=position]').iCheck({
+          checkboxClass: 'icheckbox_flat-grey',
+          radioClass: 'iradio_flat-grey',
+          increaseArea: '' // optional
+      });
+
+      $('input[name=status]').iCheck({
+          checkboxClass: 'icheckbox_flat-grey',
+          radioClass: 'iradio_flat-grey',
+          increaseArea: '' // optional
+      });
+
+      $("#fileinput").fileinput({
+          language: 'zh', //设置语言,
+          uploadUrl:"/upload/uploadImg",
+          showCaption:false,
+          browseClass:"btn btn-primary",
+          allowedFileExtensions : ['jpg','png','gif'],
+          maxFileCount:1,
+          uploadClass:"btn btn-info",
+          removeClass:"btn btn-danger",
+          uploadAsync:true,
+          dropZoneEnabled:false,
+          previewSettings:{
+              image: {width: "1210px", height: "110px"}
+          },
+          layoutTemplates:{
+              actionDelete:"",
+              actionUpload:""
+          },
+          uploadExtraData:{
+              prefix:"bigadv"
+          },
+          minImageWidth: "1210",
+          minImageHeight: "110",
+          maxImageWidth: "1210",
+          maxImageHeight: "110",
+          initialPreview:{$adv.img_url|default="''"},
+      }).on('fileuploaded', function(event, data) {
+          var _this = $(this);
+          if(data.response.status == 1){
+              var obj = data.response.data;
+              $("input[name=img]").val(obj.name);
+          }else{
+              _this.Alert({
+                  msg:data.response.info,
+                  level:2
+              });
+          }
+      }).on("fileuploaderror",function(event, data){
+          var _this = $(this);
+          _this.Alert({
+              msg:"附件上传失败,请联系技术部门！",
+              level:2
+          });
+          return false;
+      }).on("fileclear",function(){
+          $("input[name=img]").val("");
+      });
+
+      $("#btnSave").click(function(event) {
+          var _this = $(this);
+          var data = $("#myForm").serializeArray();
+          var json = $("#search").select2("data");
+          if(json != null){
+            if(typeof $("#search").select2("data") == "string"){
+                json = JSON.parse($("#search").select2("data"));
+            }
+            var company_id = json.id;
+            data.push({name:"company_id",value:company_id});
+            data.push({name:"company_name",value:json.text});
+          }
+
+          data.push({name:"city_id",value:$("#comid").select2("data").id});
+
+          $.ajax({
+              url: '/advbigbanner/bigbannerup/',
+              type: 'POST',
+              dataType: 'JSON',
+              data: data
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = "/advbigbanner/";
+              }else{
+                 _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+              }
+          })
+          .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+          });
+      });
+    </script>
+</block>

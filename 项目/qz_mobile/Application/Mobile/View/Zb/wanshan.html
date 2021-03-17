@@ -1,0 +1,108 @@
+<extend name="Common:basic"/>
+<block name="link">
+<link href="{$static_host}/assets/mobile/zb/css/m-hxsj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+<a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+<div class="m-header-tit">完善信息</div>
+</block>
+<block name="content">
+<article>
+    <ul class="m-bj-edit">
+        <li>
+            <span class="m-bj-title">感谢您的申请！</span>
+            <span class="m-bj-info"><em>本服务由齐装网及具有资质合作的装修公司提供</em><br/>
+                近期申请人数较多，完善以下信息，我们将优先为您服务！</span>
+        </li>
+        <li>
+            <div class="m-row" style="width: 100%;">
+                <select name="huxing" class="m-row-int1 m-bj-edit-list m-bj-half">
+                    <option value="">请选择户型</option>
+                    <volist name="info.hx" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+        </li>
+        <li>
+            <div class="m-row" style="width: 100%;">
+                <select name="start" class="m-row-int1 m-bj-edit-list m-bj-half">
+                    <option value="">请选择开工时间</option>
+                    <option value="1个月">1个月</option>
+                    <option value="2个月">2个月</option>
+                    <option value="3个月">3个月</option>
+                    <option value="3个月以上">3个月以上</option>
+                    <option value="拿房后开工">面议</option>
+                </select>
+            </div>
+        </li>
+        <li>
+            <div class="m-row" style="width: 100%;">
+                <select name="yusuan" class="m-row-int1 m-bj-edit-list m-bj-half">
+                    <option value="">请选择不包括家具、电器的预算</option>
+                    <volist name="info.yusuan" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+        </li>
+    </ul>
+    <a class="m-b-btn save-submit">马上获取</a>
+    <div class="m-bj-description">
+        <i class="fa fa-exclamation"></i>
+        我们承诺：齐装网提供该项免费服务，绝不产生任何费用，为了您的利益以及我们的口碑，您的隐私将被严格保密。
+    </div>
+</article>
+</block>
+<block name="script">
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".save-submit").click(function(event) {
+             
+            var huxing = $(".m-bj-edit input[name=huxing]").val();
+            var start = $(".m-bj-edit select[name=start]").val();
+            var yusuan = $(".m-bj-edit select[name=yusuan]").val();
+
+            if(!start){
+                alert('请选择开工时间');
+                return false;
+            }
+
+            if(!yusuan){
+                alert('请选择预算');
+                return false;
+            }
+             
+            window.order({
+                extra:{
+                    start:$("select[name=start]").val(),
+                    yusuan:$("select[name=yusuan]").val(),
+                    huxing:$("select[name=huxing]").val(),
+                    orderid:"{$order.id}"
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+                    alert("网络异常,请稍后再试！");
+                     
+                },
+                success:function(data, status, xhr){
+                     
+                    if (data.status == 1) {
+                        window.location.href = "{$redirect|default='/shejidone/'}";
+                    } else {
+                        alert(data.info);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+    })
+</script>
+</block>
+
+

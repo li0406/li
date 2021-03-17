@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qzsms
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: qzsms
+  template:
+    metadata:
+      labels:
+        app: qzsms
+    spec:
+      containers:
+      - name: qzsms
+        # image: registry.cn-shanghai.aliyuncs.com/qizuang/qzsms:master-040ce9e
+        image: <K8S_IMAGE>
+        imagePullPolicy: Always
+        # command: [ "echo", "SUCCESS" ]
+        ports:
+        - containerPort: 12000
+          name: 12000tcp00
+          protocol: TCP
+        # envFrom:
+        # - configMapRef:
+        #     name: env-app-config
+        volumeMounts:
+          - mountPath: /data/app/qzsms/config
+            name: vol1
+      imagePullSecrets:
+      - name: "container-registry-a"
+      volumes:
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: qzsms
+                path: config.toml
+            name: app-config
+            optional: false
+          name: vol1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: qzsms
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: qzsms
+  ports:
+    - protocol: TCP
+      port: 12000
+      targetPort: 12000
+  type: ClusterIP

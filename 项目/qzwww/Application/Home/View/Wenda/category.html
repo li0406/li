@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>{$info.SEO_title}</title>
+<meta name="keywords" content="{$info.SEO_keywords}" />
+<meta name="description" content="{$info.SEO_description}" />
+<meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/wenda/ask-{$info.sub_category_id}/" />
+<notempty name="info.header.canonical">
+<link rel="canonical" href="{$info.header.canonical}"/>
+</notempty>
+<include file="Index:resource" />
+<link rel="stylesheet" href="{$static_host}/assets/home/ask/css/ask.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" />
+<link href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<!--[if IE 7]>
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+<![endif]-->
+</head>
+<body>
+{$headerTmp}
+
+<div class="wrap oflow">
+	<div class="bread position"><a href="/wenda/">在线问答</a> &gt; <if condition="!$info['SEO_level']"> <a href="/wenda/ask-{$info.category_id}/">{$info.category_name}</a> &gt; {$info.sub_category_name}<else/>{$info.category_name}</if>
+    </div>
+	<div class="leftsider">
+		<ul class="ask-tab">
+		<volist name="category" id="v">
+			<li {$v.cls}><a href="/wenda/ask-{$v.cid}/">{$v.name}</a></li>
+		</volist>
+        <li><a href="/gonglue/jxwd/" target="_blank">精选问答</a></li>
+		</ul>
+		<ul class="ask-tab-main">
+			<volist name="subCategory" id="v">
+                <!--风水：201703临时去掉-->
+                <!--风水：20200624 feature-917 恢复-->
+    			<li {$v.cls}><a href="/wenda/ask-{$v.cid}/">{$v.name}</a></li>
+			</volist>
+		</ul>
+		<div class="ask-tiaoj">
+			<div>
+				{$info.orderBy}
+				<select class="pull-right submit-status" name="jumpMenu" id="jumpMenu">
+				    {$info.status_menu}
+				</select>
+			</div>
+		</div>
+		<ul class="ask-list">
+			<volist name="qList" id="v">
+			<li>
+				<div class="ask-list-tit state{$v.status}">
+                    <a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a>
+                </div>
+				<div class="ask-list-info">{$v.content}</div>
+				<p><span class="pull-left">已有 <em class="red">{$v.anwsers} </em>个回答</span><span class="pull-right">{$v.post_time}</span></p>
+			</li>
+			</volist>
+		</ul><br>
+		<div class="page">{$page}</div>
+	</div>
+
+<div class="rightsider">
+    <div class="wenwen">
+        <span class="h1">没有想要的回答？试试这里</span>
+        <form class="form-horizontal" action="/wenda/addquestion" method="post" id="quickAskFrom">
+            <textarea name="title" type="text" placeholder="快速提问，10分钟获取答案"></textarea>
+            <input type="hidden" name="quickask" value="id_{$ask.id}">
+            <p id="quickTextCount">还可以输入<i>30</i>字<a id="quickAsk" href="javascript:void(0)">确定</a></p>
+        </form>
+    </div>
+    <div class="mt20">
+    {$orderTmp}
+	</div>
+
+    <div class="ask_hot mt20">
+        <div class="ask_hot_tit"><span>热门问答</span></div>
+        <div class="ask_hot_list">
+            <ul>
+                <volist name="info.hotAsk" id="v">
+                <li><i class="circle_point"></i><a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a></li>
+                </volist>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+<include file="Common@lotteryDraw/index" />
+<include file="Common@Order/bottom_fadan" type="2" />
+<input id="safecode" type="hidden" value="{$safecode}" />
+<input id="safekey" type="hidden" value="{$safekey}" />
+<include file="Index:footer" />
+<script type="text/javascript" src="{$static_host}/assets/common/js/jquery.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var shen = null,
+    shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+    $(document).ready(function(){
+        $("#quickAsk").click(function(){
+            var title = $("#title").val();
+            if(title == ''){
+                alert('要填写标题哦');
+            }else{
+                $('#quickAskFrom').submit();
+            }
+        });
+        $("textarea[name=title]").bind("input propertychange",function(){
+            var length = $(this).val().length;
+            if(length >30){
+                var offset = 30 - length;
+                $("#quickTextCount i").html('<span style="color:red"> '+offset+' </span>');
+            }else{
+                $("#quickTextCount i").html(30 - length);
+            }
+        });
+
+        //排序筛选
+        $('.submit-sort').click(function(event) {
+            var wenda_category_sortby = $(this).attr('data-sortby');
+            $.cookie('wenda_category_sortby', wenda_category_sortby, {expires: 1, path: '/'});
+            window.location.href = window.location.href;
+        });
+        //状态筛选
+        $('.submit-status').change(function(event) {
+            var wenda_category_status = $(this).val();
+            $.cookie('wenda_category_status', wenda_category_status, {expires: 1, path: '/'});
+            window.location.href = window.location.href;
+        });
+
+        // 设计报价滚动到1065px 悬浮
+        $(window).scroll(function(event) {
+            if($(window).scrollTop() >= 1065){
+                $('.secbox_form').css({
+                    "width":"260px",
+                    "margin-top":"0",
+                    "position":"fixed",
+                    "top":"85px",
+                    "zIndex":2
+                });
+                }else{
+                    $('.secbox_form').css({
+                    "margin-top":"15px",
+                    "position":"",
+                    "top":"",
+                    "zIndex":''
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

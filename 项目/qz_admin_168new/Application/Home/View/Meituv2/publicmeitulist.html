@@ -1,0 +1,341 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+	<title>公装美图</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+    <style>
+        input.allchoose{margin-left: -27px;}
+        .w300{width: 300px;}
+    </style>
+</block>
+<block name="content">
+	<section class="content-header">
+		<h1>公装美图管理</h1>
+	</section>
+	<section class="content-header">
+		<a href="/meituv2/publicmeitudetail" class="btn btn-primary"><i class="fa fa-plus"></i> 添加美图</a>
+		<a href="/meituv2/publicmeitucategory" class="btn btn-primary"><i class="fa fa-plus"></i> 添加类型</a>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-header with-border">
+						<h3 class="box-title">条件查询</h3>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<form action="">
+								<div class="col-xs-5">
+									<div>选择分类</div>
+									<volist name="categorylist" id="vo">
+										<select name="pub_category-{$vo.id}"  class="select-fl">
+											<option value="">{$vo.name}</option>
+											<volist name="vo.child" id="v">
+												<if condition="$requestData['pub_category'] eq $v['id']" >
+													<option value="{$v.id}" selected="selected">{$v.name}</option>
+													<else />
+													<option value="{$v.id}">{$v.name}</option>
+												</if>
+<!--												<option value="{$v.id}">{$v.name}</option>-->
+											</volist>
+										</select>
+									</volist>
+								</div>
+								<div class="col-xs-2">
+									<div>状态</div>
+									<select name="state" id="state" class="form-control">
+										<option value="0">请选择</option>
+										<option value="2" <if condition="$requestData.state eq 2">selected </if>>预发布</option>
+										<option value="3" <if condition="$requestData.state eq 3">selected </if>>已发布</option>
+									</select>
+								</div>
+								<div class="col-xs-2">
+									<div>标题或ID</div>
+									<input type="text" name="keyword" class="form-control" placeholder="标题或ID" value="{$requestData.keyword}" autocomplete="off">
+								</div>
+								<div class="col-xs-2">
+									<br>
+									<button type="button" data-triger="meituselect" class="key-down-event btn btn-primary meituselect">
+										<i class="fa fa-search"></i>查询
+                                    </button>
+                                    <div class="btn btn-info pull-right" id="fabu-more"> 批量重新发布</div>
+                                </div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="box box-default">
+					<div class="box-header with-border">
+						<h3 class="box-title">美图列表</h3>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<table class="table table-bordered table-hover">
+								<tr>
+                                    <th><input type="checkbox" id="all-choose"><label for="all-choose">全选</label></th>
+									<th>ID</th>
+									<th style="text-align: left">标题</th>
+									<th>标签</th>
+									<th>操作人</th>
+									<th>创建时间</th>
+									<th>发布时间</th>
+									<th>状态</th>
+									<th>操作</th>
+								</tr>
+								<foreach name="list.data" item="vo">
+								<tr>
+                                    <td class="list-td"><input type="checkbox" class="allchoose" data-id="{$vo.id}"></td>
+									<td>{$vo.id}</td>
+									<td style="text-align: left" class="w300">
+										<if condition="$vo.state eq 2">
+											<span class="label label-success"><i class="fa fa-clock-o"></i>预</span>
+										</if>
+										<if condition="$vo.state eq 3">
+										<a title="{$vo.title}" href="http://{:C('QZ_YUMINGWWW')}/tu/g{$vo.id}.html" target="_blank">
+											{$vo.title}
+										</a>
+										<else />
+											{$vo.title}
+										</if>
+									</td>
+									<td></td>
+									<td>
+										{$vo.creator_name}
+									</td>
+									<td class="text-align-center">
+										{$vo.created_at}
+									</td>
+									<td class="text-align-center">
+										<if condition="$vo.state eq 3">
+										{$vo.publish_at}
+										</if>
+									</td>
+									<td>
+										{$vo.state_name}
+									</td>
+									<td>
+                                        <span title="重新发布" class="fa fa-mail-forward " data-id="{$vo.id}"></span>
+										<span title="编辑" class="fa fa-pencil edit" data-id="{$vo.id}"></span>
+										<span title="删除" class="fa fa-trash" data-id="{$vo.id}"></span>
+									</td>
+								</tr>
+								</foreach>
+							</table>
+							{$list.page}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		//热门
+		$("select[name=pub_category-3").change(function(){
+			var choose = $(this).val();
+			if(choose){
+				$("select[name=pub_category-4").val("");
+				$("select[name=pub_category-5").val("");
+				$("select[name=pub_category-6").val("");
+			}
+		});
+
+		//公用
+		$("select[name=pub_category-4").change(function(){
+			var choose = $(this).val();
+			if(choose){
+				$("select[name=pub_category-3").val("");
+				$("select[name=pub_category-5").val("");
+				$("select[name=pub_category-6").val("");
+			}
+		});
+
+		//公用
+		$("select[name=pub_category-5").change(function(){
+			var choose = $(this).val();
+			if(choose){
+				$("select[name=pub_category-3").val("");
+				$("select[name=pub_category-4").val("");
+				$("select[name=pub_category-6").val("");
+			}
+		});
+
+		//商用
+		$("select[name=pub_category-6").change(function(){
+			var choose = $(this).val();
+			if(choose){
+				$("select[name=pub_category-3").val("");
+				$("select[name=pub_category-4").val("");
+				$("select[name=pub_category-5").val("");
+			}
+		});
+
+
+		$('.meituselect').click(function(){
+			var category = '';
+			var pub_category1 = $("select[name=pub_category-3").val();
+			var pub_category2 = $("select[name=pub_category-4").val();
+			var pub_category3 = $("select[name=pub_category-5").val();
+			var pub_category4 = $("select[name=pub_category-6").val();
+			var state = $("select[name=state").val();
+			var keyword = $("input[name=keyword").val();
+			if(pub_category1){
+				category = pub_category1;
+			}else if(pub_category2){
+				category = pub_category2;
+			}else if(pub_category3){
+				category = pub_category3;
+			}else if(pub_category4){
+				category = pub_category4;
+			}else{
+				category = '';
+			}
+			window.location.href = '/meituv2/publicmeitulist?pub_category=' + category +'&state='+ state + '&keyword='+ keyword
+		});
+		// enter键查询
+		$("input[name=keyword]").keyup(function(e){
+			if(e.keyCode == 13){
+				var category = '';
+				var pub_category1 = $("select[name=pub_category-3").val();
+				var pub_category2 = $("select[name=pub_category-4").val();
+				var pub_category3 = $("select[name=pub_category-5").val();
+				var pub_category4 = $("select[name=pub_category-6").val();
+				var state = $("select[name=state").val();
+				var keyword = $("input[name=keyword").val();
+				if(pub_category1){
+					category = pub_category1;
+				}else if(pub_category2){
+					category = pub_category2;
+				}else if(pub_category3){
+					category = pub_category3;
+				}else if(pub_category4){
+					category = pub_category4;
+				}else{
+					category = '';
+				}
+				window.location.href = '/meituv2/publicmeitulist?pub_category=' + category +'&state='+ state + '&keyword='+ keyword
+			}
+		});
+		//编辑美图
+		$ (".edit").click (function (event) {
+			var id = $ (this).attr ('data-id');
+			window.location.href = "/meituv2/publicmeitudetail?id=" + id;
+		});
+
+		//删除
+		$ ('.fa-trash').click (function () {
+			var id = $ (this).attr ('data-id');
+			layer.confirm ('确认要删除吗？', {
+				title: '确认删除！',
+				btn: ['确定', '取消'] //按钮
+			}, function () {
+				if (id === '') {
+					alert ('数据错误');
+					return;
+				}
+				$.ajax ({
+					url: '/meituv2/delMeitu/',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						id: id,
+					},
+				})
+					.done (function (data) {
+						if (data.code == 0) {
+							window.location.href = "/meituv2/publicmeitulist";
+						}else {
+							console.log(data.msg);
+						}
+					});
+			});
+		});
+
+		function msg(msg, fn) {
+			layer.msg (
+				msg,
+				{time: 2000,},
+				fn || function () {
+				}
+			)
+		}
+        //全选全不选
+        $("#all-choose").click(function () {
+            if($(this).is(":checked")){
+                $(".allchoose").prop("checked",true);
+            }else{
+                $(".allchoose").prop("checked",false);
+            }
+        });
+        //单个重新发布
+        $ ('.fa-mail-forward').click (function () {
+			var id = $(this).attr('data-id');
+			layer.confirm ('确认要重新发布吗？', {
+				title: '确认重新发布！',
+				btn: ['确定', '取消'] //按钮
+			}, function () {
+				if (id === '') {
+					alert ('数据错误');
+					return;
+				}
+				$.ajax ({
+					url: '/meituv2/restore/',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						ids: id,
+					},
+				})
+                .done (function (data) {
+                    if (data.code == 0) {
+                        layer.msg('发布成功', {icon: 1});
+                        window.location.href = "/meituv2/publicmeitulist";
+                    }else {
+                        layer.msg(data.msg, {icon: 2});
+                    }
+                });
+			});
+		});
+
+        //批量重新发布
+        $("#fabu-more").click(function () {
+            var arr = [];
+            $(".list-td").each(function (index,item) {
+                if($(this).find("input[type=checkbox]").is(':checked')){
+                    arr.push($(this).find("input[type=checkbox]").data("id"))
+                }
+            })
+            if(arr != ''){
+                layer.confirm('是否确认批量发布？', {
+                    btn: ['确认','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/meituv2/restore/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            ids:arr
+                        }
+                    })
+                    .done(function (data) {
+                        if (data.code == 0) {
+                            layer.msg('批量发布成功', {icon: 1});
+                            setTimeout("history.go(0);",1000);
+                        } else {
+                            layer.msg(data.msg, {icon: 2});
+                            return false;
+                        }
+                    })
+                    .fail(function (xhr) {
+                        layer.msg("网络错误，请稍后重试！");
+                    })
+                })
+            }
+        })
+	</script>
+</block>

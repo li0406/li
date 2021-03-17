@@ -1,0 +1,98 @@
+<div class="win_box comment_box">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="win_box_in">
+            <div class="zb_box_title">
+                <div class="zb_box_info">
+                   评论回复&nbsp;【{$comment.name}】
+                </div>
+                <span class="win_box_close" title="关闭">
+                </span>
+            </div>
+            <div class="zb_box_form">
+                <div class="input">
+                    <label class="label-control"><h4>用户评分:</h4></label>
+                </div>
+                <div class="input">
+                    <label class="label-control">施工水平:</label>
+                    <em class="star" data-score="{$comment.sg}"></em>
+                    <em class="score">{$comment.sg}分</em>
+                </div>
+                <div class="input">
+                    <label class="label-control">设计水平:</label>
+                    <em class="star"  data-score="{$comment.sj}"></em>
+                    <em>{$comment.sj}分</em>
+                </div>
+                <div class="input">
+                    <label class="label-control">服务质量:</label>
+                    <em class="star"  data-score="{$comment.fw}"></em>
+                    <em>{$comment.fw}分</em>
+                </div>
+                <div class="input">
+                    <label class="label-control"><h4>回复评论:</h4></label>
+                </div>
+                <div class="input">
+                     <textarea name="text" placeholder="回复评论">{$comment.rptxt}</textarea>
+                </div>
+                <div class="input">
+                    <em class="red">*评价内容中,请勿包含 联系方式\网址\其他网站LOGO\微博、微信帐号\二维码 等"相关联系方式",否则将会被删除。</em>
+                </div>
+                <div class="input">
+                    <button id="btnSave" class="button" type="button">提交</button>
+                    <em class="red err-tips"></em>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".win_box_close").click(function(event) {
+        $(".comment_box").remove();
+    });
+
+    $(".star").raty({
+        size: 24,
+        path: '{$static_host}/assets/common/js/raty/img/',
+        half: true,
+        starHalf : 'star-half-big.png',
+        starOff  : 'star-off-big.png',
+        starOn   : 'star-on-big.png',
+        score:function(){
+            return $(this).attr("data-score");
+        },
+        precision: false,
+        readOnly:true
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        $(".err-tips").html("");
+        if(!App.validate.run($("textarea[name=text]").val())){
+            $("textarea[name=text]").focus();
+            $("textarea[name=text]").addClass("focus");
+            $(".err-tips").html("亲,您总得回复点什么吧！");
+            return false;
+        }
+
+        $.ajax({
+            url: '/recomment/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                id:"{$comment.id}",
+                text:$("textarea[name=text]").val()
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = window.location.href;
+              }else{
+                $(".err-tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+            $(".err-tips").html("发生了未知不到的错误,请稍后再试！");
+          });
+    });
+</script>

@@ -1,0 +1,127 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服标准化</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+    <style>
+        img{
+            max-width: 850px;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服标准化</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/adminnotice">客服标准化</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <form method="get">
+                            <div class="col-xs-2">
+                                <p>标题：</p>
+                                <input class="form-control" type="text" name="title" placeholder="标题" value="{$Think.get.title}">
+                            </div>
+                            <div class="col-sm-2">
+                                <p>&nbsp;</p>
+                                <button type='submit' class="btn btn-success normal" style="width:auto"><i class="fa fa-search"></i> 查询</button>
+                                <a href="/adminnotice/notice" type='button' class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i> 添加标准</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"></h3>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <tbody>
+                            <tr style="font-size:14px;">
+                                <th width="2%">序号</th>
+                                <th width="10%">标题</th>
+                                <th width="3%">操作</th>
+                            </tr>
+                            <volist name="info.articles" id="v">
+                                <tr>
+                                    <td>{$v.article_id}</td>
+                                    <td><a class="article" data-id="{$v.article_id}" href="javascript:void (0)">{$v.title}</a></td>
+                                    <td>
+                                        <a title="编辑" href="/adminnotice/notice?edit_id={$v.article_id}">修改</a>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        <div class="box-footer clearfix page">
+                            <ul class="pagination no-margin">{$info.page}</ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 查看Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            //查看
+            $(".article").on('click',function () {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/adminnotice/showArticle',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    },
+                    success:function(data){
+                        if(data.status == 1){
+                            $("#myModal .modal-dialog").removeClass('modal-sm').addClass('modal-lg');
+                            $("#myModal #myModalLabel").html(data.head);
+                            $("#myModal .modal-body").html(data.info);
+                            $("#myModal").modal();
+                        }
+                    },
+                    error:function(xhr){
+                        $(".error").html("出错啦,请找技术部门协助！");
+                    }
+                });
+            });
+        });
+    </script>
+</block>

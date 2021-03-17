@@ -1,0 +1,671 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+  <style>.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+        vertical-align: middle !important;
+        text-align: left;
+    }
+  .table td{
+      text-align: left;
+  }
+  </style>
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>后台订单导入</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/orderimport/importtask/">后台订单导入</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" id="searchForm">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="col-xs-2">
+                                    <h5>操作人:</h5>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h5>执行状态:</h5>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h5>执行开始时间:</h5>
+                                </div>
+                                <div class="col-xs-2">
+                                    <h5>执行结束时间:</h5>
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="col-xs-2">
+                                    <input type="text" name="op_name" class="form-control" value="{$Think.get.op_name}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <select name="execute_status" id="execute_status" class="form-control">
+                                        <volist name="vdata.execute_status" id="vo" key="k">
+                                            <option value="{$k-1}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <input type="text" name="execute_start_time" class="form-control date-picer" value="{$Think.get.execute_start_time}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <input type="text" name="execute_end_time" class="form-control date-picer" value="{$Think.get.execute_end_time}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <button class="btn btn-primary" id="searchBtn"><i class="fa fa-search"></i>&nbsp;查询&nbsp;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div class="box-body">
+                        <div class="row">
+                             <div class="col-xs-12">
+                                <div class="col-xs-10">
+                                    &nbsp;
+                                </div>
+                                <div class="col-xs-1">
+                                    <button class="btn btn-primary btn-success" id="importAct">&nbsp;&nbsp;&nbsp;&nbsp;导入&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <a  class="btn btn-primary btn-success" href="/orderimport/exportordertemplate" target="_blank">模板下载</a>
+                                </div>
+                             </div>
+                        </div>
+                        <br/>
+                        <table class="table">
+                            <thead>
+                                <th>导入时间</th>
+                                <th>导入数量</th>
+                                <th>导入成功</th>
+                                <th>导入失败</th>
+                                <th>渠道标识</th>
+                                <th>执行开始时间</th>
+                                <th>执行结束时间</th>
+                                <th>执行状态</th>
+                                <th>操作人</th>
+                                <th>操作</th>
+                            </thead>
+                            <tbody>
+                                <volist name="vdata.list" id="vo">
+                                <tr>
+                                    <td>{$vo.import_time|date='Y-m-d H:i:s',###}</td>
+                                    <td><a href="/orderimport/importlist?task_id={$vo.id}">{$vo.import_count}</a></td>
+                                    <td>{$vo.import_success}</td>
+                                    <td>{$vo.import_fail}</td>
+                                    <td>
+                                        <notempty name="vo.src">
+                                            {$vo.src}
+                                            <else />
+                                            未设置
+                                        </notempty>
+                                    </td>
+                                    <td>
+                                        <notempty name="vo.execute_start_time">
+                                            {$vo.execute_start_time|date='Y-m-d H:i:s',###}
+                                            <else />
+                                            无
+                                        </notempty>
+                                    </td>
+                                    <td>
+                                        <notempty name="vo.execute_end_time">
+                                            {$vo.execute_end_time|date='Y-m-d H:i:s',###}
+                                            <else />
+                                            无
+                                        </notempty>
+                                    </td>
+                                    <td>
+                                        <switch name="vo.execute_status">
+                                            <case value="0">未知</case>
+                                            <case value="1">标识未设置</case>
+                                            <case value="2">待执行</case>
+                                            <case value="3">立即执行</case>
+                                            <case value="4">执行中</case>
+                                            <case value="5">执行完成</case>
+                                            <default />
+                                            未知
+                                        </switch>
+                                    </td>
+                                    <td>{$vo.op_name}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary setId"  data-id="{$vo.id}"
+                                            <in name="vo.execute_status" value="3,4,5">disabled="disabled" style=" background-color: #444; border-color: #444; "</in>
+                                        >设置标识</button>
+                                        <button class="btn btn-sm btn-success toDoNow"  data-id="{$vo.id}"
+                                          <in name="vo.execute_status" value="1,3,4,5">disabled="disabled" style=" background-color: #444; border-color: #444; "</in>
+                                        >立即执行</button>
+                                        <button class="btn btn-sm btn-danger toDel"  data-id="{$vo.id}"
+                                            <in name="vo.execute_status" value="3,4,5">disabled="disabled" style=" background-color: #444; border-color: #444; "</in>
+                                        >删除</button>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12">
+                        {$vdata.page}
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div class="box-body" style="">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="col-xs-2">模板中字段填写帮助说明:</div>
+                                <div class="row">
+                                    <div class="col-xs-12 set-mt16 box-body table-responsive">
+                                        <table id="explain" class="table table-hover" role="grid" aria-describedby="myTable_info">
+                                            <thead>
+                                            <tr role="row"></tr>
+                                            <tr role="row" class="white">
+                                                <th class="col-xs-2">字段项</th>
+                                                <th class="sorting_asc">示例</th>
+                                                <th class="sorting">说明</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1"><span class="red">*</span>联系电话</td>
+                                                <td>13812345678</td>
+                                                <td class="col-xs-4"><span class="red">*</span>此项为必填  长度：11位</td>
+                                            </tr>
+                                            <tr role="row" class="even white">
+                                                <td class="col-xs-2" class="sorting_1">备用电话</td>
+                                                <td>15957845464</td>
+                                                <td class="col-xs-4">长度：11位</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">联系人</td>
+                                                <td>张三</td>
+                                                <td class="col-xs-4">李四、王五</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">性别</td>
+                                                <td>女士</td>
+                                                <td class="col-xs-4">可选：女士，先生</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">城市</td>
+                                                <td>苏州</td>
+                                                <td class="col-xs-4">支持所有已开站的城市</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">区域</td>
+                                                <td>
+                                                    吴江区
+                                                </td>
+                                                <td class="col-xs-4">可选：某城市下的区域，姑苏区、其他等</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">小区名称</td>
+                                                <td>实验小区</td>
+                                                <td class="col-xs-4">要求：文本</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">家装公装</td>
+                                                <td>家装</td>
+                                                <td class="col-xs-4">可选：家装、公装</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">新房旧房</td>
+                                                <td>新房装修</td>
+                                                <td class="col-xs-4">可选：新房装修、旧房装修</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">用途</td>
+                                                <td>婚房</td>
+                                                <td class="col-xs-4">要求：文本</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">户型</td>
+                                                <td>1室1厅1卫</td>
+                                                <td class="col-xs-4">可选：1室1厅1卫、2室1厅1卫、2室2厅1卫、2室2厅2卫、3室2厅1卫、3室2厅2卫、3室1厅1卫、3室2厅1卫、4室2厅2卫、5室2厅2卫、6室2厅3卫、普通户型、跃层户型、复式户型、大平层、复式楼、别墅、其它</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">室</td>
+                                                <td>2</td>
+                                                <td class="col-xs-4">可选：1、2、3、4、5、6、7、8、9、10</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">面积</td>
+                                                <td>120.5 </td>
+                                                <td class="col-xs-4">要求：数字</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">喜欢风格</td>
+                                                <td>欧式风格</td>
+                                                <td class="col-xs-4">可选：现代简约、欧式风格、中式风格、古典风格、田园风格、地中海风格、美式风格、混搭风格、其它</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">预算装修类型</td>
+                                                <td>全包</td>
+                                                <td class="col-xs-4">可选：半包、全包、清包、面议</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">预算</td>
+                                                <td>4万以下</td>
+                                                <td class="col-xs-4">可选：4万以下、4-7万、7-10万、10-15万、15-20万、20-30万、30-50万、50-100万、100万以上、面议</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">拿房时间</td>
+                                                <td>2018-06-09</td>
+                                                <td class="col-xs-4">要求：时间</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">钥匙</td>
+                                                <td>有</td>
+                                                <td class="col-xs-4">可选：有、无、其他</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">开工时间</td>
+                                                <td>2个月内开工</td>
+                                                <td class="col-xs-4">可选：1个月内开工、2个月内开工、3个月内开工、4个月内开工、5个月内开工、6个月内开工、6个月以上开工、方案满意开工、满意拿房后开工、面议</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">量房时间</td>
+                                                <td>拿房后</td>
+                                                <td class="col-xs-4">可选：随时、今天、1周内、2周内、1个月内、2个月内、3个月内、3个月以上、周末、拿房后、电话预约后、看户型图后、去实体店后</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">装修需求</td>
+                                                <td>要用名牌的主材</td>
+                                                <td class="col-xs-4">要求： 文本</td>
+                                            </tr>
+                                            <tr role="row" class="odd white">
+                                                <td class="col-xs-2" class="sorting_1">数据类型(来源入口)</td>
+                                                <td>3</td>
+                                                <td class="col-xs-4">对应表中source_in： 默认0   0 默认 1.app 2.api 3.大数据 4.美团  5.金九银十活动 10 微信</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--S 模态框 设置标识-->
+    <div class="modal" id="identModal" tabindex="10" role="dialog" aria-labelledby="exampleModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <h4 class="modal-title">设置标识</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                  <span>*渠道标识（src）：</span>
+                  <select id="src"  class="form-control " name="src" type="text" placeholder="所属渠道" tabindex="-1">
+                  </select>
+              </div>
+                <div class="form-group">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;发单位置标识：</span>
+                    <select id="source"  class="form-control " name="source" type="text" placeholder="所属发单位置" tabindex="-1">
+                    </select>
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="saveIdent">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--E 模态框 设置标识-->
+
+    <div class="modal" id="doNowModal" tabindex="10" role="dialog" aria-labelledby="exampleModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <h4 class="modal-title">确认</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                 确认将该批次订单导入客服系统中?
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn " id="cancelOkBtn">取消</button>
+            <button type="button" class="btn btn-primary" id="okBtn">确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="delModal" tabindex="10" role="dialog" aria-labelledby="exampleModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <h4 class="modal-title">确认</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                 确定删除此批次订单?
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn " id="cancelDelBtn">取消</button>
+            <button type="button" class="btn btn-primary" id="delBtn">确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S 模态框导入 -->
+    <div class="modal fade in" id="importExcel" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="" id="uploadForm" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title">导入订单</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal .control-label">
+                            <div style="overflow: hidden;">
+                                <div class="col-xs-5 no-padding">
+                                    <h3>选择要导入Excel表：</h3>
+                                    <input  type="file" name="excel" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" id="thisId" value="">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" id="upload">增加导入任务</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- E 模态框导入 -->
+
+</block>
+<block name="script">
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            /*S-初始化筛选条件*/
+            $("select[name=execute_status]").val('{$Think.get.execute_status}' == '' ? 0 : '{$Think.get.execute_status}');
+            /*E-初始化筛选条件*/
+
+
+            //搜索
+            $('#searchBtn').click(
+                function (event) {
+                    var getparam = $("select,input", $("#searchForm")).serialize();
+                    window.location.href = "/orderimport/importtask?"+getparam;
+                }
+            )
+
+            //上传
+            $('#importAct').click(function(event){
+                $('#importExcel').modal('show');
+            });
+            $("#upload").click(function () {
+                //var formData = new FormData();
+                //formData.append("excelFile", document.getElementById("file1").files[0]);
+                var formData = new FormData($("#uploadForm")[0]);
+                $.ajax({
+                    url: "/orderimport/importtask",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.code == 0) {
+                            alert(data.msg);
+                            $(".mask-self").hide();
+                            window.location.reload();
+                        }
+                        if (data.code != 0) {
+                            alert(data.msg);
+                        }
+                    },
+                    error: function () {
+                        alert("上传失败！");
+                    }
+                });
+            });
+
+
+
+            var taskid="";
+            var target_obj=null;
+
+        $('.date-picer').daterangepicker({
+              timePicker: true,
+              timePickerIncrement: 30,
+              format: 'YYYY/MM/DD',
+              timePicker12Hour: false
+          }, function(start, end, label) {
+              console.log(start.toISOString(), end.toISOString(), label);
+          });
+
+
+           //设置标识弹框
+            // 渠道标识
+           $(".setId").click(function(event) {
+               target_obj=$(this);
+               taskid=target_obj.attr("data-id");
+               $("#identModal").show();
+           });
+
+            $("#src").select2({
+                //containerCss : {"display":"block"},
+                language: "zh-CN",
+                width: '60%',
+                dropdownAutoWidth: true,
+                placeholder :'请选择',
+                ajax: {
+                    url: "/orderimport/findsrc/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.data
+                        };
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                minimumInputLength: 2,
+                templateResult: function(repo) {
+                    if (repo.loading) return repo.text;
+                    var markup = "<div class='select2-result-repository clearfix'>" +
+                        "<div class='select2-result-repository__meta'>" +
+                        "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+                    return markup;
+                },
+                templateSelection: function(repo) {
+                    return repo.text;
+                },
+                allowClear : true
+            });
+                // 发单位置标识
+            $("#source").select2({
+                //containerCss : {"display":"block"},
+                language: "zh-CN",
+                width: '60%',
+                dropdownAutoWidth: true,
+                placeholder :'请选择',
+                ajax: {
+                    url: "/orderimport/findSourceLocation/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.data
+                        };
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                minimumInputLength: 2,
+                templateResult: function(repo) {
+                    if (repo.loading) return repo.text;
+                    var markup = "<div class='select2-result-repository clearfix'>" +
+                        "<div class='select2-result-repository__meta'>" +
+                        "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+                    return markup;
+                },
+                templateSelection: function(repo) {
+                    return repo.text;
+                },
+                allowClear : true
+            });
+
+            //标识设置确认弹框
+           $("#saveIdent").click(function(event) {
+              $("#identModal").hide();
+              target_obj.next(".toDoNow").removeAttr("disabled");
+              var src = $("[name=src]").val();
+              var source = $("[name=source]").val();
+              if (src == null) {
+                alert("失败，你还未选择渠道标识！");
+                $("#identModal").show();
+                return false;
+              }
+              $.ajax({
+                url:"/orderimport/taskMarkSet",
+                data:{"task_id":taskid,
+                    "src":src,
+                    "source":source
+                },
+                dataType: 'json',
+                type: "post",
+                success:function(data){
+                    if (data.code == 0) {
+                        alert(data.msg);
+                        $(".mask-self").hide();
+                        window.location.reload();
+                    }
+                    if (data.code != 0) {
+                        alert(data.msg);
+                    }
+                }
+               });
+           });
+
+
+           //立即执行弹框
+           $(".toDoNow").click(function(event) {
+               target_obj=$(this);
+               taskid=target_obj.attr("data-id");
+               $("#doNowModal").show();
+           });
+
+
+           //确认立即执行
+           $("#okBtn").click(function(event) {
+                $("#doNowModal").hide();
+                $.ajax({
+                url:"/orderimport/taskdo",
+                data:{"task_id":taskid},
+                dataType: 'json',
+                type:"post",
+                success:function(data){
+                    alert(data.msg);
+                    $(".mask-self").hide();
+                    window.location.reload();
+                }
+               });
+                // target_obj.next("").attr("disabled","disabled");
+                // target_obj.prev("").attr("disabled","disabled");
+                // target_obj.attr("disabled","disabled");
+           });
+
+
+
+           //删除任务
+           $(".toDel").click(function(event) {
+               target_obj=$(this);
+               taskid = target_obj.attr("data-id");
+               $("#delModal").show();
+           });
+
+
+
+           //确认删除任务
+           $("#delBtn").click(function(event) {
+                $("#delModal").hide();
+                target_obj.parent().parent().remove();
+               $.ajax({
+                   url:"/orderimport/importtaskdisable",
+                   data:{'task_id':taskid},
+                   type:"post",
+                   success:function(data){
+                       alert(data.msg);
+                       window.location.reload();
+                   }
+               });
+           });
+
+
+
+
+
+           //取消立即执行
+           $("#cancelOkBtn,#cancelDelBtn").click(function(event) {
+               $(".modal").hide();
+
+
+              /* $.ajax({
+                url:"",
+                data:id,
+                type:"get",
+                success:function(){
+
+                }
+               });*/
+           });
+
+
+           //叉号关闭模态框
+           $(".close").click(function(event) {
+               $(".modal").hide();
+           });
+        });
+    </script>
+</block>

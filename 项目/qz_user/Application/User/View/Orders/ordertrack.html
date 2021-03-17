@@ -1,0 +1,200 @@
+<form id="trackForm">
+    <div style="margin-top: 15px;">
+        跟进时间：
+        <input type="text" name="track_date" class="layui-input timer" id='ymd' value='' placeholder="yyyy-mm-dd" autocomplete="off" data-focus="">
+        <input type="text" class="layui-input timer" id='hms' placeholder="hh:mm:ss">
+        <i class="red err-tips"></i>
+    </div>
+
+    <div style="margin-top: 15px;">
+        跟进阶段：
+        <select name="track_step" class="track_step">
+            <option value="">请选择</option>
+            <volist name="track_step_list" id="item">
+                <option value="{$key}">{$item}</option>
+            </volist>
+        </select>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <span style="float: left;">跟进内容：</span>
+        <textarea name="track_content" id="" cols="30" rows="5"></textarea>
+    </div>
+
+    <div style="margin-top: 15px;text-align: center;">
+        <input type="hidden" name="id" />
+        <button type="button" class="btn_save">提交</button>
+    </div>
+</form>
+
+<div class="trackorders_list">
+    <notempty name="info.visit_list">
+        <h5 class="tit" style="padding:10px 20px;font-weight: 700;">齐装回访</h5>
+        <volist name="info.visit_list" id="item">
+            <div style="padding:10px 20px;">
+                <div class="track_box_top">
+                    <span>{$item.visit_date}</span>
+                    <span class="tag">{$item["visit_step_name"]}</span>
+                </div>
+                <p class="many-txt">
+                    {$item.visit_content_sales}
+                </p>
+            </div>
+            <div class="fgx"></div>
+        </volist>
+    </notempty>
+
+    <notempty name="info.track_list">
+        <h5 class="tit" style="padding:20px 20px 10px;font-weight: 700;">订单跟进情况</h5>
+        <volist name="info.track_list" id="item">
+                <div class="track_box" style="padding:10px 20px;"
+                    data-id="{$item.id}"
+                    data-date="{$item.track_date}"
+                    data-step="{$item.track_step}">
+                    <div class="track_box_top">
+                        <span class="track_date">{$item.track_date}</span>
+                        <span class="tag">{$item["track_step_name"]}</span>
+
+                        <if condition="$item['id'] == $info['last_track_id']">
+                            <span class="operation">
+                                <span class="delete">删除</span>
+                                <span class="edit">编辑</span>
+                            </span>
+                        </if>
+                    </div>
+                    <p class="track_box_text">{$item.track_content}</p>
+                </div>
+                <div class="fgx"></div>
+        </volist>
+    </notempty>
+</div>
+
+<script type="text/javascript" src="{$static_host}/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+    $(function(){
+        $(".btn_save").click(function(){
+            var $trackForm = $("#trackForm");
+            var ymd = $trackForm.find('#ymd').val(),
+                hms = $trackForm.find('#hms').val();
+            if(!ymd || !hms) {
+                alert('请选择跟进时间')
+                return
+            }
+            $(".btn_save").attr("disabled", true);
+            $.post("/orders/savetrack", {
+                "order_id": "{$order_id}",
+                "id": $trackForm.find("input[name=id]").val(),
+                "track_date": ymd + ' ' + hms,
+                "track_step": $trackForm.find("select[name=track_step]").val(),
+                "track_content": $trackForm.find("textarea[name=track_content]").val(),
+            }, function(response){
+                $(".btn_save").attr("disabled", false);
+                if (response.error_code == 0) {
+                    ordersTrack("{$order_id}");
+                } else {
+                    alert(response.error_msg);
+                }
+            });
+        });
+
+        //  跟进时间
+        var vs_time, ve_time, as_time, ae_time;
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+            var cdate = new Date();
+            var y = '', m = '', d = '', h = '', m = '', s = ''
+            y = cdate.getFullYear()
+            m = cdate.getMonth() + 1
+            d = cdate.getDate()
+            h = cdate.getHours()
+            mi = cdate.getMinutes()
+            s = cdate.getSeconds()
+            if(String(m).length < 2) {
+                m = '0' + m
+            }
+            if(String(d).length < 2) {
+                d = '0' + d
+            }
+            if(String(h).length < 2) {
+                h = '0' + h
+            }
+            if(String(mi).length < 2) {
+                mi = '0' + mi
+            }
+            if(String(s).length < 2) {
+                s = '0' + s
+            }
+            
+            laydate.render({
+                elem: '#ymd',
+                value: y + "-" + m + '-' + d
+            });
+            laydate.render({
+                elem: '#hms', 
+                type: 'time',
+                value: h + ':' + mi + ':' + s
+            });
+        })
+
+        // 编辑
+        $(".track_box").on("click", ".edit", function(){
+            var $trackForm = $("#trackForm");
+            var $boxElem = $(this).parents(".track_box");
+            var ymd = $boxElem.data("date").split(' ')[0]
+            var hms = $boxElem.data("date").split(' ')[1]
+            if(hms.split(':').length < 3) {
+                hms = hms + ':00'
+            }
+            $trackForm.find("input[name=id]").val($boxElem.data("id"));
+            $trackForm.find("input#ymd").val(ymd);
+            $trackForm.find("input#hms").val(hms);
+            $trackForm.find("select[name=track_step]").val($boxElem.data("step"));
+            $trackForm.find("textarea[name=track_content]").val($boxElem.find(".track_box_text").text());
+        });
+
+        // 删除
+        $(".track_box").on("click", ".delete", function(){
+            var $boxElem = $(this).parents(".track_box");
+            if (confirm("确定要删除吗？") == true) {
+                $.post("/orders/deltrack", {
+                    id: $boxElem.data("id")
+                }, function(response){
+                    if (response.error_code == 0) {
+                        ordersTrack("{$order_id}");
+                    } else {
+                        alert(response.error_msg);
+                    }
+                });
+            }
+        });
+
+
+        $('.many-txt').each(function(index,item){
+            // 引入flexible.js 进行移动端适配
+            // 根据flexible 获取rem 即 window.rem
+            if(item.clientHeight > 42){
+                var el = document.createElement('span');
+                el.innerHTML = '展开';
+                el.className = 'spread open';
+                // 由于每条评论相间背景
+                item.appendChild(el);
+                // multi 是显示溢出的标志
+                $(item).addClass('ellipsis ellipsis_t multi')
+            }
+        })
+        // 点击判断收起还是展开
+        $('.spread').on('click',function(e){
+            var $this = $(this).closest('.ellipsis_t');
+            if($this.hasClass('ellipsis')){
+                $this.addClass("ellipsis_p").removeClass('ellipsis').find('span').html('收起');
+            }else{
+                $this.addClass('ellipsis').removeClass("ellipsis_p").find('span').html('展开');
+            }
+        })
+
+
+
+    });
+
+</script>

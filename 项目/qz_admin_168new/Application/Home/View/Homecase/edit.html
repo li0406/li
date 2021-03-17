@@ -1,0 +1,351 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>编辑案例 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>编辑案例</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homecase">编辑案例</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="nav-tabs-custom">
+                    <form id="form1" action="" method="POST">
+                    <div class="tab-content">
+                        <!-- 常规 -->
+                        <div class="tab-pane active" id="tab_1">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="title">公司与城市</label>
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                        <input type="input" id="company" autocomplete=off name="company" placeholder="装修公司ID或名称" value="{$info.company}">
+                                        </div>
+                                        <div class="col-xs-1">
+                                            <select name="city_name" class="select2" id="city_name">
+                                                <option value="">请选择城市</option>
+                                                <volist name="citys" id="vo">
+                                                    <if condition="$info['city_id'] EQ $vo['cid'] ">
+                                                        <option value="{$vo.cid}" selected>{$vo.cname}</option>
+                                                    <else />
+                                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                                    </if>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="display:none">
+                                    <label for="title">公司信息</label>
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <input type="input" class="form-control" disabled id="company_name" placeholder="公司简称" value="{$info.company_name}">
+                                            <input type="hidden" name="company_name" id="real_company_name" value="{$info.company_name}">
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <input type="input" id="company_id" class="form-control" autocomplete=off placeholder="公司ID" value="{$info.company_id}" disabled>
+                                            <input type="hidden" name="company_id" id="real_company_id" value="{$info.company_id}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="title">案例名称</label>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                        <input type="input" class="form-control" name="title" placeholder="案例名称" value="{$info.title}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sort">有效时间</label>
+                                    <div class="row">
+                                        <div class="col-xs-2"><input type="text" class="form-control datetime" name="start_time" placeholder="广告开始日期" value="{$info.start_time|date="Y-m-d H:i:s",###}"></div>
+                                        <div class="col-xs-2"><input type="text" class="form-control datetime" name="end_time" placeholder="广告结束日期" value="{$info.end_time|date="Y-m-d H:i:s",###}"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="title">案例链接</label>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                        <input type="input" class="form-control" name="url" id="url" placeholder="案例链接" value="{$info.url}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="title">案例属性</label>
+                                    <div class="row">
+                                        <div class="col-xs-2">
+                                            <input type="input" class="form-control" name="sort" id="sort" placeholder="案例排序" value="{$info.sort}">
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <select name="status" class="select2" id="status" >
+                                            <if condition="$info.status EQ '1' ">
+                                                <option value="1" selected >启用</option><option value="0" >停用</option>
+                                            <else />
+                                                <option value="1" >启用</option><option value="0" selected>停用</option>
+                                            </if>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="title">案例备注</label>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                        <textarea class="form-control" placeholder="案例备注" name="description">{$info.description}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="title">上传图片</label>
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                            <input id="imgUpload" type="file" multiple/>
+                                            <input type="hidden" name="img_url" value="{$info.img_url}" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-xs-4">
+                                        <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <strong>注意事项：</strong> 广告图片大小限制：请不要超出100K！尺寸：800*360px
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <input type="hidden" name="theMaxNum" id="theMaxNum" value="">
+                        <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;保存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="/assets/common/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        function compareTime(beginTime,endTime){
+            var beginTimes = beginTime.substring(0,10).split('-');
+            var endTimes   =  endTime.substring(0,10).split('-');
+            beginTime = beginTimes[1]+'-'+beginTimes[2]+'-'+beginTimes[0]+' '+beginTime.substring(10,16);
+            endTime    = endTimes[1]+'-'+endTimes[2]+'-'+endTimes[0]+' '+endTime.substring(10,16);
+            var a =(Date.parse(endTime)-Date.parse(beginTime))/3600/1000;
+            if(a<0){
+                return 1;   //endTime小
+            }else if (a>0){
+                return 2;   //endTime大
+            }else if (a==0){
+                return 3;   //时间相等
+            }
+        }
+
+        //检测时间
+        function checkTime(){
+            var start_time = $("input[name=start_time]").val();
+            var end_time = $("input[name=end_time]").val();
+            //对比促销开始和上架时间
+            if(start_time != '' && end_time != ''){
+                var r = compareTime(start_time,end_time);
+                if(r == '1'){
+                    alert('结束时间不能 早于 开始时间！');
+                    $("input[name=end_time]").val('');
+                }
+            }
+        }
+
+        $(document).ready(function(){
+            $(".datetime").change(function(){
+                checkTime();
+            });
+
+            $("#company").select2({
+                allowClear: true,
+                minimumInputLength: 1,
+                maximumInputLength:10,
+                query: function(query) {
+                    var result = null;
+                    $.ajax({
+                        url: '/api/getcasecompany',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        delay: 2250,
+                        quietMillis: 2150,
+                        data: {
+                            condition: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            var company = data.data;
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text: data.data[i].id + '|' + data.data[i].jc,
+                                    user: data.data[i].user,
+                                    qc: data.data[i].qc,
+                                    jc: data.data[i].jc,
+                                    cs: data.data[i].cs,
+                                    city_name:data.data[i].cname
+                                });
+                            }
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+
+            $("#company").select2("data",{id:"{$info.company_id}",text:"{$info.company_id}|{$info.company_name}"});
+
+            $('.datetime').datetimepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                minuteStep:1,
+                autoclose: true,
+            });
+
+            $(".select2").select2();
+
+            $('#company').change(function(){
+                var city_id = $("#company").select2("data").cs;
+                var company_id =  $("#company").select2("data").id;
+                var company_name =  $("#company").select2("data").jc;
+                $.ajax({
+                    url: '/homecase/checkCount',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        city_id:city_id
+                    },
+                })
+                .done(function(result) {
+                    if(result.status == 1){
+                        $('#company_id').val(company_id);
+                        $('#company_name').val(company_name);
+                        $('#real_company_id').val(company_id);
+                        $('#real_company_name').val(company_name);
+                        $("#city_name").val(city_id);
+                        $("#city_name").select2();
+                    }else{
+                        alert('选择的城市超过了最大 15 个的限制！');
+                        $('#company_id').val('');
+                        $('#company_name').val('');
+                        $('#real_company_id').val('');
+                        $('#real_company_name').val('');
+                        $("#city_name").val('');
+                        $("#theMaxNum").val(result.data);
+                    }
+                }).fail(function(xhr){
+                });
+            });
+
+            $("#imgUpload").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption:false,
+                browseClass:"btn blue",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount:1,
+                uploadClass:"btn green",
+                removeClass:"btn red",
+                uploadAsync:true,
+                dropZoneEnabled:false,
+                previewSettings:{
+                    image: {width: "auto", height: "100px"}
+                },
+                /*minImageWidth: 1205,
+                minImageHeight: 405,
+                maxImageWidth: 1205,
+                maxImageHeight: 405,*/
+                //maxFileSize: 100,
+                msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                layoutTemplates:{
+                    actionDelete:"",
+                    actionUpload:""
+                },
+                uploadExtraData:{
+                    prefix:'homecase'
+                },
+                initialPreview:[
+                    "<img src='//{:C('QINIU_DOMAIN')}/{$info.img_url}' class='file-preview-image' >"
+                ],
+            }).on('fileuploaded', function(event, data) {
+                if(1 == data.response.status){
+                    $('input[name=img_url]').val(data.response.data.name);
+                }else{
+                    alert("上传失败，请重新上传，如多次失败请联系技术部门");
+                }
+            }).on("fileuploaderror",function(event, data){
+                 alert('附件上传失败,请联系技术部门！');
+                 return false;
+            }).on("fileclear",function(){
+                $("input[name=files]").val("");
+            });
+
+            $("#submit").click(function(event){
+                if(trim($("#theMaxNum").val()) == '2'){
+                    alert("当前城市案例数已超过最大限制~ ");
+                    return false;
+                }
+                if(trim($("select[name=city_name]").val()) === ''){
+                    alert("请选择城市~ ");
+                    return false;
+                }
+                if(trim($("input[name=title]").val()) === ''){
+                    $("input[name=title]").focus();
+                    $("input[name=title]").addClass('focus');
+                    alert("请填写案例名称~ ");
+                    return false;
+                }
+                if(trim($("input[name=start_time]").val()) === ''){
+                    $("input[name=start_time]").focus();
+                    $("input[name=start_time]").addClass('focus');
+                    alert("请填写开始日期~ ");
+                    return false;
+                }
+                if(trim($("input[name=end_time]").val()) === ''){
+                    $("input[name=end_time]").focus();
+                    $("input[name=end_time]").addClass('focus');
+                    alert("请填写结束日期~ ");
+                    return false;
+                }
+                if(trim($("input[name=url]").val()) === ''){
+                    $("input[name=url]").focus();
+                    $("input[name=url]").addClass('focus');
+                    alert("请填写案例链接~ ");
+                    return false;
+                }
+                if(trim($("input[name=img_url]").val()) === ''){
+                    alert("必须要上传案例图哦！");
+                    return false;
+                }
+                $("#form1").submit();
+            });
+        });
+    </script>
+</block>

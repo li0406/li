@@ -1,0 +1,86 @@
+dist: trusty
+language: php
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php:
+  - 7.1
+  - 7.2
+  - nightly
+
+before_install:
+  - docker pull yandex/clickhouse-server
+  - docker run -d -p 8123:8123 --name clickhouse --ulimit nofile=262144:262144 yandex/clickhouse-server
+  - docker ps -a
+
+install:
+  - travis_retry composer update -n --prefer-dist
+
+script: ./vendor/bin/phpunit --debug
+
+jobs:
+  allow_failures:
+    - php: nightly
+    - env: DEV_DEPENDENCIES
+
+  include:
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      php: 7.2
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      php: nightly
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: DEV_DEPENDENCIES
+      php: nightly
+      install:
+        - composer config minimum-stability dev
+        - travis_retry composer update -n --prefer-dist
+
+    - stage: Pull request coding standard
+      if: type = pull_request
+      php: 7.1
+      install: travis_retry composer install --prefer-dist
+      script:
+        - |
+          if [ $TRAVIS_BRANCH != "master" ]; then
+            git remote set-branches --add origin $TRAVIS_BRANCH;
+            git fetch origin $TRAVIS_BRANCH;
+          fi
+        - git merge-base origin/$TRAVIS_BRANCH $TRAVIS_PULL_REQUEST_SHA || git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge --unshallow
+        - wget https://github.com/diff-sniffer/git/releases/download/0.1.0/git-phpcs.phar
+        - php git-phpcs.phar origin/$TRAVIS_BRANCH...$TRAVIS_PULL_REQUEST_SHA
+
+#    - stage: Coding standard
+#      if: NOT type = pull_request
+#      php: 7.1
+#      install: travis_retry composer install --prefer-dist
+#      script:
+#        - ./vendor/bin/phpcs
+
+    - stage: Code Quality
+      install: travis_retry composer install --prefer-dist
+      script: vendor/bin/phpstan analyse -c phpstan.neon src
+
+after_script:
+  # upload clover.xml file to Scrutinizer to analyze it
+  - |
+    if [ "$TRAVIS_PHP_VERSION" == "7.1" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
+    if [ "$TRAVIS_PHP_VERSION" == "7.1" ]; then php ocular.phar code-coverage:upload --format=php-clover temp/clover.xml; fi

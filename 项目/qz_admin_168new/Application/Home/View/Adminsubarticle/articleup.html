@@ -1,0 +1,434 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分站文章-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/home/css/specialarticle.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/js/plugins/icheck/skins/all.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/icheck/skins/flat/grey.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/home/aminsubarticle/css/articleup.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分站文章</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <form id="myForm" class="form-horizontal" method="GET" onsubmit="return false">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">文章标题</label>
+                                <div class="col-sm-4">
+                                    <input type="text" name="title" class="form-control" placeholder="文章标题" value="{$info.title}"  />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">选择</label>
+                                <div class="col-sm-4">
+                                    <select name="city"  class="col-sm-12" placeholder="选择城市">
+                                        <option value="">选择城市</option>
+                                        <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">文章类型</label>
+                                <div class="col-sm-4">
+                                    <select name="type" class="form-control">
+                                        <option value="">-请选择-</option>
+                                        <volist name="type" id="vo">
+                                        <if condition="$info['classid'] EQ $vo['id']">
+                                        <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                        <else/>
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-1 col-sm-4">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">文章标识</label>
+                                <div class="col-sm-4">
+                                    <select id="tags" class="col-sm-12" multiple="multiple">
+                                        <volist name="info.sub_child" id="vo">
+                                            <option selected="selected" value="{$vo.id}">{$vo.text}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button type="button" class="add-tag btn btn-success"  id="tagsbox" data-toggle="modal">
+                                        <i class="fa fa-plus-circle"></i> 新增标识
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">关键字</label>
+                                <div class="col-sm-4">
+                                    <input type="text" name="keywords" class="form-control" placeholder="关键字" value="{$info.keywords}"  />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">文章封面</label>
+                                <div class="col-sm-6">
+                                    <input id="img"  type="file" class="form-control" />
+                                    <input type="hidden" name="img" value="{$info.face}"/>
+                                </div>
+                                <div class="col-sm-offset-2 clearfix li-message">尺寸要求：宽度335像素，高度243像素.</div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">推荐至装修资讯页</label>
+                                <div class="col-sm-2">
+                                  <label class="control-label">
+                                        <if condition="!$info OR $info['istop'] EQ 1">
+                                            <input class="icheck" type="radio" name="istop"  value="1" checked="checked" />&nbsp;&nbsp;推荐&nbsp;&nbsp;
+                                            <input class="icheck" type="radio" name="istop" value="0" />&nbsp;&nbsp;不推荐
+                                            <else/>
+                                            <input class="icheck" type="radio" name="istop" value="1" />&nbsp;&nbsp;推荐&nbsp;&nbsp;
+                                            <input class="icheck" type="radio" name="istop" value="0" checked="checked"/>&nbsp;&nbsp;不推荐
+                                        </if>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">推荐至装修公司页</label>
+                                <div class="col-sm-2">
+                                    <label class="control-label">
+                                        <if condition="!$info OR $info['is_to_subcompany'] EQ 1">
+                                            <input class="icheck" type="radio" name="is_to_subcompany"  value="1" checked="checked"  />&nbsp;&nbsp;推荐&nbsp;&nbsp;
+                                            <input class="icheck" type="radio" name="is_to_subcompany" value="0"/>&nbsp;&nbsp;不推荐
+                                            <else/>
+                                            <input class="icheck" type="radio" name="is_to_subcompany" value="1"/>&nbsp;&nbsp;推荐&nbsp;&nbsp;
+                                            <input class="icheck" type="radio" name="is_to_subcompany" value="0" checked="checked"/>&nbsp;&nbsp;不推荐
+                                        </if>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-sm-2 control-label">文章内容</label>
+                                <div class="col-sm-9">
+                                  <script id="editor" name="content" type="text/javascript">{$info.content}
+                                  </script>
+                                </div>
+                            </div>
+                           <div class="form-group">
+                                <label  class="col-sm-2 control-label">预发布时间：</label>
+                                <div class="col-sm-2">
+                                    <if condition="isset($info)">
+                                        <if condition="$info['state'] EQ 3">
+                                            <input type="text" class="form-control datepicker" name="preview-time"  value="{$info.addtime|default=''|date='Y-m-d H:i:s',###}"/>
+                                        <else/>
+                                            <input type="text" class="form-control datepicker" name="preview-time"  disabled="disabled" />
+                                        </if>
+                                    <else/>
+                                        <input type="text" class="form-control datepicker" name="preview-time" />
+                                    </if>
+                                </div>
+                                <label  class="col-sm-1 control-label">推送为原创：</label>
+                                <div class="col-sm-2">
+                                    <select name="isoriginal" class="form-control">
+                                        <if condition="$info['isoriginal'] EQ 1">
+                                        <option value="0">否</option>
+                                        <option value="1" selected="selected">是</option>
+                                        <else/>
+                                        <option value="0">否</option>
+                                        <option value="1">是</option>
+                                        </if>
+                                    </select>
+                                </div>
+                                <label  class="col-sm-1 control-label">提交至熊掌号：</label>
+                                <div class="col-sm-2">
+                                    <select name="isxiongzhang" class="form-control">
+                                        <if condition="$info['isoriginal'] EQ 1">
+                                        <option value="0">否</option>
+                                        <option value="1" selected="selected">是</option>
+                                        <else/>
+                                        <option value="0">否</option>
+                                        <option value="1">是</option>
+                                        </if>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-1 col-sm-1">
+                                    <button id="btnSave" class="btn btn-block btn-info">保存</button>
+                                    <input type="hidden" value="{$info.id}" name="id" />
+                                    <!--<input type="hidden" value="{$info.tags}" name="oldtags" />-->
+                                    <input type="hidden" value="{$info.sub_tags}" name="oldtags" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <a href="javascript:void(0)" onclick="history.back(-1)" class="btn btn-block btn-default">返回</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 新增标识 -->
+    <div class="modal fade" id="tagsModal" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增/编辑标识</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="group">
+                            <span>标识名称</span>
+                            <input type="text" class="form-control" name="name" id="tag_name" maxlength="15" placeholder="请输入标识名称">
+                        </div>
+                        <div class="group">
+                            <span>所属城市</span>
+                            <select name="cs" class="form-control" id="tag_cs">
+                                <option value="">请选择城市</option>
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="group">
+                            <span>启用状态</span>
+                            <div class="switch">
+                                <input id="switch" name="enabled" type="checkbox" checked>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id" id="tag_id">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success tag-save-btn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(".datepicker").datetimepicker({
+          format:"yyyy-mm-dd h:i:s",
+          minViewMode:0,
+          todayBtn:true,
+          autoclose:true
+    });
+
+    $("select[name=city]").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("select[name=city]").select2("val","{$info.cs}");
+    $('input[name=istop],input[name=is_to_subcompany]').iCheck({
+          checkboxClass: 'icheckbox_flat-grey',
+          radioClass: 'iradio_flat-grey',
+          increaseArea: '' // optional
+    });
+
+    $("#img").fileinput({
+        language: 'zh', //设置语言,
+        uploadUrl:"/upload/uploadImg",
+        showCaption:false,
+        browseClass:"btn btn-primary",
+        allowedFileExtensions : ['jpg','png','gif'],
+        maxFileCount:1,
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        uploadAsync:true,
+        dropZoneEnabled:false,
+        previewSettings:{
+            image: {width: "335px", height: "242px"}
+        },
+        layoutTemplates:{
+            actionDelete:"",
+            actionUpload:""
+        },
+        uploadExtraData:{
+            prefix:"zhuanti"
+        },
+        minImageWidth: "332",
+        minImageHeight: "240",
+        maxImageWidth: "338",
+        maxImageHeight: "246",
+        initialPreview:{$info.img|default="'' "},
+    }).on('fileuploaded', function(event, data) {
+        var _this = $(this);
+        if(data.response.status == 1){
+            var obj = data.response.data;
+            $("input[name=img]").val(obj.url);
+        }else{
+          console.log(data);
+            _this.Alert({
+                msg:data.response.info,
+                level:2
+            });
+        }
+    }).on("fileuploaderror",function(event, data){
+          var _this = $(this);
+          _this.Alert({
+              msg:"图片不符合要求!",
+              level:2
+          });
+        return false;
+    }).on("fileclear",function(){
+        $("input[name=img]").val("");
+    });
+
+    var ue = UE.getEditor('editor', {
+        autoClearinitialContent: false,
+        serverUrl: '/ueditor/upload/',
+        toolbars: [
+            ['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain','|','justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+                'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+                'paragraph', 'fontfamily', 'fontsize', '|',
+                'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts','|','simpleupload','insertimage','link','unlink','searchreplace'
+            ]
+        ],
+        maximumWords: 10000
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var data = $("#myForm").serializeArray();
+        var json = $("#tags").select2("data");
+        if (json !== null) {
+            if(typeof $("#tags").select2("data") == "string"){
+                json = JSON.parse($("#tags").select2("data"));
+            }
+
+            for(var i in json){
+               data.push({name:"sub_tags[]",value:json[i]["id"]});
+            }
+        }
+        $.ajax({
+          url: '/adminsubarticle/articleup/',
+          type: 'POST',
+          dataType: 'JSON',
+          data: data
+        })
+        .done(function(data) {
+
+            if (data.status == 1) {
+                window.location.href = "/adminsubarticle/";
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+
+    $("#tags").select2({
+        allowClear: true,
+        placeholder: "选择标识",
+        ajax:{
+            url: "/specialarticle/findsubtags/",
+            type:"post",
+            dataType: 'json',
+            delay: 1000,
+            data: function (params) {
+              return {
+                  query: params.term,
+                  cs: $("select[name=city]").select2("val"),
+              };
+            },
+            processResults:function (data, params) {
+              if (data.status ==1) {
+                  var result = {
+                      results: []
+                  };
+                  for(var i in data.data){
+                      result.results.push({
+                          id:data.data[i].id,
+                          text:data.data[i].name
+                      });
+                  }
+                  return{
+                      results:result.results
+                  }
+              };
+            }
+        }
+    });
+
+    $("select[name=city]").change(function () {
+        $("#tags").select2("val", "");
+    })
+
+    /*新增标识*/
+    $("select[name=cs]").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $('#switch').bootstrapSwitch({
+        onText: "开启",
+        offText: "关闭",
+        onColor: "success",
+        offColor: "info",
+        size: "small",
+        onSwitchChange: function (e, data) {
+            var $el = $(e.target);
+            if ($el.attr("checked") == "checked") {
+                $el.attr("checked", false);
+            } else {
+                $el.attr("checked", "checked")
+            }
+        }
+    });
+    $("#tagsbox").click(function () {
+        $("#tag_id").val("");
+        $("#tag_name").val("");
+        $("#tag_cs").select2("val",'');
+        $("#switch").bootstrapSwitch('state', true,true);
+        $('#tagsModal').modal('show');
+        $('#tagsModal').find('.modal-title').html('新增标识');
+    });
+    $('.tag-save-btn').click(function(event) {
+        var enabled = $("#switch").bootstrapSwitch('state') ? 1 : 2;
+        $.post("/subtag/tagsave", {
+            id: $("#tag_id").val(),
+            cs: $("#tag_cs").val(),
+            name: $("#tag_name").val(),
+            enabled: enabled
+        }, function(data){
+            if (data.status == 0) {
+                alert(data.info);
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+    /*新增标识*/
+</script>
+</block>

@@ -1,0 +1,542 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>受理审核详情页-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/signbacknew/css/details.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/common/css/bootstrap/css/bootstrap-table.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/bootstrap/css/bootstrap-table-fixed-columns.css?v={:C('STATIC_VERSION')}">
+    <style type="text/css">
+        .layui-layer-msg {top: 100px !important;}
+        .layui-layer-shade{
+            z-index: 10000!important;
+        }
+        .layui-layer-dialog{
+            z-index: 10000!important;
+        }
+
+        #passModal .radio-inline, #noModal .radio-inline{margin-left: 0; margin-right: 15px;}
+        #noModal .tips.hui {margin-top: 10px; color: #AEAEAE;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>受理审核详情</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>受理审核详情</li>
+        </ol>
+    </section>
+    <section class="content clearfix">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-xs-6">
+                            <h4>订单编号： {$info.order_id}</h4>
+                        </div>
+                        <div class="col-xs-6 order-right" id="optBox" data-order="{$info.order_id}">
+                            <a class="btn btn-default" href="/roundorderapply/apply_list" role="button">返回</a>
+                            <notempty name="prower.order_review">
+                                <button type="button" class="btn btn-default blue" onclick="javascript:window.open('/orderreviewNew/index?review_type=999&search={$info.order_id}')" >查看回访</button>
+                            </notempty>
+                            <if condition="in_array($info['exam_status'], $exam_pre_status) and $info['can_exam'] eq 1 and $prower['apply_exam']">
+                            <eq name="info.exam_status" value="$exam_pre_status[0]">
+                                <button type="button" class="btn btn-default blue" data-toggle="modal"
+                                    data-target="#myModal">放入待定单
+                            </button>
+                            </eq>
+                            <button type="button" class="btn btn-danger" data-toggle="modal" id="bootCheck">
+                                不通过审核
+                            </button>
+                            <button type="button" class="btn btn-info" id="layCheck">通过审核</button>
+                            </if>
+                        </div>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="col-xs-8 check-details">
+                            <div class="col-md-4">发布时间：{$info.date_real}</div>
+                            <div class="col-md-4">城市/县区：{$info.city_name}-{$info.area_name}</div>
+                            <div class="col-md-4">申请公司：{$info.company_qc}</div>
+                            <div class="col-md-4">分配人：{$info.opname}</div>
+                            <div class="col-md-4">小区名称：{$info.xiaoqu}</div>
+                            <div class="col-md-4">公司ID：{$info.company_id}</div>
+                            <div class="col-md-4">分配时间：{$info.allot_time|date='Y-m-d H:i:s',###}</div>
+                            <div class="col-md-4">业主名称：{$info.name}</div>
+                            <div class="col-md-4">申请时间：{$info.created_at|date='Y-m-d H:i:s',###}</div>
+                            <div class="col-md-4">申请补轮原因：<span class="red">{$info.apply_reason_text}</span></div>
+                            <div class="col-md-8">详细备注：{$info.apply_remark|default='未填写备注'}</div>
+                        </div>
+                        <div class="col-xs-4 check-money">
+                            <div class="col-md-6">审核状态 <br> 
+                                <span>{$info.exam_status_name}</span>
+                            </div>
+                            <div class="col-md-6">订单金额 <br> <span>¥{$info.round_money}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default check-table">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-xs-10">
+                            <h4>已分配装修公司列表</h4>
+                            <div class="tips">该订单当前所有分配的装修公司，可同步受理审核操作，解决订单重复审核问题。常规会员无法受理，只受理已申请，未审核的装企。</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr class="orderitem">
+                                <th class="w200">装修公司名称</th>
+                                <th>公司ID</th>
+                                <th>会员类型</th>
+                                <th>订单状态</th>
+                                <th>是否申请</th>
+                                <th>申请时间</th>
+                                <th>审核状态</th>
+                                <th>申请补轮原因</th>
+                                <th class="w20">备注</th>
+                                <th class="w20">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody class="orderxq">
+                                <volist name="info.company_list" id="val">
+                                    <tr data-id="{$item.order_id}">
+                                        <td>{$val.company_qc}</td>
+                                        <td>{$val.com}</td>
+                                        <td>
+                                            <notempty name="val.round_id">新签返会员<else/>常规会员</notempty>
+                                        </td>
+                                        <td>{$val.status_name}</td>
+                                        <td><if condition="$val['apply_id']">已申请<else/>未申请</if></td>
+                                        <td>{$val.apply_date}</td>
+                                        <td>{$val.exam_status_name}</td>
+                                        <td>{$val.apply_reason_text}</td>
+                                        <td>{$val.apply_remark}</td>
+                                        <td id="reference">
+                                            <in name="info.exam_status" value="$exam_pre_status">
+                                                <input type="checkbox" class="input_exam_ids" value="{$val.round_id}" 
+                                                 id="exam_{$val.round_id}" {$val.disabled} {$val.checked} />
+                                                <label for="exam_{$val.round_id}"> <span>选中即同步受理</span></label>
+                                            </in>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default">
+            <div class="box-body">
+                <ul class="ol-tab-list">
+                    <li class="ol-tab ol-tab-active" data-tab="0">回访记录</li>
+                    <li class="ol-tab" data-tab="1">审核记录</li>
+                </ul>
+            </div>
+            <div class="box-body tabTable">
+                <div class="item show">
+                    <empty name="info.trackDetail">
+                        <div class="empty">
+                            <img src="//{:C('QINIU_DOMAIN')}/custom/20200806/FiWkwpyFpB0JPJDlRMaiKd0t0DCw" alt="">
+                            <span>暂无数据</span>
+                        </div>
+                    <else/>
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr class="orderitem">
+                            <th>回访时间</th>
+                            <th>回访状态</th>
+                            <th width="200">备注</th>
+                            <th style="width: 30%">回访内容</th>
+                            <th>下次回访</th>
+                            <th>回访人</th>
+                            <th>下次回访时间</th>
+                        </tr>
+                        </thead>
+                        <tbody class="orderxq">
+                        <volist name="info.trackDetail" id="vo">
+                            <tr>
+                                <td>{$vo.updated_at_time}</td>
+                                <td>
+                                   {$vo.review_type_name}
+                                </td>
+                                <td>
+                                    <empty name="vo.remark_type_name">—<else/>{$vo.remark_type_name}</empty>
+                                </td>
+                                <td>{$vo.review_feedback}</td>
+                                <td><empty name="vo.next_time">—<else/>{$vo.next_visit_step_name}</empty></td>
+                                <td>{$vo.review_name}</td>
+                                <td>{$vo.next_visit_time}</td>
+                            </tr>    
+                        </volist>
+                        </tbody>
+                    </table>
+                    </empty>
+                </div>
+                <div class="item">
+                    <empty name="info.checkDetail">
+                        <div class="empty">
+                            <img src="//{:C('QINIU_DOMAIN')}/custom/20200806/FiWkwpyFpB0JPJDlRMaiKd0t0DCw" alt="">
+                            <span>暂无数据</span>
+                        </div>
+                    <else/>
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr class="orderitem">
+                            <th>审核结果</th>
+                            <th width="500">审核原因</th>
+                            <th>审核时间</th>
+                            <th>审核人</th>
+                        </tr>
+                        </thead>
+                        <tbody class="orderxq">
+                        <volist name="info.checkDetail" id="vo">
+                        <tr>
+                            <td>{$vo.exam_status_name}</td>
+                            <td width="500">{$vo.exam_remark}</td>
+                            <td>{$vo.exam_time|date='Y-m-d H:i:s',###}</td>
+                            <td>{$vo.username}</td>
+                        </tr>    
+                        </volist>
+                        </tbody>
+                    </table>
+                    </empty>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!--填写跟进-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">放入待定单</h4>
+                </div>
+                <div class="modal-body">
+                    是否确认将改订单放入待定单
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">我再想想</button>
+                    <button type="button" class="btn btn-primary" id="myButton">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--通过审核-->
+    <div class="modal fade" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">通过审核</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="tips">确定需要通过该补轮申请嘛？审核后，将无法撤回审核结果。请谨慎提交审核结果，30秒后可提交审核。</div>
+                    <div class="tips mt-10">请勾选通过审核原因：</div>
+                    <div class="passm-modal-radio">
+                        <volist name="exam_remark_list.pass" id="remark">
+                            <label class="radio-inline">
+                                <input type="radio" name="passVal" value="{$remark}">{$remark}
+                            </label>
+                        </volist>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">我再想想</button>
+                    <button type="button" class="btn btn-info" id="passCheck">通过审核</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--不通过审核-->
+    <div class="modal fade" id="noModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">不通过审核</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="tips">确定需要不通过该补轮申请嘛？审核后，将无法撤回审核结果，请谨慎提交审核结果。</div>
+                    <div class="tips mt-10">请勾选不通过审核原因：</div>
+                    <div class="passm-modal-radio">
+                        <!-- 已量房/到店、已签约、撞单、电话沟通报价高 -->
+                        <volist name="exam_remark_list.fail" id="remark">
+                            <label class="radio-inline">
+                                <input type="radio" name="noPassVal" value="{$remark}">{$remark}
+                            </label>
+                        </volist>
+                    </div>
+                    <div class="tips red small">注：该原因会同步装企后台，请仔细校对原因文案，防止出错。</div>
+
+                    <div class="tips hui small">
+                        名词解释：<br />
+                        再约量房/到店成功：装企没有量到房，客服回访也确实没有量到房，但是约到了再次可以量房/到店的时间
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">我再想想</button>
+                    <button type="button" class="btn btn-danger" id="noCheck">不通过审核</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-table/bootstrap-table.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-table/bootstrap-table-fixed-columns.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $table = $("#tablelist");
+    $table.bootstrapTable('destroy').bootstrapTable({
+      fixedColumns: true,
+      fixedNumber: 1 //固定列数
+    });
+
+    function getRoundsIds(){
+        var round_ids = [];
+        var order_id = $(this).data("orderid");
+        $(".input_exam_ids:checked").each(function(){
+            if ($(this).attr("disabled") == undefined) {
+                round_ids.push($(this).val());
+            }
+        });
+
+        if (round_ids.length == 0) {
+            return false;
+        }
+
+        return round_ids;
+    }
+
+    function checkedCompanyRound(data,selector) {
+        var order_id = $('#optBox').data('order');
+        $.ajax({
+            url: "/roundorderapply/apply_exam",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                order_id: order_id,
+                round_ids: data.round_ids,
+                exam_status: data.status,
+                exam_remark: data.reason
+            }
+        }).done(function (res) {
+            if (res.error_code == 0) {
+                layer.msg('操作成功！');
+                window.location.href = window.location.href;
+            } else {
+                selector.attr("disabled",false)
+                selector.css("pointer-events","auto")
+                layer.msg(res.error_msg);
+            }
+        });
+    }
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var curDate = new Date();
+            var preDate = new Date(curDate.getTime() - 24*60*60*1000); //前一天
+            /*初始化插件*/
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd',
+                startDate : preDate
+            });
+            //tab切换
+            $('.ol-tab').on('click', function () {
+                $('.ol-tab').removeClass('ol-tab-active');
+                $(this).addClass('ol-tab-active');
+                var status = $(this).attr('data-tab');
+                var contain = $('.tabTable>.item');
+                contain.removeClass('show');
+                $(contain[status]).addClass('show');
+            });
+            // 1. 填写跟进记录
+            var content = [];
+            $("#myButtonTTTTTT").click(function (event) {
+                $.each($('.contents input:checkbox:checked'), function () {
+                    content.push($(this).val());
+                });
+                var data = $("#myform").serializeArray();
+                var need = {}
+                $.each(data, function(i,v){
+                    need[v.name] = v.value
+                })
+
+                if(need.order_id == ''){
+                    layer.msg('数据错误')
+                    return false;
+                }
+                if(need.track_status == ''){
+                    layer.msg('请选择跟进状态')
+                    return false;
+                }
+                
+                if( typeof need.track_type == 'undefined' || need.track_type == ''){
+                    layer.msg('请选择跟进内容')
+                    return false;
+                }
+
+
+                if(need.track_type == 99 && need.track_info == ''){
+                    layer.msg('请填写备注')
+                    return false;
+                }
+
+                var formData = $("#myform").serialize();
+
+                $.ajax({
+                    url: '/roundorderapply/apply_track',
+                    type: 'post',
+                    dataType: 'json',
+                    data: formData
+                })
+                .done(function (data) {
+                    if (data.error_code == 0) {
+                        layer.msg("操作成功！");
+                        window.location.href = window.location.href;
+                        window.location.reload()
+                    } else {
+                        layer.msg(data.error_msg);
+                    }
+                })
+                .fail(function () {
+                    alert("发生异常,请稍后再试！");
+                });
+            });
+
+            $('#myButton').on('click', function(){
+                var _this = $(this)
+                var order_id = $('#optBox').data('order');
+                var round_ids = getRoundsIds();
+                
+                _this.attr("disabled",true)
+                $.ajax({
+                    url: "/roundorderapply/pre_apply_exam",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        order_id: order_id,
+                        round_ids: round_ids
+                    }
+                }).done(function (res) {
+                    if (res.error_code == 0) {
+                        layer.msg('操作成功！');
+                        window.location.href = window.location.href;
+                    } else {
+                        _this.attr("disabled",false)
+                        _this.css("pointer-events","auto")
+                        layer.msg(res.error_msg);
+                    }
+                });
+            })
+
+            $("#resetButton").click(function (event) {
+                $("#mystatus")[0].selectedIndex = ''
+                $('input[type=radio][name="track_type"]:checked').attr("checked", false);
+                $("#type_area").val("")
+                $("#type_time").val("")
+            })
+
+            // 2. 不通过审核
+            $('#bootCheck').click(function(){
+                var round_ids = getRoundsIds();
+                if(round_ids == false){
+                    layer.msg("请先选择审核公司");
+                    return false;
+                }
+
+                $('#noModal').modal();
+
+            })
+
+            $("#noCheck").click(function (event) {
+                var round_ids = getRoundsIds();
+                $(this).attr("disabled",true)
+                if(round_ids == false){
+                    layer.msg("请先选择审核公司")
+                    $(this).attr("disabled",false)
+                    return false;
+                }
+                
+                var noPassReason = $('#noModal input:radio:checked').val()
+                if(!noPassReason){
+                    layer.msg("请填写审核不通过原因")
+                    $(this).attr("disabled",false)
+                    return false;
+                }
+
+                var data = {round_ids: round_ids, status: 3, reason: noPassReason}
+                checkedCompanyRound(data,$(this));
+            });
+
+            // 3. 通过审核
+            var interval;
+            $("#layCheck").click(function (event) {
+                var round_ids = getRoundsIds();
+                if(round_ids == false){
+                    layer.msg("请先选择审核公司");
+                    return false;
+                }
+                $('#passModal').modal();
+                var i = 30;
+                $("#passCheck").css({"backgroundColor":"#ccc","border":"none","pointer-events":"none"});
+                $('#passCheck').text('通过审核('+ i + 's)')
+                var fn = function() {
+                    $("#passCheck").text('通过审核('+ i + 's)');
+                    i--;
+                };
+                interval = setInterval(function(){
+                    if(i === 0){
+                        $("#passCheck").css({"backgroundColor":"#1E9FFF","pointer-events":"unset"});
+                        $("#passCheck").text('通过审核');
+                        clearInterval(interval);
+                    }else{
+                        fn();
+                    }
+                }, 1000);
+            })
+
+            $('#passModal').on('hide.bs.modal', function () {
+                clearInterval(interval);
+            });
+            
+            $('#passCheck').click(function(){
+                var round_ids = getRoundsIds();
+                var passReason = $('#passModal input:radio:checked').val()
+                if(!passReason){
+                    layer.msg("请选择审核通过原因")
+                    $(this).attr("disabled",false)
+                    return false;
+                }
+
+                var data = {round_ids: round_ids, status: 2, reason: passReason}
+                $("#passCheck").css("pointer-events","none")
+                checkedCompanyRound(data,$("#passCheck"));
+            })
+
+        })
+    </script>
+</block>

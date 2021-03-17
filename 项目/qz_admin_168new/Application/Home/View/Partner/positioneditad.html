@@ -1,0 +1,126 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>编辑广告位置 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/partner/css/ad.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <span>编辑广告位置</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box" style="min-width:500px" id="box-head">
+                        <form  id="add-ad">
+                            <div class="control-group col-sm-12">
+                                <label for=""><span class="red">*</span>页面名称：</label>
+                                <input type="text" class="form-control ke-inline-block" name="page-name" value="{$info.name}">
+                                <input type="hidden" id="location_id" value="{$info.id}">
+                            </div>
+                            <div class="control-group col-sm-12">
+                                <label for="">页面地址：</label>
+                                <input type="text" class="form-control" name="website" value="{$info.url}">
+                            </div>
+                            <div class="control-group col-sm-12">
+                                <label for=""><span class="red">*</span>所属站点：</label>
+                                <select name="bsite" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="1" <if condition="$info.module eq 1">selected</if>>装修-PC端</option>
+                                    <option value="2" <if condition="$info.module eq 2">selected</if>>装修-m端</option>
+                                    <option value="3" <if condition="$info.module eq 3">selected</if>>家具-PC端</option>
+                                    <option value="4" <if condition="$info.module eq 4">selected</if>>家具-m端</option>
+                                </select>
+                            </div>
+                            <div class="control-group col-sm-12">
+                                <label for=""><span class="red">*</span>是否启用：</label>
+                                <select name="enabled" class="form-control">
+                                    <option value="0">请选择</option>
+                                    <option value="1" <if condition="$info.is_use eq '1'">selected</if>>是</option>
+                                    <option value="0" <if condition="$info.is_use eq '0'">selected</if>>否</option>
+                                </select>
+                            </div>
+                            <div class="control-group col-sm-12">
+                                <button type="button" id="save" class="btn btn-success" style="margin-left: 105px;">保存</button>
+                                <button type="button" class="btn" onclick="location.href='/partner/positionad'">取消</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            var Global_Submit_url = ''
+            $("#save").on("click", function () {
+                var pageName = $('input[name="page-name"]').val(),
+                    id = $('#location_id').val(),
+                    website = $('input[name="website"]').val(),
+                    bsite = $('select[name="bsite"]').val(),
+                    enabled = $('select[name="enabled"]').val();
+                if(!pageName){
+                    layer.msg('请输入页面名称！')
+                    $('input[name="page-name"]').focus()
+                    return
+                }
+                if(bsite == 0){
+                    layer.msg('请选择所属站点！')
+                    $('select[name="bsite"]').focus()
+                    return
+                }
+                if(enabled == ''){
+                    layer.msg('请选择是否启用！')
+                    $('select[name="enabled"]').focus()
+                    return
+                }
+                $.ajax({
+                    url: Global_Submit_url,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:{
+                        id:id,
+                        pageName: pageName,
+                        website: website,
+                        bsite: bsite,
+                        enabled: enabled
+                    }
+                })
+                    .done(function(data) {
+                        if (data.error_code == 0) {
+                            layer.msg("添加成功");
+                            window.location.href = '/partner/positionad';
+                        } else {
+                            layer.msg(data.info);
+                            return false;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        layer.msg('发生未知错误，请稍后重试~');
+                        return false;
+                    })
+            })
+        })
+    </script>
+</block>

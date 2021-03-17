@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>用户中心-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Designer:resource" />
+    <link href="{$static_host}/assets/user/designercase/css/de-blog.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <include file="Designer:header" />
+    <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+        <div class="yh-main">
+            <if condition="$info['company']">
+            <h1 class="yh-tit">我就职的公司</h1>
+            <div class="red mt20">入驻公司：入驻自己所在的装饰企业，可以将您和该装饰公司关联，您将和公司一起得到更多的宣传展示机会!</div>
+            <dl class="userhead-warp">
+                <dt>
+                  <img src="{$info.user.logo}" width="658" height="658">
+                </dt>
+                <dd><i class="icon-exchange icon-2x"></i></dd>
+                <dt class="compinfo">
+                    <span class="complogo">
+                      <img src="{$info.company.logo}" width="126" height="63">
+                    </span>
+                    <p>
+                      <a href="{:C('QZ_YUMING_SCHEME')}://{$info.company.bm}.{:C('QZ_YUMING')}/company_home/{$info.company.id}" target="_blank">{$info.company.qc}</a>
+                    </p>
+                    <strong>所在城市：{$info.company.cname}</strong>
+                </dt>
+            </dl>
+            <a class="binding-btn" href="javascript:void(0)"><i class="icon-unlock mr10"></i>解除绑定</a>
+            <div class="red err-tips" style="text-align:center;margin-top:10px;"></div>
+            <else/>
+            <dl class="userhead-warp">
+              <dt><img src="{$info.user.logo}" width="658" height="658"></dt>
+              <dd><i class="icon-exchange icon-2x gray"></i></dd>
+              <dt class="compinfo">
+                  <img src="{$static_host}/assets/user/designerteam/img/unknowncompany.png" width="150" height="150">
+              </dt>
+            </dl>
+            <a class="binding-btn-disable"><i class="icon-unlock mr10"></i>暂无绑定公司</a>
+            <div class="red err-tips" style="text-align:center;margin-top:50px;"></div>
+            <h3>入驻邀请：以下公司邀您入驻，如果您是该公司旗下设计师，请选择<span class="red">接受邀请</span>，则可以将您和贵公司关联，得到更多的宣传和展示；如果您是没有在职的自由设计师，则可以视为该公司对您的招聘意向。</h3>
+            <table class="complist" border="0" cellspacing="0" cellpadding="0">
+              <volist name="info.team" id="vo">
+              <tr>
+                <td>
+                  <div class="complogo">
+                    <img src="{$vo.logo}" width="126" height="63">
+                  </div>
+                </td>
+                <td><a href="{:C('QZ_YUMING_SCHEME')}://{$vo.bm}.{:C('QZ_YUMING')}/company_home/{$vo.id}" target="_blank">{$vo.qc}</a></td>
+                <td>所在城市：{$vo.cname}</td>
+                <td width="10%"><a class="agree" data-id="{$vo.id}" href="javascript:void(0)">同意入驻</a></td>
+                <td width="10%"><a class="disgree"  data-id="{$vo.id}" href="javascript:void(0)">拒绝入驻</a></td>
+              </tr>
+              </volist>
+            </table>
+            {$info.page}
+          </if>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(".binding-btn").click(function(event) {
+      if(confirm("确定解除绑定吗？")){
+          $.ajax({
+            url: '/release/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                comid:"{$info.company.id}"
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href = window.location.href;
+              }else{
+                  $(".err-tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+              $(".err-tips").html("发生了未知的错误,请刷新再试！");
+          });
+      }
+  });
+
+  $(".disgree").click(function(event) {
+      var id = $(this).attr("data-id");
+      $.ajax({
+        url: '/joinus/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            comid:id,
+            agree:2
+        }
+      })
+      .done(function(data) {
+          if(data.status == 1){
+              window.location.href = window.location.href;
+          }else{
+              $(".err-tips").html(data.info);
+          }
+      })
+      .fail(function(xhr) {
+          $(".err-tips").html("发生了未知的错误,请刷新再试！");
+      });
+
+  });
+
+  $(".agree").click(function(event) {
+      var id = $(this).attr("data-id");
+      $.ajax({
+        url: '/joinus/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            comid:id,
+            agree:1
+        }
+      })
+      .done(function(data) {
+          if(data.status == 1){
+              window.location.href = window.location.href;
+          }else{
+              $(".err-tips").html(data.info);
+          }
+      })
+      .fail(function(xhr) {
+          $(".err-tips").html("发生了未知的错误,请刷新再试！");
+      });
+
+  });
+
+</script>
+</html>

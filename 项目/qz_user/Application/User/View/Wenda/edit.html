@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="keywords" content="用户中心">
+<meta name="description" content="用户中心">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<title>编辑装修问答 - 齐装网用户中心</title>
+<include file="Index:resource" />
+<include file="Designer:resource" />
+<link rel="stylesheet" href="/assets/user/home/css/global.css?v={:C('STATIC_VERSION')}">
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$static_host}/assets/common/js/plupload/plupload.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<link src="{$static_host}/assets/common/js/plupload/plupload.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<style type="text/css">
+#btn_sub{display: inline-block;}
+.disable{cursor: pointer;}
+.ht-yes {margin-top:10px;}
+</style>
+</head>
+<body>
+    <if condition="$info['user']['classid'] EQ '1' ">
+      <include file="User:header" />
+      <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+    <elseif condition="$info['user']['classid'] EQ '2' "/>
+      <include file="Designer:header" />
+      <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+    <else/>
+    <link rel="stylesheet" href="/assets/user/home/css/ht-public.css?v={:C('STATIC_VERSION')}">
+      <include file="Home:header" />
+      <div class="ht-wrap oflow">
+        <include file="Home:comnavleft" />
+    </if>
+
+    <div class="yh-main">
+      <h1 class="yh-tit">编辑装修问答</h1>
+        <form action="" method="POST" id="contentBox">
+        <ul class="diary-edit">
+            <li>
+                <span>标题：</span><input name="title" type="text" value="{$ask.title}" style="width:700px;">
+                <i class="red err-tips"></i>
+            </li>
+            <div id="descBox">
+                <li><span>简介：</span>
+                <textarea name="content" style="height:160px;width:700px;" class="textarea">{$ask.content}</textarea>
+                <i class="red err-tips"></i></li>
+            </div>
+        </ul>
+        <div class="ht-yes">
+            <a href="javascript:;" id="editBtn">确认编辑</a>
+            <i class="red err-tips" id="error_msg"></i>
+            <input name="id" type="hidden" value="{$ask.id}">
+        </div>        
+        </form>
+    </div>
+  </div>
+<include file="Index/footer" />
+<script type="text/javascript">
+$(function(){
+
+    $("#editBtn").click(function(event) {
+        $(".err-tips").html("");
+        $(".focus").removeClass('focus');
+        var _this = $(this);
+
+        if(!App.validate.run($("input[name=title]").val())){
+            $("input[name=title]").focus().addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").addClass('red').html("请填写文章标题");
+            return false;
+        }
+
+        if(!App.validate.run($("textarea[name=content]").val())){
+            $("textarea[name=content]").focus().addClass('focus');
+            $("textarea[name=content]").parent().find(".err-tips").html("亲,您的内容总得写点什么吧！");
+            return false;
+        }
+
+        $.ajax({
+            url: '/wenda/edit?id={$ask.id}',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $("#contentBox").serializeArray()
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.href = "/wenda/";
+            }else{
+                _this.parent().find(".err-tips").html(data.info);
+            }
+        })
+        .fail(function() {
+             _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+        });
+    });
+});
+</script>
+</body>
+</html>

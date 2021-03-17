@@ -1,0 +1,97 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link href="/assets/home/basicinfo/css/editquyu.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <a href="/basicinfo/index/"><span>区域城市管理</span></a>
+                            <a href="/basicinfo/index/"><span><i class="fa fa-home"></i>&nbsp;城市管理</span></a>
+                            <a href="/basicinfo/quyu/?id={$quyuInfo.cid}"><span class="cur"><i class="fa fa-sitemap"></i>&nbsp;区域管理</span></a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <div class="top">
+                            <div class="title">{$quyuInfo.cname}</div>
+                            <div class="info">
+                                <span>区划代码：{$quyuInfo.cid}，</span><span>下辖区域：{$quyuInfo.count}</span>
+                            </div>
+                            <ul class="px-ul clearfix">
+                                <volist name="areaList" id="v">
+                                    <li>
+                                        <a href="/basicinfo/editquyu?id={$v.qz_areaid}">
+                                            <p>{$v.qz_area}</p>
+                                            <p class="px">排序：{$v.orders}</p>
+                                        </a>
+                                    </li>
+                                </volist>
+
+                            </ul>
+                        </div>
+                        <form id="form1" action="" method="POST">
+                        <div class="edit-box">
+                            <div class="c-title">编辑区域</div>
+                            <div class="form-group">
+                                <span>区域名:</span>
+                                <input name="qz_area" type="text" value="{$areaInfo.qz_area}">
+                            </div>
+                            <div class="form-group">
+                                <span>区划代码:</span>
+                                <input name="qz_areaid" type="text" value="{$areaInfo.qz_areaid}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <span>排序:</span>
+                                <input name="orders" type="text"  value="{$areaInfo.orders}">
+                            </div>
+                            <div class="button">
+                                <div class="btn btn-save"><i class="fa fa-floppy-o"></i>&nbsp;保存修改</div>
+                                <a href="javascript:;" onclick="history.back(-1)"><div class="btn btn-default"><i class="fa fa-reply"></i>&nbsp;返回</div></a>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script>
+        $(".btn-save").click(function(event){
+
+            if( $.trim($('input[name=orders]').val()) == '' || $.trim($('input[name=orders]').val()) == 0){
+                alert('请填写排序值');
+                return false;
+            }
+
+            var data = $("#form1").serializeArray();
+            $.ajax({
+                url: '/basicinfo/editquyu/?id={$_GET["id"]}',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            window.location.href = window.location.href;
+                        } else {
+                            alert(data.info);
+                        }
+                    });
+        });
+
+
+    </script>
+</block>

@@ -1,0 +1,96 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-单时段部门人均分单量折线图</title>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-info">分单量总览</button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/customerorderstatistics/">分时段统计</a>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/fendanteamanalysissheet/">团队分析</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border text-center">
+                        <div class="box-title">单时段部门人均分单量折线图</div>
+                    </div>
+                    <div class="box-header">
+                        <div class="pull-right" role="group" aria-label="Large button group">
+                            <a class="btn btn-info" href="/orderstat/branchorderoverview/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                切换至表格
+                            </a>
+                            <eq name="Think.get.average" value="1">
+                                <a class="btn btn-info" href="/orderstat/dansdfdzxt/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=0">
+                                    切换至部门
+                                </a>
+                            <else />
+                                <a class="btn btn-info" href="/orderstat/dansdfdzxt/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=1">
+                                    切换至人均
+                                </a>
+                            </eq>
+                        </div>
+                    </div>
+                    <div class="box-header text-right" style="padding-top: 0;padding-bottom:0;text-decoration:underline">
+                        <a class="btn btn-default btn-sm pull-right" style="margin-top: 10px;" href="/orderstat/branchorderaveragechart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                            按平均值查看
+                        </a>
+                    </div>
+                    <div class="box-body">
+                        <div id="canvas" class="col-xs-12 no-padding" style="height: 600px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+    var option = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c}'
+        },
+        legend: {
+            left: 'right',
+            top:'50px',
+            orient:'vertical',
+            data: {$main.echarts.legend}
+        },
+        xAxis: {
+            type: 'category',
+            name: 'x',
+            splitLine: {show: false},
+            data: {$main.echarts.xAxis}
+        },
+        yAxis: {
+            type: 'value',
+            name: 'y',
+            splitNumber:10,
+            min: 0
+        },
+        series: {$main.echarts.series}
+    };
+    myChart.setOption(option);
+
+    window.onresize=function(){
+        var myChart = echarts.init(Dom);
+        myChart.setOption(option);
+    }
+</script>
+</block>

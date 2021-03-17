@@ -1,0 +1,93 @@
+<div class="panel-heading">
+    广告报备
+</div>
+<div class="panel-body advform">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">投放位置:</label>
+        <div class="col-sm-2">
+            <select name="type" class="form-control">
+                <if condition="!isset($list) OR $list['flag'] EQ 1">
+                <option value="1" selected="selected">老站</option>
+                <option value="2">新站</option>
+                <else />
+                <option value="1">老站</option>
+                <option value="2" selected="selected">新站</option>
+                </if>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">轮显:</label>
+        <div class="col-sm-2">
+           <input type="text" class="form-control" name="lunbo" placeholder="轮显报备时长" value="{$advInfo['1'][0]['total']}"/>
+        </div>
+        <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$advInfo['1'][0]['use_day']|default=0}天</label>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">通栏A:</label>
+        <div class="col-sm-2">
+           <input type="text" class="form-control" name="tl_A" placeholder="通栏A报备时长" value="{$advInfo['2'][1]['total']}" />
+        </div>
+        <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$advInfo['2'][1]['use_day']|default=0}天</label>
+        <label class="col-sm-2 control-label">通栏B:</label>
+        <div class="col-sm-2">
+           <input type="text" class="form-control" name="tl_B" placeholder="通栏B报备时长" value="{$advInfo['2'][2]['total']}" />
+        </div>
+        <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$advInfo['2'][2]['use_day']|default=0}天</label>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">通栏C:</label>
+        <div class="col-sm-2">
+           <input type="text" class="form-control" name="tl_C" placeholder="通栏C报备时长" value="{$advInfo['2'][3]['total']}" />
+        </div>
+        <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$advInfo['2'][3]['use_day']|default=0}天</label>
+        <if condition="!isset($list) OR $list['flag'] EQ 1">
+
+        <div class="adv-item">
+        <label class="col-sm-2 control-label">通栏D:</label>
+        <div class="col-sm-2">
+           <input type="text" class="form-control" name="tl_D" placeholder="通栏D报备时长" value="{$advInfo['2'][4]['total']}" />
+        </div>
+        <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$advInfo['2'][4]['use_day']|default=0}天</label>
+        </div>
+        </if>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $("select[name=type]").change(function(event) {
+        var parent = $(this).parents(".advform");
+        $(".adv-item",parent).show();
+        if ($(this).val() == 2) {
+            $(".adv-item",parent).hide();
+        }
+    });
+
+    $("#btnAdv").click(function(event) {
+        var data = $("#advForm").serializeArray();
+        var json = $("#search_company").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_company").select2("data") == "string"){
+                json = JSON.parse($("#search_company").select2("data"));
+            }
+            var company_id = json[0].id;
+            data.push({name:"company_id",value:company_id});
+            data.push({name:"company_name",value:json[0].jc});
+        };
+
+        $.ajax({
+            url: '/vip/advertising/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    });
+</script>

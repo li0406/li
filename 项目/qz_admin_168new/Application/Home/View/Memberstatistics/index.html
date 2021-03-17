@@ -1,0 +1,434 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>会员统计</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/user/css/usermanagement.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .user-condition .form-select{width:30%; height: 34px;border-color: #d2d6de;}
+        .user-condition .downUp{width: 20% !important;height: 35px;padding:0 10px;border-color: #d2d6de;}
+        .user-condition .level{width: 25%;margin-left: -160px;}
+        .user-condition .jifen{width:34%;margin-left: -45px;}
+        .user-condition .btns{width:10%;margin-left: -210px;}
+        .touxiang img{border-radius: 50%;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border user-titbtn">
+                        <h3 class="box-title">会员统计</h3>
+                        <span style="float:right;">
+<!--                            <a href="/Memberstatistics/integral" target="_blank">现金券记录</a>-->
+<!--                            <a href="/Memberstatistics/recommend" target="_blank">推荐记录</a>-->
+<!--                            <a href="/Memberstatistics/exchange" target="_blank">兑换记录</a>-->
+<!--                            <a href="/Memberstatistics/attendance" target="_blank">签到统计</a>-->
+                            <button type="button" id="export" class="btn btn-success">导出数据</button>
+                        </span>
+                    </div>
+                    <div class="box-body">
+                        <form id="searchForm" action="/memberstatistics" method="get">
+                            <div class="row user-condition">
+                                <div class="col-xs-2">
+                                        <label>会员：</label>
+                                        <input type="text" name="nickname" value="{$getdata.nickname}" class="form-control" placeholder="会员昵称" />
+                                </div>
+                                <div class="col-xs-4" style="30%">
+                                    <label>入会时间：</label>
+                                    <input type="text" name="join_start" value="{$getdata.join_start}" class="form-control zhuce-time datepicker" autocomplete="off" placeholder="开始时间" style="width: 22%!important;"/>
+                                    &nbsp;—&nbsp;
+                                    <input type="text" name="join_end" value="{$getdata.join_end}" class="form-control zhuce-time datepicker" autocomplete="off" placeholder="结束时间" style="width: 22%!important;"/>
+                                </div>
+
+                                <div class="col-xs-4 level">
+                                    <label>等级：</label>
+                                    <select id="level1" name="level1"  class="form-select" style="float: left;">
+                                        <option value="" disabled selected hidden >最低</option>
+                                        <option value="0">请选择</option>
+                                        <volist name="levellist" id="vo">
+                                            <if condition="$getdata['level1'] eq $vo['level']">
+                                                <option value="{$vo.level}" selected="selected">LV{$vo.level}</option>
+                                                <else />
+                                                <option value="{$vo.level}">LV{$vo.level}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                    &nbsp;—&nbsp;
+                                    <select id="level2" name="level2" class="form-select">
+                                            <option value="" disabled selected hidden>最高</option>
+                                            <option value="0">请选择</option>
+                                        <volist name="levellist" id="vo">
+                                            <if condition="$getdata['level2'] eq $vo['level']">
+                                                <option value="{$vo.level}" selected="selected">LV{$vo.level}</option>
+                                                <else />
+                                                <option value="{$vo.level}">LV{$vo.level}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-4 jifen">
+                                    <label>当前现金券：</label>
+                                    <input type="text"  name="score_min" value="{$getdata.score_min}" class="form-control" autocomplete="off" placeholder="最低"   id="jifen" style="width: 20%!important;"/>
+                                    &nbsp;—&nbsp;
+                                    <input type="text"  name="score_max" value="{$getdata.score_max}" class="form-control" autocomplete="off" placeholder="最高"   id="jifen" style="width: 20%!important;"/>
+                                </div>
+                                <div class="col-xs-4 btns">
+                                    <button type="submit" class="btn btn-primary user-search">搜索</button>
+                                    <button type="button" class="btn user-chongzhi" >重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>排序</th>
+                                <th>头像</th>
+                                <th>会员昵称</th>
+                                <th class="paixu">入会时间
+                                    <span class="rhtime">
+                                        <if condition="$getdata['rhtime'] eq 2">
+                                            <a href="javascript:void(0)" data-rhtime="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active" ></i></a>
+                                            <a href="javascript:void(0)" data-rhtime="1"><i class="fa fa-sort-desc" ></i></a>
+                                        <elseif condition="$getdata['rhtime'] eq 1" />
+                                            <a href="javascript:void(0)" data-rhtime="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up" ></i></a>
+                                            <a href="javascript:void(0)" data-rhtime="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-rhtime="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up" ></i></a>
+                                            <a href="javascript:void(0)" data-rhtime="1"><i class="fa fa-sort-desc" ></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">等级
+                                    <span class="levelsort">
+                                        <if condition="$getdata['levelsort'] eq 2">
+                                            <a href="javascript:void(0)" data-levelsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-levelsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['levelsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-levelsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-levelsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-levelsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-levelsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">成长值
+                                    <span class="growthsort">
+                                        <if condition="$getdata['growthsort'] eq 2">
+                                            <a href="javascript:void(0)" data-growthsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-growthsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['growthsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-growthsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-growthsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-growthsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-growthsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">总现金券
+                                    <span class="totalmaxsort">
+                                        <if condition="$getdata['totalmaxsort'] eq 2">
+                                            <a href="javascript:void(0)" data-totalmaxsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-totalmaxsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['totalmaxsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-totalmaxsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-totalmaxsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-totalmaxsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-totalmaxsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">当前现金券
+                                    <span class="totalnowsort">
+                                        <if condition="$getdata['totalnowsort'] eq 2">
+                                            <a href="javascript:void(0)" data-totalnowsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-totalnowsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['totalnowsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-totalnowsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-totalnowsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-totalnowsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-totalnowsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">兑换次数
+                                    <span class="changedsort">
+                                        <if condition="$getdata['changedsort'] eq 2">
+                                            <a href="javascript:void(0)" data-changedsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-changedsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['changedsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-changedsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-changedsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-changedsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-changedsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                                <th class="paixu">推荐人数
+                                    <span class="recomendsort">
+                                        <if condition="$getdata['recomendsort'] eq 2">
+                                            <a href="javascript:void(0)" data-recomendsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up active"></i></a>
+                                            <a href="javascript:void(0)" data-recomendsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        <elseif condition="$getdata['recomendsort'] eq 1" />
+                                            <a href="javascript:void(0)" data-recomendsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-recomendsort="1"><i class="fa fa-sort-desc active"></i></a>
+                                        <else/>
+                                            <a href="javascript:void(0)" data-recomendsort="2" style="position: relative; z-index: 2;"><i class="fa fa-sort-up"></i></a>
+                                            <a href="javascript:void(0)" data-recomendsort="1"><i class="fa fa-sort-desc"></i></a>
+                                        </if>
+                                    </span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <if condition="$vo['sum_score'] eq 99">
+                                        <tr style="background-color: #FFEAFF">
+                                        <else />
+                                        <tr>
+                                    </if>
+                                        <td>{$nowpage*20 + $i}</td>
+                                        <td class="touxiang"><img src="{$vo.avatar}" width="60" height="60"/></td>
+                                        <td>{$vo.nickname}</td>
+                                        <td>{$vo.first_score_time|date="Y-m-d H:i:s",###}</td>
+                                        <td>LV{$vo.level}</td>
+                                        <td>{$vo.growth}</td>
+                                        <td>{$vo.all_score}</td>
+                                        <td>{$vo.score}</td>
+                                        <td>{$vo.meo_count}</td>
+                                        <td>{$vo.sr_count}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    {$page}
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            $('.zhuce-time').datepicker({
+                format: "yyyy-mm-dd",
+                minViewMode: 0,
+                autoclose: true,
+                todayBtn:true
+            }).on("change",function(){
+                if(toTimeStamp($("input[name = join_start]").val())>toTimeStamp($("input[name = join_end]").val())){
+                    msg("结束时间必须大于开始时间")
+                    $("input[name=join_start]").val("");
+                }
+                var start_year = $("input[name = join_start]").val().split("-")[0];
+                var start_month = $("input[name = join_start]").val().split("-")[1];
+                var start_date = $("input[name = join_start]").val().split("-")[2];
+                var end_year = $("input[name = join_end]").val().split("-")[0];
+                var end_month = $("input[name = join_end]").val().split("-")[1];
+                var end_date = $("input[name = join_end]").val().split("-")[2];
+                timeStep(start_year,end_year,start_month,end_month,start_date,end_date,$("input[name=join_end]"))
+            });
+
+            //重置
+            $(".user-chongzhi").click(function () {
+                $(".user-condition input").val('');
+                $(".user-condition select").val('');
+            });
+
+             //现金券 只能输入数字 且不能0开头
+            $("#jifen").on("keyup",function(){
+                var reg = /^[1-9]\d*(?:\.\d{1,1}|\d*)$/;
+                if(!reg.test($(this).val())){
+                $(this).val("");
+                }
+            });
+
+            var myDate = new Date();
+            var year = myDate.getFullYear();    //获取完整的年份(4位,1970-????)
+            var month = myDate.getMonth() + 1;       //获取当前月份(0-11,0代表1月)
+            var day = myDate.getDate();        //获取当前日(1-31)
+
+            //搜索
+            $(".user-search").click(function () {
+                var nickname = $('input[name = nickname]').val();
+                var join_start = $("input[name = join_start]").val();
+                var join_end = $("input[name = join_end]").val();
+                var level1 = $('#level1').val(); //会员等级
+                var level2 = $('#level2').val(); //会员等级
+                var score_min = $('input[name = score_min]').val(); //最低现金券
+                var score_max = $('input[name = score_max]').val(); //最高现金券
+                //判断时间间隔
+                if ((join_end != '') && (join_start > join_end)) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发单开始时间不能大于结束时间~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                };
+
+                //入会时间
+                if(join_start != '' && join_end == ''){
+                    $("input[name = join_end]").val(year + '-' + month + '-' + day)
+                    if(year - join_start.split('-')[0] > 1){
+                        msg('时间跨度不能超过1年');
+                        $("input[name = join_end]").val("");
+                        return false
+                    }else if(year - join_start.split('-')[0] == 1){
+                        if(join_start.split('-')[1] - month < 0){
+                            msg('时间跨度不能超过1年');
+                            $("input[name = join_end]").val("");
+                            return false
+                        }else if(join_start.split('-')[1] - month == 0){
+                            if(join_start.split('-')[2] - day < 0){
+                                msg('时间跨度不能超过1年');
+                                $("input[name = join_end]").val("");
+                                return false
+                            }
+                        }
+                    }else if(year - join_start.split('-')[0] == 0){
+                        if(join_start.split('-')[1] > month){
+                            msg('结束时间必须大于开始时间');
+                            $("input[name = join_end]").val("");
+                            return false
+                        }else if(join_start.split('-')[1] == month && zhuce_start.split('-')[2] > day){
+                            msg('结束时间必须大于开始时间');
+                            $("input[name = join_end]").val("");
+                            return false
+                        }
+                    }else if(year - join_start.split('-')[0] < 0){
+                        msg('结束时间必须大于开始时间');
+                        //$("input[name = join_start]").val('');
+                        //$("input[name = join_end]").val(year+ '-' + month + '-' + day);
+                        $("input[name = join_end]").val("");
+                        return false
+                    }
+                }
+                //最高等级必须大于等于最低等级
+                if((level2 != 0 && level2 != null && level2 != '') && (level1  > level2)) {
+                    msg('最高等级必须大于等于最低等级')
+                    $("#level1").val('');
+                    $("#level2").val('');
+                    return false;
+                }
+
+
+               //最高现金券必须大于等于最低现金券
+                if(score_max != '' && score_min > score_max){
+                    msg('最高现金券必须大于等于最低现金券')
+                    $("input[name = score_min]").val('')
+                    $("input[name = score_max]").val('')
+                    return false
+                }
+            });
+
+           /************************   排序 开始  *************************************/
+            //入会时间排序
+            $(".rhtime a").click(function () {
+                var rhtime = $(this).attr('data-rhtime');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?rhtime=' + rhtime + '&' + dataStr;
+            });
+            //等级排序
+            $(".levelsort a").click(function () {
+                var levelsort = $(this).attr('data-levelsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?levelsort=' + levelsort + '&' + dataStr;
+            });
+            //成长值排序
+            $(".growthsort a").click(function () {
+                var growthsort = $(this).attr('data-growthsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?growthsort=' + growthsort + '&' + dataStr;
+            });
+            //总现金券排序
+            $(".totalmaxsort a").click(function () {
+                var totalmaxsort = $(this).attr('data-totalmaxsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?totalmaxsort=' + totalmaxsort + '&' + dataStr;
+            });
+            //剩余现金券排序
+            $(".totalnowsort a").click(function () {
+                var totalnowsort = $(this).attr('data-totalnowsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?totalnowsort=' + totalnowsort + '&' + dataStr;
+            });
+            //兑换次数排序
+            $(".changedsort a").click(function () {
+                var changedsort = $(this).attr('data-changedsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?changedsort=' + changedsort + '&' + dataStr;
+            });
+            //推荐人数排序
+            $(".recomendsort a").click(function () {
+                var recomendsort = $(this).attr('data-recomendsort');
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics?recomendsort=' + recomendsort + '&' + dataStr;
+            });
+
+
+            /************************   排序 结束  *************************************/
+            function toTimeStamp(time){
+                if(time!=undefined){
+                    var date = time;
+                    date = date.substring(0,19);
+                    date = date.replace(/-/g,'/');
+                    var timestamp = new Date(date).getTime();
+                    return timestamp;
+                }
+            }
+            function msg(msg, fn) {
+                layer.msg(
+                    msg,
+                    {time: 2000,},
+                    fn || function () {
+                    }
+                )
+            }
+            //判断时间跨度
+            function timeStep(start_year,end_year,start_month,end_month,start_date,end_date,selector) {
+                if(start_year != ''){
+                    if(end_year - start_year > 1){
+                        msg("时间跨度不能超过1年")
+                        selector.val("");
+                    }else if(end_year - start_year == 1){
+                        if(end_month - start_month > 0){
+                            msg("时间跨度不能超过1年")
+                            selector.val("");
+                        }else if(end_month - start_month == 0){
+                            if(end_date > start_date){
+                                msg("时间跨度不能超过1年")
+                                selector.val("");
+                            }
+                        }
+                    }
+                }
+            }
+            /************************  导出数据   ***********************************/
+            $("#export").click(function(){
+                var dataStr = $('#searchForm').serialize();
+                window.location = '/memberstatistics/exportexcel?' + dataStr;
+            });
+        });
+    </script>
+</block>

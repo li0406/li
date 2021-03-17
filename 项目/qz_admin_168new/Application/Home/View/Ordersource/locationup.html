@@ -1,0 +1,185 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/colorpicker/spectrum.css?v={:C('STATIC_VERSION')}">
+     <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+            <h1>发单位置标识添加</h1>
+            <ol class="breadcrumb">
+                <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+                <li class="active"><a href="/ordersource/location">发单位置标识</a></li>
+            </ol>
+        </section>
+        <section class="content">
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <form id="form1" >
+                <div class="tab-content">
+                    <!-- 常规 -->
+                    <div class="tab-pane active" id="tab_1">
+                        <div class="box-body">
+                            <if condition="isset($info['info'])">
+                                <div class="form-group">
+                                    <label for="title">标记代号</label>
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                        <input type="input" class="form-control" disabled placeholder="标记代号" value="{$info.info.src}" >
+                                        </div>
+                                    </div>
+                                </div>
+                            </if>
+
+                            <div class="form-group">
+                                <label for="title">发单位置名称</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                    <input type="input" class="form-control" name="name" placeholder="发单位置名称" value="{$info.info.name}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sort">所属模块</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <select class="form-control" id="groupid" name="groupid">
+                                            <volist name="info.sourceGroup" id="vo">
+                                            <optgroup label="{$vo.name}">
+                                                <volist name="vo.child" id="v">
+                                                    <option value="{$v.id}">{$v.name}</option>
+                                                </volist>
+                                            </optgroup>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">添加时间</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                    <input type="text" class="form-control datetimepicker" name="time" placeholder="添加时间" value="{$info.info.addtime|default=''}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">预览图</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input id="imgUpload" type="file" multiple/>
+                                        <input type="hidden" name="img_url" value="{$info.info.thumb|default=''}"/>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <a href="/assets/common/img/location-demo.jpg" target="_blank">图片样例</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sort">描述</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                    <textarea class="form-control" rows="3" placeholder="来源描述，可选填" name="description">{$info.info.description}</textarea></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="button" id="submit" class="btn btn-success"><i class="fa fa-plus-circle"></i>&nbsp;添加</button>
+                    <a href="/ordersource/location/" class="btn btn-default" ><i class="fa fa-mail-reply"></i>&nbsp;返回</a>
+                    <input type="hidden" name="id" value="{$info.info.id}"/>
+                </div>
+                </form>
+            </div>
+        </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".datetimepicker").datepicker({
+             autoclose: true,
+             todayBtn: true,
+             todayHighlight: true,
+             pickerPosition: "bottom-left",
+             startView: 0,//月视图
+             endDate : new Date(),
+             minView: 1//日期时间选择器所能够提供的最精确的时间选择视图
+        });
+
+
+
+        $("#submit").click(function(event){
+            if(trim($("input[name=name]").val()) === ''){
+                $("input[name=name]").focus().addClass('focus');
+                alert("请填写来源名称~ ");
+                return false;
+            }
+
+            if(trim($("input[name=img_url]").val()) === ''){
+                alert("必须要上传预览图哦！");
+                return false;
+            }
+
+            $("#form1").submit();
+        });
+
+
+        $("#imgUpload").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/uploadimg/",
+            showCaption:false,
+            browseClass:"btn blue",
+            allowedFileExtensions : ['jpg','png','gif'],
+            maxFileCount:1,
+            uploadClass:"btn green",
+            removeClass:"btn red",
+            uploadAsync:true,
+            dropZoneEnabled:false,
+            previewSettings:{
+                image: {width: "auto", height: "100px"}
+            },
+            msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+            layoutTemplates:{
+                actionDelete:"",
+                actionUpload:""
+            },
+            uploadExtraData:{
+                prefix:'admin/ordersource'
+            },
+            initialPreview:'{$info.info.thumb_json}'
+        }).on('fileuploaded', function(event, data) {
+            if(1 == data.response.status){
+                $('input[name=img_url]').val(data.response.data.name);
+                $('input[name=value]').attr('value',data.response.info);
+            }else{
+                alert("预览图上传失败，请重新上传，如多次失败请联系技术部门");
+            }
+        }).on("fileuploaderror",function(event, data){
+             alert('预览图上传失败,请联系技术部门！');
+             return false;
+        }).on("fileclear",function(){
+            $("input[name=files]").val("");
+        });
+    });
+
+    $("#submit").click(function(event) {
+        $.ajax({
+            url: '/ordersource/locationup',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $("#form1").serializeArray()
+        })
+        .done(function(data) {
+            alert(data.info);
+            if (data.status == 1) {
+                window.location.href = "/ordersource/location/";
+            }
+        });
+    });;
+</script>
+</block>

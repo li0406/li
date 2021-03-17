@@ -1,0 +1,80 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>批量导入</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/subthemeatic/css/batch.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <h4 class="col-xs-2">分站-专题页管理 > 批量导入</h4>
+                    </div>
+                </div>
+                <div class="box box-body" style="padding-left:25px;">
+                    <p>批量导入：请按照模板下载中的结构设置批量数据，勿调整该结构</p>
+                    <div style="width:70%;">
+                        <form>
+                            <div class="form-group">
+                                <div class=" file-group">
+                                    <input id="fileUp" name="excel" type="file"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <span class="return cancel-btn">返回</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+          //返回
+          $(".cancel-btn").click(function () {
+            localStorage.removeItem("description");
+            window.location.href = '/subthematic';
+          })
+            $("#fileUp").fileinput({
+                language: 'zh', //设置语言,
+                allowedFileExtensions: ['xls', 'xlsx'],
+                uploadUrl: "/subthematic/companyUploadExcel/",
+                browseClass: "btn btn-primary",
+                uploadClass: "btn btn-info",
+                removeClass: "btn btn-danger",
+                showPreview: false,
+                uploadAsync: true,
+                showRemove: true,
+                showCancel: false,
+                showUpload: true,
+                maxFileCount: 1,
+                dropZoneEnabled: false
+            }).on('fileuploaded', function (event, data) {
+                if (1 == data.response.error_code) {
+                    if(data.response.data.error_data_count > 0){
+                        var str = '<p style="margin-left:15px;margin-top:15px;">错误提示：</p>';
+                        $.each(data.response.data.error_list,function (index,item) {
+                            str += '<p style="margin-left:15px;">第'+ item.line +'行：'+ item.error +'</p>'
+                        });
+                        layer.open({
+                            type: 1,
+                            area: ['420px', '300px'], //宽高
+                            content: str
+                        });
+                    }else{
+                        layer.msg(data.response.error_msg);
+                    }
+                } else {
+                    layer.msg(data.response.error_msg);
+                }
+            });
+        })
+    </script>
+</block>
+

@@ -1,0 +1,138 @@
+
+<div class="row">
+    <div class="box">
+        <div class="box-body">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4>会员信息</h4>
+                        <form id="myForm" class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">会员ID:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" disabled="disabled" class="form-control" value="{$userinfo.id}" />
+                                </div>
+                                <label class="col-sm-2 control-label">公司名称:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" disabled="disabled" class="form-control" value="{$userinfo.jc}" />
+                                </div>
+                                <div class="col-sm-2">
+                                    <eq name="signbackinfo.order_stop_status" value="2">
+                                        <button id="btnOrderStop" data-status="1" type="button" class="btn btn-success">
+                                            开始派单
+                                        </button>
+                                    <else />
+                                        <button id="btnOrderStop" data-status="2" type="button" class="btn btn-danger">
+                                            停止派单
+                                        </button>
+                                    </eq>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">所在城市:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" disabled="disabled" class="form-control" value="{$userinfo.cname}" />
+                                </div>
+                                <label class="col-sm-2 control-label">所属销售:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" disabled="disabled" class="form-control" value="{$userinfo.saler}" disabled="disabled" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">接单人:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" name="jd_name1" class="form-control" value="{$userinfo.jd_tel_name_1}" />
+                                </div>
+                                <label class="col-sm-2 control-label">手机:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" name="jd_tel1" class="form-control" value="{$userinfo.jd_tel_1}" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">接单人:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" name="jd_name2" class="form-control" value="{$userinfo.jd_tel_name_2}" />
+                                </div>
+                                <label class="col-sm-2 control-label">手机:</label>
+                                <div class="col-sm-3">
+                                    <input type="text" name="jd_tel2" class="form-control" value="{$userinfo.jd_tel_2}" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-2 col-sm-offset-2">
+                                    <input type="hidden" value="1" name="is_edit" />
+                                    <input type="hidden" value="{$userinfo.id}" name="company_id" />
+                                    <button id="btnSave" type="button" class="btn btn-success">
+                                        <i class="fa fa-floppy-o"></i> 保存
+                                    </button>
+                                </div>
+                                <div class="col-sm-2 col-sm-offset-2">
+                                    
+                                </div>
+                                <div class="col-sm-6 err-msg"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        $("#btnSave").click(function(){
+            var _this = $(this);
+            var data = $("#myForm").serializeArray();
+            $("#myForm .err-msg").html("");
+
+            $.ajax({
+                url: '/signbackuser/extendinfo',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    alert("编辑成功");
+                    window.location.reload();
+                } else {
+                    $("#myForm .err-msg").html(data.errmsg);
+                }
+            })
+            .fail(function() {
+                $("#myForm .err-msg").html("发生异常,请稍后再试！");
+            });
+        });
+
+
+        $("#btnOrderStop").click(function(){
+            var status = $(this).data("status");
+            if (status == 2) {
+                var tip = "确定要停止该会员的派单吗？确定后将停止配订单给该会员！！！";
+            } else {
+                var tip = "确定要开始该会员的派单吗？确定后将正常配订单给该会员！！！";
+            }
+
+            if (confirm(tip)) {
+                $.ajax({
+                    url: '/signbackuser/setorderstatus',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        company_id: "{$userinfo.id}",
+                        order_status: status
+                    }
+                })
+                .done(function(data) {
+                    if (data.code == 200) {
+                        alert("修改成功");
+                        window.location.reload();
+                    } else {
+                        alert(data.errmsg);
+                    }
+                });
+            }
+        });
+    });
+</script>

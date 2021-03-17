@@ -1,0 +1,120 @@
+<!--设计伸缩广告-->
+<div class="zb_footer_box">
+    <div class="zb_footer_bg">
+    </div>
+    <div class="wrap">
+        <div class="zb_l_bg">
+        </div>
+        <div class="zb_m_container">
+            <div class="zb_m_tit">
+                <p>免费获得四份不同的设计方案</p>
+                <span>免费户型设计，今日仅剩 <a href="javascript:void(0)">{:releaseCount("fbrs")}</a>个名额</span>
+            </div>
+            <form class="secbox_form">
+                <div class="zb_m_input">
+                    <input type="text" name="tel" placeholder="请输入您的手机号码" maxlength="11" />
+                    <input type="hidden" name="fb_type" value="sheji">
+                    <button class="btn-add" type="button">获取设计</button>
+                </div>
+            </form>
+        </div>
+        <div class="zb_close">
+        </div>
+    </div>
+</div>
+<div class="zb_footer_box_little">
+    <img src="{$static_host}/assets/common/img/tanchuang.png" alt="免费获取设计" class="baiduab-beha"/>
+</div>
+<script>
+    $(window).scroll(function(){
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop ;
+        var height = $(".nav1,.nav").offset().top + $(".nav1").outerHeight()+10;
+        if(scrollTop > height){
+            $(".zb_footer_box").show();
+            $(".zb_footer_box_little").show();
+        }else{
+            $(".zb_footer_box").hide();
+            $(".zb_footer_box_little").hide();
+        }
+    });
+
+
+    $(".zb_footer_box .zb_close").click(function(event) {
+        animate($(".zb_footer_box"),$(".zb_footer_box_little"));
+    });
+
+    function animate(from,to){
+        var length = from.outerWidth();
+        from.animate({"left":"-="+length},800,function(){
+            to.animate({"left":"0"},800);
+        });
+    }
+    $(".zb_footer_box_little").click(function(event) {
+        animate($(".zb_footer_box_little"),$(".zb_footer_box"));
+    });
+    $(".zb_footer_box .btn-add").click(function(event) {
+        var _this = $(this);
+        var tel = $(".zb_footer_box input[name=tel]");
+        if (!App.validate.run(tel.val())) {
+            tel.addClass('secbox_focus');
+            tel.focus();
+            //显示提示
+            $.pt({
+                target: tel,
+                content: '请填写正确的手机号码 ^_^!',
+                width: 'auto'
+            });
+            return false;
+        } else {
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if (!reg.test(tel.val())) {
+                tel.addClass('secbox_focus');
+                tel.val('');
+                tel.focus();
+                //显示提示
+                $.pt({
+                    target: tel,
+                    content: '请填写正确的手机号码 ^_^!',
+                    width: 'auto'
+                });
+                return false;
+            }
+        }
+
+        window.order({
+            extra:{
+                tel: tel.val(),
+                fb_type: $(".zb_footer_box input[name=fb_type]").val(),
+                source: '176',
+                safecode:$("#safecode").val(),
+                ssid:"{$ssid}",
+                safekey: $("#safekey").val(),
+                step:2
+            },
+            error:function(){
+                $.pt({
+                    target:_this,
+                    content: '发生了未知的错误,请刷新页面',
+                    width: 'auto'
+                });
+            },
+            success:function(data, status, xhr){
+                $("#safecode").val(data.data.safecode);
+                $("#safekey").val(data.data.safekey);
+                if (data.status == 1) {
+                    animate($(".zb_footer_box"),$(".zb_footer_box_little"));
+                    $("body").append(data.data.tmp);
+                }else{
+                    $.pt({
+                        target: _this,
+                        content: data.info,
+                        width: 'auto'
+                    });
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+</script>

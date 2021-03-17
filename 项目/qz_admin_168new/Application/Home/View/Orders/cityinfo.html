@@ -1,0 +1,121 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">上传文件</h3>
+            </div>
+            <div class="box-body">
+                <div class="col-sm-3">
+                    <br/>
+                    <button id="btnUp" type="button" class="btn btn-primary">上传</button>
+                    <a href="/export/downordercity/" class="btn btn-primary" target="_blank">模版下载</a>
+                </div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">城市信息</h3>
+            </div>
+            <div class="box-body">
+                <table id="table" class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="col-sm-1">城市</th>
+                            <th class="col-sm-1">半包价</th>
+                            <th class="col-sm-1">全包价</th>
+                            <th>拨打注意事项</th>
+                            <th>对接注意事项</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td class="col-sm-1">{$vo.city_name}</td>
+                                <td class="col-sm-1">{$vo.half_price_min}-{$vo.half_price_max}</td>
+                                <td class="col-sm-1">{$vo.price_min} - {$vo.price_max}</td>
+                                <td class="col-sm-5">{$vo.description}</td>
+                                <td class="col-sm-4">{$vo.description1}</td>
+                            </tr>
+                        </volist>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                    <div class="form-group">
+                        <label class=" control-label">选择文件:</label>
+                        <div class=" file-group">
+                             <input id="fileUp" name="fileup" type="file" />
+                        </div>
+                    </div>
+                    </form>
+                    <div class="form-group">
+                    <p>注意事项：</p>
+                    <p>1.点击右侧模板下载，按规范填写信息</p>
+                    <p>2.请上传文件EXCEL格式文档</p>
+                    <p>3.上传数据库已有城市，信息将进行覆盖</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#btnUp").click(function(event) {
+        $("#myModal").modal();
+    });
+
+    $("#fileUp").fileinput({
+        language: 'zh', //设置语言,
+        allowedFileExtensions:['xls','xlsx'],
+        uploadUrl:"/export/upordercityinfo/",
+        browseClass:"btn btn-primary",
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        showPreview:false,
+        uploadAsync:true,
+        showRemove:true,
+        showCancel:false,
+        showUpload:true,
+        maxFileCount:1,
+        dropZoneEnabled:false
+    }).on('fileuploaded', function(event, data) {
+        if(1 == data.response.status){
+            window.location.href =  window.location.href;
+        }else{
+            $("#myModal").Alert({
+                msg:'上传失败！',
+                level:2
+            });
+        }
+    });
+
+    $('#table').DataTable({
+       paging:false,
+       searching:true,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+    });
+
+</script>
+</block>

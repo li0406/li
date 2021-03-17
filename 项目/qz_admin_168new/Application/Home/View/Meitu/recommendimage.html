@@ -1,0 +1,200 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网品牌榜编辑后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分站首页美图推荐</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitu/">美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 分站首页美图推荐</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div id="categorydetails" class="col-md-12">
+                        <div class="nav-tabs-custom">
+                            <form id="form" action="javascript:void(0)" method="POST">
+                                <div class="tab-content">
+                                    <!-- 常规 -->
+                                    <div class="tab-pane active" id="tab_1">
+                                        <div class="box-body">
+                                            <div class="form-group">
+                                                <label>标题</label>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <input type="input" id="title" placeholder="标题">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>位置</label>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <input type="input" id="order" class="form-control" placeholder="位置" value="{$info.info.order}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>图片</label>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <input id="img" type="file" class="form-control" placeholder="URL" data-url="{$info.info.img}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-success btn-save">
+                                                <i class="fa fa-save"></i>&nbsp;保存
+                                            </button>
+                                            <button type="button" class="btn btn-default" onclick="history.back(-1)">
+                                                <i class="fa fa-mail-reply"></i>&nbsp;返回
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#title").select2({
+                allowClear: true,
+                minimumInputLength: 1,
+                maximumInputLength:10,
+                query: function(query) {
+                    var result = null;
+                    $.ajax({
+                        url: '/api/getmeitulist/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            condition: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text: data.data[i].id + '|' + data.data[i].title
+                                });
+                            }
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+            $("#title").select2("data",{id:"{$info.info.id}",text:"{$info.info.id}|{$info.info.title}"});
+
+            $("#img").fileinput({
+                language: 'zh',
+                uploadUrl:"/upload/uploadimg/",
+                showCaption:false,
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount:1,
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync:true,
+                dropZoneEnabled:false,
+                previewSettings:{
+                    image: {width: "auto", height: "100px"}
+                },
+                uploadExtraData:{
+                    prefix:'meitu',
+                    chars:'true'
+                },
+                initialPreview: ["<img id = 'recommendcover' class='file-preview-image' src= '//{:C('QINIU_DOMAIN')}/{$info.info.img}' >"]
+            }).on('fileuploaded', function(event, data, id, index) {
+                if(1 == data.response.status){
+                    $('#img').attr('data-url', data.response.data.name);
+                }else{
+                    var d = dialog({
+                        title: '消息',
+                        content: data.response.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    d.show();
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                var e = dialog({
+                    title: '消息',
+                    content: '文件上传失败,请检查文件格式，规格是否符合要求，或联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }).on("fileclear",function(){
+                $("#img").attr("data-url","");
+                $(".img-upload .fileinput-upload-button").removeClass('disabled');
+            });
+
+            $('.btn-save').click(function(event) {
+                var data = new Object();
+                data.id = "{$info.info.id}";
+                data.title = $("#title").select2("data").text;
+                data.order = $('#order').val();
+                data.img = $('#img').attr('data-url');
+                data.type = 1;
+                $.ajax({
+                    url: '/meitu/subwebsite/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+        })
+    </script>
+</block>

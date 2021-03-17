@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>领个红包装新房 - 齐装网</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<include file="Index:resource" />
+<link rel="stylesheet" href="{$static_host}/assets/home/zt/css/zt-spring.css?v={:C('STATIC_VERSION')}" />
+</head>
+<body>
+<include file="header" />
+
+<div class="zt-bg1">
+    <div class="zt-order">
+        <input type="text" name="tel" value="" placeholder="请输入您的手机号">
+        <button id="submit" type="submit">马上领取</button>
+    </div>
+    <ul class="libao-list">
+        <li><h3>1</h3><strong>专人上门量房、<br>
+        只取真实准确数据。</strong></li>
+        <li><h3>2</h3><strong>4份不同户型设计、<br>全面对比再选择。</strong></li>
+        <li><h3>3</h3><strong>4家装修公司报价、<br>综合考虑好预算。</strong></li>
+        <li><h3>4</h3><strong>免费参观样板间、<br>视觉感受更直观。</strong></li>
+    </ul>
+</div>
+<div class="zt-bg2"></div>
+<div class="zt-bg3"></div>
+<div class="zt-bg4">
+<ul class="zt-com-logo">
+    <volist name="companyList" id="v">
+    <li><a href="{$SCHEME_HOST.scheme_full}{$v.bm}.{$SCHEME_HOST.domain}/company_home/{$v.comid}" title="{$v.qc}" target="_blank"><img src="{$v.logo}" width="126" height="63" alt=""/></a></li>
+    </volist>
+</ul>
+<a class="return-home-btn" href="/zt/">返回频道首页&gt;&gt;</a>
+</div>
+
+<input id="safecode" type="hidden" value="{$safecode}" />
+<input id="safekey" type="hidden" value="{$safekey}" />
+<script type="text/javascript">
+$(function(){
+    $("#submit").click(function(event) {
+        var _this = $(this);
+        var tel = $(".zt-order input[name=tel]");
+
+        if (!App.validate.run(tel.val(),"moblie")) {
+            tel.addClass('secbox_focus');
+            tel.focus();
+            //显示提示
+            $.pt({
+                target: tel,
+                content: '请输入正确的手机号码!',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        window.order({
+            extra:{
+                tel: tel.val(),
+                source: '403',
+                safecode:$("#safecode").val(),
+                ssid:"",
+                safekey: $("#safekey").val(),
+                step:2
+            },
+            error:function(){
+                $.pt({
+                    target:_this,
+                    content: '发生了未知的错误,请刷新页面',
+                    width: 'auto'
+                });
+            },
+            success:function(data, status, xhr){
+                $("#safecode").val(data.data.safecode);
+                $("#safekey").val(data.data.safekey);
+                if (data.status == 1) {
+                    $("body").append(data.data.tmp);
+                }else{
+                    $.pt({
+                        target: _this,
+                        content: data.info,
+                        width: 'auto'
+                    });
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+});
+</script>
+<include file="Index:footer" />
+</body>
+</html>

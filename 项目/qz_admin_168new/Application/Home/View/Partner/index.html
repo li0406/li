@@ -1,0 +1,680 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>合作商账户管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/partner/css/index.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+    <style>
+        .dataTables_filter {display:none}
+        tr:hover{
+            background-color: #F0F2F6;
+        }
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <span>合作商账户管理</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body act-box" style="min-width:500px" id="box-head">
+                <div class="tiaojian-sel">条件查询</div>
+                <form action="" method="get" id="tiaojian">
+                        <div class="col-sm-2">
+                            <label for="">合作商账户名称：</label>
+                            <select name="state" class="form-control select2" id="hzs_name">
+                                <option value="">全部</option>
+                                <volist name="hzs_info" id="vi">
+                                    <if condition="$vi['id'] eq $map['name']">
+                                        <option value="{$vi.id}" selected>{$vi.name}</option>
+                                    <else/>
+                                        <option value="{$vi.id}">{$vi.name}</option>
+                                    </if>
+
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="">所属合作商：</label>
+                            <select name="company" class="form-control select2" id="company_id">
+                                <option value="">全部</option>
+                                <volist name="hzs_company" id="va" key="ko">
+                                    <if condition="$va['id'] eq $map['company_id']">
+                                        <option value="{$va.id}" selected>{$va.name}</option>
+                                        <else/>
+                                        <option value="{$va.id}">{$va.name}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">合作模式：</label>
+                            <select name="state" class="form-control" id="hzs_mode">
+                                <option value="">请选择</option>
+                                <option value="1" <?php echo $map['cooperate_mode']==1?'selected':'';?>>CPA(分单)</option>
+                                <option value="2" <?php echo $map['cooperate_mode']==2?'selected':'';?>>CPT</option>
+                                <option value="3" <?php echo $map['cooperate_mode']==3?'selected':'';?>>CPM</option>
+                                <option value="4" <?php echo $map['cooperate_mode']==4?'selected':'';?>>CPC</option>
+                                <option value="5" <?php echo $map['cooperate_mode']==5?'selected':'';?>>CPD</option>
+                                <option value="6" <?php echo $map['cooperate_mode']==6?'selected':'';?>>CPS</option>
+                                <option value="7" <?php echo $map['cooperate_mode']==7?'selected':'';?>>免费</option>
+                                <option value="8" <?php if($user['cooperate_mode'] == 8){echo 'selected';}?>>CPA(发单)</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">合作状态：</label>
+                            <select name="state" class="form-control" id="hzs_state">
+                                <option value="" >请选择</option>
+                                <option value="1" <?php echo $map['state']==1?'selected':'';?>>合作中</option>
+                                <option value="2" <?php echo $map['state']==2?'selected':'';?>>测试中</option>
+                                <option value="3" <?php echo $map['state']==3?'selected':'';?>>停止合作</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">api状态：</label>
+                            <select name="api_state" class="form-control" id="hzs_api_state">
+                                <option value="" >请选择</option>
+                                <option value="1" <?php echo $map['api_state']==1?'selected':'';?>>关闭</option>
+                                <option value="2" <?php echo $map['api_state']==2?'selected':'';?>>开启</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">对接人：</label>
+                            <select name="state" class="form-control" id="hzs_duijie">
+                                <option value="">请选择</option>
+                                <volist name="buttman" id="vo">
+                                    <if condition="$vo['id'] eq $map['yy_id']">
+                                        <option value="{$vo.id}" selected>{$vo.uname}</option>
+                                    <else/>
+                                        <option value="{$vo.id}">{$vo.uname}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <label for="">添加日期：</label>
+                            <!-- <input type="text" class="form-control datepicker" id="add-time" value="{$map.create_time}" name="create_time"> -->
+                            <input type="text" class="form-control pull-right" id="add-time" placeholder="添加日期">
+                            <input type="hidden" name="starttime" id="starttime" value="" />
+                            <input type="hidden" name="endtime" id="endtime" value="" />
+                        </div>
+                        <div class="input-group" >
+                            <div class="input-group-btn" id="search">
+                                <button type="button" class="btn btn-success">查询</button>
+                            </div>
+                        </div>
+                </form>
+                <div class="add"><a href="/partner/add/"><button class="button button-highlight button-square button-large"><i class="fa fa-plus"></i></button>添加合作商</a></div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box" id="hezuoshang">
+                <table>
+                    <tbody >
+                        <tr>
+                            <th width="50">序号</th>
+                            <th width="200">合作商账户名称</th>
+                            <th width="100">所属合作商</th>
+                            <th width="100">简称</th>
+                            <th width="100">账号</th>
+                            <th width="100">密码</th>
+                            <!-- <th width="100">注册时间</th> -->
+                            <!-- <th width="100">注册资本</th> -->
+                            <th width="100">联系人</th>
+                            <!-- <th width="100">联系人职位</th> -->
+                            <th width="100">联系电话</th>
+                            <th width="100">QQ</th>
+                            <th width="100">微信</th>
+                            <!-- <th width="200">合作商推广渠道</th> -->
+                            <th width="100">合作模式</th>
+                            <th width="100">结款方式</th>
+                            <!-- <th width="100">合作价格</th> -->
+                            <!-- <th width="200">营业执照</th> -->
+                            <th width="50">渠道标识数</th>
+                            <th width="100">合作状态</th>
+                            <th width="200">测试日期</th>
+                            <th width="200">合作日期</th>
+                            <th width="100">api状态</th>
+                            <!-- <th width="200">合作链接</th> -->
+                            <th width="100">对接人</th>
+                            <!-- <th width="200">添加日期</th> -->
+                            <!--<th width="200">备注</th>-->
+                            <th width="200">操作</th>
+                        </tr>
+                        <volist name="list" id="vo" key="ko">
+                        <tr>
+                                <td>{$ko}</td>
+                                <td><a href="javascript:void(0)" class="hzsName" data-logo="{$vo.logo}">{$vo.name|default='--'}</a></td>
+                                <td>{$vo.parent_name|default='--'}</td>
+                                <td class="short">{$vo.short|default='--'}</td>
+                                <td class="account">{$vo.account|default='--'}</td>
+                                <td >{$vo.psw|default='--'}</td>
+                                <!-- <td ><?php echo !empty($vo['join_time'])?date('Y-m-d',$vo['join_time']):'--';?></td> -->
+                                <!-- <td>{$vo.join_capital|default='--'}</td> -->
+                                <td>{$vo.linkman|default='--'}</td>
+                                <!-- <td>{$vo.linkposition|default='--'}</td> -->
+                                <td>{$vo.linktel|default='--'}</td>
+                                <td>{$vo.linkqq|default='--'}</td>
+                                <td>{$vo.linkwx|default='--'}</td>
+                                <!-- <td>{$vo.channel|default='--'}</td> -->
+                                <td>{$vo.hzs_mode|default='--'}</td>
+                                <td>{$vo.pay_mode|default='--'}</td>
+                                <!-- <td>{$vo.cooperate_price|default='--'}</td> -->
+                                <!-- <td>
+                                    <notempty name="vo['licence_logo']">
+                                        <a href="javascript:;" class="licence-logo">
+                                            <img src='//{:C('QINIU_DOMAIN')}/{$vo.licence_logo}' width='100' height='100' >
+                                            <else/>
+                                            --
+                                        </a>
+                                    </notempty>
+                                </td> -->
+                                <td><a href="/partner/detail/?id={$vo.id}"  target="_blank">{$vo.number}</a></td>
+                                <td>
+                                    {$vo.state}
+                                </td>
+                                <td><?php echo !empty($vo['test_starttime'])?date('Y-m-d',$vo['test_starttime']):'--';?>~<?php echo !empty($vo['test_endtime'])?date('Y-m-d',$vo['test_endtime']):'--';?></td>
+                                <td><?php echo !empty($vo['cooperate_starttime'])?date('Y-m-d',$vo['cooperate_starttime']):'--';?>~<?php echo !empty($vo['cooperate_endtime'])?date('Y-m-d',$vo['cooperate_endtime']):'--';?></td>
+                                <!-- <td>{$vo.cooperate_link|default='--'}</td> -->
+                                <td><eq name="vo.api_state" value="2">开启<else/>关闭</eq></td>
+                                <td>{$vo.aname|default='--'}</td>
+                                <!-- <td><?php echo !empty($vo['create_time'])?date('Y-m-d',$vo['create_time']):'--';?></td> -->
+                                <!--<td>{$vo.remark|default='&#45;&#45;'}</td>-->
+                                <td>
+                                    <a href="javascript:;" class="p-detail" data-id="{$vo.id}">详情</a>
+                                    <a href="/partner/detail/?id={$vo.id}" target="_blank"  data-id="{$vo.id}" data-name="{$vo.name}">匹配标识</a>
+                                    <a href="javascript:;" class="p-api" data-id="{$vo.id}">api配置</a>
+                                    <a href="/partner/add?id={$vo.id}" class="p-edit">编辑</a>
+                                    <a href="javascript:;" class="p-del" data-id="{$vo.id}">删除</a>
+                                </td>
+                        </tr>
+                        </volist>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+</div>
+<div class="box-footer clearfix">
+       {$page}
+</div>
+<!-- 详情弹框 -->
+<div class="detail clearfix">
+    <div class="detail-close">
+        <button class="button button-highlight button-square button-large "><i class="fa fa-close"></i></button>
+    </div>
+    <div class="w50 fl">
+        <span>合作商名称：</span><span id="h_name" class="h_detail"> </span>
+    </div>
+    <div class="w50 fl">
+        <span>联系人：</span><span id="h_linkman" class="h_detail">sss</span>
+    </div>
+    <div class="w50 fl">
+        <span>简称：</span><span id="h_short" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>联系人职位：</span><span id="h_linkposition" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>注册时间：</span><span id="h_join_time" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>联系电话：</span><span id="h_linktel" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>注册资本：</span><span id="h_join_capital" class="h_detail"><span></span>
+    </div>
+    <div class="w50 fl">
+        <span>QQ：</span><span id="h_linkqq" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>合作模式：</span><span id="h_cooperate_mode" class="h_detail"></span>
+    </div>
+    <div class="w50 fl">
+        <span>微信：</span><span id="h_linkwx" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span>结款方式：</span><span id="h_pay_mode" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span>合作价格：</span><span id="h_cooperate_price" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span>合作商推广渠道：</span><span id="h_channel" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span class="fl">合作链接：</span><span id="h_cooperate_link" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span>添加日期：</span><span id="h_create_time" class="h_detail"></span>
+    </div>
+    <div class="w100 fl">
+        <span class="fl">备注：</span><span id="h_remark" class="h_detail"></span>
+    </div>
+    <div class=" fl licence-logo">
+        <div>营业执照：</div>
+        <span id="h_licence_logo" class="h_detail"></span>
+
+    </div>
+</div>
+<!-- 删除弹框 -->
+<div class="delete">
+    <p>确认删除该合作商？</p>
+   <div class="d-btn">
+        <button class="d-qr">确认</button>
+        <button class="d-qx">取消</button>
+   </div>
+</div>
+<!-- 图片弹框 -->
+<div class="licence-img">
+    <div class="licence-close">
+        <button class="button button-highlight button-square button-large "><i class="fa fa-close"></i></button>
+    </div>
+    <img id="bigImg" width="100%" src='//{:C('QINIU_DOMAIN')}/{$vo.licence_logo}' >
+</div>
+<!-- 编辑api-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="padding:5px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center">API接口设置</h4>
+            </div>
+            <div class="modal-body">
+                <form id="myForm" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>aKey：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="akey" placeholder="首次保存后自动生成" readonly>
+                            <input type="hidden" name="api_id">
+                            <input type="hidden" name="companyid">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>cKey：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="ckey" placeholder="首次保存后自动生成" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4"><span style="color: red">*</span>渠道标识：</label>
+                        <div class="col-xs-6">
+                            <input class="form-control" type="text" name="source" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">开启状态：</label>
+                        <div class="col-xs-6">
+                            <label><input name="is_use" type="radio" value="2" />开启 </label>
+                            <label><input name="is_use" type="radio" value="1" checked/>关闭 </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btnSave"  type="button" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var starttime = '{$starttime}';
+    var nowtime = '{$nowtime}';
+    var need_time = '';
+    if(starttime){
+        need_time = starttime;
+    }else {
+        need_time = "16/04/2018";
+    }
+    $('.select2').select2({
+        allowClear: true,
+        language: "zh-CN"
+    });
+    $('#add-time').daterangepicker({
+        format: 'YYYY/MM/DD',
+        "alwaysShowCalendars": true,
+        linkedCalendars:false,
+        locale : {
+            applyLabel : '确定',
+            cancelLabel : '取消',
+            fromLabel : '起始时间',
+            toLabel : '结束时间',
+            customRangeLabel : '自定义',
+            daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+            monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                    '七月', '八月', '九月', '十月', '十一月', '十二月' ],
+            firstDay : 1
+        },
+        startDate: "{$starttime|default=''}",
+        endDate: "{$endtime|default=''}"
+    },
+    function(start, end, label) {
+        var hb = $("#addHuanBi").attr("checked") == "checked"?1:0;
+        var tb = $("#addTongBi").attr("checked") == "checked"?1:0;
+        $("input[name=start]").val(start.format('MM/DD/YY'));
+        $("input[name=end]").val(end.format('MM/DD/YY'));
+    });
+
+     $('.p-select').select2({
+        allowClear: true,
+        language: "zh-CN"
+    });
+     // 图片弹框
+     $('.licence-logo').click(function() {
+         var img = $(this).find('img').attr("src");
+         $("#bigImg").attr("src",img);
+        $('.licence-img').show();
+     });
+      $('.licence-close').click(function() {
+        $('.licence-img').hide();
+     });
+    //api弹框
+    $('#hezuoshang').on('click','.p-api',function(){
+        var id = $(this).attr("data-id");
+        $.ajax({
+            url: "/partner/getApiDetail",
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id:id
+            }
+        })
+            .done(function(data) {
+                $("input[name='api_id']").val();
+                $("input[name='akey']").val();
+                $("input[name='ckey']").val();
+                $("input[name='companyid']").val(id);
+                $("input[name='source']").val();
+                $("input:radio[value='1']").attr('checked','true');
+                if(data.status == '1'){
+                    $("input[name='api_id']").val(data.data.id);
+                    $("input[name='akey']").val(data.data.akey);
+                    $("input[name='ckey']").val(data.data.ckey);
+                    $("input[name='companyid']").val(data.data.companyid);
+                    $("input[name='source']").val(data.data.source);
+                    if(data.data.is_use == 2){
+                        $("input:radio[value='2']").attr('checked','true');
+                    }else{
+                        $("input:radio[value='1']").attr('checked','true');
+                    }
+                }
+                $('.modal').modal("show")
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请稍后重试~');
+            })
+    });
+    $('#btnSave').on('click',function(){
+        var api_id = $("input[name='api_id']").val();
+        var akey = $("input[name='akey']").val();
+        var ckey = $("input[name='ckey']").val();
+        var companyid = $("input[name='companyid']").val();
+        var source = $("input[name='source']").val();
+        var is_use = $('input:radio:checked').val();
+        $.ajax({
+            url: "/partner/saveApiDetail",
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                api_id:api_id,akey:akey,ckey:ckey,companyid:companyid,source:source,is_use:is_use
+            }
+        })
+            .done(function(data) {
+                if(data.status == '1'){
+                    alert(data.info);
+                    window.location = window.location;
+                }else{
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请稍后重试~');
+            })
+    });
+
+     //详情弹框
+      $('#hezuoshang').on('click','.p-detail',function(){
+
+        var id = $(this).attr("data-id");
+          $.ajax({
+              url: "/partner/getDetail",
+              type: 'POST',
+              dataType: 'JSON',
+              data: {
+                  id:id
+              }
+          })
+          .done(function(data) {
+              $(".h_detail").text('');
+              var info = data.data;
+              if(data.status == '1'){
+                  $("#h_name").text(info.name);
+                  $("#h_short").text(info.short);
+                  $("#h_join_time").text(info.join_time);
+                  $("#h_join_capital").text(info.join_capital);
+                  $("#h_cooperate_mode").text(info.cooperate_mode);
+                  $("#h_pay_mode").text(info.pay_mode);
+                  $("#h_cooperate_price").text(info.cooperate_price);
+                  $("#h_channel").text(info.channel);
+                  $("#h_cooperate_link").text(info.cooperate_link);
+                  $("#h_linktel").text(info.linktel);
+                  $("#h_create_time").text(info.create_time);
+                  $("#h_remark").text(info.remark);
+                  $("#h_linkman").text(info.linkman);
+                  $("#h_linkposition").text(info.linkposition);
+                  $("#h_linktel").text(info.linktel);
+                  $("#h_linkqq").text(info.linkqq);
+                  $("#h_linkwx").text(info.linkwx);
+                  if(info.licence_logo.length>0){
+                      $("#h_licence_logo").append("<img src='//{:C('QINIU_DOMAIN')}/"+info.licence_logo+"' width='100' height='100' >");
+                  }
+
+                  $('.detail').show();
+              }else{
+                  return false;
+              }
+          })
+          .fail(function(xhr) {
+              alert('操作失败,请稍后重试~');
+          })
+      });
+
+      $('.detail-close').click(function(event) {
+         $('.detail').hide();
+      });
+
+     // 合作商删除
+     $('#hezuoshang ').on('click','.p-del',function(){
+         var that = $(this);
+         $('.delete').show();
+         $('.d-qr').on('click',function(){
+
+             if($(this).attr("useful") == 1){
+                return false;
+             }else{
+                 $(this).attr("useful",'1');
+                 $('.delete').hide();
+                 var id = that.attr("data-id");
+                 $.ajax({
+                     url: "/partner/delCompany",
+                     type: 'POST',
+                     dataType: 'JSON',
+                     data: {
+                         id:id
+                     }
+                 })
+                 .done(function(data) {
+                     if(data.status == '1'){
+                         alert(data.info);
+                         window.location = window.location;
+                     }else{
+                         alert(data.info);
+                     }
+                 })
+                 .fail(function(xhr) {
+                     alert('操作失败,请稍后重试~');
+                 })
+
+             }
+
+
+         });
+         $('.d-qx').on('click',function(){
+             $('.delete').hide();
+         });
+        var _this = $(this);
+        $('.d-qr').on('click',function(){
+            $('.delete').hide();
+            _this.parent().parent().remove();
+         });
+        $('.d-qx').on('click',function(){
+            $('.delete').hide();
+         });
+     });
+
+
+
+    $('#search').on('click',function () {
+        var name = $('#hzs_name').val();
+        var company_id = $('#company_id').val();
+        var cooperate_mode = $('#hzs_mode').val();
+        var state = $('#hzs_state').val();
+        var yy_id = $('#hzs_duijie').val();
+        var starttime =  $('input[name=daterangepicker_start]').val();
+        var endtime = $('input[name=daterangepicker_end]').val();
+        var api_state = $('#hzs_api_state').val();
+        window.location.href = "/partner/index/?name="+name+'&cooperate_mode='+cooperate_mode+'&state='+state+'&yy_id='+yy_id+'&starttime='+starttime+'&endtime='+endtime+'&api_state='+api_state+'&company_id='+company_id;
+    });
+    $(function(){
+        $(document).on('click','.p-qr',function(){
+            var jsonData = new Array();
+            var companyid = $('#nameHzs').attr('data-id');
+            $('#hsz_tbody tr').each(function(i){
+                var that = $(this);
+                var option = that.find('select').val();
+                var checkbox =  that.find('input:checkbox');
+                var uv = '';
+                var ip = '';
+                var zhuce = '';
+                var real_zhuce = '';
+                $.each(checkbox,function(i){
+//                    data.push({name:"fen_id",value:$("input[name=fen_id]").val()});
+//                    data.push({name:"chk_id",value:$("input[name=chk_id]").val()});
+                    if(i == 0){
+                        if(this.checked){
+                            uv = 1;
+                        }else{
+                            uv = 0;
+                        }
+                    }
+                    if(i == 1){
+                        if(this.checked){
+                           ip = 1;
+                        }else{
+                            ip = 0;
+                        }
+                    }
+                    if(i == 2){
+                        if(this.checked){
+                            zhuce = 1;
+                        }else{
+                            zhuce = 0;
+                        }
+                    }
+                    if(i == 3){
+                        if(this.checked){
+                            real_zhuce = 1;
+                        }else{
+                            real_zhuce = 0;
+                        }
+                    }
+                });
+                jsonData.push({"company":companyid,"source":option,"uv":uv,"ip":ip,"zhuce":zhuce,"real_zhuce":real_zhuce});
+
+            })
+
+            $.ajax({
+                url: '/partner/addSource/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{data:jsonData}
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    alert("添加成功");
+                    window.location.href = window.location.href;
+                } else {
+                    alert(data.info);
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                alert('发生未知错误，请稍后重试~');
+                return false;
+            })
+
+        })
+        $('.hzsName').on('click',function () {
+            var that = $(this);
+            var account = that.parent().siblings('.account').html();
+            $.ajax({
+                url: '/partner/gotoHzs/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{account:account}
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    // window.location.href='http://168hzs.qizuang.com';
+                    window.open('http://168hzs.qizuang.com');
+                } else {
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                alert('发生未知错误，请稍后重试~');
+                return false;
+            })
+        })
+
+
+    })
+
+
+</script>
+</block>

@@ -1,0 +1,169 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网专题管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/meituzt/css/meituzt.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>美图专题管理</h1>
+    </section>
+    <section class="content">
+        <div class="box no-border">
+            <div class="box-body">
+                <form id="searchForm" action="" method="GET">
+                <div class="pull-left search-box">
+                    <div class="search-title">ID或标题</div>
+                    <div>
+                        <input type="text" name="title" class="form-control" placeholder="ID或标题">
+                    </div>
+                </div>
+                <div class="pull-left search-box">
+                    <div class="search-title">启用状态</div>
+                    <div>
+                        <select name="status" class="form-control">
+                            <option value="0">请选择</option>
+                            <option value="1">已审核</option>
+                            <option value="2">未审核</option>
+                            <option value="3">预发布</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pull-left search-box">
+                    <div class="search-title">推荐状态</div>
+                    <div>
+                        <select name="is_home" class="form-control">
+                            <option value="0">请选择</option>
+                            <option value="1">未推荐</option>
+                            <option value="2">已推荐</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pull-left search-box">
+                    <div class="search-title">精选状态</div>
+                    <div>
+                        <select name="is_choice" class="form-control">
+                            <option value="0">请选择</option>
+                            <option value="1">精选</option>
+                            <option value="2">未精选</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pull-left search-box">
+                    <div class="search-title">&nbsp;</div>
+                    <div>
+                       <button class="btn btn-primary" type="submit" id="search">&nbsp; <i class="fa fa-search"></i>&nbsp;查询&nbsp;&nbsp;</button>
+                    </div>
+                </div>
+                <div class="pull-right search-box text-align-right">
+                    <div class="search-title">&nbsp;</div>
+                    <div>
+                       <a href="/meituzt/add" class="btn btn-info">&nbsp;&nbsp;新建专题&nbsp;&nbsp;</a>
+                    </div>
+                </div>
+                </form>
+                <div class="clear-float"></div>
+                <table class="data-table table table-hover table-bordered">
+                    <thead>
+                        <th width="70">ID</th>
+                        <th class="text-align-left">标题</th>
+                        <th width="80">推荐状态</th>
+                        <th width="80">精选状态</th>
+                        <th width="100">发布人</th>
+                        <th width="160">创建时间</th>
+                        <th width="160">发布时间</th>
+                        <th width="100">修改人</th>
+                        <th width="160">修改时间</th>
+                        <th width="80">启用状态</th>
+                        <th width="80">操作</th>
+                    </thead>
+                    <tbody>
+                        <volist name="list" id="v">
+                        <tr>
+                            <td>{$v.id}</td>
+                            <td class="text-align-left">{$v.title}</td>
+                            <td><if condition="$v.is_home EQ '1' ">否<else />是</if></td>
+                            <td><if condition="$v.is_choice EQ '1' ">是<else />否</if></td>
+                            <td>{$v.name}</td>
+                            <td>{$v.create_time|date='Y-m-d H:i:s',###}</td>
+                            <td>
+                                <eq name="v.status" value="3">
+                                    -
+                                <else />
+                                    {$v.time|date='Y-m-d H:i:s',###}
+                                </eq>
+                            </td>
+                            <td>{$v.last_username|default="-"}</td>
+                            <td><empty name="v.last_time">-<else />{$v.last_time|date='Y-m-d H:i:s',###}</empty></td>
+                            <td>
+                                <switch name="v.status">
+                                    <case value="1"><span>已审核</span></case>
+                                    <case value="2"><span class="text-yellow">未审核</span></case>
+                                    <case value="3"><span class="text-aqua">预发布</span></case>
+                                </switch>
+                            </td>
+                            <td>
+                                <a href="/meituzt/edit?id={$v.id}" class="fa fa-pencil"></a>
+                                <if condition="!in_array($v['status'], array('1'))">
+                                    <a href="javascript:void(0)" class="submit-status" data-id="{$v.id}" data-status="1">
+                                        <span title="发布" class="fa fa-eye-slash"></span>
+                                    </a>
+                                <else />
+                                    <a href="javascript:void(0)" class="submit-status" data-id="{$v.id}" data-status='2' >
+                                        <span title="撤销发布" class="fa fa-eye"></span>
+                                    </a>
+                                </if>
+                            </td>
+                        </tr>
+                        </volist>
+                    </tbody>
+                </table>
+            </div>
+            <div class="box-footer no-border fenye">
+                <div class="col-xs-12">{$page}</div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('select[name=is_home]').val('{$Think.get.is_home|default=0}');
+    $('select[name=status]').val('{$Think.get.status|default=0}');
+    $('select[name=is_choice]').val('{$Think.get.is_choice|default=0}');
+    $('input[name=title]').val('{$Think.get.title}');
+
+    //状态按钮
+    $('.submit-status').click(function() {
+        if (confirm("确认进行该操作吗？")) {
+            var id = $(this).attr('data-id');
+            $.ajax({
+                url: '/meituzt/setstatus/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    status:$(this).attr('data-status')
+                }
+            })
+            .done(function(data) {
+                if ('0' == data.status) {
+                    alert(data.info);
+                } else {
+                    window.location.href = window.location.href;
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败,网络错误！');
+            })
+        }
+    })
+})
+</script>
+</block>

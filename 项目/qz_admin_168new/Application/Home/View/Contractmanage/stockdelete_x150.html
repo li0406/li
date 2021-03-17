@@ -1,0 +1,139 @@
+<!--库存删除-->
+<link rel="stylesheet" type="text/css" href="/assets/home/contractmanage/css/stockdelete.css?v={:C('STATIC_VERSION')}">
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">库存删除</span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line"></span>
+    </div>
+    <div class="step1 step-container kucunshanchu">
+        <div class="step_leftPart jvzhongxs">
+            <div class="input_box_line kcscbiaodan clearfix">
+                <div class="" style="text-align: left;">
+                    <span class="qujian qujian2" style="color: red;">重要提示：输入格式为7位有效数字</span>
+                </div>
+                <div class="qujiandg">
+                    <span class="qujian qujian2">区间</span>
+                    <span class="dange dange2">单个</span>
+                </div>
+                <span class="pull-left label_name">
+                    输入合同编号：
+                </span>
+                <span class="pull-left">
+                    <input type="text" name="step1_hetong_inCode1" class="startCode" data-category="1" data-url='/salesetting/findusers/' value="">
+                </span>
+                <span class="pull-left middle_line">一</span>
+                <span class="pull-left">
+                    <input type="text" name="step1_hetong_inCode2" class="endCode" value="" data-category="1" data-url='/salesetting/findusers/'>
+                </span>
+                <span class="pull-left dangeshuru">
+                    <input type="text" name="step1_hetong_inCode2" class="explicitCode" value="" data-category="1" data-url='/salesetting/findusers/'>
+                </span>
+                <div class="pull-left">
+                    <button class="button small_button nobg submit-delete" data-category="1">
+                        确认删除
+                    </button>
+                </div>
+            </div>
+            <div class="input_box_line kcscbiaodan">
+                <div class="qujiandg">
+                    <span class="qujian qujian2">区间</span>
+                    <span class="dange dange2">单个</span>
+                </div>
+                <span class="pull-left label_name">
+                    输入票据编号：
+                </span>
+                <span class="pull-left">
+                    <input type="text" name="step1_hetong_inCode1" class="startCode" value="" data-category="2" data-url='/salesetting/findusers/'>
+                </span>
+                <span class="pull-left middle_line">一</span>
+                <span class="pull-left">
+                    <input type="text" name="step1_hetong_inCode2" class="endCode" value="" data-category="2" data-url='/salesetting/findusers/'>
+                </span>
+                <span class="pull-left dangeshuru">
+                    <input type="text" name="step1_hetong_inCode2" class="explicitCode" value="" data-category="2" data-url='/salesetting/findusers/'>
+                </span>
+                <div class="pull-left">
+                    <button class="button small_button nobg  submit-delete" data-category="2">
+                        确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $('input').on('keyup paste',function(){
+        var category = $(this).attr('data-category');
+        var nextNode=$(this).next(".tishi_box").length;
+        if(nextNode==0){
+            $(this).after("<div class='tishi_box'><ul></ul></div>");
+        }
+        var text = $(this).val();
+        var nextUl = $(this).next().children('ul');
+         $.ajax({
+            url: '/contractmanage/piaojucontractapi/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                category:category,
+                query:text
+            }
+        })
+        .done(function(data) {
+            $(nextUl).html('');
+            if (data.status == '1') {
+                if(data.data != ''){
+                    for(var i in data.data){
+                        var contentStr = "<li data-id="+ data.data[i].id +" class='search_result_li'>"+ data.data[i].contractid +"</li>";
+                        $(nextUl).append(contentStr);
+                    }
+                }else{
+                    $(nextUl).append('没有搜索到~');
+                }
+            } else {
+                $(nextUl).append('没有搜索到~');
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生未知错误，请联系技术部门~');
+            return false;
+        })
+    });
+    $("body").on("click","li",function(){
+        var value=$(this).text();
+        if($(this).hasClass('search_result_li')){
+             $(this).parent().parent().prev("input").val(value);
+             $(this).parent().remove();
+        }
+    });
+    $(document).click(function(event){
+        $(".tishi_box").remove();
+    });
+    $('.submit-delete').click(function(event) {
+        var category = $(this).attr('data-category');
+        var startCode = $(this).parent().parent().find('.startCode').val();
+        var endCode = $(this).parent().parent().find('.endCode').val();
+        var explicitCode = $(this).parent().parent().find('.explicitCode').val();
+        $.ajax({
+            url: '/contractmanage/stockdelete/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                category:category,
+                startCode:startCode,
+                endCode:endCode,
+                explicitCode:explicitCode
+            }
+        })
+        .done(function(data) {
+            alert(data.info);
+        })
+        .fail(function(xhr) {
+            alert('网络错误，请稍后重试')
+        });
+    });
+});
+</script>

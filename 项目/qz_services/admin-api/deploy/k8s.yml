@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-api
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: admin-api
+  template:
+    metadata:
+      labels:
+        app: admin-api
+    spec:
+      containers:
+      - name: admin-api
+        # image: registry.cn-shanghai.aliyuncs.com/qizuang/admin-api:master-040ce9e
+        image: <K8S_IMAGE>
+        imagePullPolicy: Always
+        # command: [ "echo", "SUCCESS" ]
+        ports:
+        - containerPort: 20000
+          name: 20000tcp00
+          protocol: TCP
+        # envFrom:
+        # - configMapRef:
+        #     name: env-app-config
+        volumeMounts:
+          - mountPath: /data/app/admin-api/config
+            name: vol1
+      imagePullSecrets:
+      - name: "container-registry-a"
+      volumes:
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: admin-api
+                path: config.toml
+            name: app-config
+            optional: false
+          name: vol1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: admin-api
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: admin-api
+  ports:
+    - protocol: TCP
+      port: 20000
+      targetPort: 20000
+  type: ClusterIP

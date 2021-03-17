@@ -1,0 +1,133 @@
+
+<div class="win_box win_sms">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="win_box_out">
+        </div>
+        <div class="win_box_in">
+            <div class="win_smsmain">
+                <h1>手机验证</h1>
+                <h2>为了给您提供更快速高效的服务、我们会给您手机免费发送短信、其中包括一个6位纯数字的验证信息、请您在页面填写。</h2>
+                <ul>
+                    <li class="numb"><strong>您的称呼：</strong>
+                        <input name="name" class="type" type="text">
+                        <input name="sex" type="radio" class="radio icheck" value="先生" checked><em>先生</em>
+                        <input name="sex" type="radio" value="女士" class="radio icheck"><em>女士</em>
+                    </li>
+                    <li class="mob"><strong>手机号码：</strong>
+                        <input name="tel" class="type" type="text">
+                    </li>
+                    <li class="numb"><strong>验证码：</strong>
+                        <input name="code" class="type" type="text">
+                        <button class="sms">获取短信验证码</button>
+                    </li>
+                    <li class="tips">验证码有效期为30分钟</li>
+                    <li>
+                        <div class="tip"></div>
+                    </li>
+                </ul>
+                <a class="botton" href="javascript:void(0)">提交</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("body").keypress(function(event) {
+        if (event.key == "Esc") {
+            $(".win_sms").remove();
+            $(".popOut").remove();
+        }
+    });
+
+    $(".win_box_bg").click(function(event) {
+        $(".win_sms").remove();
+        $(".popOut").remove();
+    });
+
+    $('.icheck').iCheck({
+        checkboxClass: 'icheckbox_minimal-red',
+        radioClass: 'iradio_minimal-red',
+        increaseArea: '' // optional
+    });
+
+    $(".win_smsmain .sms").click(function(event) {
+        $(".win_smsmain .tip").html("");
+        $(".win_smsmain .focus").removeClass("focus");
+        var _this = $(this);
+        _this.attr("disabled","disabled");
+        if(!App.validate.run($(".win_smsmain input[name=tel]").val(),"string")){
+            $(".win_smsmain input[name=tel]").focus();
+            $(".win_smsmain input[name=tel]").addClass('focus');
+            $(".win_smsmain .tip").html("请填写手机号");
+            return false;
+        }
+
+        if(!App.validate.run($(".win_smsmain input[name=tel]").val(),"moblie")){
+            $(".win_smsmain input[name=tel]").focus();
+            $(".win_smsmain input[name=tel]").addClass('focus');
+            $(".win_smsmain .tip").html("无效的手机号");
+            return false;
+        }
+        sendSms($(".win_smsmain input[name=tel]").val(),_this);
+        // _this.popVerify(function(input){
+        //         $.ajax({
+        //             url: '/checkverify',
+        //             type: 'POST',
+        //             dataType: 'JSON',
+        //             data: {
+        //                 code:input.val()
+        //             },
+        //         })
+        //         .done(function(data) {
+        //             if(data.status == 1){
+        //                 $(".popOut").remove();
+        //                 sendSms($(".win_smsmain input[name=tel]").val(),_this);
+        //             }else{
+        //                 $.pt({
+        //                     target: input,
+        //                     content: data.info,
+        //                     width: 'auto'
+        //                 });
+        //             }
+        //         })
+        //         .fail(function(xhr) {
+        //             $.pt({
+        //                 target: input,
+        //                 content: "提交错误,请刷新重试",
+        //                 width: 'auto'
+        //             });
+        //         });
+        //     });
+    });
+
+    function sendSms(tel,target){
+        var json ={};
+        if('{$source}' != ""){
+            json = JSON.parse('{$source}');
+        }
+        json["tel"] = tel;
+        json["save"] = "{$isSave}";
+        json["safekey"] = "{$safekey}";
+        json["safecode"] = "{$safecode}";
+        json["ssid"] = "{$ssid}";
+        json["name"] = $(".win_smsmain input[name=name]").val();
+        json["sex"] = $(".win_smsmain input[name=sex]:checked").val();
+        $.ajax({
+            type : "POST",
+            url : "{$SCHEME_HOST.scheme_full}oauthtmp.qizuang.com/Sms/sendsms",
+            dataType : "json",
+            data:json,
+            success : function(data){
+                if(data.status == 0){
+                    target.attr("disabled",false);
+                    $(".win_smsmain .tip").html(data.info);
+                }
+            },
+            error:function(xhr){
+                target.attr("disabled",false);
+                $(".win_smsmain .tip").html("发送失败,请稍后再试！");
+            }
+        });
+    }
+</script>

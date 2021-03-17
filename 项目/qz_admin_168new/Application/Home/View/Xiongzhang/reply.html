@@ -1,0 +1,360 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/home/xiongzhang/css/huifu.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+ <section class="content-header">
+        <h1>熊掌号菜单管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="menu">
+                    <div class="col-sm-1">熊掌号功能：</div>
+                    <div class="col-sm-1 zidong active"><a href="/xiongzhang/reply/">自动回复</a></div>
+                        <div class="col-sm-1 zidingyi "><a href="/xiongzhang/">自定义菜单</a></div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="msg col-sm-10">自动回复：通过编辑内容或关键词规则，快速进行自动回复设置。如具备开发能力，可更灵活地使用该功能。关闭自动回复之后，将立即对所有用户生效。
+                </div>
+                <div class="col-sm-2 kaiguan">
+                    <div class="switch switch-mini">
+                        <input type="checkbox" checked />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 box">
+                <div class="title">被关注回复</div>
+                <div class="reply-box">
+                    <div class="col-sm-1 guanzhu-reply current">被关注回复</div>
+                    <div class="col-sm-1 shoudao-reply">收到消息回复</div>
+                    <div class="col-sm-1 guanjian-reply">关键词回复</div>
+                </div>
+                <div class="guanzhu-reply-box">
+                    <!-- 图文类型 -->
+                    <div class="full-text-box content-type-container" id="text1">
+                        <!-- 图文类型-文字类型 -->
+                        <div class="edit-type-tab">
+                             <span class="text-type text-active" data-type="view_text"><i class="fa fa-text-width"></i>文字</span>
+                             <span class="text-type" data-type="view_limited"><i class="fa fa-picture-o fa-text-width"></i>图文</span>
+                        </div>
+                        <!-- 图文类型-素材类型容器 -->
+                        <div class="text-type-content">
+                            <div class="tuwen">
+                                <div class="add-tuwen">
+                                    <div class="file-box">
+                                    </div>
+                                    <p>从素材库中选择</p>
+                                </div>
+                                <div class="tw-content">
+
+                                </div>
+                            </div>
+                            <!-- 图文类型-文字类型容器 -->
+                            <textarea name="" class="textarea showBlock"></textarea>
+                        </div>
+                    </div>
+                    <div class="b-d-r">
+                        <div class="baocun col-sm-1 cur" data-tab="0" data-sub-type="view_text" data-type="subscribe" >保存</div>
+                        <div class="shanchu col-sm-2">删除回复</div>
+                    </div>
+                </div>
+                <div class="shoudao-reply-box">
+                    <!-- 图文类型 -->
+                    <div class="full-text-box content-type-container" id="text2">
+                        <!-- 图文类型-文字类型 -->
+                        <div class="edit-type-tab">
+                             <span class="text-type text-active" data-type="view_text"><i class="fa fa-text-width"></i>文字</span>
+                             <span class="text-type" data-type="view_limited"><i class="fa fa-file-image-o fa-text-width"></i>图文</span>
+                             <span class="text-type" data-type="view_image"><i class="fa fa-picture-o fa-text-width"></i>图片</span>
+                        </div>
+                        <!-- 图文类型-素材类型容器 -->
+                        <div class="text-type-content">
+                            <!-- 图文类型-文字类型容器 -->
+                            <textarea name="" class="textarea showBlock"></textarea>
+                            <div class="tuwen">
+                                <div class="add-tuwen">
+                                    <div class="file-box">
+                                    </div>
+                                    <p>从素材库中选择</p>
+                                </div>
+                                <div class="tw-content">
+                                </div>
+                            </div>
+                            <div class="img">
+                                <div class="add-img">
+                                    <div class="file-box">
+                                    </div>
+                                    <p>从素材库中选择</p>
+
+                                </div>
+                                <div class="tw-img-content">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="b-d-r">
+                        <div class="baocun col-sm-1 cur" data-tab="1"  data-sub-type="view_text" data-type="message" >保存</div>
+                        <div class="shanchu col-sm-2">删除回复</div>
+                    </div>
+                </div>
+                <div class="guanjian-reply-box">
+                    <div class="col-xs-12 search-box">
+                        <div class="add-reply col-sm-1" id="add-reply">添加回复</div>
+                    </div>
+                    <div class="search-list col-xs-12">
+                        <table id="keyword-table" class="table">
+                            <thead>
+                                <tr>
+                                    <th>规则名称</th>
+                                    <th>关键词</th>
+                                    <th>回复内容</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="wordList" id="vo">
+                                <tr>
+                                    <td>{$vo.rule}</td>
+                                    <td>{$vo.keyword|default="-"}</td>
+                                    <td>{$vo.content}</td>
+                                    <td>
+                                        <i class="fa fa-pencil-square-o" data-id="{$vo.id}"></i>
+                                        <i class="fa fa-trash-o" data-id="{$vo.id}"></i>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="edit-list col-xs-12">
+                        <form id="keyword-form">
+                        <div class="guize-name">
+                            <i class="star">*</i><span>规则名称</span><input name="rule" type="text" maxlength="60">
+                            <p class="tishi">规则名最多为60个字</p>
+                        </div>
+                        <div class="guanjianci">
+                            <i class="star">*</i><span>关键词</span><input type="text" name="keyword">
+                            <p class="tishi">关键词，必填项，各关键词之间用英文逗号分隔</p>
+                        </div>
+                        <div class="huifu-neirong">
+                            <div class="edit clearfix">
+                                <div class="edit-na">
+                                    <i class="star">*</i><span class="neirong">回复内容</span>
+                                </div>
+                            </div>
+                            <!-- 图文类型 -->
+                            <div class="full-text-box content-type-container" id="text3">
+                                <!-- 图文类型-文字类型 -->
+                                <div class="edit-type-tab">
+                                     <span class="text-type text-active" data-type="view_text"><i class="fa fa-text-width"></i>文字</span>
+                                     <span class="text-type" data-type="view_limited"><i class="fa fa-file-image-o fa-text-width"></i>图文</span>
+                                     <span class="text-type" data-type="view_image"><i class="fa fa-picture-o fa-text-width"></i>图片</span>
+                                </div>
+                                <!-- 图文类型-素材类型容器 -->
+                                <div class="text-type-content">
+                                    <div class="tuwen">
+                                        <div class="add-tuwen">
+                                            <div class="file-box">
+                                            </div>
+                                            <p>从素材库中选择</p>
+                                        </div>
+                                        <div class="tw-content"></div>
+                                    </div>
+                                    <div class="img">
+                                        <div class="add-img">
+                                            <div class="file-box"></div>
+                                            <p>从素材库中选择</p>
+                                        </div>
+                                        <div class="tw-img-content"></div>
+                                    </div>
+                                    <textarea id="add-shuju" class="textarea showBlock"></textarea>
+                                </div>
+                            </div>
+                            <div class="b-d-r">
+                                <div class="baocun col-sm-1 cur" data-tab="3" data-sub-type="view_text" data-type="keyword" >保存</div>
+                                <div class="shanchu col-sm-2">删除回复</div>
+                                <div class="back col-sm-2">返回</div>
+                                <input type="hidden" name="id" />
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mask"></div>
+        <!--选择素材弹窗-->
+        <div id="sucai-box" class="select-sucai-box">
+            <div class="select-box-header">
+                <div class="pull-left">选择素材</div>
+                <div class="pull-right" ><i class="fa fa-close" id="close-sec"></i></div>
+            </div>
+            <div class="select-search-box">
+                <input type="text" name="search-sucai"><i class="fa fa-search"></i>
+            </div>
+            <div class="sucai-content">
+                <div id="sc-contanier">
+                    <volist name="materialList" id="vo">
+                        <div class="sucai-item" data-id="{$vo.media_id}" data-select="false">
+                            <div class="sc-detail">
+                                <img  src="{$vo.news_item.src|default='/assets/home/xiongzhang/img/placeholder-xiongzhang.png'}" />
+                                <span>{$vo.news_item.title}</span>
+                            </div>
+                        </div>
+                    </volist>
+                </div>
+            </div>
+            <div class="sucai-bottom">
+                <button class="btn btn-primary" id="select-sc">确定</button>
+                <button class="btn btn-defalut" id="cancel-sc">取消</button>
+            </div>
+        </div>
+
+        <div id="img-box" class="select-sucai-box">
+            <div class="select-box-header">
+                <div class="pull-left">选择素材</div>
+                <div class="pull-right" ><i class="fa fa-close" id="close-sec"></i></div>
+            </div>
+            <div class="select-search-box">
+                <input type="text" name="search-sucai"><i class="fa fa-search"></i>
+            </div>
+            <div class="sucai-content">
+                <div id="sc-img-contanier">
+                    <volist name="imgList" id="vo">
+                    <div class="sucai-item sucai-img-item" data-id="{$vo.media_id}" data-select="false">
+                        <div class="sc-detail ">
+                            <img  src="{$vo.news_item.src|default='/assets/home/xiongzhang/img/placeholder-xiongzhang.png'}" />
+                                <span>{$vo.news_item.title}</span>
+                            </div>
+                        </div>
+                    </volist>
+                </div>
+            </div>
+            <div class="sucai-bottom">
+                <button class="btn btn-primary" id="select-img-sc">确定</button>
+                <button class="btn btn-defalut" id="cancel-img-sc">取消</button>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/xiongzhang/js/pubul.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/xiongzhang/js/xiongzhang.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var p =  2;
+    var p1 = 2;
+    var imgContainer = $('#sc-img-contanier',$("#img-box"));
+    var container = $('#sc-contanier');
+    $(function(){
+        bind_content('{$subscribe|json_encode}',$(".guanzhu-reply-box"));
+        bind_content('{$message|json_encode}',$(".shoudao-reply-box"));
+        $('#keyword-table').DataTable({
+            responsive: false,
+            searching:true,
+            bLengthChange:false,
+            oLanguage: {
+                "sLengthMenu": "每页显示 _MENU_ 条记录",
+                "sZeroRecords": "对不起，查询不到任何相关数据",
+                "sInfo": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_条记录",
+                "sInfoEmtpy": "找不到相关数据",
+                "sInfoFiltered": "数据表中共为 _MAX_ 条记录)",
+                "sProcessing": "正在加载中...",
+                "sSearch": "",
+                "oPaginate": {
+                     "sFirst": "第一页",
+                     "sPrevious":" 上一页 ",
+                     "sNext": " 下一页 ",
+                     "sLast": " 最后一页 "
+                },
+                "sSearchPlaceholder":"搜索关键词/规则名称",
+            },
+            paging: false,
+            info:false,
+            ordering:false
+        });
+
+        $(".sucai-content",$("#sucai-box")).scroll(function(){
+            var _this =  $(this);
+            var scrollTop = _this.scrollTop();
+          　var scrollHeight = $("#sc-contanier").height();
+        　　var windowHeight = $(this).height();
+        　　if((scrollTop + windowHeight) == scrollHeight ){
+    　　　　     $.ajax({
+                    url: '/xiongzhang/getmateriallist/',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {p: p}
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        if (data.data != null && data.data != false) {
+                            p = data.page;
+                            for(var i in data.data) {
+                                var child = data.data[i];
+                                var src = child.news_item.src == null?'/assets/home/xiongzhang/img/placeholder-xiongzhang.png':child.news_item.src;
+                                var tmp = $('<div class="sucai-item" data-id="'+child.media_id+'"  data-select="false"><div class="sc-detail"><img  src="'+src+'" /><span>'+child.news_item.title+'</span></div></div>');
+                                container.prepend(tmp).masonry( 'prepended', tmp );
+                            }
+                            isloading = false;
+                            container.imagesLoaded( function() {
+                                container.masonry('layout');
+                            });
+
+                            $(".sucai-content",$("#sucai-box")).scrollTop(0);
+                        } else {
+                            alert("没有数据了");
+                        }
+                    }
+                });
+        　　}
+        });
+
+
+        $(".sucai-content",$("#img-box")).scroll(function(){
+            var _this =  $(this);
+            var scrollTop = _this.scrollTop();
+          　var scrollHeight = $("#sc-img-contanier").height();
+        　　var windowHeight = $(this).height();
+        　　if((scrollTop + windowHeight) == scrollHeight ){
+
+    　　　　     $.ajax({
+                    url: '/xiongzhang/getmateriallist/',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {p: p1,type:'image'}
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        if (data.data != null && data.data != false ) {
+                            p1 = data.page;
+
+                            for(var i in data.data) {
+                                var child = data.data[i];
+                                var src = child.news_item.src == null?'/assets/home/xiongzhang/img/placeholder-xiongzhang.png':child.news_item.src;
+                                var tmp = $('<div class="sucai-item sucai-img-item" data-id="' + child.media_id +'"  data-select="false"><div class="sc-detail"><img  src="'+src+'" /><span>'+child.news_item.title+'</span></div></div>');
+                                 imgContainer.prepend(tmp).masonry( 'prepended', tmp );
+                            }
+                            imgContainer.imagesLoaded( function() {
+                                imgContainer.masonry('layout');
+                            });
+                            isloading = false;
+                            $(".sucai-content",$("#img-box")).scrollTop(0);
+                        } else {
+                            alert("没有数据了");
+                        }
+                    }
+                });
+        　　}
+        });
+    });
+</script>
+</block>

@@ -1,0 +1,304 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/"/>
+    <link href="/assets/mobile/meitu/css/meitu.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/video/css/dropload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/meitu/css/swiper-3.3.1.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/meitu/css/meituztlist_m.2.8.4.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$banner.0.thumb}" />
+</block>
+<block name="top">
+
+<div class="m-header-his">
+    <i class="fa fa-angle-left"></i>
+</div>
+ <a href="/{$cityInfo.bm}/" class="m-header-left"></a>
+<div class="m-header-tit">精品专题</div>
+</block>
+<block name="content">
+    <article>
+    <div class="gl-slide">
+    <div class="swiper-container swiper-container-horizontal">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide banner-meitu" data-tag="M-13">
+            <img src="/assets/mobile/meitu/img/zt-banner.png" />
+        </div>
+    <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="4" style="width: 375px;">
+      <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/zhuanti/15/"> <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/zhuanti/20160823/57bc085f23986-slt930.jpg" alt="" /></a>
+    </div>
+     <volist name="banner" id="vo">
+         <div class="swiper-slide">
+             <a href="{$vo.url}"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.thumb}" alt="{$vo.title}" /><p>{$vo.title}</p></a>
+         </div>
+     </volist>
+     <div class="swiper-slide">
+        <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/baojia?src=ym-m-7" rel='nofollow'>
+            <img src="//{:C('QINIU_DOMAIN')}/webstatic/img/zt/banner.png"/>
+        </a>
+    </div>
+    </div>
+   </div>
+  </div>
+       <div class="zhutinr">
+       	  <ul class="list">
+              <volist name="list" id="vo">
+                  <!--$i是从1开始的-->
+                  <if condition="$i % 2 == 1">
+                      <li>
+                          <a href="/zt/{$vo.id}.html">
+                              <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.thumb}" alt="">
+                              <div class="title_ms">{$vo.title|mbstr=0, 10, 'utf-8', false}</div>
+                          </a>
+                      </li>
+                  <else />
+                      <li>
+                          <a href="/zt/{$vo.id}.html">
+                              <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.thumb}" alt="">
+                              <div class="title_ms">{$vo.title|mbstr=0, 10, 'utf-8', false}</div>
+                          </a>
+                      </li>
+                  </if>
+              </volist>
+       	  </ul>
+       </div>
+    </article>
+
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <!-- <include file="Common:float-sj" /> -->
+    <include file="Common/footfadantc"/>
+    <include file="Common/yima_adv" ymid='ym-m-7' type="li" style="display: none" imgsrc="/webstatic/img/adml-1.png"/>
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/mobile/video/js/dropload.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/swiper/swiper-3.3.1.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+       var mySwiper = new Swiper('.swiper-container', {
+            //移动端轮播
+            pagination : '.swiper-pagination',
+            autoplayDisableOnInteraction : false,
+            loop : true,
+            autoplay: 4000,//可选选项，自动滑动
+            initialSlide :0,
+            observer:true,//修改swiper自己或子元素时，自动初始化swiper
+            observeParents:true//修改swiper的父元素时，自动初始化swiper
+        });
+
+        $(function(){
+            var hongbao = localStorage.hongbao;
+            if(hongbao == 1){
+                $('.red_box').css('display','none');
+            }
+        });
+
+        var cityId = "{$cityInfo.id}";
+
+        // 置顶
+        $(window).on("scroll", function(){
+            if($(document).scrollTop()>="1000"){
+                $('#gotop').addClass('show');
+            }else{
+                $('#gotop').removeClass('show');
+            }
+        });
+
+        // 红包部分
+        (function(){
+            var timer = setTimeout(function(){
+                $('.red_box').addClass('animated wobble show');
+
+                var timer1 = setTimeout(function(){
+                    //$('.red_box').removeClass('animated wobble');
+                    clearTimeout(timer1);
+                },1000)
+                clearTimeout(timer);
+            },800);
+        })();
+
+
+        (function(){
+
+            var page = 1;
+
+    // dropload 下拉加载数据
+    $('.zhutinr').dropload({
+        scrollArea : window,
+        loadDownFn : function(me){
+            page++;
+            // 拼接HTML
+            var result = '';
+            $.ajax({
+                type: 'GET',
+                url: '{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/meitu/meituztlist?p='+page,
+                dataType: 'json',
+                success: function(data){
+                    if (data.status == 1) {
+                        var data = data.data;
+                        for(var i=0; i<data.length; i++){
+                            if(i % 2 == 0){
+                                result = result + '<li><a href="/zt/'+ data[i].id +'.html"><img src="{$SCHEME_HOST.scheme_full}{:C(\'QINIU_DOMAIN\')}/'+ data[i].thumb +'" alt="">' +
+                                    '<div class="title_ms">'+ data[i].title +'</div></a></li>';
+                            }else{
+                                result = result + '<li class="bianjv"><a href="/zt/'+ data[i].id +'.html"><img src="{$SCHEME_HOST.scheme_full}{:C(\'QINIU_DOMAIN\')}/'+ data[i].thumb +'" alt="">' +
+                                    '<div class="title_ms">'+ data[i].title +'</div></a></li>';
+                            }
+                        }
+                    // 如果没有数据
+                    }else{
+                        // 锁定
+                        me.lock();
+                        // 无数据
+                        me.noData();
+                    }
+
+                    setTimeout(function(){
+                        // 插入数据到页面，放到最后面
+                        $('.list').append(result);
+                        // 每次数据插入，必须重置
+                        me.resetload();
+                    },500);
+                },
+                error: function(xhr, type){
+                    alert('Ajax error!');
+                    // 即使加载出错，也得重置
+                    me.resetload();
+                }
+            });
+        }
+    });
+
+        })()
+
+        $('.red_box').on('touchend', function(){
+            $('.red_box_pop').addClass('show').find('.start_box').addClass('show')
+
+        });
+        $('.close_red_box').on('touchend', function(e){
+            $('.red_box').hide();
+            return false;
+        });
+        $('.start_box .close_start').on('touchend', function(){
+            $('.start_box').removeClass('show').parent().removeClass('show');
+            return false;
+        });
+
+
+
+        $('.end_box .close_start,.close_ok').on('touchend', function(){
+            $('.end_box').removeClass('show').parent().removeClass('show');
+            $('.red_box').css('display','none');
+            return false;
+        });
+        // 发单
+        $(function() {
+            $(".home-zb .get_free").click(function(event) {
+                var container = $(this).parents(".home-zb");
+                var name = $(".m-bj-edit input[name=name]").val();
+                var tel = $(".m-bj-edit input[name=tel]").val();
+                var cs = $('input[name=city]').attr('data-id');
+                var qx = $('input[name=area]').attr('data-id');
+
+                if (!App.validate.run(name)) {
+                    $(".m-bj-edit input[name=name]").focus();
+                    alert("请输入您的称呼");
+                    return false;
+                } else {
+                    var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                    if (!reg.test(name)) {
+                        $(".m-bj-edit input[name=name]").focus();
+                        alert("请输入正确的名称，只支持中文和英文");
+                        return false;
+                    }
+                }
+                if (!App.validate.run(tel)) {
+                    $(".m-bj-edit input[name=tel]").focus();
+                    alert("请填写正确的手机号码 ^_^!");
+                    return false;
+                } else {
+                    var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                    if (!reg.test(tel)) {
+                        $(".m-bj-edit input[name=tel]").focus();
+                        $(".m-bj-edit input[name=tel]").val('');
+                        alert("请填写正确的手机号码 ^_^!");
+                        return false;
+                    }
+                }
+                if ('' == cs || '' == qx) {
+                    alert('请选择您所在的区域 ≧▽≦');
+                    return false;
+                }
+
+                window.order({
+                    extra:{
+                        cs: cs,
+                        qx: qx,
+                        name: $("input[name=name]", container).val(),
+                        tel: $("input[name=tel]", container).val(),
+                        fb_type: $("input[name=fb_type]", container).val(),
+                        source: '315'
+                    },
+                    submitBtn:{
+                        className:$(this),
+                        type:'btn'
+					},
+                    error:function(){
+                        alert("网络错误，请稍后重试")
+
+                    },
+                    success:function(data, status, xhr){
+
+                        if (data.status == 1) {
+                            localStorage.hongbao = 1;
+                            $('.start_box').removeClass('show');
+                            $('.end_box').addClass('show bounceIn animated')
+                            var timer2 = setTimeout(function(){
+                                $('.end_box').removeClass('bounceIn animated');
+                                clearTimeout(timer2)
+                            },800)
+                        } else {
+                            alert(data.info);
+                        }
+                    },
+                    validate:function(item, value, method, info){
+                        return true;
+                    }
+                });
+            });
+        });
+        var oLi = $(".list li").eq(4)
+        var html = '<li class="five-appentry" data-tag="M-14">\n' +
+            '                          <a href="javascript:void(0)">\n' +
+            '                              <img src="/assets/mobile/meitu/img/zt-img.png" />\n' +
+            '                              <div class="title_ms">装修灵感一触即发-齐装APP</div>\n' +
+            '                          </a>\n' +
+            '                      </li>'
+        $(html).insertAfter(oLi)
+        $(".list li:even").css("margin-right","2%")
+    </script>
+    <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 城市选择插件
+        /*selectQz.init({
+            province:$("input[name=province]").attr("data-id"),
+            city:$("input[name=city]").attr("data-id"),
+            area:$("input[name=area]").attr("data-id")
+        });*/
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

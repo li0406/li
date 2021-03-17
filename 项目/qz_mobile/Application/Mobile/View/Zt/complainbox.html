@@ -1,0 +1,142 @@
+<div class="windowbg complainbox">
+    <div class="order-window">
+        <div class="tit">我要投诉</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info complain">
+            <div class="box-line"><br></div>
+
+            <div class="box-line edit-text">
+                <input type="text" name="complain-name" style="width:100%" placeholder="输入您的姓名">
+            </div>
+
+            <div class="box-line edit-text">
+                <input type="text" name="complain-tel" style="width:100%" placeholder="输入您的手机号">
+            </div>
+
+            <div class="box-line edit-text">
+                <input type="text" name="company" id="company" style="width:100%" placeholder="投诉的装修公司名称">
+            </div>
+
+             <p style="color:#000;font-size:14px;padding-bottom:10px">请您选择投诉内容</p>
+
+            <div class="changebox">
+                <ul>
+                    <li><span>礼品延时发放/礼品与活动礼品信息不符</span><input type="radio" name="reason" value="1" /></li>
+                    <li><span>装修公司报价虚高/施工质量太次</span><input type="radio" name="reason" value="2" /></li>
+                    <li><span>其他</span><input type="radio" name="reason" value="3" /></li>
+                </ul>
+            </div>
+            <div class="box-line edit-text">
+                <textarea name="note" class="textarea" type="text" placeholder="其它"></textarea>
+            </div>
+
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+            <div style="text-align:center;margin-left:30px">
+                <button type="button" class="ok" style="width:35%">确定</button> <button type="button" class="cancel" style="width:35%">取消</button>
+                <input type="hidden" name="selectComid" value="" id="selectComid">
+             </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+
+
+    $(".ok").click(function(event) {
+        var _this = $(this);
+        var name = $('.complain input[name="complain-name"]');
+        var tel = $(".complain input[name=complain-tel]");
+        var company = $(".complain input[name=company]");
+        var reason = $(".complain input[name='reason']:checked").val();
+        var note = $(".complain .textarea").val();
+        var companyid = $('#selectComid').val();
+
+        if (!App.validate.run(name.val())) {
+            $('.complain input[name="complain-name"]').addClass('tip').focus();
+             $.pt({
+                target: tel,
+                content: '请输入您的称呼',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        if (!App.validate.run(tel.val(),"moblie")) {
+            tel.addClass('tip').focus();
+            //显示提示
+            $.pt({
+                target: tel,
+                content: '请输入正确的手机号码!',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        if (!App.validate.run(company.val()) || companyid == '') {
+            $('.complain input[name="company"]').addClass('tip').focus();
+             $.pt({
+                target: $(".complain input[name=company]"),
+                content: '请输入要投诉的装修公司',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        if(reason == undefined){
+             $.pt({
+                target: $(".complain input[name=reason]"),
+                content: '请选择投诉类型哦！',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        $.ajax({
+            url: "/complain/",
+            type: 'POST',
+            dataType : "JSON",
+            data: {
+                tel: tel.val(),
+                name: name.val(),
+                company: $('#selectComid').val(),
+                reason:reason,
+                note:note
+            }
+        })
+        .done(function(data) {
+            $(".windowbg").remove();
+            $("body").append(data.data.tmp);
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target:_this,
+                content: '发生了未知的错误,请刷新页面',
+                width: 'auto'
+            });
+        });
+    });
+
+    $(".complain input[name=complain-name]").focus();
+
+    $(".cancel").click(function(event) {
+        $(".windowbg").remove();
+    });
+
+    $(".windowbg .fa-remove").click(function(event) {
+        $(".windowbg").remove();
+    });
+
+    $("#company").bigAutocomplete({
+        width:288,
+        data:[<volist name="info.company" id="v">
+            {title:"{$v.qc}",id:"{$v.uid}"},
+            </volist>
+        ],
+        callback:function(data){
+            $('#selectComid').val(data.id);
+        }
+    });
+});
+</script>

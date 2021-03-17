@@ -1,0 +1,199 @@
+<link href="/assets/mobile/common/css/surprise.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+<div class="surprise-package" style="display: block;"></div>
+<div class="surprise-box">
+  <div class="surprise-order">
+    <div class="caption">
+      <img src="/assets/common/img/surprise-close.png" alt="" class="close-btn">
+    </div>
+    <div class="surprise_main">
+      <div class="form-once hongbao-wrap">
+        <ul class="m-bj-edit">
+          <li id="area">
+            <div>
+              <button id="showCityPicker3" class="c-zb-city" type="button">
+                <i class="fa fa-map-marker">
+                </i>
+                <empty name="defaultCityarea.name">
+                  请选择您所在的区域
+                  <else />
+                  {$mapUseInfo.provincefull} {$mapUseInfo.name} {$defaultCityarea.name}
+                </empty>
+              </button>
+              <input type="hidden" name="surprise_province" data-id="{$mapUseInfo.pid}">
+              <input type="hidden" name="surprise_city" data-id="{$mapUseInfo.id}">
+              <input type="hidden" name="surprise_area" data-id="{$defaultCityarea.id}">
+            </div>
+            <input type="hidden" name="hide_city_id" value="{$defaultCityarea.id}">
+          </li>
+          <li>
+            <input class="m-row-int1 m-bj-edit-list" type="tel" maxlength="11" name="surprise_tel" placeholder="请输入手机号获取报价">
+          </li>
+          <li>
+            <input class="m-row-int1 m-bj-edit-list" type="text" name="surprise_name" placeholder="怎么称呼您">
+          </li>
+          <li>
+            <input class="m-row-int1 m-bj-edit-list xiaoqumc" type="text" name="surprise_xiaoqu" placeholder="填写小区名称以便准确匹配">
+          </li>
+          <li id="shenming" style="padding-left: 5px;">
+            <input type="checkbox" checked="checked" id="surprise_mianze" style="display: none;">
+            <label for="surprise_mianze" id="surprise_check" class="fa fa-check"></label>
+            <span>我已阅读并同意齐装网的</span>
+            <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+          </li>
+        </ul>
+        <span class="m-b-btn surprise_save-submit">
+          免费获取报价明细
+        </span>
+      </div>
+    </div>
+  </div>
+  <!--获取成功-->
+  <div class="surprise_success_pop">
+    <div class="surprise_end_box">
+      <img src="/assets/common/img/surprise-close.png" alt="" class="surprise_close_start">
+      <div class="surprise_end_box_info">
+        <p class="surprise_ok_text"><b>恭喜您领取成功</b></p>
+        <p class="surprise_ok_info">客服会在24小时内回访了解您的具体需求 请保持手机畅通</p>
+        <button class="surprise_close_ok">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="hidden" name="surprise_package_source" value="[source]">
+<script>
+  var source = $('input[name="surprise_package_source"]').val()
+  if($('#hzsxgk').length > 0) {
+    $('#hzsxgk').fadeOut(0)
+  }
+  //切换免责对勾
+  $("#surprise_check").click(function(){
+    $(this).toggleClass('fa-check');
+  });
+
+  //获取红包
+  $(function(){
+    $('.surprise-order .surprise_save-submit').click(function(event) {
+      event.preventDefault()
+      var tel = $("input[name=surprise_tel]").val();
+      var name = $("input[name=surprise_name]").val();
+      var xq= $("input[name=surprise_xiaoqu]").val();
+      var checked = $("#surprise_mianze").is(':checked');
+      var city = $("input[name='surprise_city']").attr('data-id')
+      var area = $("input[name='surprise_area']").attr('data-id')
+      if (!city) {
+        alert("请选择您所在的城市");
+        return false;
+      }
+
+      if (!area) {
+        alert("请选择您所在的区域");
+        return false;
+      }
+      if (!App.validate.run(tel)) {
+        $("input[name=surprise_tel]").focus();
+        $("input[name=surprise_tel]").val('');
+        alert("请填写正确的手机号码 ^_^!");
+        return false;
+      }else{
+        var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+        if(!reg.test(tel)){
+          $("input[name=surprise_tel]").focus();
+          $("input[name=surprise_tel]").val('');
+          alert("请填写正确的手机号码 ^_^!");
+          return false;
+        }
+      }
+      if (!App.validate.run(name,'name')) {
+        $("input[name=surprise_name]").focus();
+        alert("请输入您的称呼");
+        return false;
+      }else{
+        var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+        if(!reg.test(name)){
+          $("input[name=surprise_name]").focus();
+          alert("请输入正确的名称，只支持中文和英文");
+          return false;
+        }
+      }
+      if (xq == '') {
+        alert("请填写您的小区名称");
+        return false;
+      }
+      var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+      if (re.test(xq)) {
+        $("input[name=surprise_xiaoqu]").focus();
+        alert("亲，请填写正确的小区名称！");
+        return false;
+      }
+      if(!checked){
+        alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+        return false;
+      };
+
+      window.order({
+        extra:{
+          cs:$('input[name=surprise_city]').attr('data-id'),
+          qx:$('input[name=surprise_area]').attr('data-id'),
+          tel:$("input[name=surprise_tel]").val(),
+          name:$("input[name=surprise_name]").val(),
+          xiaoqu:$("input[name=surprise_xiaoqu]").val(),
+          source: source
+        },
+        submitBtn:{
+          className:$(this),
+          type:'btn'
+        },
+        error:function(){
+          alert("发生了未知的错误,请稍后再试！");
+        },
+        success:function(data, status, xhr){
+          $('.surprise_success_pop').fadeIn(0);
+          $('.surprise-order').fadeOut(0)
+        },
+        validate:function(item, value, method, info){
+          // if ('tel' == item && ('notempty' == method) || 'ismobile' == method) {
+          //     alert(info);
+          //     return false;
+          // };
+          // if ('name' == item && ('notempty' == method) || 'isword' == method) {
+          //     alert(info);
+          //     return false;
+          // };
+          // if ('xiaoqu' == item && !value) {
+          //     alert('请填写您的小区名称');
+          //     return false;
+          // };
+
+          return true;
+        }
+      });
+    });
+    //关闭红包
+    $('.red_box_pop .close_start').click(function(event) {
+      window.location.href = '{$referUrl}';
+    });
+    $('.red_box_pop .close_ok').click(function(event) {
+      window.location.href = '{$referUrl}';
+    });
+  })
+
+  $(function () {
+    $('.surprise-order .close-btn, .surprise-box .surprise_close_ok, .surprise-box .surprise_close_start').on('click', function () {
+      $('.surprise-box').fadeOut(0)
+    })
+  })
+
+
+  $('.surprise-package').on('click', function (evt) {
+    evt.preventDefault()
+    $('.surprise_success_pop').fadeOut(0)
+    $('.surprise-order').fadeIn(0).find('input').val('')
+    $('.surprise-box').fadeIn(0)
+    // 城市选择插件
+    selectQz.init({
+      province:$("input[name=surprise_province]").attr("data-id"),
+      city:$("input[name=surprise_city]").attr("data-id"),
+      area:$("input[name=surprise_area]").attr("data-id")
+    });
+  })
+</script>

@@ -1,0 +1,110 @@
+<div class="windowbg">
+    <div class="order-window big-order-window">
+        <div class="tit">10秒快速申请4份户型设计</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info">
+            <p>
+                大牌设计师，精准定制
+                <br><span class="red">4份</span>设计方案 全面PK 不满意重新设计
+            </p>
+            <div class=""><br></div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">您的称呼</div>
+                <input type="text" name="name" class="edit-half-right" placeholder="请输入您的称呼" />
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">手机号码</div>
+                <input type="text" name="tel" class="edit-half-right" placeholder="请输入您的手机号" />
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">所在地区</div>
+                <select class="selectbox_two" style="float:left;position:relative;left:4px;" name="city_box"></select>
+                <select class="selectbox_two" name="quyu_box"></select>
+            </div>
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+            <button type="button">马上获取</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+var ip_cityid = '{$Think.cookie.iplookup}';
+var city_id = '{$theCityId}';
+
+(city_id == '') ? cityId = ip_cityid : cityId = city_id;
+if(cityId == ''){
+    getLocation();
+}else{
+    initCity(cityId);
+}
+
+function initCity(cityId){
+    App.citys.init(".windowbg select[name='city_box']",".windowbg select[name='quyu_box']",shen,shi,cityId);
+}
+
+    $(function(){
+        $(".windowbg .fa-remove").click(function(event) {
+            $(".windowbg").remove();
+        });
+        $(".big-order-window button").click(function(event) {
+            var container = $(".big-order-window");
+            $(".err").html('');
+            $(".windowbg").find('.focus').removeClass('focus');
+
+            var name = $("input[name=name]", container).val();
+            var tel = $("input[name=tel]", container).val();
+            var city = $("select[name=city_box]", container).val();
+            var quyu = $("select[name=quyu_box]", container).val();
+
+            if (name == '') {
+                $(".err").html("请输入您的称呼 ^_^!");
+                $("input[name=name]", container).addClass('focus').focus();
+                return false;
+            }
+
+            if (!App.validate.run(tel,"moblie")) {
+                $(".err").html("请输入正确的手机号码 ^_^!");
+                $("input[name=tel]", container).addClass('focus').focus();
+                return false;
+            }
+
+            if (city == '') {
+                $(".err").html("您还没有选择城市哦 ^_^!");
+                $("select[name=city_box]", container).addClass('focus').focus();
+                return false;
+            }
+
+            $.ajax({
+                url: "/fb_order/",
+                type: 'POST',
+                dataType : "JSON",
+                data: {
+                    cs: city,
+                    qx: quyu,
+                    name: name,
+                    tel: tel,
+                    source: "{$source}" || 1,
+                    safecode:'{$safecode}',
+                    ssid:"{$ssid}",
+                    safekey:"{$safekey}",
+                    step:2,
+                    select_desid : "{$select_desid}" || 0,
+                    select_comid : "{$select_comid}" || 0,
+                    display_type : "{$display_type}" || 0,
+                    des:"{$des}"
+                }
+            })
+            .done(function(data) {
+                container.remove();
+                if (data.status == 1) {
+                    $("body").append(data.data.tmp);
+                }
+            })
+            .fail(function(xhr) {
+                container.remove();
+            });
+        });
+    });
+</script>

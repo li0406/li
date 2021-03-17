@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta name="mobile-agent" content="format=html5;url={$alternate}" />
+    <title>{$basic['head']['title'] }</title>
+    <meta name="keywords" content="{$basic['head']['keywords'] }" />
+    <meta name="description" content="{$basic['head']['description'] }" />
+    <link rel="alternate" media="only screen and (max-width: 640px)" href="{$alternate}" >
+    <include file="Index:resource" />
+    <link href="{$SCHEME_HOST.scheme_host}/zhishi/" rel="canonical" />
+    <meta name="applicable-device" content="pc">
+    <link rel="stylesheet" href="{$static_host}/assets/home/baike/css/zhishidaquan.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+{$headerTmp}
+<div class="wrap ">
+    <div class="bread">
+        <a href="/">装修公司</a> &gt;
+        <h1>装修知识</h1>
+    </div>
+</div>
+<div class="wrap clearfix">
+    <div class="main-left left mt10">
+        <ul class="list clearfix" id="ul-list">
+            <li>
+                <a href="{$SCHEME_HOST.scheme_host}/zxbj/?src=xzh" rel="nofollow">8秒获取准确报价<i class="hot"></i></a>
+            </li>
+            <li>
+                <a href="{$SCHEME_HOST.scheme_host}/sheji/?src=xzh" rel="nofollow">领取4份设计方案<i class="hot"></i></a>
+            </li>
+            <volist name="list" id="vo">
+                <li>
+                    <eq name="vo.type" value="2">
+                        <a href="/tu/{$vo.id}/" target="_blank" title="{$vo.name}" >{$vo.name}</a>
+                    <else />
+                        <a href="/zhishi/{$vo.id}/" target="_blank" title="{$vo.name}" >{$vo.name}</a>
+                    </eq>
+                </li>
+            </volist>
+        </ul>
+        <div class="content pageContent mt40">
+            {$page}
+        </div>
+    </div>
+    <div class="main-right right">
+        <include file="Common@Order/orderTmp"/>
+        <div>
+            <img src="/assets/common/img/zhier-qzb.png" alt="">
+        </div>
+        <div class="mt15">
+            <img src="/assets/common/img/zhishi-qzb.png" alt="">
+        </div>
+        <div class="konw-box mt10 clearfix">
+            <div class="left-title">
+                热门知识
+            </div>
+            <div class="hot-title">
+                <volist name="hot" id="vo">
+                    <a href="{$vo.url}" target="_blank">{$vo.name}</a>
+                </volist>
+            </div>
+        </div>
+    </div>
+</div>
+<include file="Common@Friendlink/index"/>
+<include file="Index:footer"/>
+</body>
+
+<script>
+    var shen, shi;
+    shen = citys["shen"];
+    shi = citys["shi"];
+
+    initCity('{$theCityId}');
+    function initCity(cityId){
+        App.citys.init("#top_hl_cs","#top_hl_qx",shen,shi,cityId);
+    }
+    $("#top-hl-butt").click(function(event){
+        var _this = $(this);
+        window.order({
+            wrap:'.ls-banner',
+            extra:{
+                tel: $("input[name=top_hl_tel]").val(),
+                fb_type: $("input[name=top_hl_fb_type]").val(),
+                hltime: $("select[name=xztime]").val(),
+                source: '179',
+                cs:$("select[name=top_hl_cs]").val(),
+                qx:$("select[name=top_hl_qx]").val(),
+                ssid:"",
+                step:99
+            },
+            error:function(){
+                $.pt({
+                    target: _this,
+                    content: '发布失败,请刷新页面！',
+                    width: 'auto'
+                });
+            },
+            success:function(data, status, xhr){
+                if (data.status == 1) {
+                    $("body").append(data.data.tmp);
+                } else {
+                    $.pt({
+                        target: _this,
+                        content: data.info,
+                        width: 'auto'
+                    });
+                }
+            },
+            validate:function(item, value, method, info){
+                if ('tel' == item && 'notempty' == method) {
+                    $("input[name=top_hl_tel]").focus();
+                    $.pt({
+                        target: $("input[name=top_hl_tel]"),
+                        content: '请填写您的电话',
+                        width: 'auto'
+                    });
+                    return false;
+                };
+                if ('tel' == item && 'ismobile' == method) {
+                    $("input[name=top_hl_tel]").focus();
+                    $("input[name=top_hl_tel]").val('');
+                    $.pt({
+                        target: $("input[name=top_hl_tel]"),
+                        content: '请填写正确的手机号码 ^_^!',
+                        width: 'auto'
+                    });
+                    return false;
+                };
+                if(!checkDisclamer(".baike-mianze")){
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    });
+    $("#sheji_text,#sheji_img,#sheji_content").on('click',function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/dispatcher/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                type: "sj",
+                source:'18010854',
+                action: "load"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("body").append(data.data);
+                $(".zb_box_sj").fadeIn(400, function() {
+                    $(this).find("input[name=lf-name]").focus();
+                });
+            }
+        });
+    });
+    $("#to-design .to-design").on("click",function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/dispatcher/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                type:"sj",
+                source: '{$source}',
+                action:"load"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("body").append(data.data);
+                if(navigator.appName == "Microsoft Internet Explorer"){
+                    $(".zxfb").show();
+                }else{
+                    $(".zxfb").fadeIn(400,function(){
+                        $(this).find("input[name='bj-xiaoqu']").focus();
+                    });
+                    $(".zxbj_content").removeClass('smaller');
+                }
+                $(".win_box .win-box-bj-mianji").addClass('focus').focus();
+            }
+        });
+    });
+    $("#hl_img,#hl_text,#hl_content").on('click',function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/dispatcher/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                type: "hl",
+                source:'18010843',
+                action: "load"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("body").append(data.data);
+                $(".zb_box_sj").fadeIn(400, function() {
+                    $(this).find("input[name=lf-name]").focus();
+                });
+            }
+        });
+    });
+
+</script>
+</html>

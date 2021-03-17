@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>用户中心-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Designer:resource" />
+    <link href="{$static_host}/assets/user/message/css/message.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="{$static_host}/assets/user/designer/css/de-info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <include file="Designer:header" />
+    <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+        <div class="yh-main">
+            <h1 class="yh-tit">消息中心</h1>
+            <div class="c-news-operation">
+                <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/desmessage/">全部</a>
+                <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/desmessage/unread/">未读消息</a>
+            </div>
+            <ul class="c-news-ul">
+                <volist name="info.notices" id="vo">
+                <if condition="!$vo['isread']">
+                <li class="readed">
+                    <input type="checkbox" class="icheck" data-id="{$vo.id}">
+                    <i class="icon-envelope"></i>
+                    <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/desmessage/{$vo.id}" class="c-news-tit">{$vo.title}</a>
+                    <i class="icon-trash" data-id="{$vo.id}"></i>
+                    <div class="c-news-date">{$vo.time|date="Y-m-d",###}</div>
+                </li>
+                <else/>
+                <li>
+                    <input type="checkbox" class="icheck" data-id="{$vo.id}">
+                    <i class="icon-envelope-alt"></i>
+                    <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/desmessage/{$vo.id}" class="c-news-tit">{$vo.title}</a>
+                    <i class="icon-trash" data-id="{$vo.id}"></i>
+                    <div class="c-news-date">{$vo.time|date="Y-m-d",###}</div>
+                </li>
+                </if>
+                </volist>
+            </ul>
+            <div class="c-news-operation">
+                <a id="icheck-all" href="javascript:void(0)">全选</a>
+                <a id="del-all" href="javascript:void(0)">删除</a>
+            </div>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <script type="text/javascript">
+        $('.icheck').iCheck({
+            checkboxClass: 'icheckbox_minimal-red',
+            radioClass: 'iradio_minimal-red',
+            increaseArea: '' // optional
+        }).on("ifChecked", function(event) {
+            var target = $(event.target);
+            target.attr("checked", "checked");
+        }).on("ifUnchecked", function(event) {
+            var target = $(event.target);
+            target.attr("checked", false);
+        });
+
+        $('#icheck-all').click(function(event) {
+             $('.icheck').iCheck("check");
+        });
+
+        $(".icon-trash").click(function(event) {
+            var _this = $(this);
+            openwindow("确定删除站内信吗？",function(){
+                var id = _this.attr("data-id");
+                $.ajax({
+                    url: '/deldesmessage/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                       id:id
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }else{
+                        openwindow(data.info);
+                    }
+                });
+            });
+        });
+
+        $("#del-all").click(function(event) {
+            var _this = $(this);
+            openwindow("确定删除站内信吗？",function(){
+                var ids = new Array();
+                $(".icheck:checked").each(function(){
+                    ids.push($(this).attr("data-id"));
+                });
+
+                $.ajax({
+                    url: '/deldesmessage/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                       id:ids
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }else{
+                        openwindow(data.info);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

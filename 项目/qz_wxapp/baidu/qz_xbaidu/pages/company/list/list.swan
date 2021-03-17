@@ -1,0 +1,147 @@
+<scroll-view class="company-box" scroll-y lower-threshold="10" bind:scroll="scroll" bind:scrolltolower="lower" scroll-top='{= topNum =}'>
+    <view class="company-banner">
+        <image src="https://staticqn.qizuang.com/custom/20200826/Ft3dlPtH8K_OVgsShFpfy3BHaEvT"></image>
+    </view>
+    <view class="tab {{scrollTop > 200 ? 'tabTop' : ''}}"">
+        <view class=" company-nav">
+        <view class="sx" bindtap='onSelectCityHandle'>
+            <text>{{cityName}}</text>
+            <image src="/images/sanbottom.png"></image>
+        </view>
+        <view class="sx" data-tab="0" data-show="{{isShow[0]}}" bindtap='changeTab'>
+            <text class="{{isShow[0] ? 'act' : ''}}">{{quyu}}</text>
+            <image class="{{isShow[0] ? 'true' : ''}}" src="/images/sanbottom.png"></image>
+        </view>
+        <view class="sx" data-tab="1" data-show="{{isShow[1]}}" bindtap='changeTab'>
+            <text class="{{isShow[1] ? 'act' : ''}}">{{overall}}</text>
+            <image class="{{isShow[1] ? 'true' : ''}}" src="/images/sanbottom.png"></image>
+        </view>
+    </view>
+    <view class="tabContent" s-if="{{isShow[0]}}">
+        <text class="item {{currentIndexOne == ''?'cur':''}}" data-id="not" data-name="所在区域" bindtap='qySetTab'>不限</text>
+        <block s-for="{{qyArr}}" s-key="item">
+            <text class='item {{item.id==currentIndexOne?"cur":""}}' data-id="{{item.id}}" data-name="{{item.name}}"
+                bindtap='qySetTab'>{{item.name}}</text>
+        </block>
+    </view>
+    <view class="tabContent" s-if="{{isShow[1]}}">
+        <block s-for="{{bzArr}}" s-key="item">
+            <text class='item {{item.id==currentIndexTwo?"cur":""}}' data-id="{{item.id}}" data-name="{{item.name}}"
+                bindtap='bzSetTab'>{{item.name}}</text>
+        </block>
+    </view>
+    </view>
+
+
+
+    <view class="company-list {{item.gujia =='no' ? 'gujia' : ''}}" s-for="item in comList" s-key="item.id">
+        <navigator url="{{item.url}}" hover-class="none">
+            <view class="ofw">
+                <view class="company-logo">
+                    <image src="{{item.logo ? item.logo : '/images/com_logo.png'}}"></image>
+                </view>
+                <view class="company-details">
+                    <view class="company-name">
+                        <view>{{item.jc}}</view>
+                        <image src="/images/bzj.png" s-if="{{item.deposit_money}}"></image>
+                    </view>
+                    <view class="haoping">
+                        <view class="star">
+                            <image s-if="item.star>0" src="/images/stars.png"></image>
+                            <image s-if="item.star>1" src="/images/stars.png"></image>
+                            <image s-if="item.star>2" src="/images/stars.png"></image>
+                            <image s-if="item.star>3" src="/images/stars.png"></image>
+                            <image s-if="item.star>4" src="/images/stars.png"></image>
+                        </view>
+                        <text s-if="{{item.haopinglv}}"> {{item.haopinglv}}% 好评率</text>
+                    </view>
+                    <view class="count">
+                        <view class="item" s-if="{{item.case_count >0}}">案例数 <text class="yellow">{{item.case_count}}</text>
+                        </view>
+                        <view class="item" s-if="{{item.team_count >0}}">设计师 <text class="yellow">{{item.team_count}}</text>
+                        </view>
+                        <view class="item" s-if="{{item.team_num >0}}">在建工地 <text class="yellow">{{item.team_num}}</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="company-location" s-if="{{item.dz}}">
+                <image src="/images/map.png"></image>
+                <view>{{item.dz}}</view>
+            </view>
+            <view class="company-tags" s-if="{{item.tags.length}}">
+                <text s-for="item.tags" s-for-item="tip">{{tip.tag}}</text>
+            </view>
+        </navigator>
+
+        <view class="other-company-logo" s-if="{{item.banner.length}}">
+            <image s-for="item.banner" s-for-item="tip" src="{{tip.img_path}}" data-src='{{tip.img_path}}' data-media_list="{{item.banner}}" bindtap="onTap" ></image>
+        </view>
+        <view class="hui" s-if="{{item.activity_list.length > 0 || item.card_list.length > 0}}">
+            <view class="hui-list" s-if="{{item.activity_list.length > 0}}">
+                <view class="mrb10" s-for="{{item.activity_list}}" s-for-item="items" bindtap="tohddet" data-id="{{ items.id }}" data-bm="{{ item.bm }}">
+                    <view class="tit hui-tit" s-if="{{items.title}}">惠</view>
+                    <view class="hui-content">{{items.title}}</view>
+                </view>
+            </view>
+            <view class="hui-list" s-if="{{item.card_list.length > 0}}">
+                <view  class="mrb10" s-for="{{item.card_list}}" s-for-item="items" bindtap="todetail" data-id="{{ item.id }}" data-bm="{{ item.bm }}">
+                    <view class="tit quan-tit" s-if="{{items.content}}">券</view>
+                    <view class="hui-content">{{items.content}}</view>
+                </view>
+            </view>
+        </view>
+        <view class="check" bindtap="openOrderMask">预约</view>
+    </view>
+    <view class="btm-nomore" s-if="{{nomore!=2}}">{{nomore==1?'':nomore==3?'没有更多记录了~':' '}}</view>
+    <view class="nototal" s-if="{{nototal}}">
+        <image src="/images/nototal.png"></image>
+        <view>没有更多记录了~</view>
+    </view>
+</scroll-view>
+
+<!--发单-->
+<view class="order-mask" s-if="{{showOrderMask}}">
+    <view class="order-box">
+        <view class="close-btn" bindtap="closeOrderMask">
+            <image src="/images/close.png"></image>
+        </view>
+        <view class="tit">填写您的信息</view>
+        <view class="c-zb-city" bindtap="onSelectCityorder">
+            <text class="iconfont iconsite2 map-icon"></text>
+            <view class="select-text" s-if="{{city_order_name}}">{{city_order_name}}</view>
+            <text s-else>{{xzcity}}</text>
+            <view class="triangle"></view>
+        </view>
+        <view class="phone">
+            <input maxlength="11" placeholder="输入手机号获取计算结果" placeholder-style="color:#a9a9a9" type="number"
+                name="tel" value="{{bjtel}}" bindinput="gettel" />
+        </view>
+        <checkbox-group class="item" bindchange="checkboxChange">
+            <checkbox class="check-box" value="选中" checked />
+            <text>我已阅读并同意齐装网的</text>
+            <navigator class="sm" url='/pages/gonglue/declare/declare' hover-class='none'>《免责声明》</navigator>
+        </checkbox-group>
+        <view class="btn">
+            <button class="bjbtn" bindtap="SubmitBj" plain='true'>
+                立即预约
+            </button>
+        </view>
+    </view>
+</view>
+<!--发单成功-->
+<view class="order-mask" s-if="{{showOrderMaskSuccess}}">
+    <view class="order-box order-box-success">
+        <view class="close-btn" bindtap="closeOrderMask">
+            <image src="/images/close.png"></image>
+        </view>
+        <view class="success-pic">
+            <image src="/images/lf_success.png"></image>
+        </view>
+        <view class="success-title">预约成功</view>
+        <view class="success-text">稍后有客服专员与您确认，请保持电话畅通</view>
+    </view>
+</view>
+
+<city-select isHide="{{isHide}}" bindcloseSelect="closeSelect"></city-select>
+<to-top backTopValue="{{backTopValue}}" bind:backTop="backTop"></to-top>

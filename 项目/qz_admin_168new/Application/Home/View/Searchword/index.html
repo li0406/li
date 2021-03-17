@@ -1,0 +1,162 @@
+<!-- <extend name="Main:baseTemplate" /> -->
+<block name="title">
+    <title>搜索关键词统计</title>
+</block>
+<block name="style">
+    <style type="text/css">
+        .cursor{cursor: pointer;}
+        .modal-dialog{transform: translate(0,180px) !important;}
+    </style>
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>搜索关键词统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <!-- S 条件查询模块 -->
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <div class="">日期</div>
+                                <div class="datatime">
+                                    <input type="text" class="form-control" id="reservationtime" placeholder="请选择查询时间" />
+                                </div>
+                            </div>
+                            <div class="col-xs-4">
+                                <div class="col-xs-7">
+                                    <div class="">关键词</div>
+                                    <input type="text" class="form-control" name="word" value="{$keyword.word}" />
+                                </div>
+
+                                <div class="col-xs-5" style="margin-top: 15px;margin-left: -20px;">
+                                    <br>
+                                    <input type="checkbox" name="fullReg" value="1" <if condition="$keyword.jingque eq 1">checked</if>>精确匹配
+                                </div>
+                            </div>
+                            <div class="col-xs-2">
+                                <div class="">搜索模块</div>
+                                <div class="">
+                                    <div class="col-xs-7 no-padding">
+                                        <select name="cid" class="level-two form-control" id="cid">
+                                            <option value="">请选择</option>
+                                            <option value="1">装修公司</option>
+                                            <option value="2">家居美图</option>
+                                            <option value="3">案例</option>
+                                            <option value="4">问答</option>
+                                            <option value="5">百科</option>
+                                            <option value="6">文章</option>
+                                            <option value="7">视频</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-xs-1">
+                                <br>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i> 查询
+                                </button>
+                            </div>
+                            <div class="col-sm-1">
+                                <br />
+                                <button type="button" id="export" class="btn btn-info hideLoading"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- E 条件查询模块 -->
+                <!-- S 表格内容模块 -->
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>关键词</th>
+                                                <th>搜索模块</th>
+                                                <th>搜索次数</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <volist name="list" id="v">
+                                            <tr>
+                                                <td>{$key + $indexStart + 1}</td>
+                                                <td>{$v.word}</td>
+                                                <td>{$v.part}</td>
+                                                <td>{$v.num}</td>
+                                            </tr>
+                                            </volist>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-center">
+                                    {$page}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- E 表格内容模块 -->
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(document).ready(function() {
+            var nowtime = new Date();
+            var ms = parseInt({$lastDate});
+            nowtime.setTime(ms);
+            $('#reservationtime').daterangepicker({
+                startDate:nowtime,
+                endDate:new Date(),
+                timePicker: false,
+                timePickerIncrement: 30,
+                format: 'YYYY/MM/DD',
+                timePicker12Hour: false
+            }, function(start, end, label) {
+                console.log(start.toISOString(), end.toISOString(), label);
+            });
+            $('#cid').val("{$keyword.cid}");
+            var time = "{$keyword.time}";
+            if(time != ''){
+                $('#reservationtime').prop('value',"{$keyword.time}");
+            }
+            //查询
+            $("#search").on('click',function(){
+                var time        = $("#reservationtime").val();
+                var word        = $("input[name=word]").val();
+                var cid         = $("#cid").val();
+                var jingque =[];
+                $('input[name="fullReg"]:checked').each(function(){
+                    jingque.push($(this).val());
+                });
+                window.location.href = '/searchword/?time='+time+'&word='+word+'&cid='+cid+'&jingque='+jingque;
+            });
+
+            //导出
+            $('#export').click(function(){
+                var time        = $("#reservationtime").val();
+                window.location.href = '/export/exportsearchwords/?time='+time;
+            });
+        });
+
+    </script>
+</block>

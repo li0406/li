@@ -1,0 +1,172 @@
+<view class='top-header'>
+	<view class='header'>
+		<view class='h_time'>
+			<view class='h_title'>订单日期</view>
+			<view class="seach-content">
+				<view class="input-span" data-time="{{date_begin}}">
+					<picker mode="date" value="{{date_begin}}" start="{{createTime}}" end="{{nowTime}}" data-time="date_begin" bindchange="dateChange">
+						<view class="picker">
+							{{date_begin?date_begin:"开始时间"}}
+						</view>
+					</picker>
+				</view>
+				<text class="em">至</text>
+				<view class="input-span" data-time="{{date_end}}">
+					<picker mode="date" value="{{date_end}}" start="{{date_begin||createTime}}" end="{{nowTime}}" data-time="date_end" bindchange="dateChange">
+						<view class="picker">
+							{{date_end?date_end:"结束时间"}}
+						</view>
+					</picker>
+				</view>
+			</view>
+		</view>
+		<view class='h_site' bindtap='toCity'>
+			<image src='../../img/dingwei.png'></image>
+			<view class='dingwei'>{{curCity}}</view>
+		</view>
+	</view>
+	<view class='search'>
+		<image src='../../img/search.png'></image>
+		<input placeholder='订单号、小区名称' bindconfirm="orderSearch" bindinput='orderSearchChange' confirm-type="search" value="{{ parms.order_search }}"></input>
+	</view>
+	<view class='search'>
+		<image src='../../img/search.png'></image>
+		<input placeholder='公司ID/简称/全称' bindconfirm="companySearch" bindinput='companySearchChange' confirm-type="search" value="{{ parms.company_search }}"></input>
+	</view>
+</view>
+
+<view class='tab-back'>
+	<view class='tab'>
+		<view class="flex1 flex3">
+			<picker class="flex_text" value="{{pxIndex}}" data-selecthx="{{pxList[pxIndex].name}}" range="{{pxList}}" range-key="{{'name'}}" bindchange="bindPickerChange_px">
+				<view wx:if="{{pxIndex == -1}}">排序</view>
+				<view wx:else="{{pxIndex != 0}}" class="px-width"> {{pxList[pxIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+		<view class="flex1">
+			<picker class="flex_text" value="{{lfIndex}}" data-selecthx="{{lfList[lfIndex].name}}" range="{{lfList}}" range-key="{{'name'}}" bindchange="bindPickerChange_lf">
+				<view wx:if="{{lfIndex == 0}}">量房</view>
+				<view wx:else>{{lfList[lfIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+		<view class="flex1">
+			<picker class="flex_text" value="{{gdIndex}}" data-selecthx="{{gdList[gdIndex].name}}" range="{{gdList}}" range-key="{{'name'}}" bindchange="bindPickerChange_gd">
+				<view wx:if="{{gdIndex == 0}}">跟单</view>
+				<view wx:else> {{gdList[gdIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+		<view class="flex1">
+			<view catchtap="showOfferDetail">筛选</view>
+			<image src="../../img/shaix2.png"></image>
+		</view>
+	</view>
+</view>
+
+<view class='mask-offer' wx:if="{{maskOfferShow}}" style="height:{{offerHeight}}">
+	<view class="close-area" catchtap="closeOffer"></view>
+	<view class="main {{activeTag ? 'active' : ''}}">
+		<view class="fix-padding">
+			<view class="title">订单状态</view>
+			<view class="item-li">
+				<view class="item {{typeFwId == 1?'red':''}}" data-id="1" bindtap="typeFwBtn">分单</view>
+				<view class="item {{typeFwId == 2?'red':''}}" data-id="2" bindtap="typeFwBtn">赠单</view>
+			</view>
+			<view class="title">装修类型</view>
+			<view class="item-li">
+				<view class="item {{leixingId == 1?'red':''}}" data-id="1" bindtap="leixingBtn">家装</view>
+				<view class="item {{leixingId == 2?'red':''}}" data-id="2" bindtap="leixingBtn">公装</view>
+			</view>
+			<view class="title">面积（㎡）</view>
+			<view class="item-li">
+				<view class="item"><input type="number" placeholder="最低" value="{{parms.mianji_min}}" bindinput="mianjiMin"></input></view>
+        <view class="line">—</view>
+				<view class="item"><input type="number" placeholder="最高" value="{{parms.mianji_max}}" bindinput="mianjiMax"></input></view>
+			</view>
+			<view class="title">装修方式</view>
+			<view class="item-li">
+				<block wx:for="{{meth}}" wx:if="{{index !==0}}">
+					<view class="item {{item.active ? 'red' : ''}}" data-id="{{item.id}}" data-index="{{index}}" bindtap="zxBtn">{{item.name}}</view>
+					</block>
+			</view>
+			<view class="title">预算（元）</view>
+			<view class="item-li">
+				<block wx:for="{{yu}}">
+					<view class="item {{item.active ? 'red' : ''}}" wx:if="{{index !==0}}" data-id="{{item.id}}" data-index="{{index}}" bindtap="ysBtn">{{item.name}}</view>
+				</block>
+			</view>
+			<view class="bottom-btn">
+				<view class="btn reset" bindtap="resetBtn">重置</view>
+				<view class="btn complete" bindtap="completeBtn">完成</view>
+			</view>
+		</view>
+	</view>
+</view>
+
+<view class='con-scoll'>
+	<navigator url="{{item.url}}" hover-class='none' wx:for="{{list}}" wx:for-index='index' wx:key>
+		<view class='con'>
+			<view class='con-item name'>
+				<view class='item-x'>{{item.yz_name}}</view>
+				<view class='xz'>{{item.type_fw =='1'?'分':'赠'}}</view>
+				<view class='xw'>{{item.lf_status_name}}</view>
+			</view>
+			<view class='con-item time'>{{item.date}}</view>
+			<view class='con-item'>
+				城市：
+				<text>{{item.qy_name}}</text>
+			</view>
+			<view class=' con-item '>
+				小区：
+				<text>{{item.xiaoqu}}</text>
+			</view>
+			<view class='con-item '>
+				面积：
+				<text>{{item.mianji}}m²</text>
+			</view>
+			<view class='con-item '>
+				预算：
+				<text>{{item.yusuan_name}}</text>
+			</view>
+			<view class='con-item '>
+				装修类型：
+				<text>{{item.leixing_name}}</text>
+			</view>
+			<view class='con-item '>
+				装修方式：
+				<text>{{item.fangshi_name}}</text>
+			</view>
+			<view class='con-item con-num '>
+				订单编号：
+				<text>{{item.id}}</text>
+				<text class="copy-btn" data-id="{{item.id}}" catchtap='copyBtn'>复制</text>
+				<text class="copy-btn" wx:if="{{item.is_new_review === 0}}" data-id="{{item.id}}" catchtap='visitShow'>回访</text>
+			</view>
+		</view>
+	</navigator>
+	<view class='page' wx:if='{{page}}'>
+		<view class="pre {{pageCurrent =='1'?'active':''}}" bindtap='prevBtn'>上一页</view>
+		<view class='total'>
+			<picker bindchange="toPage" value="" range="{{pageNumber}}">
+				<view class="picker">
+					<view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+				</view>
+			</picker>
+		</view>
+		<view class="next {{pageCurrent == pageTotalNumber?'active':''}}" bindtap='nextBtn'>下一页</view>
+	</view>
+	<view class='no-result' wx:if='{{noResult}}'>
+		<image src='../../img/no_result.png'></image>
+		<view>暂无搜索结果</view>
+	</view>
+	<view class='no-result' wx:if='{{noInternet}}'>
+		<image src='../../img/no_internet.png'></image>
+		<view>网络开了小差~请稍等</view>
+		<button bindtap='toCustom'>重新加载</button>
+	</view>
+</view>

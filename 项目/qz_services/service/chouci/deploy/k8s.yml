@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chouci
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: chouci
+  template:
+    metadata:
+      labels:
+        app: chouci
+    spec:
+      imagePullSecrets:
+      - name: container-registry-a
+      containers:
+      - name: chouci
+        # image: registry.cn-shanghai.aliyuncs.com/qizuang/chouci:master-040ce9e
+        image: <K8S_IMAGE>
+        imagePullPolicy: Always
+        # command: [ "echo", "SUCCESS" ]
+        ports:
+        - containerPort: 11000
+          name: 11000tcp02
+          protocol: TCP
+        # envFrom:
+        # - configMapRef:
+        #     name: env-app-config
+      imagePullSecrets:
+      - name: "container-registry-a"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: chouci
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: chouci
+  ports:
+    - protocol: TCP
+      port: 11000
+      targetPort: 11000
+  type: ClusterIP

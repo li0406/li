@@ -1,0 +1,264 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .signbackedit_nav { padding: 20px; margin-bottom: 20px;}
+        .signbackedit_nav li { font-size: 18px; float: left; padding: 0 15px; line-height: 2;}
+        .signbackedit_nav li a { color: inherit;}
+        .signbackedit_nav li.active {border-bottom: 1px solid #FF0000; color: #FF0000;}
+
+        .layout_operator {display: none;}
+        .layout_operator .layout_bg {position: fixed; top:0;right:0;bottom:0;left:0;background:#000;z-index: 1100;opacity: 0.6;}
+        .layout_operator .layout_body {position: fixed;top: 120px; width: 400px; left: calc(50% - 200px); z-index: 1200;background: #FFF;}
+        .layout_operator .layout_title {text-align: center; font-size: 18px; padding: 10px; position: relative;}
+        .layout_operator .layout_close {font-size: 30px; position: absolute; right: 10px; top: 8px;cursor: pointer;}
+        .layout_operator .layout_content {padding: 10px; min-height: 120px;}
+        .layout_operator .layout_content .btn_box {text-align: center; margin-top: 15px;}
+        .layout_operator .layout_content p label {text-align: right; font-weight: normal; width: 140px;}
+
+        .layout_operator#layoutLog .layout_body {width: 500px;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box-header with-border">
+                <h3 class="box-title">签返会员管理/编辑会员</h3>
+            </div>
+
+            <!-- 会员信息部分 -->
+            <include file="accountedit" />
+
+            <div class="box">
+                <ul class="signbackedit_nav">
+                    <li><a href="/signbackuser/signlist?company_id={$company_id}">签单记录</a></li>
+                    <li><a href="/signbackuser/usercontract?company_id={$company_id}">会员时间</a></li>
+                    <li><a href="/signbackuser/packageinfo?company_id={$company_id}">订单数量</a></li>
+                    <li class="active">保证金</li>
+                </ul>
+
+                <div class="box-body">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th>订单包ID</th>
+                            <th>分单量</th>
+                            <th>赠单量</th>
+                            <th>保证金</th>
+                            <th>签单金额</th>
+                            <th>返点</th>
+                            <th>返点应缴金额</th>
+                            <th>实缴金额</th>
+                            <th>使用状态</th>
+                            <th>状态</th>
+                            <th class="width-210">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="data.list" id="item">
+                            <tr>
+                                <td class="item_packageid">{$item.id}</td>
+                                <td>{$item.fen_number}</td>
+                                <td>{$item.zen_number}</td>
+                                <td>{:floatval($item["deposit_money"])}</td>
+                                <td class="item_qiandan_jine">{:intval($item["total"]["qiandan_jine"] * 10000)}</td>
+                                <td class="item_back_ratio">{$item.back_ratio}%</td>
+                                <td class="item_back_total_money">{:floatval($item["total"]["back_total_money"])}</td>
+                                <td class="item_back_pay_money">{:floatval($item["total"]["back_pay_money"])}</td>
+                                <td>
+                                    <switch name="item.use_status">
+                                        <case value="1" break="1">未使用</case>
+                                        <case value="2" break="1">使用中</case>
+                                        <case value="3" break="1">已结束</case>
+                                    </switch>
+                                </td>
+                                <td class="item_back_status" data-status="{$item.back_status}">
+                                    <switch name="item.back_status">
+                                        <case value="1" break="1">未返还</case>
+                                        <case value="2" break="1">部分返还</case>
+                                        <case value="3" break="1">已返还</case>
+                                    </switch>
+                                </td>
+                                <td class="operater-table" data-id="{$item.id}" data-backmoney="{:floatval($item['back_money'])}">
+                                    <a href="javascript:void(0);" class="btn_check">审核</a>
+                                    <a href="javascript:void(0);" class="btn_log">日志</a>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    <div>{$data.page}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout_operator" id="layoutCheck">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">审核</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content">
+                <p>
+                    <label for="">订单包ID：</label>
+                    <span class="packageid"></span>
+                </p>
+                <p>
+                    <label for="">签单金额：</label>
+                    <span class="qiandan_jine"></span>
+                </p>
+                <p>
+                    <label for="">返点：</label>
+                    <span class="back_ratio"></span>
+                </p>
+                <p>
+                    <label for="">应缴金额：</label>
+                    <span class="back_total"></span>
+                </p>
+                <p>
+                    <label for="">实缴金额：</label>
+                    <span class="pay_money"></span>
+                </p>
+
+                <p>
+                    <label for="">返还状态：</label>
+                    <span>
+                        <input type="radio" name="back_status" value="3" /> 已返还&nbsp;
+                        <input type="radio" name="back_status" value="2" /> 部分返还&nbsp;
+                        <input type="radio" name="back_status" value="1" /> 未返还
+                    </span>
+                </p>
+
+                <p>
+                    <label for="">返还金额：</label>
+                    <span>
+                        <input type="number" name="back_money" class="back_money" />
+                    </span>
+                </p>
+                
+                <div class="btn_box">
+                    <input type="hidden" name="id" class="id" />
+                    <button type="button" class="btn btn-primary btn_save" data-status="1">保存</button>
+                    <button type="button" class="btn btn_cancel" data-status="2">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_operator" id="layoutLog">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">日志</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content"></div>
+        </div>
+    </div>
+</block>
+
+<block name="script">
+    <script type="text/javascript">
+        $(function() {
+            $(".layout_operator").on("click", ".layout_close", function(){
+                $(".layout_operator").fadeOut(200);
+            });
+
+            // 审核
+            $("#tablelist").on("click", ".btn_check", function(){
+                var id = $(this).parent().data("id");
+                var trElement = $(this).parents("tr");
+
+                var packageid = trElement.find(".item_packageid").html();
+                var qiandan_jine = trElement.find(".item_qiandan_jine").html();
+                var back_ratio = trElement.find(".item_back_ratio").html();
+                var back_total = trElement.find(".item_back_total_money").html();
+                var pay_money = trElement.find(".item_back_pay_money").html();
+                var back_status = trElement.find(".item_back_status").data("status");
+                var back_money = $(this).parent().data("backmoney");
+
+                var layoutElement = $("#layoutCheck");
+                layoutElement.find(".packageid").html(packageid);
+                layoutElement.find(".qiandan_jine").html(qiandan_jine);
+                layoutElement.find(".back_ratio").html(back_ratio);
+                layoutElement.find(".back_total").html(back_total);
+                layoutElement.find(".pay_money").html(pay_money);
+                layoutElement.find(".back_money").val(back_money);
+                layoutElement.find("input[name=back_status][value="+back_status+"]").attr("checked", "checked");
+                layoutElement.find(".id").val(id);
+
+                if (back_status == 2) {
+                    layoutElement.find(".back_money").removeAttr("disabled");
+                } else {
+                    layoutElement.find(".back_money").attr("disabled", true);
+                }
+
+                layoutElement.fadeIn(200);
+            });
+
+            $("#layoutCheck").on("click", "input[name=back_status]", function(){
+                var back_status = $(this).val();
+                if (back_status == 2) {
+                    $("#layoutCheck").find(".back_money").removeAttr("disabled");
+                } else {
+                    $("#layoutCheck").find(".back_money").attr("disabled", true);
+                }
+            });
+
+            // 
+            $("#layoutCheck").on("click", ".btn_cancel", function(){
+                $("#layoutCheck").fadeOut(200);
+            });
+
+            $("#layoutCheck").on("click", ".btn_save", function(){
+                var layoutElement = $("#layoutCheck");
+                var id = layoutElement.find(".id").val();
+                var back_money = layoutElement.find(".back_money").val();
+                var back_status = layoutElement.find("input[name=back_status]:checked").val();
+
+                if (back_status == "" || back_status == undefined) {
+                    alert("请先选择返还状态");
+                    return false;
+                }
+
+                // 收款
+                $.post("/signbackuser/packageexam", {
+                    id: id,
+                    back_money: back_money,
+                    back_status: back_status
+                }, function(response){
+                    if (response.code == 200) {
+                        alert("操作成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.errmsg);
+                    }
+                });
+            });
+
+            // 日志
+            $("#tablelist").on("click", ".btn_log", function(){
+                var id = $(this).parent().data("id");
+
+                $.get("/signbackuser/packagelog", {
+                    id: id
+                }, function(response){
+                    if (response.code == 200) {
+                        $("#layoutLog").find(".layout_content").html(response["temp"]);
+                        $("#layoutLog").fadeIn(200);
+                    } else {
+                        alert(response.errmsg);
+                    }
+                });
+            });
+        });
+    </script>
+</block>
+

@@ -1,0 +1,164 @@
+#!/usr/bin/env groovy
+pipeline {
+
+    // 定义代理
+    agent any
+
+    // 定义全局变量
+    environment {
+        APP_NAME = 'qzpnp' // appname
+        APP_DIR  = "service/qzpnp" // git sub dir
+        // GIT_URL = 'git'  // git url
+        CONTAINER_REGISTRY_A = credentials('container-registry-a') // container registry a
+        CONTAINER_REGISTRY_B = credentials('container-registry-b') // container registry b
+        CREDENTIAL_ID_BASE = 'robot' // 基本凭据id 存储在jenkins中
+        CREDENTIAL_ID_CONTAINER_REGISTRY_A = 'aliyun-registry-qizuang' // 容器镜像A的凭据id 存在jenkins中
+        CREDENTIAL_BASE = credentials('robot') // 取基本凭据
+        CREDENTIAL_CONTAINER_REGISTRY_A = credentials('aliyun-registry-qizuang') // 取容器镜像A的凭据
+        // k8s
+        CREDENTIAL_ID_K8S_A = 'qizuang-k8s-local'
+        CREDENTIAL_ID_K8S_B = 'qizuang-k8s-prod'
+
+    }
+
+    // 参数
+    parameters {
+        // GIT分支
+        gitParameter(branchFilter: 'origin/(.*)',
+                     defaultValue: 'devops',
+                     name: 'BRANCH_TAG',
+                     type: 'PT_BRANCH_TAG',
+                     selectedValue: 'TOP',
+                     sortMode: 'NONE',
+                     quickFilterEnabled: true,
+                     description: '分支')
+        // 部署环境
+        choice(choices: ['dev', 'testing', 'testing-1', 'testing-2', 'testing-3', 'staging', 'prod'], description: '部署环境', name: 'DEPLOY_ENV')
+    }
+
+    // 多阶段
+    stages {
+        // 阶段
+        stage("Init(初始化)") {
+            steps {
+                script {
+                   // 工作分支
+                   env.WORKING_BRANCH = "${params.BRANCH_TAG}"
+                }
+
+                // docker login
+                sh "docker login ${env.CONTAINER_REGISTRY_A} -u ${env.CREDENTIAL_CONTAINER_REGISTRY_A_USR} -p ${env.CREDENTIAL_CONTAINER_REGISTRY_A_PSW} "
+                //sh "docker login ${env.CONTAINER_REGISTRY_B} -u ${env.CREDENTIAL_BASE_USR} -p ${env.CREDENTIAL_BASE_PSW} "
+
+                echo "本次工作分支：${env.WORKING_BRANCH}"
+                echo "本次部署环境：${params.DEPLOY_ENV}"
+            }
+
+        }
+        stage("Checkout(代码检出)") {
+            steps {
+
+                // echo "Branch Specifier is ${env.WORKING_BRANCH}"
+                //git branch: "${env.WORKING_BRANCH}", CREDENTIALId: env.CREDENTIAL_ID_BASE, url: env.GIT_URL
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${env.WORKING_BRANCH}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[
+                        credentialsId: "${env.CREDENTIAL_ID_BASE}",
+                        url: "${env.GIT_URL}"
+                    ]]
+                ])
+                // https://stackoverflow.com/questions/45937337/jenkins-pipeline-get-repository-url-variable-under-pipeline-script-from-scm
+
+                script {
+
+                    // def branchName = getCurrentBranch()
+                    env.BRANCH_NAME = "${env.WORKING_BRANCH}"
+
+                    // def commitHash = checkout(scm).GIT_COMMIT
+                    env.COMMIT_HASH = getCurrentCommitHash()
+
+                    // 容器tag
+                    env.CONTAINER_TAG = "${params.BRANCH_TAG}-${env.COMMIT_HASH}"
+
+                    // 容器URL_A
+                    env.CONTAINER_URL_A = "${env.CONTAINER_REGISTRY_A}/${env.APP_NAME}:${env.CONTAINER_TAG}"
+                    // 容器URL_B
+                    //env.CONTAINER_URL_B = "${env.CONTAINER_REGISTRY_B}/${env.APP_NAME}:${env.CONTAINER_TAG}"
+                }
+            }
+        }
+        stage('Build(容器镜像构建)') {
+            // 步骤
+            steps {
+		dir("${APP_DIR}") {
+		echo 'Now branch is ' + env.WORKING_BRANCH + "-" + env.COMMIT_HASH
+		//GIT_BRANCH
+		sh "docker build -t ${env.CONTAINER_URL_A} ."
+		//sh "docker build -t ${env.CONTAINER_URL_B} ."
+		}
+            }
+        }
+        stage('Push(容器镜像推送到远程仓库)') {
+            steps {
+                sh "docker push ${env.CONTAINER_URL_A}"
+                //sh "docker push ${env.CONTAINER_URL_B}"
+            }
+        }
+        stage('Deploy(部署)') {
+            steps {
+              dir("${APP_DIR}") {
+                  script {
+                      echo "部署到环境:${params.DEPLOY_ENV}"
+                      //if (params.DEPLOY_ENV == 'qizuang-dev') {
+                      //    echo "部署到【开发环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-testing') {
+                      //    echo "部署到【测试环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-testing-1') {
+                      //    echo "部署到【测试环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-testing-2') {
+                      //    echo "部署到【测试环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-testing-3') {
+                      //    echo "部署到【测试环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-staging') {
+                      //    echo "部署到【准生产环境】:${params.DEPLOY_ENV}"
+                      //} else if (params.DEPLOY_ENV == 'qizuang-prod') {
+                      //    echo "部署到【生产环境】:${params.DEPLOY_ENV}"
+                      //}
+                  }
+                  // 准备 k8s yml
+                  //sh "sed -i 's%<K8S_NAMESPACE>%${params.DEPLOY_ENV}%g' deploy/k8s.yml"
+                  //sh "sed -i 's%<K8S_IMAGE>%${env.CONTAINER_URL_A}%g' deploy/k8s.yml"
+                  withKubeConfig([credentialsId: env.CREDENTIAL_ID_K8S_A]) {
+                      // , serverUrl: env.K8S_APIURL_A
+                      // 部署k8s
+                      echo "部署k8s"
+                      sh "kubectl cluster-info"
+                      sh "cd deploy/overlays/${params.DEPLOY_ENV} \
+                          kustomize edit set image ${env.CONTAINER_URL_A}\
+                          kubectl apply -k ."
+                      sh "kubectl get -n ${params.DEPLOY_ENV} pods"
+                  }
+              }
+            }
+        }
+    }
+
+}
+
+def getCurrentBranch () {
+    return sh (
+        script: 'git rev-parse --abbrev-ref HEAD',
+        returnStdout: true
+    ).trim()
+}
+
+def getCurrentCommitHash () {
+    return sh (
+        script: 'git rev-parse --short HEAD',
+        returnStdout: true
+    ).trim()
+}

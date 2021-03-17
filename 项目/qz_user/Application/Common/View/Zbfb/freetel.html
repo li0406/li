@@ -1,0 +1,145 @@
+<!-- S 免费电话咨询 -->
+<style>
+.freetel{ width:525px; height:136px; position:fixed; bottom:50px; left:-404px; background:url(/assets/common/img/freetel.png) top right; z-index: 999;
+transition:all 0.5s;
+-moz-transition:all 0.5s; /* Firefox 4 */
+-webkit-transition:all 0.5s; /* Safari and Chrome */
+-o-transition:all 0.5s; /* Opera */
+}
+.freetelbd{margin-top:60px; margin-left:28px; height:40px; width:300px; float:left; position:relative}
+.freetelbd input{ float:left;}
+.freetelbd input:focus{ outline:none}
+.freetelbd>input[type=text]{ width:180px; height:40px; margin:0; border:0; padding:0; padding-left:20px; border-top-left-radius:3px; border-bottom-left-radius:3px;}
+.freetelbd input.btn{ width:100px; height:40px; background:#0bd1b3; margin:0; border:0; padding:0; cursor:pointer; color:#086859; font-weight:bold;border-top-right-radius:3px; border-bottom-right-radius:3px}
+.freetelbd input.btn:hover{ opacity:0.9}
+.switch{ width:140px; height:136px; float:right;cursor:pointer}
+.freeyzm{ background:#fff; width:100px; height:60px; right:0; top:-55px; position:absolute; border-radius:3px; overflow:hidden; padding:2px; background:url(/assets/common/img/yzm.png) no-repeat;}
+.freeyzm img{ width:95px; height:20px}
+.freeyzm input[type=text]{ width:57px;margin:0;  padding:0;vertical-align:-10px; height:18px;border: 1px solid #ccc;}
+.freeyzm input.tijiao{ width:35px;margin:0; border:0; padding:0; height:22px; cursor:pointer; background:#f23d3d; color:#fff}
+</style>
+<div class="freetel">
+    <div class="freetelbd">
+        <input name="freetel" type="text" placeholder="此输入您的号码">
+        <input class="btn" type="submit" value="立即免费通话">
+        <div class="freeyzm">
+            <img src="/verify" style="cursor:pointer" class="verifyimg" title="点击更换验证码">
+            <input name="safecode" type="text">
+            <input class="tijiao"  type="submit" value="提交">
+        </div>
+    </div>
+    <div class="switch">
+        <img src="/assets/common/img/shutdown.png" titel="切换">
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    $(".verifyimg").click(function(event) {
+        $(this).attr("src","/verify?rand="+Math.random());
+        $(".freeyzm [name=safecode]").val('');
+        $(".freeyzm [name=safecode]").focus();
+    });
+    /*展开收缩*/
+    var flag=1;
+    $(".freetel").children(".switch").click(function(event){
+        if(flag==0){
+            $(".freetel").css("left","-404px");
+            flag=1;
+        }else{
+            $(".freetel").css("left","0");
+            $("[name=freetel]").focus();
+            flag=0;
+        }
+    });
+
+    $(".freetelbd").children(".freeyzm").hide(); //默认隐藏
+    $(".freetelbd").children(".btn").click(function(event){
+        //验证表单
+        if ($("input[name=freetel]").val() == "" || $("input[name=freetel]").val().length == 0) {
+            $.pt({
+                    target: $("input[name=freetel]"),
+                    content: '还没有您的联系电话噢 ^_^!',
+                    width: 'auto'
+            });
+            return false;
+        }
+        var reg = /^[0-9]{7}|[0-9]{8}|[0-9]{11}$/gi;
+        if (!$("input[name=freetel]").val().match(reg)) {
+            $.pt({
+                    target: $("input[name=freetel]"),
+                    content: '请填写11位手机号码,或7位8位纯数字的联系电话 ^_^!',
+                    width: 'auto'
+            });
+            return false;
+        }
+        /*给验证码*/
+        $(".freeyzm").show();
+        $(".freeyzm [name=safecode]").focus();
+    });
+    $(".freeyzm").children(".tijiao").click(function(event){
+        var _this    = $(this);
+        var safecode = $("input[name=safecode]",_this.parent()).val();
+        var tel      = $("input[name=freetel]").val();
+        if (safecode == "" || safecode.length != 4) {
+            $.pt({
+                    target: $("input[name=safecode]",_this.parent()),
+                    content: '请输入正确的验证码',
+                    width: 'auto'
+            });
+            $("input[name=safecode]",_this.parent()).focus();
+            return false;
+        }
+        $.ajax({
+            url: '/freetel',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                code: safecode,
+                cs : '{$cityInfo.id}'|| '000001',
+                tel : tel,
+                source : 99,
+                safecode:$("#safecode").val(),
+                safekey: $("#safekey").val(),
+                ssid:"{$ssid}"
+            },
+        })
+        .done(function(result) {
+            if (result.data.safecode != '') {
+                $("#safecode").val(result.data.safecode);
+            };
+            if (result.data.safekey != '') {
+                $("#safekey").val(result.data.safekey);
+            };
+            if (0 == result.status) {
+                $.pt({
+                    target: $("input[name=safecode]",_this.parent()),
+                    content: result.info,
+                    width: 'auto'
+                });
+                $(".verifyimg",_this.parent()).attr("src","/verify?rand="+Math.random());
+                $("[name=safecode]",_this.parent()).val('');
+                $("[name=safecode]",_this.parent()).focus();
+            }else{
+                $(".freetelbd").children(".freeyzm").hide();
+                $.pt({
+                    target: $("input[name=freetel]"),
+                    content: result.info,
+                    time: 6000,
+                    width: 'auto'
+                });
+            };
+
+            console.log(result);
+        })
+        .fail(function() {
+            console.log("error");
+        })
+        .always(function() {
+            console.log("complete");
+        });
+
+    });
+
+});
+</script>
+<!-- E 免费电话咨询  -->

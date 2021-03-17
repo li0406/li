@@ -1,0 +1,164 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>视频学装修-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>视频学装修-专题</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/vedio/">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    视频标题:<input type="text" name="title" class="form-control"  placeholder="标题" value="{$title}">
+                                </div>
+                                <div class="col-xs-2">
+                                    视频ID:<input type="text" name="id" class="form-control"  placeholder="视频ID" value="{$Think.get.id}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="pull-right col-sm-2">
+                                <br/>
+                                    <a  href="/vedio/vedioup/" class="btn btn-block btn-info" ><i class="fa fa-plus-square"></i> 新增视频</a>
+                                </div>
+                                <div class="pull-right col-sm-2">
+                                <br/>
+                                    <a  href="/vedio/adduser/" class="btn btn-block btn-info"><i class="fa fa-user-plus"></i> 讲师管理</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th class="col-sm-1">序号</th>
+                            <th >视频标题</th>
+                            <th class="col-sm-1">视频分类</th>
+                            <th class="col-sm-2">操作时间</th>
+                            <th class="col-sm-1">推荐状态</th>
+                            <th class="col-sm-1">状态</th>
+                            <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="list.list" id="vo">
+                        <tr>
+                            <td>{$vo.count}</td>
+                            <td ><a href="http://{:C('QZ_YUMINGWWW')}/video/v{$vo.id}.html" target="_blank">{$vo.title}</a></td>
+                            <td class="col-sm-1">
+                                <switch name="vo.type">
+                                <case value="1">装修讲堂</case>
+                                <case value="2">装修头条</case>
+                                </switch>
+                            </td>
+                            <td class="col-sm-2">{$vo.updated_at|date="Y-m-d H:i:s",###}</td>
+                            <td class="col-sm-1">
+                                <if condition="$vo['istop'] EQ 1">
+                                    推荐
+                                <else/>
+                                    不推荐
+                                </if>
+                            </td>
+                            <td class="col-sm-1">
+                                <if condition="$vo['isdelete'] EQ 0">
+                                    显示
+                                <else/>
+                                    删除
+                                </if>
+                            </td>
+                            <td class="col-sm-1">
+                                <if condition="$vo['isdelete'] EQ 0">
+                                    <a href="/vedio/vedioup?id={$vo.id}&p={$p}" class="fa fa-pencil" title="编辑"></a>
+                                    <eq name="vo.istop" value="1">
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" data-value="0" class="fa fa-toggle-on" title="不推荐"></a>
+                                    <else/>
+                                        <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="fa fa-toggle-off " title="推荐"></a>
+                                    </eq>
+                                    <a href="javascript:void(0)" data-id="{$vo.id}" class="fa fa-trash" title="删除"></a>
+                                <else/>
+                                    -
+                                </if>
+                            </td>
+                        </tr>
+                        </volist>
+                    </table>
+                    {$list.page}
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(".fa-trash").click(function(event) {
+    var _this = $(this);
+    if (confirm("确定删除吗？")) {
+        $.ajax({
+            url: '/vedio/delvedio/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {id: _this.attr("data-id")}
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+               window.location.href = window.location.href;
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    };
+});
+$("a[class*='fa-toggle']").click(function(event) {
+        var _this = $(this);
+        $.ajax({
+            url: '/vedio/editvedio/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {id: _this.attr("data-id"),value:_this.attr("data-value")}
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+               window.location.href = window.location.href;
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+});
+</script>
+</block>

@@ -1,0 +1,89 @@
+<extend name="Search:basic"/>
+<block name="meta">
+    <title>{$meta.title}</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/search/css/baike.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <if condition="count($list) GT 0">
+    <div class="origin-news-list wrap">
+        <volist name="list" id="vo" key="k">
+            <div class="origin-list">
+                <div class="list-left">
+                    <a rel="nofollow" href="{$vo.link}" target="_blank">
+                        <img src="{$vo.img_path}" alt="{$vo.title}"/>
+                    </a>
+                </div>
+                <div class="list-right">
+                    <a href="{$vo.link}" target="_blank" class="list-tit">{$vo.title}</a>
+                    <div class="list-des">{$vo.description}<a rel="nofollow" class="des-detail" target="_blank" href="{$vo.link}">[详情]</a></div>
+                    <div class="list-fenlei">
+                        <img src="/assets/home/decoration/img/book.png" />
+                        <span class="fenlei-theme">装修百科-{$vo.class_name}</span>
+                        <if condition="isset($vo['labels'])">
+                            <ul>
+                                <volist name="vo.labels" id="v">
+                                    <li>{$v.name}</li>
+                                </volist>
+                            </ul>
+                        </if>
+                        <span class="des-num">
+                        <img src="/assets/home/decoration/img/icon-eye.png">{$vo.views}
+                    </span>
+                        <span class="des-time">{$vo.createtime}</span>
+                    </div>
+                </div>
+            </div>
+
+            <eq name="k" value="4">
+                <div class="origin-list">
+                    <div class="list-left shejiBtn">
+                        <a rel="nofollow" href="javascript:;">
+                            <img src="/assets/home/baike/images/shejitankz.png" alt="免费获取4份装修设计图"/>
+                        </a>
+                    </div>
+                    <div class="list-right">
+                        <a href="javascript:;" class="list-tit shejiBtn">买了房子想装修成什么样？点击立即免费获取4份装修设计图！</a>
+                        <div class="list-des shejiBtn" style="cursor: pointer">齐装网装修设计大礼包，知名设计师，为您定制4份设计方案，全面PK，不满意重新设计，点击图片或文字立即获取。</div>
+                    </div>
+                </div>
+            </eq>
+        </volist>
+
+        <div class="pagebox">
+            {$page}
+        </div>
+    </div>
+    <else/>
+        <include file="Home@Search/nodata" />
+    </if>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(function () {
+            $(".shejiBtn").on('click',function(){
+                var _this = $(this);
+                $.ajax({
+                    url: '/dispatcher/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type: "sj",
+                        source:'18010854',
+                        action: "load"
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        $("body").append(data.data);
+                        $(".zb_box_sj").fadeIn(400, function() {
+                            $(this).find("input[name=lf-name]").focus();
+                        });
+                    }
+                });
+            });
+        })
+    </script>
+</block>
+

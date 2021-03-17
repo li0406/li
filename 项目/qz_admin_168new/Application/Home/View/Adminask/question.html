@@ -1,0 +1,359 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>问答管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <nav class="navbar navbar-default" style="margin-bottom:0px;">
+        <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="/adminask">问答管理</a></div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/adminask"><i class="fa fa-home"></i> 首页</a></li>
+                    <li class="active"><a href="/adminask/question"><i class="fa fa-align-justify"></i> 问题</a></li>
+                    <li><a href="/adminask/anwsers"><i class="fa fa-lightbulb-o"></i> 答案</a></li>
+                    <li><a href="/adminask/comment"><i class="fa fa-comment"></i> 评论</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div style="margin-bottom:10px;">
+                    <a href="/adminask/add" class="btn btn-info button"><i class="fa fa-plus"></i> 发布问题</a>&nbsp;
+                    <a href="/adminask/question?dist=1" class="btn btn-primary button"><i class="fa fa-trophy"></i> 精华问题</a>
+                </div>
+            <div class="box">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-xs-8">
+                            <form id="searchform" action="" method="get" class="form-inline">
+                                <div class="form-group">
+                                    <input type="text" name="start_time" value="{$info.start_time}" placeholder="请选择开始时间段" class="form-control date form_datetime" style="width:150px" data-date-format="yyyy-mm-dd" />
+                                </div>
+                                <div class="form-group">
+                                   <input type="text" name="end_time" value="{$info.end_time}" placeholder="请选择结束时间段" class="form-control date form_datetime" style="margin-left:5px;width:150px" data-date-format="yyyy-mm-dd" />
+                                </div>
+
+                                <div class="form-group">
+                                   <select name="visible" id="visible" class="form-control" style="font-size:13px;">
+                                    <volist name="info.visibleArray" id="v">
+                                        <option value="{$v.id}" {$v.now}>{$v.name}</option>
+                                    </volist>
+                                    </select>
+                                </div>
+
+                                <div class="input-group" style="width:250px;">
+                                    <input type="text" class="form-control pull-right" name="keyword" value="{$info.title}" placeholder="请输入查询关键词" >
+                                    <div class="input-group-btn">
+                                        <button type="submit" id="btnSearch" class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12" style="padding-top:5px;padding-bottom: 5px">
+                            <div class="tableth">
+                                <span class="span">
+                                <a id="selectAll" class="btn btn-default" style="padding-top:2px;padding-bottom:2px"><i class="fa fa-square-o"></i> 全选</a>
+                                    <a id="passAll" class="btn btn-success button" style="padding-top:2px;padding-bottom:2px">批量通过</a>
+                                </span>
+                                <div style="width:200px;text-align:right;float:right">
+                                <i class="icon-sort-by-attributes-alt"></i> 排序：
+                                <select class="pull-right" name="jumpMenu" id="jumpMenu" onChange="jumpMenu('parent',this,0)">
+                                    <volist name="sortby" id="v">
+                                        <option value="{$v.id}" {$v.now} >{$v.name}</option>
+                                    </volist>
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tableRow">
+                         <table class="table table-condensed table-bordered table-hover">
+                            <tr>
+                                <th width="30">#</th>
+                                <th style="text-align:left">标题</th>
+                                <th width="250">附加信息</th>
+                                <th width="100">分类</th>
+                                <th width="120">发布作者</th>
+                                <th class="text-align-left" width="155">创建时间</th>
+                                <th class="text-align-left" width="155">发布时间</th>
+                                <th width="45">答案</th>
+                                <th width="70">状态</th>
+                                <th class="text-align-left" width="105">操作</th>
+                            </tr>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selected[]" class="selectbox" value="{$vo.id}" data-id="{$vo.id}">
+                                </td>
+                                <td style="text-align:left">
+                                    <if condition="$vo.review NEQ '0' ">
+                                        <span title="已审核" class="fa fa-circle" style="color:green"> </span>
+                                    <else />
+                                        <span title="未审核" class="fa fa-circle-blank" style="color:red"> </span>
+                                    </if>
+                                    {$vo.dist} {$vo.status_ico}
+                                    <a href="/adminask/anwsers/?qid={$vo.id}" style="font-size:15px;color:#000" title="被查看{$vo.views}次" >{$vo.title}</a>&nbsp;
+                                    <if condition="$vo.visible EQ '0' ">
+                                        <a target="_blank" href="{$host}/wenda/x{$vo.id}.html" style="font-size:12px;color:#666">查看</a>
+                                    <else />
+                                        <a href="javascript:;" class="viewQuestion" style="font-size:12px;color:#666" data-id="{$vo.id}">查看</a>
+                                    </if>&nbsp;<a href="/adminask/anwseradd/id/{$vo.id}" style="font-size:12px;color:#666">回答</a>
+                                </td>
+                                <td><span title="{$vo.content}" >{$vo.content|mbstr=0,14}</span></td>
+                                <td><a href="?c={$vo.cid}" >{$vo.category}</a></td>
+                                <td><a href="?u={$vo.userid}" >{$vo.name}</a></td>
+                                <td>{:date('Y-m-d H:i:s', $vo['create_time'])}</td>
+                                <td class="text-align-left">
+                                    <gt name="vo.post_time" value="0">
+                                        {:date('Y-m-d H:i:s', $vo['post_time'])}
+                                    <else />
+                                        -
+                                    </gt>
+                                </td>
+                                <td>{$vo.anwsers}</td>
+                                <td>
+                                    <if condition="$vo.review EQ '0' ">
+                                        <i>待审核</i>
+                                    <else />
+                                        <if condition="$vo.visible EQ '1' "><i style="color:red">不通过</i></if>
+                                        <if condition="$vo.visible EQ '0' "><i style="color:green">已通过</i></if>
+                                        <if condition="$vo.visible EQ '3' "><i style="color:orange">待发布</i></if>
+                                    </if>
+                                </td>
+                                <td class="text-align-left">
+                                <if condition="$vo.blocked  EQ '0'">
+                                    <span title="设为禁言" class="fa fa-microphone blocked" data-id="{$vo.userid}" data-name="{$vo.name}"></span>
+                                <else/>
+                                    <span title="已禁言至{$vo.blocked|date="Y-m-d H:i:s",###}" class="fa fa-microphone-slash" style="color:red"></span>
+                                </if>
+                                <div style="display:none" class="reason">{$vo.reason}</div>
+                                    <a href="/adminask/edit?id={$vo.id}"><span title="编辑" class="fa fa-edit"></span></a>
+                                    <if condition="$vo.visible EQ '0' ">
+                                    <span title="取消审核" class="fa fa-eye-slash visible" data-id="{$vo.id}"></span>
+                                    <span title="设为精华" class="fa fa-trophy set-dist" data-id="{$vo.id}"></span>
+                                    </if>
+                                    <if condition="$vo.visible EQ '1' ">
+                                    <span title="通过审核" class="fa fa-eye visible" data-id="{$vo.id}"></span>
+                                    <span title="删除" class="fa fa-trash-o" data-id="{$vo.id}"></span>
+                                    </if>
+                                </td>
+                            </tr>
+                            </volist>
+                        </table>
+                        <div class="page">{$page}</div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+<script src="/assets/common/js/global.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    function jumpMenu(targ,selObj,restore){ //v3.0
+        eval(targ+".location='?sortby="+selObj.options[selObj.selectedIndex].value+"'");
+        if (restore) selObj.selectedIndex=0;
+    }
+
+    $('.blocked').click(function(){
+        var uid = $(this).attr('data-id');
+        var content = '<div>您确定要对用户 '+$(this).attr('data-name')+' 进行禁言吗？</div>'
+        + '<div id="blocked"><br><input type="radio" name="blockedTime" value="1" checked="">提醒用户&nbsp;<input type="radio" name="blockedTime" value="2">禁言3小时&nbsp;<input type="radio" name="blockedTime" value="3">禁言7小时&nbsp;<input type="radio" name="blockedTime" value="4">永久</div>';
+
+        confirmBox('用户禁言',content,function(){
+            var type = $("#blocked input[name='blockedTime']:checked").val();
+
+            $.ajax({
+                url: '/adminask/blocked/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    uid:uid,
+                    type:type
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    alert('操作成功');
+                    window.location.href = window.location.href;
+                }else{
+                    alert('操作失败了');
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败');
+            })
+        });
+    })
+
+   //取消审核
+   $('.icon-eye-openss').click(function(){
+        if(confirm("您确定要取消审核吗？")){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            location.href="/adminask/visible?type=1&id="+id;
+        }
+    })
+
+    //审核
+    $('.pass_visiblesss').click(function(){
+        if(confirm("您确定要通过审核吗？")){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            location.href="/adminask/visible?type=2&id="+id;
+        }
+    })
+
+    //审核
+    $('.visible').click(function(){
+        var id = $(this).attr('data-id');
+
+        var oldReason = $(this).parent().find('.reason').html();
+
+        reviewBox('问答审核','<textarea id="reason" placeholder="如果审核不通过，这里可以输入原因" style="height:120px;" class="form-control" >'+oldReason+'</textarea>',"/adminask/visible?type=2&id="+id,function(){
+            var reason = $('#reason').val();
+            $.ajax({
+                url: '/adminask/notPassAsk/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id:id,
+                    reason:reason
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    window.location.href = window.location.href;
+                }else{
+                    alert('操作失败了');
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败');
+            })
+        });
+    });
+
+    //全选
+    $('#selectAll').click(function(){
+        $(".selectbox").each(function() {
+            var flag = $(this).prop("checked");
+            $(this).prop("checked", !flag);
+        })
+    })
+
+
+    $('.viewQuestion').click(function(){
+        var id = $(this).attr('data-id');
+         $.ajax({
+            url: '/adminask/getQuestionInfo/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                id:id
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                $('.modal-title').text(data.data.title);
+                $(".modal-body").text(data.data.info);
+                $('#myModal').modal('show');
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败');
+        })
+    })
+
+    //批量通过
+    $('#passAll').click(function(){
+        var allde = new Object();
+        $(".selectbox").each(function(key) {
+            var flag = $(this).prop("checked");
+            if(flag){
+                var id = $(this).attr('data-id');
+                allde[key] = {
+                    'id':id
+                }
+            }
+        })
+        $.ajax({
+            url: '/adminask/passall/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                allde:allde
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                window.location.href = window.location.href;
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败');
+        })
+    })
+
+    $('.form_datetime').datetimepicker({
+        language:'zh-CN',
+        weekStart: 1,
+        todayHighlight: 1,
+        minuteStep:1,
+        minView:3,
+        autoclose: true,
+        showMeridian: true,
+        startView: 2,
+        forceParse: 0,
+        pickerPosition: "bottom-left"
+    });
+
+   $('.icon-trash').click(function(){
+        if(confirm("您确定要删除吗？此操作不可撤销！")){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            location.href="/adminask/remove?id="+id;
+        }
+    })
+
+    $('.set-dist').click(function(){
+        if(confirm("您确定要把这个问题设精/取精吗？首页精华按时间排序，且必须有大图")){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            location.href="/adminask/distillate?id="+id;
+        }
+    })
+</script>
+</block>

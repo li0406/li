@@ -1,0 +1,139 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/home/company/css/templatelist.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>评论发布设置</h1>
+    </section>
+    <section class="content">
+        <form action="" id="dataForm">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box box-default">
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">是否启用:</label>
+                                    <div class="check">
+                                        <label><input name="comment_on" type="radio" value="1" <eq
+                                                name="config.comment_on" value="1">checked</eq>/>&nbsp;是</label>
+                                        <label><input name="comment_on" type="radio" value="2" <eq
+                                                name="config.comment_on" value="2">checked</eq> />&nbsp;否</label>
+                                    </div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">应用城市:</label>
+                                    <div class="col-sm-4">
+                                        <textarea name="citys" id="city-name" rows="10"
+                                            placeholder="不填写时默认为所有已开站城市">{$config.citys}</textarea>
+                                    </div>
+                                    <div class="tro">填写多个城市时，使用英文“,”隔开</div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">应用对象:</label>
+                                    <div class="check">
+                                        <label><input name="company_type" type="radio" value="R" <if
+                                                condition="in_array('R', $config['company_type'])">checked</if>
+                                            />注册用户</label>
+                                        <label><input name="company_type" type="radio" value="F" <if
+                                                condition="in_array('F', $config['company_type'])">checked</if>
+                                            />假会员</label>
+                                        <label><input name="company_type" type="radio" value="T" <if
+                                                condition="in_array('T', $config['company_type'])">checked</if>
+                                            />真会员</label>
+                                    </div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">发布数量:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" min="0" name="publish_number" class="form-control"
+                                            value="{$config.publish_number}" maxlength="4"
+                                            onkeyup="this.value=this.value.replace(/[^\d]/g,'');" />
+                                    </div>
+                                    <div class="col-sm-9" style="line-height: 36px;padding-left:0;">每个装修公司每天的发布数量上限</div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">发布时间段:</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="publish_begin" class="form-control datepicker start"
+                                            autocomplete="off" value="{$config.publish_begin}">
+                                        <div class="line">——</div>
+                                        <input type="text" name="publish_end" class="form-control datepicker end"
+                                            autocomplete="off" value="{$config.publish_end}">
+                                    </div>
+                                    <div class="col-sm-6" style="line-height: 36px;padding-left:0;">发布的评论在前台显示的时间范围</div>
+                                </div>
+                                <!-- <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">时间间隔:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" min="0" name="publish_interval" maxlength="3"
+                                            autocomplete="off" class="form-control fl jg-time"
+                                            value="{$config.publish_interval}"
+                                            onkeyup="this.value=this.value.replace(/[^\d]/g,'');"><span
+                                            class="fenzhong">分钟</span>
+                                    </div>
+                                </div> -->
+                                <div class="form-group clearfix">
+                                    <div class="btn btn-success save"><i class="fa fa-save"></i>保存</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            // 保存
+            $('.save').click(function () {
+                var data = getFormData("#dataForm");
+                if (data.company_type == undefined) {
+                    alert("请先选择应用对象");
+                    return false;
+                } else if (data.publish_number == "" || data.publish_number == "0") {
+                    alert("请先填写发布数量");
+                    return false;
+                } else if (data.publish_begin == "" || data.publish_end == "") {
+                    alert("请先选择应用时间段");
+                    return false;
+                }
+
+                $.ajax({
+                    url: "/companycommentauto/autosetting",
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                }).done(function (response) {
+                    if (response.status == 1) {
+                        alert("保存成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.msg);
+                    }
+                }).fail(function (response) {
+                    alert("程序运行出错，请联系管理员（" + response.status + "）");
+                });
+            })
+
+            $(".datepicker").datetimepicker({
+                autoclose: true,
+                todayBtn: true,
+                todayHighlight: true,
+                pickerPosition: "bottom-left",
+                startView: 1,
+                startDate: '00:00',
+                format: "hh:ii",
+                minView: 0,
+                // step: 60,
+            });
+        });
+
+    </script>
+</block>

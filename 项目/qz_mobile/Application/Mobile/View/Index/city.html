@@ -1,0 +1,196 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="/assets/mobile/index/css/city.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/city/"/>
+</block>
+<block name="top">
+<a class="m-header-left gl-logo" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+<div class="m-header-tit">城市选择</div>
+</block>
+<block name="content">
+    <article>
+        <div class="c-before location">
+            <span class="auto-location">
+                <i class="c-pag fa fa-map-marker"></i>当前定位:<em>定位中</em>
+            </span>
+            <if condition="$hiddensearch neq 1">
+                <div class="c-opt clearfix">
+                    <div class="c-opt-l">
+                        <select name="cs" class="province m-row-int2 m-bj-edit-list" ></select>
+                    </div>
+                    <div class="c-opt-r">
+                        <select name="qx" class="city m-row-int2 m-bj-edit-list" ></select>
+                    </div>
+                    <a class="into" href="javascript:void(0)">进入</a>
+                </div>
+            </if>
+            <div class="c-hot">
+                <div class="c-hot-box">
+                    <h4 class="c-hot-tle">
+                        热门城市
+                    </h4>
+                    <div class="c-town clearfix">
+                        <ul class="clearfix uls">
+                            <empty name="showall">
+                                <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}">全国</a></li>
+                            </empty>
+                            <volist name="hotcitytop" id="v">
+                                <if condition="!empty($redirect['baojia'])">
+                                    <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$redirect.baojia}{$v.bm}">{$v.cname}</a></li>
+                                <elseif condition="!empty($redirect['zxgstj'])" />
+                                    <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$redirect.zxgstj}?bm={$v.bm}">{$v.cname}</a></li>
+                                <elseif condition="!empty($redirect['zxdt'])" />
+                                    <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$v.bm}{$redirect.zxdt}">{$v.cname}</a></li>
+                                <else />
+                                    <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$v.bm}/">{$v.cname}</a></li>
+                                </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+                <div class="c-hot-box">
+                    <h4 class="c-hot-tle">
+                        按字母查找城市
+                    </h4>
+                    <div class="c-town c-row clearfix">
+                        <ul class="clearfix uls">
+                            <volist name="cityInfo.accordCity" id="vo">
+                                <li><a href="#{$vo.pname}">{$vo.pname}</a></li>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+                <volist name="cityInfo.accordCity" id="vo">
+                    <div class="c-hot-box">
+                        <h4 class="c-hot-tle" id="{$vo.pname}">
+                            {$vo.pname}
+                        </h4>
+                        <div class="c-town clearfix">
+                            <ul class="clearfix uls">
+                                <volist name="vo.child" id="v">
+                                    <if condition="!empty($redirect['baojia'])">
+                                        <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$redirect.baojia}{$v.bm}">{$v.cname}</a></li>
+                                    <elseif condition="!empty($redirect['zxgstj'])" />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$redirect.zxgstj}{$v.bm}?bm={$v.bm}">{$v.cname}123</a></li>
+                                    <elseif condition="!empty($redirect['hdzt'])" />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$redirect.hdzt}?bm={$v.bm}">{$v.cname}</a></li>
+                                    <elseif condition="!empty($redirect['zxdt'])" />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$v.bm}{$redirect.zxdt}">{$v.cname}</a></li>
+                                    <else />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$v.bm}/">{$v.cname}</a></li>
+                                    </if>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                </volist>
+            </div>
+         </div>
+        <div class="call-tel">
+            <a href="tel:{:OP('QZ_CONTACT_TELNUM400')}"> 装修咨询热线</a>
+        </div>
+    </article>
+    <div id="zxkf">
+        <a rel="nofollow" href="{:OP('53kf_ty')}"><img src="/assets/mobile/common/img/kefu.png" alt="在线客服"></a>
+    </div>
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/mobile/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$cityfile}"></script>
+<script>
+    //城市下拉
+    var shen  = null,shi = null, cid = null;
+        shen      = citys["shen"];
+        shi       = citys["shi"];
+
+    getLocation();
+
+    $(function(){
+        //绑定城市下拉
+        App.citys.init("select[name=cs]","select[name=qx]",shen,shi,'{$cityInfo.id}',"",true);
+
+        $(".uls li a").click(function(){
+            $(this).addClass("c-current")
+                    .parent("li")
+                    .siblings("li")
+                    .children("a")
+                    .removeClass("c-current")
+                    .parent("li")
+                    .parent(".uls")
+                    .parent(".c-town")
+                    .parent(".c-hot-box")
+                    .siblings(".c-hot-box")
+                    .children(".c-town")
+                    .children(".uls")
+                    .children("li")
+                    .children("a")
+                    .removeClass("c-current")
+            ;
+        })
+
+        $(".into").click(function(event) {
+            var cs = $(".c-opt select[name=cs]").val();
+            $.ajax({
+                url: '/getcitybm',
+                type: 'get',
+                dataType: 'json',
+                data: {cs: cs,
+                        go:'1'},
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = "/"+data.info+"/";
+                }
+            });
+        });
+    })
+
+    function getLocation() {
+        var url = 'https://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js';
+        //并在成功后执行回调函数
+        $.getScript(url, function(response,status) {
+            var city = '苏州';
+            var href = '{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/sz/';
+            //定义调整链接
+            var redirect = {
+                'baojia':'{$redirect.baojia}'
+            };
+            if ('undefined' != typeof(remote_ip_info) && 'undefined' != typeof(remote_ip_info.city)) {
+                $.ajax({
+                    url: '/getbmbycityname/',
+                    type: 'get',
+                    dataType: 'json',
+                    async:false,
+                    data: {
+                        city:remote_ip_info.city,
+                        go:'1'
+                    },
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        city = data.data.cname;
+                        App.citys.init("select[name=cs]","select[name=qx]",shen,shi,data.data.cid,"",true);
+                        if ('' != redirect.baojia) {
+                            href = redirect.baojia + data.data.bm;
+                        } else {
+                            href = '{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/' + data.data.bm + '/';
+                        }
+
+                    } else {
+                        if ('' != redirect.baojia) {
+                            href = redirect.baojia + 'sz';
+                        };
+                    }
+                });
+            } else {
+                if ('' != redirect.baojia) {
+                    href = redirect.baojia + 'sz';
+                };
+            }
+            $(".location .auto-location em").html(city);
+
+        });
+    }
+</script>
+</block>

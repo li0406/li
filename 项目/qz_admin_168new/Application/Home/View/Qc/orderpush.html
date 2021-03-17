@@ -1,0 +1,241 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>订单推送及时度-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单推送及时度</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <form action="/qc/orderpush" method="get">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                <p>订单编号：</p>
+                                <input class="form-control" type="text" name="id" placeholder="订单编号" value="{$Think.get.id}">
+                            </div>
+                            <div class="col-xs-1">
+                                <p>客服团:</p>
+                                <select id="group" class="select2 select2-offscree " name="group" type="text" placeholder="客服团" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="group.groups" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>对接客服:</p>
+                                <select id="kf" class="select2 select2-offscree " name="kf" type="text" placeholder="对接客服" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <volist name="kf" id="vo">
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>推送状态:</p>
+                                <select id="status" class="select2 select2-offscree " name="status" type="text" placeholder="推送状态" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <option value="1">已推送</option>
+                                    <option value="2">未推送</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>耗时:</p>
+                                <select id="time" class="select2 select2-offscree " name="time" type="text" placeholder="耗时" tabindex="-1">
+                                    <option value="">请选择</option>
+                                    <option value="1">5分钟以下</option>
+                                    <option value="2">5分钟以上</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <p>订单分配时间:</p>
+                                <input id="start" class="form-control datepicker" type="text" name="begin" placeholder="分配开始时间" value="{$Think.get.begin}">
+                            </div>
+                            <div class="col-xs-1">
+                                <p>&nbsp;</p>
+                                <input class="form-control datepicker" type="text" name="end" placeholder="分配结束时间" value="{$Think.get.end}">
+                            </div>
+                            <div class="col-xs-1">
+                               <p>&nbsp;</p>
+                               <button id="btnSearch" type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                            </div>
+                            <div class="col-xs-1">
+                               <p>&nbsp;</p>
+                               <button type="button" id="export" class="btn btn-flat btn-sm btn-success"><i class="fa fa-download"></i>&nbsp;导出 Excel</button>
+                            </div>
+
+                        </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table id="myTable" class="table table-hover table-bordered ">
+                            <thead>
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>订单分配时间</th>
+                                    <th>推送时间</th>
+                                    <th>对接客服</th>
+                                    <th>耗时</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.order_id}</td>
+                                        <td>{$vo.docking_date}</td>
+                                        <td>
+                                            <if condition="!empty($vo['send_date'])">
+                                            {$vo.send_date}
+                                            <else/>
+                                            尚未推送
+                                            </if>
+                                        </td>
+                                        <td>{$vo.op_uname}</td>
+                                        <td>
+                                            <if condition="$vo['diff_date'] NEQ ''">
+                                            {$vo.diff_date}
+                                            <else/>
+                                            暂无
+                                            </if>
+                                        </td>
+                                        <td><a href="javascript:void(0)" class="icheck"  data-href="/qc/vieworder?id={$vo.order_id}">查看订单</a></td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document" style="width: 1420px; margin-top: 10px;">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding:5px;">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center">质检评分</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(function(){
+         $('#myTable').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           "bSort":true
+        });
+
+        $("#time").select2();
+        $("#time").select2("val","{$Think.get.time}");
+
+        $("#group").select2();
+        $("#group").select2("val","{$Think.get.group}");
+
+        $("#kf").select2();
+        $("#kf").select2("val","{$Think.get.kf}");
+
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+
+        $("#status").select2();
+        $("#status").select2("val","{$Think.get.status}");
+
+        $(".icheck").click(function(event) {
+            $("#myModal .modal-body").load($(this).attr("data-href")+"&rand="+new Date().getTime(),function(){
+                $("#myModal").modal("show").on("shown.bs.modal",function(){
+                    isLoading = false;
+                    $.ajax({
+                        url: '/voip/voiprecord/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            id: $("input[name=orderid]").val(),
+                            type:'qc'
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == '1') {
+                            $("#video").html(data.data);
+                        }
+                    });
+                });
+            })
+        });
+
+        $("#export").click(function(event) {
+            var colums = [];
+            var data =[];
+            $("#myTable th").each(function(i){
+                if (i != $("#myTable th").length -1 ) {
+                    var sub =[];
+                    var text = $(this).html().trim();
+                    sub["text"] = text;
+                    colums.push(sub);
+                }
+
+            });
+            data.push(colums);
+
+            $("#myTable tbody tr").each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(j){
+                    if (j != tr.find("td").length-1) {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text:text
+                        }
+                        if (j == 1) {
+                            _td["isString"] = 1;
+                        }
+                        sub.push(_td);
+                    }
+
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data:data,
+                title:"订单推送及时度",
+                url:"/export/download",
+                show:false
+            });
+
+        });
+
+    });
+
+</script>
+</block>

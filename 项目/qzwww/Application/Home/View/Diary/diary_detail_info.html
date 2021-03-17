@@ -1,0 +1,360 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/riji/d{$diary_detail_info.id}.html" />
+    <title>{$keys.title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <notempty name="info.header.canonical">
+    <link rel="canonical" href="{$info.header.canonical}"/>
+    </notempty>
+    <include file="Index:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+    <!--[if IE 7]>
+      <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/detail.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/zoom.css?v={:C('STATIC_VERSION')}" />
+    <link href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+    {$headerTmp}
+    <div class="wrap oflow">
+        <div class="bread"><a href="/">首页</a>><a href="/riji/">装修日记</a>><a href="/riji/home{$diary_detail_info.user_id}/">{$user_info.name}装修日记</a>
+            <!--&gt;{$diary_detail_info.title|mbstr=0,20}-->
+            > 正文
+        </div>
+        <div class="de-main">
+        {$hlBaoJia}
+
+            <div class="de-userinfo">
+              <div class="user-head"><span><img src="{$user_info.logo}" width="658" height="658"></span></div>
+              <h1>
+                {$user_info.name}
+                <em>{$diary_detail_info.title}</em>
+              </h1>
+              <ul>
+                  <li>
+                    <i class="icon-home"></i><em>房屋信息：</em><em>{$diary_detail_info.mianji}</em>㎡  {$diary_detail_info.hx} {$diary_detail_info.fg}
+                  </li>
+                  <li><i class="icon-map-marker"></i><em>所在小区：</em><em>{$diary_detail_info.xiaoqu}</em></li>
+                  <li>
+                    <i class="icon-group"></i><em>装修公司：</em>
+                    <if condition="$diary_detail_info['company_name'] neq ''">
+                      <if condition="$diary_detail_info['company_id'] neq 0">
+                        <a href="{$SCHEME_HOST.scheme_full}{$diary_detail_info.bm}.{:C('QZ_YUMING')}/company_home/{diary_detail_info.company_id}">{$diary_detail_info.company_name}</a>
+                        <else/>
+                        {$diary_detail_info.company_name}
+                      </if>
+                    <else/>
+                      未选择装修公司
+                    </if>
+                  </li>
+              </ul>
+              <!-- <a class="likeit" href="#"><i class="icon-heart-empty mr10"></i>收藏</a>
+              <a class="likeit done" href="#"><i class="icon-heart mr10"></i>已收藏</a> -->
+              <div class="de-userinfo-num">
+                <span>浏览<i class="red">{$diary_detail_info.page_view}</i></span>
+                <span>关注<i class="red">{$diary_detail_info.concern_count}</i></span>
+              </div>
+          </div>
+            <div class="de-mydairy">
+                <h1>{$diary_detail_info.title} - [
+                  <if condition="$diary_detail_info['stage'] eq 1">准备阶段
+                  <elseif condition="$diary_detail_info['stage'] eq 2" />施工阶段
+                  <elseif condition="$diary_detail_info['stage'] eq 3" />入住阶段
+                  <else/>未知阶段
+                  </if>
+                  ]
+                </h1>
+                <div class="de-mydairy-box">
+                    <div class="de-mydairy-word">
+                        {$diary_detail_info.content}
+                    </div>
+                    <p><i class="icon-zoom-in mr10"></i>单击图片放大</p>
+                    <ul class="de-mydairy-img1 gallery ">
+                      <volist name="diary_detail_info.img_list" id="img_list_vo">
+                        <li>
+                          <a href="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$img_list_vo.img_path}-s3.jpg"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$img_list_vo.img_path}-s3.jpg" alt="{$diary_detail_info.title}"></a>
+                        </li>
+                      </volist>
+                    </ul>
+                    <if condition="$diary_comment">
+                      <volist name="diary_comment" id="comment_vo">
+                        <dl class="de-mydairy-mes">
+                          <dt>
+                          <span class="user-head pull-left"><img src="{$comment_vo.logo}"></span>
+                              <div class="diary-message">
+                                  <p>
+                                    <span class="blue mr10">{$comment_vo.user_name}</span>{$comment_vo.add_time|timeFormat}
+                                     <if condition="$comment_vo['user_id'] NEQ $_SESSION['u_userInfo']['id'] AND isset($_SESSION['u_userInfo']['id'])">
+                                    <a class="pull-right icon-edit" href="javascript:;" data-name="{$comment_vo.user_name}" data-id="{$comment_vo.id}" data-reply-id="{$comment_vo.user_id}"  title="回复"></a>
+                                    </if>
+                                  </p>
+                                  <p class="gray">{$comment_vo.content}</p>
+                              </div>
+                          </dt>
+                          <volist name="comment_vo.child" id="comment_child_vo">
+                            <dd>
+                                <span class="user-head pull-left"><img src="{$comment_child_vo.ulogo}"></span>
+                                <div class="diary-message">
+                                    <p>
+                                      <span class="blue mr10">{$comment_child_vo.uname}</span>回复
+                                      <span class="blue ml10">{$comment_child_vo.uauthor_name}</span>
+                                      <if condition="$comment_child_vo['uid'] NEQ $_SESSION['u_userInfo']['id'] AND isset($_SESSION['u_userInfo']['id'])">
+                                        <a class="pull-right icon-edit" href="javascript:;" data-name="{$comment_vo.uname}"  data-id="{$comment_child_vo.id}" data-reply-id="{$comment_vo.uid}" title="回复" ></a>
+                                      </if>
+                                      &nbsp;{$comment_child_vo.utime|timeFormat}
+                                    </p>
+                                    <p class="gray">{$comment_child_vo.ucontent}</p>
+                                </div>
+                            </dd>
+                          </volist>
+                        </dl>
+                      </volist>
+                    </if>
+                    <dl class="de-mydairy-mes">
+                        <dt class="resend"><span class="user-head pull-left"><img src="{$logo}"></span>
+                            <div class="diary-message">
+                                <p>
+                                    <textarea id="content" class="user-resend" placeholder="随便说说你的想法，或者有什么问题，和大家一起讨论吧..."></textarea>
+                                </p>
+                                <a class="resend-btn" id="reply_btn" href="javascript:;" data-id="" diary_id="{$diary_detail_info.id}">我来回复</a>
+                                <span class="reply_message red"></span>
+                                <div id="popup-captcha"></div>
+                            </div>
+                        </dt>
+                    </dl>
+                </div>
+            </div>
+
+      <div class="wenzrmain mt20">
+          <div class="wenzrtitle">相关装修攻略</div>
+          <ul class="same-list">
+            <volist name="info.article" id="v">
+            <li><a href="/gonglue/{$v.shortname}/{$v.id}.html" target="_blank"><em>[{$v.classname}]</em>{$v.title}</a></li>
+            </volist>
+          </ul>
+      </div>
+        </div>
+        <div class="de-lesser">
+            <if condition="$_SESSION['u_userInfo']['classid'] EQ `1`">
+              <a rel="nofollow" class="xiriji" href="{$SCHEME_HOST.scheme_full}u.qizuang.com/diary/" target="_blank"><i class="icon-book mr10"></i>写装修日记</a>
+              <div class="mt10">
+            <else/>
+              <div>
+            </if>
+              {$orderTmp}
+            </div>
+            <div class="de-sider-box">
+            <h1>相关日记</h1>
+                <ul class="de-hot-diary">
+                  <volist name="other_diary_list" id="vo">
+                      <li>
+                            <eq name="vo.parent_id" value="0">
+                                <h2><a href="/riji/s{$vo.id}.html" target="_blank">{$vo.title|mbstr=0,12}</a></h2>
+                                <p>{$vo.content|mbstr=0,10}</p>
+                                <span class="little-img">
+                                    <volist name="vo.child" id="list" offset="0" length="3">
+                                        <a href="/riji/s{$vo.id}.html" target="_blank">
+                                            <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$list.img_path}" width="422" height="470">
+                                        </a>
+                                    </volist>
+                                </span>
+                            <else/>
+                                <h2><a href="/riji/d{$vo.id}.html" target="_blank">{$vo.title|mbstr=0,12}</a></h2>
+                                <p>{$vo.content|mbstr=0,10}</p>
+                                <span class="little-img">
+                                    <volist name="vo.child" id="list" offset="0" length="3">
+                                        <a href="/riji/d{$vo.id}.html" target="_blank">
+                                            <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$list.img_logo}" width="422" height="470">
+                                        </a>
+                                    </volist>
+                                </span>
+                            </eq>
+                          <span>
+                              <i class="icon-eye-open"></i>{$vo.page_view}<i class="icon-star-empty ml10"></i>{$vo.concern_count}<i class="icon-comments-alt ml10"></i>{$vo.reply_count}
+                          </span>
+                      </li>
+                    </volist>
+                </ul>
+            </div>
+</div>
+</div>
+    {$freetel}
+    <include file="Index:footer" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script src="{$static_host}/assets/home/diary/js/zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+      // 设计报价滚动到750px 悬浮
+      $(window).scroll(function(event) {
+          if($(window).scrollTop() >= 750){
+              $('.secbox_form').css({
+                  "width":"260px",
+                  "margin-top":"0",
+                  "position":"fixed",
+                  "top":"85px",
+                  "zIndex":2
+              });
+          }else{
+              $('.secbox_form').css({
+                  "margin-top":"15px",
+                  "position":"",
+                  "top":"",
+                  "zIndex":''
+              });
+          }
+      });
+    // 加载省市 为了弹窗做准备
+    var shen = null,
+    shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+
+    $(function(){
+      $("input[name='tel']").focus();//选中手机号码
+
+      //点击回复进行回复
+      $(".de-mydairy-mes p .pull-right").click(function() {
+        /* 点击回复触发的事件 */
+        var data_id=$(this).attr("data-id");//获取当前评论的id
+        var data_name=$(this).attr("data-name");//获取被评论的人昵称
+        var textarea_obj=$("#content");//
+        var sub_resend_obj=$("#reply_btn");
+        sub_resend_obj.attr("data-id",data_id);
+        textarea_obj.attr("placeholder","回复 "+data_name+":");
+        sub_resend_obj.attr("data-reply-id",$(this).attr("data-reply-id"));
+        sub_resend_obj.attr("data-name",data_name);
+        textarea_obj.focus();
+      });
+    });
+    </script>
+    <if condition="!isset($_SESSION['u_userInfo'])">
+      <script type="text/javascript">
+        $("#reply_btn").click(function(event) {
+          var _this = $(this);
+          $.ajax({
+              url: '/login/',
+              type: 'POST',
+              dataType: 'JSON',
+              data:{
+                  ssid:"{$ssid}"
+              }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href="{$SCHEME_HOST.scheme_full}{:C('QZ_PASSPORT_ACCOUNT_DONAMES')}/login?redirect="+window.location.href;
+              }
+          }).fail(function(xhr) {
+              //显示提示
+              $.pt({
+                  target: _this,
+                  content: '操作失败,请稍后再试！',
+                  width: 'auto'
+              });
+          });
+      });
+
+      </script>
+    <else/>
+      <script type="text/javascript">
+          var initG = function(reply_id){
+              $.ajax({
+                  url: '/initgeet/',
+                  type: 'POST',
+                  dataType: 'JSON',
+                  data:{
+                      scence:3
+                  }
+              })
+              .done(function(data) {
+                  initGeetest({
+                      // 以下配置参数来自服务端 SDK
+                      gt: data.data.gt,
+                      challenge: data.data.challenge,
+                      offline: !data.data.success,
+                      new_captcha: true,
+                      product: 'bind'
+                  }, function (captchaObj) {
+                      captchaObj.reset();
+                      captchaObj.onReady(function(){
+                          //验证码ready之后才能调用verify方法显示验证码
+                          captchaObj.verify();
+                      }).onSuccess(function(){
+                          var validate = captchaObj.getValidate();
+                          $.ajax({
+                              url: '/verifygeetest',
+                              type: 'POST',
+                              dataType: 'json',
+                              data: {
+                                  geetest_challenge: validate.geetest_challenge,
+                                  geetest_validate: validate.geetest_validate,
+                                  geetest_seccode: validate.geetest_seccode,
+                                  scence:3
+                              }
+                          }).done(function(data) {
+                              if (data.status == 1) {
+                                  var _this = $("#reply_btn");
+                                  var content_obj=$("#content");
+                                  var content=$.trim(content_obj.val());
+                                  var msg_obj=$("#reply_btn").next("span");
+
+                                  var diary_id=_this.attr("diary_id");
+                                  $.post("/add_diary_comment/",{diary_id:diary_id,data_id:_this.attr("data-id"), reply_id:reply_id,content:content,data_name:_this.attr("data-name")},function(res){
+                                      if(res.status == 0)
+                                      {
+                                          msg_obj.html(res.info);//提示错误信息
+                                      }else{
+                                          $.pt({
+                                              target: _this,
+                                              content: res.info,
+                                              width: 'auto'
+                                          });
+                                          window.location.href = window.location.href;
+                                      }
+                                  },'json');
+                              } else{
+                                  alert('验证不通过！');
+                              }
+                          });
+
+                      }).onError(function(){
+                          alert("发送失败,请稍后再试!")
+                      })
+                  })
+              });
+          }
+          $("#reply_btn").click(function () {
+              var _this = $("#reply_btn");
+              var content_obj=$("#content");
+              var content=$.trim(content_obj.val());
+              var msg_obj=$("#reply_btn").next("span");
+              msg_obj.html("");
+              if(content==""){
+                  msg_obj.html("回复内容不能为空");
+                  content_obj.focus();
+                  return;
+              }else{
+                  var reply_id = _this.attr("data-reply-id");
+                  if(reply_id == "{$Think.session.u_userInfo.id}" ||  ("{$Think.session.u_userInfo.id}" == "{$diary_detail_info.user_id}" && typeof reply_id == "undefined")){
+                      $.pt({
+                          target: _this,
+                          content: '请勿回复自己的评论',
+                          width: 'auto'
+                      });
+                      return false;
+                  }
+              }
+               initG(reply_id);
+          });
+      </script>
+    </if>
+</body>
+</html>

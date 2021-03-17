@@ -1,0 +1,238 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>数据对象管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/rolegroup.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>数据对象管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/auth/rbacobject/">数据对象管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box-body">
+                    <a href="/auth/rbacobjectadd/">
+                        <button type="button" id="preview" class="btn btn-success normal">新增数据对象</button>
+                    </a>
+                  </div>
+            </div>
+
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <form id="brandcheck">
+                            <table class="table table-hover text-center" id="brandlist">
+                                <tbody>
+                                    <tr>
+                                        <th class="width-100">用户组名称</th>
+                                        <th>管辖用户</th>
+                                        <th class="width-50">状态</th>
+                                        <th class="width-100">操作</th>
+                                    </tr>
+
+                                    <tr class="ta-none">
+                                            <td>技术</td>
+                                            <td class="pull-left">
+                                                <button type="button" class="btn mg-2px btn-primary btn-xs">编辑运营</button>
+                                                <button type="button" class="btn mg-2px btn-primary btn-xs">招商经理</button>
+                                                <button type="button" class="btn mg-2px btn-primary btn-xs">编辑组长</button>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <a href="/auth/rolegroupup/?id=10">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" data-id="10" class="delete">
+                                                    <span title="停用" class="fa fa-toggle-off"></span>
+                                                </a>
+                                            </td>
+                                    </tr>
+
+
+                                    <volist name="info.group" id="vo">
+                                        <tr class="ta-none">
+                                            <td>{$vo.group_name}</td>
+                                            <td class="pull-left">
+                                                <volist name="vo.groups" id="v">
+                                                    <button type="button" class="btn mg-2px btn-primary btn-xs">{$v}</button>
+                                                </volist>
+                                            </td>
+                                            <eq name="vo.stat" value="1">
+                                                <td></td>
+                                            <else/>
+                                                <td class="text-red">
+                                                    <span class="badge bg-gray">停用</span>
+                                                </td>
+                                            </eq>
+                                            <td>
+                                                <a href="/auth/rolegroupup/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" data-id='{$vo.id}' class="log">
+                                                    <span title="日志" class="fa fa-reorder"></span>
+                                                </a>
+                                                <eq name="vo.stat" value="1">
+                                                    <a href="javascript:void(0)" data-id='{$vo.id}' class="delete">
+                                                        <span title="停用" class="fa fa-toggle-off"></span>
+                                                    </a>
+                                                <else />
+                                                    <a href="javascript:void(0)" data-id='{$vo.id}' class="enable">
+                                                        <span title="使用" class="fa fa-toggle-on"></span>
+                                                    </a>
+                                                </eq>
+                                            </td>
+                                        </tr>
+                                    </volist>
+
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.log').click(function(){
+                var id = $(this).attr('data-id');
+                var _this = this;
+                $.ajax({
+                    url: '/api/getlogslistbyid/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        logtype:'rolegroup'
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        var data = data.data;
+                        var infos = '';
+                        $.each(data,function(key,info) {
+                            infos = infos + info.time + '  '+info.username+'  '+info.remark+'<br>';
+                        });
+                        if('' == infos){
+                            infos = '没有查询到相关的日志记录！';
+                        }
+                        var d = dialog({
+                            quickClose: true,
+                            content: infos,
+                            follow: _this,
+                            onclose: function () {}
+                        });
+                        d.show();
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            /*将用户组设置为不可用*/
+            $('.delete').click(function(){
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/auth/setrolegroup/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:'0'
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+
+            /*将用户组设置为可用*/
+            $('.enable').click(function(){
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/auth/setrolegroup/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:'1'
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+        })
+    </script>
+</block>

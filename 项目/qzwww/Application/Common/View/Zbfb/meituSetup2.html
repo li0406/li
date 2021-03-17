@@ -1,0 +1,122 @@
+<div class="iwantzx-ok"><!-- 获取成功 -->
+    <i class="fa fa-close"></i>
+    <div class="left-modal"></div>
+    <div class="right-modal bj-box">
+        <p class="big-title">您已申请成功！</p>
+        <p class="small-info">本服务由齐装网及具有资质合作的装修公司提供，</p>
+        <p class="small-info">近期申请人数较多，完善以下信息，我们将优先为您服务！</p>
+        <div class="form-box">
+            <div class="iwantzx-input">
+                <input type="number" placeholder="请填写房屋面积" name="mianji" value="{$step.order.mianji}" class="meituStep2-ipt"/>
+                <span class="pingfang">m²</span>
+            </div>
+            <div class="iwantzx-sel2">
+                <select name="yusuan" class="meituStep2-sel">
+                    <option value="">请选择不包括家具、电器的预算</option>
+                    <volist name="step.yusuan" id="vo">
+                    <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+            <div class="iwantzx-sel2">
+                <select name="start" class="meituStep2-sel">
+                    <option value="">请选择开工时间</option>
+                    <option value="1个月内开工">1个月内开工</option>
+                    <option value="2个月内开工">2个月内开工</option>
+                    <option value="3个月内开工">3个月内开工</option>
+                    <option value="面议">面议</option>
+                </select>
+            </div>
+            <div class="iwantzx-input">
+                <input type="text" name="xiaoqu" placeholder="填写小区名称以便定位" class="meituStep2-ipt"/>
+            </div>
+            <div class="iwantzx-button iwantzx-btn-2">立即获取</div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" id="stp2_script">
+    $(function(){
+        $('input[name=mianji]').focus();
+        $(".iwantzx .fa-close").click(function(event) {
+            $('.iwantzx').hide();
+            $('.iwantzx-wanshan,.iwantzx-ok,.iwantzx-saoma').remove();
+            $('#stp2_script,#stp3_beforescript,#stp3_beforecss,#step3_script,#step3_css').remove();
+        });
+        $(".iwantzx-btn-2").click(function(event) {
+            var container = $(".iwantzx-ok");
+            var mianji = $('input[name=mianji]', container).val();
+            var yusuan = $('select[name=yusuan]', container).val();
+            var start = $('select[name=start]', container).val();
+            var xiaoqu = $('input[name=xiaoqu]', container).val();
+            if (mianji == '') {
+                alert('您还没有填写面积哦 ^_^!');
+                $("input[name=mianji]").addClass('focus').focus();
+                return false;
+            }
+            if (isNaN(mianji)){
+                alert("面积只能是纯数字 ^_^!");
+                $("input[name=mianji]").addClass('focus').focus();
+                return false;
+            }
+            $("input[name=mianji]", container).removeClass('focus');
+
+            if (yusuan == '') {
+                alert('您还没有选择装修预算噢 ^_^!');
+                $("select[name=yusuan]", container).addClass('focus').focus();
+                return false;
+            }
+            $("select[name=yusuan]", container).removeClass('focus');
+
+            if (start == '') {
+                alert('您还没有选择开工时间噢 ^_^!');
+                $("select[name=start]", container).addClass('focus').focus();
+                return false;
+            }
+            $("select[name=start]", container).removeClass('focus');
+
+            if ($("input[name=xiaoqu]", container).val() == '') {
+                alert('您还没有填写楼盘名称哦 ^_^!');
+                $("input[name=xiaoqu]", container).addClass('focus').focus();
+                return false;
+            }
+            $("input[name=xiaoqu]", container).removeClass('focus');
+
+            window.order({
+                extra:{
+                    xiaoqu: xiaoqu,
+                    mianji: mianji,
+                    yusuan: yusuan,
+                    start: start,
+                    orderid: "{$step.orderid}",
+                    tel: "{$step.tel}",
+                    tpl: 'meitubeforesuccess',
+                    cs:"{$step.cs}",
+                    qx:"{$step.qx}",
+                    step: 3
+                },
+                error:function(){
+                    container.remove();
+                },
+                success:function(data, status, xhr){
+                    $('#stp2_script,.iwantzx-ok').remove();
+                    if (data.status == 1) {
+                        $(".iwantzx").append(data.data.tmp);
+                        $('.iwantzx-wanshan').show();
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+        if( navigator.userAgent.indexOf("MSIE 8.0") > -1 ){
+            $("input[name=mianji]").on("keyup",function () {
+                $(this).val($(this).val().replace(/\s+/g,""));
+            });
+        }else{
+            $("input[name=mianji]").on("input",function () {
+                $(this).val( $(this).val().replace(/\s+/,"") );
+            });
+        }
+    });
+</script>

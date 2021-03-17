@@ -1,0 +1,373 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>签单补轮审核管理-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css">
+    <link rel="stylesheet" href="/assets/home/signbacknew/css/editorder.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/signbacknew/css/roundOrder.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/signbacknew/css/popModel.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>签返补轮审核管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>签返补轮审核管理</li>
+        </ol>
+    </section>
+    <section class="content clearfix">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row b-pb20">
+                    <form id="myForm" method="get" action="?" class="form-horizontal">
+                        <div class="col-xs-12 b-mbt20">
+                            <div class="col-xs-2 reset-padding">
+                                <div>订单查询：</div>
+                                <input type="text" name="order" class="form-control order-num"
+                                       placeholder="订单号、小区名称" value="{$input.order}" autocomplete="off" />
+                            </div>
+                            <div class="col-xs-2">
+                                <div>申请起始日期：</div>
+                                <input type="text" name="begin"
+                                       class="form-control datepicker start-time"
+                                       placeholder="申请起始日期" value="{$input.begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>申请截止日期：</div>
+                                <input type="text" name="end"
+                                       class="form-control datepicker start-time"
+                                       placeholder="申请截止日期" value="{$input.end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>所属城市：</div>
+                                <select id="city" name="city" class="form-control" type="text" placeholder="选择城市">
+                                    <option value="">请选择</option>
+                                    <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.first_abc} {$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>申请公司：</div>
+                                <input type="text" name="company" class="form-control clear-target order-num"
+                                       value="{$input.company}" placeholder="请输入公司名称/ID" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-xs-12 b-mbt20">
+                            <div class="col-xs-2">
+                                <div>回访人：</div>
+                                <select id="people" name="people" class="form-control" type="text" placeholder="选择回访人">
+                                    <option value="">请选择</option>
+                                    <volist name="kfList" id="vo">
+                                        <option value="{$vo.id}">{$vo.user}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>审核起始日期：</div>
+                                <input type="text" name="check_begin"
+                                       class="form-control datepicker start-time"
+                                       placeholder="审核起始日期" value="{$input.check_begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>审核截止日期：</div>
+                                <input type="text" name="check_end"
+                                       class="form-control datepicker start-time"
+                                       placeholder="审核截止日期" value="{$input.check_end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>补轮审核状态：</div>
+                                <select id="status" name="exam_status" type="text" class="form-control">
+                                    <option value="">全部</option>
+                                    <volist name="exam_status_list" id="item">
+                                        <option value="{$key}">{$item}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-3 pull-right">
+                                <div>&nbsp;</div>
+                                <input type="hidden" name="nxt_order" value="">
+                                <input type="hidden" name="blt_order" value="">
+                                <input type="hidden" name="exam_order" value="">
+                                <input type="hidden" name="distribute_order" value="">
+
+                                <eq name="show_export" value="1">
+                                    <button type="button" id="btnExport" class="btn btn-default btn_export">导出</button>
+                                </eq>
+
+                                <button type="submit" id="btnSearch" class="btn btn-primary  search">搜索</button>
+                                <button type="reset" id="btnReset" class="btn btn-default  reset">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <h3 class="order-title">
+                订单列表
+            </h3>
+            <div class="box order-box">
+                <div class="order-nums" id="apply_num_box">
+                    <a href="/roundorderapply/apply_list?exam_status=1">
+                        <div class="name">当前预受理订单数</div>
+                        <div class="num apply_prepare_num">0</div>
+                    </a>
+                    <a href="/roundorderapply/apply_list?exam_status=11">
+                        <div class="name">当前待定单订单数</div>
+                        <div class="num apply_check_num">0</div>
+                    </a>
+                    <a href="/roundorderapply/apply_list?exam_status=2&check_begin={$month_begin}&check_end={$month_end}">
+                        <div class="name">本月已通过订单数</div>
+                        <div class="num apply_pass_num">0</div>
+                    </a>
+                    <a href="/roundorderapply/apply_list?exam_status=3&check_begin={$month_begin}&check_end={$month_end}">
+                        <div class="name">本月未通过订单数</div>
+                        <div class="num apply_unpass_num">0</div>
+                    </a>
+                </div>
+                <ul class="ol-tab-list">
+                    <volist name="exam_status_list" id="item">
+                        <li class="ol-tab <eq name='Think.get.exam_status' value='$key'> ol-tab-active</eq>" data-tab="{$key}">{$item}</li>
+                    </volist>
+                    <li class="ol-tab <eq name='Think.get.exam_status' value=''></eq>" data-tab="">订单总览</li>
+                </ul>
+                <div class="box-body  b-mt20">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr class="orderitem">
+                            <th>订单编号</th>
+                            <th>城市/区县</th>
+                            <th>小区名称</th>
+                            <th>业主</th>
+                            <th>申请公司</th>
+                            <th>公司id</th>
+                            <th>订单金额</th>
+                            <!--<th>订单分配时间</th>-->
+                            <!--样式参考-->
+                            <th class="wzd_orrder distribute_order">
+                                订单分配时间&nbsp;
+                                <if condition="$Think.get.distribute_order eq 1">
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes" data-asc=""></i></span>
+                                    <elseif condition="$Think.get.distribute_order eq 2"/>
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes-alt" data-asc="1"></i></span>
+                                    <else/>
+                                    <span><i class="glyphicon glyphicon-sort" data-asc="2"></i></span>
+                                </if>
+                            </th>
+                            <neq name="input.exam_status" value="$exam_pre_status[0]">
+                            <th>回访状态</th>
+                            <th>回访内容</th>
+                            <th class="wzd_orrder nxt_order">
+                                下次回访时间&nbsp;
+                                <if condition="$Think.get.nxt_order eq 1">
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes" data-asc=""></i></span>    
+                                <elseif condition="$Think.get.nxt_order eq 2"/>
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes-alt" data-asc="1"></i></span>
+                                <else/>
+                                    <span><i class="glyphicon glyphicon-sort" data-asc="2"></i></span>
+                                </if>
+                            </th>
+                            <th width="60">回访人</th>
+                            </neq>
+                            <notin name="input.exam_status" value="$exam_pre_status">
+                            <th>订单审核状态</th>
+                            <th width="60">审核人</th>
+                            <!--<th>审核时间</th>-->
+                            <!--样式参考-->
+                            <th class="wzd_orrder exam_order">
+                                审核时间&nbsp;
+                                <if condition="$Think.get.exam_order eq 1">
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes" data-asc=""></i></span>
+                                    <elseif condition="$Think.get.exam_order eq 2"/>
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes-alt" data-asc="1"></i></span>
+                                    <else/>
+                                    <span><i class="glyphicon glyphicon-sort" data-asc="2"></i></span>
+                                </if>
+                            </th>
+                            </notin>
+                            <th class="wzd_orrder blt_order">
+                                补轮申请时间 &nbsp;
+                                <if condition="$Think.get.blt_order eq 1">
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes" data-asc="2"></i></span>
+                                <elseif condition="$Think.get.blt_order eq 2"/>
+                                    <span><i class="glyphicon glyphicon-sort-by-attributes-alt" data-asc=""></i></span>
+                                <else/>
+                                    <span><i class="glyphicon glyphicon-sort" data-asc="1"></i></span>
+                                </if>
+                            </th>
+                            <!-- <th>受理时间</th> -->
+                            <th style="width: 70px;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody class="orderxq">
+                            <volist name="data.list" id="item">
+                                <tr data-id="{$item.order_id}">
+                                    <empty name="prower.order_review">
+                                        <td>{$item.order_id}</td>
+                                    <else />
+                                        <td class="order-num">
+                                            <a href="/orderreviewNew/index?review_type=999&search={$item.order_id}" target="_blank">{$item.order_id}</a>
+                                        </td>
+                                    </empty>
+
+                                    <td>{$item.city_name} - {$item.area_name}</td>
+                                    <td>{$item.xiaoqu}</td>
+                                    <td>{$item.yz_name}</td>
+                                    <td>{$item.company_qc}</td>
+                                    <td>{$item.company_id}</td>
+                                    <td>{$item.round_money}</td>
+                                    <td>{$item.allot_date}</td>
+                                    <neq name="input.exam_status" value="$exam_pre_status[0]">
+                                    <td>{$item.review_type_name}</td>
+                                    <td>{$item.remark_type_name}</td>
+                                    <td>{$item.next_visit_time}</td>
+                                    <td>{$item.username}</td>
+                                    </neq>
+                                    <notin name="input.exam_status" value="$exam_pre_status">
+                                    <td>{$item.exam_status_name}</td>
+                                    <td>{$item.exam_operator_user|default="-"}</td>
+                                    <td>{$item.exam_date|default="-"}</td>
+                                    </notin>
+                                    <td>{$item.created_date}</td>
+                                    <!-- <td>受理时间</td> -->
+                                    <td data-id="{$item.round_id}">
+                                        <eq name="item.can_exam" value="1">
+                                            <if condition="$prower['apply_exam'] and in_array($item['exam_status'], $exam_pre_status)">
+                                                <!-- <a href="javascript:void(0)" data-id="{$item.round_id}" class="oedit operate">受理</a> -->
+                                                <a href="/roundorderapply/apply_detail?round_id={$item.round_id}" class=" operate" target="_blank">受理</a>
+                                            <else />
+                                                <!-- <a href="javascript:void(0)" data-id="{$item.round_id}" class="oedit operate">查看</a> -->
+                                                <a href="/roundorderapply/apply_detail?round_id={$item.round_id}" target="_blank">查看</a>
+                                            </if>
+                                        </eq>
+                                    </td>
+                                </tr>
+                            </volist>
+                            <empty name="data.count">
+                                <tr>
+                                    <td colspan="20" style="text-align: center;">暂无数据</td>
+                                </tr>
+                            </empty>
+                        </tbody>
+                    </table>
+                    {$data.page}
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/signbacknew/js/roundOrder.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#city").select2();
+        $("#city").select2("val","{$input.city}");
+        $("#status").val("{$input.exam_status}");
+        $("#people").val("{$input.people}")
+        var status = "{$input.exam_status}";
+        console.log(status);
+        $(".ol-tab-list li").each(function () {
+            var self = $(this);
+            if(self.attr('data-tab') == status){
+                self.addClass('ol-tab-active');
+            }
+        });
+
+        // 新增代码
+        $("#people").select2();
+
+        //tab切换
+        $('.ol-tab').on('click', function () {
+            $('.ol-tab').removeClass('ol-tab-active');
+            $(this).addClass('ol-tab-active');
+            var status = $(this).attr('data-tab');
+            if (status == '') {
+                window.location.replace('/roundorderapply/apply_list?exam_status=');
+            } else {
+                window.location.replace('/roundorderapply/apply_list?exam_status=' + status);
+            }
+        });
+
+        $('.nxt_order').click(function(){
+            var asc = $(this).find('i').data('asc')
+            $('input[name=nxt_order]').val(asc)
+            $('input[name=blt_order]').val('')
+            $('input[name=exam_order]').val('')
+            $('input[name=distribute_order]').val('')
+            $('#btnSearch').click()
+        });
+
+        $('.blt_order').click(function(){
+            var asc = $(this).find('i').data('asc')
+            $('input[name=nxt_order]').val('')
+            $('input[name=blt_order]').val(asc)
+            $('input[name=exam_order]').val('')
+            $('input[name=distribute_order]').val('')
+            $('#btnSearch').click()
+        });
+
+        $('.exam_order').click(function(){
+            var asc = $(this).find('i').data('asc')
+            $('input[name=nxt_order]').val('')
+            $('input[name=blt_order]').val()
+            $('input[name=exam_order]').val(asc)
+            $('input[name=distribute_order]').val('')
+            $('#btnSearch').click()
+        });
+
+        $('.distribute_order').click(function(){
+            var asc = $(this).find('i').data('asc')
+            $('input[name=nxt_order]').val('')
+            $('input[name=blt_order]').val()
+            $('input[name=exam_order]').val()
+            $('input[name=distribute_order]').val(asc)
+            $('#btnSearch').click()
+        });
+
+        // 导出
+        $("#btnExport").click(function(){
+            var data = {
+                order: "{$input.order}",
+                begin: "{$input.begin}",
+                end: "{$input.end}",
+                city: "{$input.city}",
+                company: "{$input.company}",
+                people: "{$input.people}",
+                exam_status: "{$input.exam_status}",
+                nxt_order: "{$input.nxt_order}",
+                blt_order: "{$input.blt_order}",
+                exam_order: "{$input.exam_order}",
+                distribute_order: "{$input.distribute_order}"
+            };
+
+            window.location.href = "/roundorderapply/apply_export?" + urlencode(data);
+        });
+
+        // 获取统计数据
+        function get_apply_statistic(){
+            isLoading = false;
+            $.get("/roundorderapply/apply_statistic", {
+                exam_begin: "{$month_begin}",
+                exam_end: "{$month_end}"
+            }, function(response){
+                isLoading = true;
+                if (response.error_code == 0) {
+                    var total = response["data"]["total"];
+                    $("#apply_num_box").find(".apply_prepare_num").html(total.apply_prepare_num);
+                    $("#apply_num_box").find(".apply_check_num").html(total.apply_check_num);
+                    $("#apply_num_box").find(".apply_pass_num").html(total.apply_pass_num);
+                    $("#apply_num_box").find(".apply_unpass_num").html(total.apply_unpass_num);
+                }
+            });
+        }
+
+        $(function(){
+            get_apply_statistic();
+        });
+    </script>
+</block>

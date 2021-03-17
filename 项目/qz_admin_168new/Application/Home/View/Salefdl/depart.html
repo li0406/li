@@ -1,0 +1,318 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>会员分单量统计（按师团） - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+<style>
+.select-list .check-label {
+	display: inline-block;
+	width:auto;
+	float: left;
+	margin-right: 5px;
+}
+.daterangepicker .input-mini{
+	padding: 0 6px 0 28px !important;
+}
+</style>
+</block>
+
+<block name="content">
+	<section class="content-header">
+		<span class="h3">会员分单量统计（按师团）</span>
+	</section>
+	<section class="content-header">
+		<a href="/salefdl" class="btn btn-primary">按城市统计</a>
+		<a href="/salefdl/depart" class="btn btn-primary">按师团统计</a>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-body">
+						<form id="searchForm" class="form-horizontal" method="GET" action="">
+							<!--
+							<div class="col-sm-2">
+								<select id="cs" name="cs" type="text" tabindex="-1" class="select2" >
+                                    <option value="">全部城市</option>
+                                </select>
+							</div>
+							-->
+
+							<div class="col-sm-2">
+								<select id="znbm" name="znbm" type="text" tabindex="-1" class="select2">
+									<option value="" class="select-level-1">不限师团</option>
+                                    {$info.tree}
+                                </select>
+							</div>
+							<div class="col-sm-2">
+								<input type="text" id="daterange1" name="time1" class="form-control" value="时间">
+							</div>
+							<div class="col-sm-1" style="width:80px">
+								<label class="control-label">对比</label>
+								<input id="compare" name="compare" type="checkbox" <if condition="$info.isCompare EQ '1' ">checked</if> >
+							</div>
+							<if condition="$info.isCompare EQ '1' ">
+								<div class="col-sm-2" id="timeWrap">
+									<input type="text" id="daterange2" name="time2" class="form-control">
+								</div>
+							<else />
+								<div class="col-sm-2" id="timeWrap" style="display:none">
+									<input type="text" id="daterange2" name="time2" class="form-control">
+								</div>
+							</if>
+
+							<div class="pull-right col-sm-2" style="min-width:210px">
+								<div class="btn-group">
+									<input type="button" id="prveYear" class="btn btn-default" value="同比">
+									<input type="button" id="prveMonth" class="btn btn-default" value="环比">
+								</div>
+								&nbsp;
+								<input type="hidden" name="prveMonth" value="0">
+								<input type="hidden" name="prveYear" value="0">
+								<input type="hidden" name="dl" value="0">
+								<button type="submit" id="search" class="btn btn-primary">查询</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="box box-default">
+					<div class="box-header">
+					  	<div class="box-tools">
+					  		<button type="button" class="btn btn-xs bg-olive btn-flat" data-toggle="modal" data-target="#check-list">
+					  			<i class="fa fa-fw fa-outdent"></i>自定义列
+					  		</button>
+					  		<button type="button" class="btn btn-default btn-xs download" >
+					  			<i class="fa fa-fw fa-file-excel-o"></i>导出Excel
+					  		</button>
+					  	</div>
+					</div>
+
+					<div class="box-body">
+						<div class="row">
+							<div class="col-sm-12 set-mt16">
+								<div class="oflow">
+									<table id="myTable" class="table table-bordered table-hover dataTable no-footer">
+										<thead>
+											<tr>
+												<th class="colTh0">部门</th>
+												<th class="colTh1">城市</th>
+												<th class="colTh8" style="display:none">拓展师长</th>
+												<th class="colTh9" style="display:none">品牌师长</th>
+												<th class="colTh10" style="display:none">拓展团长</th>
+												<th class="colTh11" style="display:none">品牌团长</th>
+												<th class="colTh2">实际会员数</th>
+												<th class="colTh3">分单需求总数</th>
+												<th class="colTh4">分单需求平均数</th>
+												<th class="colTh5">当前分单累计数</th>
+												<th class="colTh6">今日分单累计数</th>
+												<th class="colTh7">团长</th>
+											</tr>
+										</thead>
+										<tbody>
+										<empty name="cl">
+										<volist name="list" id="v">
+											<tr>
+												<td class="colTd0">{$v.name}</td>
+												<td class="colTd1"><span data-toggle="tooltip" data-placement="top" title="{$v.citys}">{$v.cityNum}</span></td>
+												<td class="colTd8" style="display:none">{$v.cityManager.1.shi}</td>
+												<td class="colTd9" style="display:none">{$v.cityManager.2.shi}</td>
+												<td class="colTd10" style="display:none">{$v.cityManager.1.tuan}</td>
+												<td class="colTd11" style="display:none">{$v.cityManager.2.tuan}</td>
+												<td class="colTd2">{$v.vipnum}</td>
+												<td class="colTd3">{$v.fdlAll}</td>
+												<td class="colTd4">{$v.fdlAvg}</td>
+												<td class="colTd5">{$v.allFdl}</td>
+												<td class="colTd6">{$v.todayFdl}</td>
+												<td class="colTd7">{$v.depUser}</td>
+											</tr>
+										</volist>
+										<else />
+										<volist name="list" id="v">
+											<tr>
+												<td class="colTd0">{$v.name}</td>
+												<th class="colTd1"><span data-toggle="tooltip" data-placement="top" title="{$v.citys}">{$v.cityNum}</span><br><span data-toggle="tooltip" data-placement="top" title="{$cl[$key].citys}">{$cl[$key].cityNum}</span></th>
+												<td class="colTd8" style="display:none">{$v.cityManager.1.shi}</td>
+												<td class="colTd9" style="display:none">{$v.cityManager.2.shi}</td>
+												<td class="colTd10" style="display:none">{$v.cityManager.1.tuan}</td>
+												<td class="colTd11" style="display:none">{$v.cityManager.2.tuan}</td>
+												<td class="colTd2">{$v.vipnum}<br>{$cl[$key].vipnum}</td>
+												<td class="colTd3">{$v.fdlAll}<br>{$cl[$key].fdlAll}</td>
+												<td class="colTd4">{$v.fdlAvg}<br>{$cl[$key].fdlAvg}</td>
+												<td class="colTd5">{$v.allFdl}<br>{$cl[$key].allFdl}</td>
+												<td class="colTd6">{$v.todayFdl}<br>{$cl[$key].todayFdl}</td>
+												<td class="colTd7">{$v.depUser}<br>{$cl[$key].depUser}</td>
+											</tr>
+										</volist>
+										</empty>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-xs-12">{$info.page}</div>
+						</div>
+					</div>
+				</div>
+				<div class="alert alert-warning" role="alert" style="font-size:16px;color:#000">
+					<p><strong>系数：</strong>查询城市对应的城市重点系数，来源于“城市重点系数设置”。</p>
+					<p><strong>城市会员指标：</strong>来自销售后台会员指标设置的城市会员指标值。</p>
+					<p><strong>实际会员：</strong>后台报备到的实际会员总数+多倍会员超出数。</p>
+					<p><strong>会员完成率：</strong>当前实际会员/城市会员指标数*100%。</p>
+					<p><strong>分单需求总数：</strong>当前城市下的所有会员需要的分单量的总和。</p>
+					<p><strong>平均分单需求数：</strong>当前城市下的会员的平均分单需求数量 。</p>
+					<p><strong>当前分单累计数：</strong>当前城市下所有会员到当前时间为止总共已分单数量的和。</p>
+					<p><strong>今日分单累计数：</strong>当前城市下，所有会员在今天到现在的时间为止，总共的分单量。</p>
+				</div>
+			</div>
+
+
+<div class="modal fade" id="check-list" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">
+				<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4>选择查看的列</h4>
+			</div>
+
+			<form class="form-horizontal" method="GET" action="">
+				<div class="modal-body judge-input" style="height: auto;overflow: hidden;">
+					<div style="float:left;line-height:26px;">
+						<div class="check-label">城市分单需求列项:</div>
+						<div class="check-label">分单统计列项:</div>
+						<div class="check-label">职能列项:</div>
+					</div>
+
+					<div class="select-list col-xs-10 selectBox">
+						<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>部门</span></label></div>
+						<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>城市</span></label></div>
+						<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>实际会员数</span></label></div>
+						<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>分单需求总数</span></label></div>
+						<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>分单需求平均数</span></label></div>
+						<div style="clear:both" class="check-label">
+							<label><input type="checkbox" name="cols[]" checked><span>当前分单累计数</span></label>
+							<label><input type="checkbox" name="cols[]" checked><span>今日分单累计数</span></label>
+						</div>
+						<div style="clear:both" class="check-label">
+							<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>团长</span></label></div>
+							<div class="check-label"><label><input type="checkbox" name="cols[]"><span>拓展师长</span></label></div>
+							<div class="check-label"><label><input type="checkbox" name="cols[]"><span>品牌师长</span></label></div>
+							<div class="check-label"><label><input type="checkbox" name="cols[]"><span>拓展团长</span></label></div>
+							<div class="check-label"><label><input type="checkbox" name="cols[]"><span>品牌团长</span></label></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary btn-ok">确认</button>
+				</div>
+			</form>
+
+		</div>
+	</div>
+</div>
+
+
+		</div>
+	</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/js/sale.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/plugins/daterangepicker/moment.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+	var startDateSelf,endDateSelf,startDateSelf2,endDateSelf2;
+	$(function() {
+
+		$('#search').click(function(){
+			//var time1 = $('#daterange1').val();
+			//alert(time1);
+
+			//判断是否对比
+			if($('input[name="compare"]').is(":checked") == false){
+				$('input[name="time2"]').val('');
+			}
+			$('#searchForm').submit();
+		});
+
+		$(".select2").select2({
+			allowClear: true
+		});
+
+		$("#cs").select2("val","{$info.cs}");
+		$("#znbm").select2("val", "{$info.depart}");
+
+
+		// 列表选择
+		$('.btn-ok').on('click', function(){
+			$('#myTable thead tr th').hide();
+			$('#myTable tbody tr td').hide();
+
+			$('.selectBox input[name="cols[]"]').each(function(index, el) {
+				if ($(this).is(":checked")) {
+					//console.log(index);
+                    $('#myTable tbody .colTd'+index).show();
+					$('#myTable thead .colTh'+index).show();
+            	}
+			});
+
+			$('#check-list').modal('hide');
+		});
+
+		$('#prveMonth').on('click', function(){
+			$('input[name="prveMonth"]').val('1');
+			$('input[name="time2"]').val('');
+			$('input[name="compare"]').attr('checked',false);
+			$('#searchForm').submit();
+		});
+
+		$('#prveYear').on('click', function(){
+			$('input[name="prveYear"]').val('1');
+			$('input[name="time2"]').val('');
+			$('input[name="compare"]').attr('checked',false);
+			$('#searchForm').submit();
+		});
+
+		$('.download').on('click', function(){
+			$('input[name="dl"]').val('1');
+			$('#searchForm').submit();
+		});
+
+
+	});
+
+
+
+
+	$("#compare").change(function() {
+		if($(this).is(':checked')){
+			$('#timeWrap').show();
+			$('#prveMonth,#prveQuarter,#prveYear').attr('disabled',true);
+		}
+		else{
+			$('#timeWrap').hide();
+			$('#prveMonth,#prveQuarter,#prveYear').attr('disabled',false);
+		}
+	});
+
+	$('#daterange1').daterangepicker({
+			"startDate": "{$info.startTime}",
+			"endDate": "{$info.endTime}",
+			"autoApply": true,
+		}, function(start, end, label) {
+	});
+
+	$('#daterange2').daterangepicker({
+			"startDate": "{$info.compareStart}",
+			"endDate": "{$info.compareEnd}",
+			"autoApply": true,
+		}, function(start, end, label) {
+	});
+
+
+</script>
+</block>

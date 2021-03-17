@@ -1,0 +1,231 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="box no-border">
+        <div class="box-body">
+            <div class="row">
+                <form id="searchForm" action="" method="GET">
+                    <volist name="categorylist" id="vo">
+                        <div class="col-xs-1">
+                            {$vo.name}：
+                            <select name="pub_category-{$vo.id}"  class="form-control">
+                                <option value="">请选择</option>
+                                <volist name="vo.child" id="v">
+                                    <if condition="$requestData['pub_category'] eq $v['id']" >
+                                        <option value="{$v.id}" selected="selected">{$v.name}</option>
+                                        <else />
+                                        <option value="{$v.id}">{$v.name}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                    </volist>
+                    <div class="col-xs-2">
+                        标题或ID
+                        <input type="text" name="keyword" class="form-control" placeholder="标题或ID" value="{$requestData.keyword}" autocomplete="off">
+                    </div>
+                    <div class="col-xs-1">
+                        选取状态：
+                        <select name="choosestate" id="choosestate" class="form-control">
+                            <option value="0">请选择</option>
+                            <option value="1" <if condition="$requestData.choosestate eq 1">selected </if>>已选取</option>
+                            <option value="2" <if condition="$requestData.choosestate eq 2">selected </if>>未选取</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-1">
+                        <br/>
+                        <button type="button" data-triger="meituselect" class="key-down-event btn btn-primary meituselect">
+                            <i class="fa fa-search"></i>查询
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="clear-float"></div>
+            <table class="table table-bordered table-hover dataList">
+                <tr>
+                    <th>ID</th>
+                    <th style="text-align: left">标题</th>
+                    <th>关键字</th>
+                    <th style="text-align: left">标签</th>
+                    <th>操作人</th>
+                    <th>发布时间</th>
+                    <th>操作</th>
+                </tr>
+                <foreach name="list.data" item="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>
+                            <if condition="$vo.state eq 2">
+                                <span class="label label-success"><i class="fa fa-clock-o"></i>预</span>
+                            </if>
+                            <a title="{$vo.title}" href="http://{:C('QZ_YUMINGWWW')}/tu/g{$vo.id}.html" target="_blank"  img-src="{$vo.image_src}">
+                                {$vo.title|mbstr=0,30}
+                            </a>
+                        </td>
+                        <td>
+                            {$vo.keyword|mbstr=0,30}
+                        </td>
+                        <td></td>
+                        <td>
+                            {$vo.creator_name}
+                        </td>
+                        <td class="text-align-center">
+                            {$vo.publish_time}
+                        </td>
+                        <td><span class="fa {$vo.toggleIcon} choice" data-id="{$vo.id}"></span></td>
+                    </tr>
+                </foreach>
+            </table>
+        </div>
+        <div class="box-footer no-border fenye">
+            <div class="col-xs-12">{$list.page}</div>
+        </div>
+    </div>
+<div class="imgPreviewBox" id="imgbox">
+    <img src="" id="Preview">
+</div>
+
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#state').val('{$Think.get.state|default=0}');
+    $('#is_choice').val('{$Think.get.is_choice|default=0}');
+
+
+    //热门
+    $("select[name=pub_category-3").change(function(){
+        var choose = $(this).val();
+        if(choose){
+            $("select[name=pub_category-4").val("");
+            $("select[name=pub_category-5").val("");
+            $("select[name=pub_category-6").val("");
+        }
+    });
+
+    //公用
+    $("select[name=pub_category-4").change(function(){
+        var choose = $(this).val();
+        if(choose){
+            $("select[name=pub_category-3").val("");
+            $("select[name=pub_category-5").val("");
+            $("select[name=pub_category-6").val("");
+        }
+    });
+
+    //公用
+    $("select[name=pub_category-5").change(function(){
+        var choose = $(this).val();
+        if(choose){
+            $("select[name=pub_category-3").val("");
+            $("select[name=pub_category-4").val("");
+            $("select[name=pub_category-6").val("");
+        }
+    });
+
+    //商用
+    $("select[name=pub_category-6").change(function(){
+        var choose = $(this).val();
+        if(choose){
+            $("select[name=pub_category-3").val("");
+            $("select[name=pub_category-4").val("");
+            $("select[name=pub_category-5").val("");
+        }
+    });
+
+
+    $('.meituselect').click(function(){
+        var category = '';
+        var pub_category1 = $("select[name=pub_category-3").val();
+        var pub_category2 = $("select[name=pub_category-4").val();
+        var pub_category3 = $("select[name=pub_category-5").val();
+        var pub_category4 = $("select[name=pub_category-6").val();
+        var choosestate = $("select[name=choosestate").val();
+        var keyword = $("input[name=keyword").val();
+        if(pub_category1){
+            category = pub_category1;
+        }else if(pub_category2){
+            category = pub_category2;
+        }else if(pub_category3){
+            category = pub_category3;
+        }else if(pub_category4){
+            category = pub_category4;
+        }else{
+            category = '';
+        }
+        window.location.href = '/meituv2/gzBox?pub_category=' + category +'&choosestate='+ choosestate + '&keyword='+ keyword
+    });
+    // enter键查询
+    $("input[name=keyword]").keyup(function(e){
+        if(e.keyCode == 13){
+            var category = '';
+            var pub_category1 = $("select[name=pub_category-3").val();
+            var pub_category2 = $("select[name=pub_category-4").val();
+            var pub_category3 = $("select[name=pub_category-5").val();
+            var pub_category4 = $("select[name=pub_category-6").val();
+            var choosestate = $("select[name=choosestate").val();
+            var keyword = $("input[name=keyword").val();
+            if(pub_category1){
+                category = pub_category1;
+            }else if(pub_category2){
+                category = pub_category2;
+            }else if(pub_category3){
+                category = pub_category3;
+            }else if(pub_category4){
+                category = pub_category4;
+            }else{
+                category = '';
+            }
+            window.location.href = '/meituv2/gzBox?pub_category=' + category +'&choosestate='+ choosestate + '&keyword='+ keyword
+        }
+    });
+
+
+
+
+    $('.dataList a').hover(function(){
+        var imgUrl = "https://staticqn.qizuang.com/" + $(this).attr('img-src') + '-s3.jpg';
+        $("#Preview").attr("src",imgUrl);
+        $('#imgbox').show();
+    },function(){
+        $('#imgbox').hide();
+    });
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('{$info.module}');
+
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 8){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,9);
+            }
+            Cookies.set('{$info.module}',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('{$info.module}',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+    });
+
+    // $('#search').click(function(){
+    //     $('select[name="location"]').removeAttr("disabled");
+    // })
+
+})
+</script>
+</block>

@@ -1,0 +1,28 @@
+pipeline {
+  agent any
+  stages {
+    stage('检出') {
+      steps {
+        checkout([$class: 'GitSCM', branches: [[name: env.GIT_BUILD_REF]], 
+                                                            userRemoteConfigs: [[url: env.GIT_REPO_URL, credentialsId: env.CREDENTIALS_ID]]])
+      }
+    }
+    stage('构建') {
+      steps {
+        echo '构建中...'
+        sh '''chmod +x ./qshell
+./qshell account ${QINIU_AK} ${QINIU_CK} qizuang@qq.com'''
+        echo '构建完成..'
+      }
+    }
+    stage('部署') {
+      steps {
+        echo '部署中...'
+        sh './qshell qupload qiniu-config'
+		sh './qshell cdnrefresh -i cdnrefresh-files.txt'
+		sh './qshell cdnrefresh --dirs -i cdnrefresh-dirs.txt'
+        echo '部署完成'
+      }
+    }
+  }
+}

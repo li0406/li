@@ -1,0 +1,632 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>公装美图</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/assets/common/plugins/select2/css/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/fileinput/fileinputLink.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>公装美图管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/pubmeitu">公装美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <div class="form-horizontal">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">美图标题：</label>
+                        <div class="col-sm-5" id="meitu_biaoti">
+                            <input id="bt-title" class="form-control" autocomplete="off" name="title" value="{$meitu.title}">
+                            <!--<select name="title" id="biaoti" class="form-control" value="{$meitu.title}"></select>-->
+                        </div>
+                        <div class="col-sm-5 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">美图类型：</label>
+                        <div class="col-sm-6">
+                            <ul class="item">
+                                <volist name="info.location" id="vl">
+                                <if condition="in_array($vl['id'],$meitu['location'])">
+                                    <li class="active" data-id="{$vl.id}" data-type="lx"><i class="glyphicon glyphicon-ok"></i> {$vl.name}</li>
+                                <else/>
+                                    <li data-id="{$vl.id}" data-type="lx"><i class="glyphicon glyphicon-tag"></i> {$vl.name}</li>
+                                </if>
+                                </volist>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">美图风格：</label>
+                        <div class="col-sm-6">
+                            <ul class="item">
+                                <volist name="info.fengge" id="vf">
+                                <if condition="in_array($vf['id'],$meitu['fengge'])">
+                                <li class="active" data-id="{$vf.id}" data-type="fg"><i class="glyphicon glyphicon-ok"></i> {$vf.name}</li>
+                                <else/>
+                                <li data-id="{$vf.id}" data-type="fg"><i class="glyphicon glyphicon-tag"></i> {$vf.name}</li>
+                                </if>
+                                </volist>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">美图面积：</label>
+                        <div class="col-sm-6">
+                            <ul class="item">
+                                <volist name="info.mianji" id="va">
+                                <if condition="in_array($va['id'],$meitu['mianji'])">
+                                <li class="active" data-id="{$va.id}" data-type="mj"><i class="glyphicon glyphicon-ok"></i> {$va.name}</li>
+                                <else/>
+                                <li data-id="{$va.id}" data-type="mj"><i class="glyphicon glyphicon-tag"></i> {$va.name}</li>
+                                </if>
+                                </volist>
+                            </ul>
+                        </div>
+                        <div class="col-sm-4 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group tags-wrap">
+                        <label class="col-sm-2 control-label">标签</label>
+                        <div class="col-sm-5">
+                            <select name="tags" class="tags form-control" id="tags" multiple="">
+                            <notempty name="meitu.tagname">
+                                <volist name="meitu.tagname" id="vo">
+                                    <option value="{$vo}" selected>{$vo}</option>
+                                </volist>
+                            </notempty>
+                            </select>
+                            <input name="tagnames" id="tagnames" type="hidden">
+                        </div>
+                        <div class="col-sm-5 link-error tips"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">关键字：</label>
+                        <div class="col-sm-5">
+                            <input id="biaoti2" class="form-control" name="keyword" value="{$meitu.keyword}">
+                        </div>
+                    </div>
+                    <if condition="empty($meitu['id'])">
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">预发布日期：</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control datetime" name="start_time">
+                            </div>
+                        </div>
+                    <elseif condition="2 EQ $meitu['visible']" />
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">预发布日期：</label>
+                            <div class="col-sm-3">
+                                <gt name="meitu.time" value="0">
+                                    <input type="text" class="form-control datetime" name="start_time" value="{$meitu.time|date='Y-m-d',###}">
+                                <else />
+                                    <input type="text" class="form-control datetime" name="start_time">
+                                </gt>
+                            </div>
+                        </div>
+                    </if>
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">美图类型：</label>
+                        <div class="col-sm-3">
+                            <select name="type" class="form-control">
+                                <if condition="$meitu['master'] EQ 0">
+                                    <option value="1" selected="selected">标准美图</option>
+                                    <option value="2">大师美图</option>
+                                <else/>
+                                    <option value="1" >标准美图</option>
+                                    <option value="2" selected="selected">大师美图</option>
+                                </if>
+                            </select>
+                        </div>
+                    </div>
+
+                    <if condition="$meitu['master'] EQ 0">
+                        <div class="form-group master" style="display:none">
+                            <label class="col-sm-2 control-label">选择大师：</label>
+                            <div class="col-sm-3">
+                                <select name="master" class="form-control">
+                                    <volist name="info.master" id="vo">
+                                        <if condition="$meitu['master'] EQ $vo['uid']">
+                                            <option value="{$vo.uid}" selected="selected">{$vo.name}({$vo.comname})</option>
+                                        <else/>
+                                            <option value="{$vo.uid}">{$vo.name}({$vo.comname})</option>
+                                        </if>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                    <else/>
+                        <div class="form-group master">
+                            <label class="col-sm-2 control-label">选择大师：</label>
+                            <div class="col-sm-3">
+                                <select name="master" class="form-control">
+                                    <volist name="info.master" id="vo">
+                                        <if condition="$meitu['master'] EQ $vo['uid']">
+                                            <option value="{$vo.uid}" selected="selected">{$vo.name}({$vo.comname})</option>
+                                        <else/>
+                                            <option value="{$vo.uid}">{$vo.name}({$vo.comname})</option>
+                                        </if>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                    </if>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">推荐状态：</label>
+                        <div class="col-sm-5">
+                            <div class="switch" data-on-label="SI" data-off-label="NO">
+                                <if condition="$meitu['istop'] EQ 1">
+                                    <input id="create-switch" type="checkbox" checked />
+                                <else/>
+                                    <input id="create-switch" type="checkbox" />
+                                </if>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">美图描述：</label>
+                        <div class="col-sm-5">
+                            <textarea id="biaoti3" type="text" name="description" class="form-control" placeholder="美图描述" style="height:100px;" >{$meitu.description}</textarea>
+                        </div>
+                        <div class="col-sm-5 link-error tips"></div>
+                    </div>
+
+                    <div class="form-group img-wrap">
+                        <label class="col-sm-2 control-label">美图图片：</label>
+                        <div class="col-sm-8">
+                            <input id="uploadPic" type="file" multiple/>
+                            <input type="hidden" name="files"/>
+                        </div>
+                        <div class="col-sm-1 link-error tips"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <div class="col-xs-4">
+                        <div class="alert alert-warning alert-dismissible fade in " role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            <strong>注意事项：</strong> 图片大小现不设限制，但请控制图片不要太大哦！
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <div class="col-xs-5">
+                            <button type="submit" class="btn btn-success button submit-save" data-directpost="0">保存</button>
+                            <if condition="true EQ check_menu_auth('/pubmeitu/directpost/')">
+                                <if condition="empty($meitu['id'])">
+                                    <button type="submit" class="btn btn-info button submit-save" data-directpost="1">直接发布</button>
+                                <elseif condition="2 EQ $meitu['visible']" />
+                                    <button type="submit" class="btn btn-info button submit-save" data-directpost="1">直接发布</button>
+                                </if>
+                            </if>
+                            <button type="button" class="btn btn-default" onclick="history.back()"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                        </div>
+                        <input type="hidden" name="caseid" value="{$meitu.id}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinputLink.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".tags").select2({
+                language: "zh-CN",
+                tags: false,
+                multiple: true, //是否使用多个标签
+                ajax: {
+                    url: "/tags/gettagsapi/",
+                    dataType: 'json',
+                    type: 'GET',
+                    delay: 1000,
+                    data: function (params) {
+                        return {
+                        key: params.term, //查询参数
+                      };
+                    },
+                    processResults: function (data, page) {
+                        var parsed = data.data;
+                        var arr = [];
+                        for(var x in parsed){
+                            arr.push(parsed[x]); //这个应该是个json对象
+                        }
+                        return {
+                            results: arr
+                        };
+                    },
+                    cache: true
+                  },
+                escapeMarkup: function (markup) { return markup; },
+                /*最小需要输入多少个字符才进行查询，与之相关的小需要输入多少个字符才进行查询，与之相关的maximumSelectionLength表示最大输入限制*/
+                minimumInputLength: 1
+            });
+
+
+           /* $("#biaoti").select2({
+                language: "zh-CN",
+                tags: false,
+                multiple: true, //是否使用多个标签
+                ajax: {
+                    url: "/tags/getbiaotiapi/",
+                    dataType: 'json',
+                    type: 'GET',
+                    delay: 1000,
+                    data: function (params) {
+                        return {
+                            key: params.term, //查询参数
+                        };
+                    },
+                    processResults: function (data, page) {
+                        var parsed = data.data;
+                        var arr = [];
+                        for(var x in parsed){
+                            arr.push(parsed[x]); //这个应该是个json对象
+                        }
+                        if(arr.length==0){
+                            var title_text = $(".select2-search__field").val();
+//                            var spanEle= "<li class='select2-selection__choice' title='"+title_text+"'><span class='remove_title' role='presentation'>×</span>"+title_text+"</li>";
+                            $("#meitu_biaoti .select2-search").html(title_text);
+                        }
+
+                        return {
+                            results: arr
+                        };
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) { return markup; },
+                /!*最小需要输入多少个字符才进行查询，与之相关的小需要输入多少个字符才进行查询，与之相关的maximumSelectionLength表示最大输入限制*!/
+                minimumInputLength: 1
+            });*/
+
+
+            $("#meitu_biaoti").on("click","li",function(){
+                $("#bt-title").val($(this).text());
+                $(".tishi_box").remove();
+            });
+
+            $(document).click(function(event){
+                $(".tishi_box").remove();
+            });
+
+            $('#bt-title').on('keyup paste',function(){
+                var that=$(this);
+                var nextNode=$(this).next(".tishi_box").length;
+                if(nextNode==0){
+                    $(this).after("<div class='tishi_box'><ul></ul></div>");
+                }
+                if($(this).val()==""){
+                    $(".tishi_box").remove();
+                }
+
+                var text = $(this).val();
+                var type = $(this).parent().parent().find('.type').val();
+                var nextUl = $(this).next().children('ul');
+                if(that.val().length>0){
+                    $.ajax({
+                        url: "/tags/getbiaotiapi/",
+                        dataType: 'json',
+                        type: 'GET',
+                        delay: 1000,
+                        data: {key: that.val()},//查询参数*/
+                        success:function (data) {
+                            $(nextUl).html('')
+                            var parsed = data.data;
+                            var arr = [];
+                            for(var x in parsed){
+                                var text="<li>"+parsed[x].text+"</li>";
+                                $(".tishi_box ul").append(text)
+                            }
+                        },
+                        cache: true
+                    })
+                }
+            });
+
+
+            $(".datetime").datetimepicker({
+                format:"yyyy-mm-dd",
+                startView: 2,
+                todayHighlight: 1,
+                minView: 2,
+                todayBtn:true,
+                autoclose:true
+            });
+
+            //推荐滑块js
+            $('#create-switch').bootstrapSwitch({onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                }else{
+                    $el.attr("checked","checked")
+                }
+            }});
+
+            //多选按钮
+            $(".item li").click(function(event) {
+                var _this = $(this);
+                if(!_this.hasClass('active')){
+                    _this.addClass('active').find('i').removeClass("glyphicon-tag").addClass('glyphicon-ok');
+                }else{
+                    _this.removeClass("active").find("i").removeClass('glyphicon-ok').addClass('glyphicon-tag');
+                }
+            });
+
+            //标签多选按钮
+            $(".tags li").click(function(event) {
+                var tag = $("input[name=tagname]").val();
+                if(!$(this).hasClass('active')){
+                    $(this).addClass('active').find('i').removeClass("glyphicon-tag").addClass('glyphicon-ok');
+                    tag +=" " + $(this).attr("data-name");
+                }else{
+                    $(this).removeClass("active").find("i").removeClass('glyphicon-ok').addClass('glyphicon-tag');
+                    tag = tag.replace($(this).attr("data-name"),"");
+                    if(tag == ","){
+                        tag ="";
+                    }
+                }
+                $("input[name=tagname]").val(tag);
+            });
+
+            //美图类型
+            $("select[name=type]").change(function(event) {
+                $(".master").hide();
+                if($(this).val() == 2){
+                    $(".master").show();
+                }
+            });
+
+            //保存按钮
+            $(".submit-save").click(function(event) {
+                var url = '';
+                if ('1' == $(this).attr('data-directpost')) {
+                    url = '/pubmeitu/directpost/';
+                } else {
+                    url = '/pubmeitu/pubimg/';
+                }
+                //检查标题
+                $(".tips").html("");
+                $(".focus").removeClass('focus');
+                var _this = $(this);
+                if($("input[name=title]").val() == ""){
+                    $("input[name=title]").focus();
+                    $("input[name=title]").parent().parent().find(".tips").html("请填写美图标题");
+                    return false;
+                }
+                //检查类型、风格、面积
+                var flag = true;
+                $(".item").each(function(){
+                    var item = $(this);
+                    if(item.find(".active").length == 0){
+                       $("html,body").animate({scrollTop:item.offset().top},500);
+                       item.find("button").eq(0).addClass('focus');
+                       var type = item.find("button").eq(0).attr("data-type");
+                       var msg ="";
+                       switch(type){
+                            case "lx":
+                            msg ="请选择美图类型";
+                            break;
+                            case "fg":
+                            msg ="请选择美图风格";
+                            break;
+                            case "mj":
+                            msg ="请选择美图面积";
+                            break;
+                            default :
+                            msg="没有相关内容";
+                            break;
+                       }
+                       item.parent().parent().find(".tips").html(msg);
+                       flag = false;
+                    }
+                });
+                if(!flag){
+                    return false;
+                }
+
+                if($("textarea[name=description]").val() == ""){
+                    $("textarea[name=description]").focus();
+                    $("textarea[name=description]").parent().parent().find(".tips").html("请填写美图描述");
+                    return false;
+                }
+
+                var tags = $("#tags").select2("data");
+                var tagnames = '';
+                $.each(tags,function(n,value) {
+                    tagnames = tagnames + value.text + ',';
+                });
+                if (tagnames == '') {
+                    $('.tags-wrap').find(".tips").html("请选择标签~");
+                    return false;
+                };
+
+                var addtime = $("input[name=start_time]").val();
+                if ('undefined' == typeof(addtime)) {
+                    addtime = '';
+                };
+                var data = {
+                    title:$("input[name=title]").val(),
+                    description:$("textarea[name=description]").val(),
+                    tagnames:tagnames,
+                    caseid:$("input[name=caseid]").val(),
+                    keyword:$("input[name=keyword]").val(),
+                    type:$("select[name=type]").val(),
+                    master:$("select[name=master]").val(),
+                    addtime:addtime,
+                    istop:$("#create-switch:checked").val() == "on"?1:0,
+                }
+
+                $(".item").each(function(){
+                    var item = $(this);
+                    item.find(".active").each(function(i){
+                        var li = $(this);
+                        if(i == 0){
+                            data[li.attr("data-type")] = li.attr("data-id");
+                        }else{
+                            data[li.attr("data-type")] += ","+li.attr("data-id");
+                        }
+                    });
+                });
+
+                //获取上传的图片
+                data['newImgs']= $("input[name=files]").data("data");
+
+                var id = "{$meitu.id}";
+                if (id == '') {
+                    if (data['newImgs'] == '' || typeof(data['newImgs']) == 'undefined') {
+                        $('.img-wrap').find(".tips").html("请上传图片");
+                        return false;
+                    };
+                };
+
+                var img_desc = [],
+                    img_id=[];
+                $(".file-preview-frame").each(function (k,y) {
+                    var img_desc_html = $(this).find('.textarea').html(); //富文本框
+                    var img_upid = $(this).attr('id');//新上传的 上传id
+                    var old_img_upid = $(this).find('img').attr('data-id'); //老上传的 图片地址
+
+                    //1.判断是否是 新上传的
+                    if(!$(this).find('img').attr('data-id')){
+                        img_id[k] = $(this).attr('id');
+                        img_desc.push({text:img_desc_html,upId:img_upid})
+                    }else {
+                        img_id[k] = old_img_upid;
+                        img_desc.push({text:img_desc_html,upId:old_img_upid})
+                    }
+                });
+                data.img_id = img_id;
+                data.img_desc = img_desc;
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:{
+                        data:data
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href="/pubmeitu/?p={$p}";
+                    }else{
+                        $("#bt-title").focus();
+                        alert(data.info);
+                    }
+                });
+            });
+
+            //上传图片
+            $("#uploadPic").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption:false,
+                browseClass:"btn blue",
+                allowedFileExtensions : ['jpg','png','gif'],
+                uploadClass:"btn green",
+                removeClass:"btn red",
+                uploadAsync:true,
+                dropZoneEnabled:false,
+                maxFileSize:1000000000,
+                previewSettings:{
+                    image: {width: "auto", height: "100px"}
+                },
+                //是否覆盖初始设置的或者之前的
+                overwriteInitial: false,
+                uploadExtraData:{
+                    prefix:'meitu'
+                },
+                initialPreview:[
+                <volist name="meitu.img" id="v">
+                    "<img data-id='{$v.id}' src='//{:C('QINIU_DOMAIN')}/{$v.img_path}'  class='file-preview-image'>",
+                </volist>
+                ],
+                initialPreviewAsData: true,
+                initialPreviewFileType: 'image',
+                initialPreviewConfig: [
+                <volist name="meitu.img" id="v">
+                    {url: "/pubmeitu/delimg?id={$v.id}&key={$v.img_path}",text:'{$v.description}'},
+                </volist>
+                ]
+            }).on('fileuploaded', function(event, data) {
+                var _this = $(this);
+                if(data.response.status == 1){
+                    //var obj = data.response.data.file_data;
+                    //var val = $("input[name=files]").val();
+                    //var val = data.response.data.name;
+                    //$("input[name=files]").val(val);
+                    var Imgs =  $("input[name=files]").data("data");
+                    if(typeof Imgs == "undefined"){
+                        Imgs = [];
+                    }
+                    img = {
+                        name:data.response.data.name
+                    }
+                    Imgs.push(img);
+                    $("input[name=files]").data("data",Imgs);
+                }else{
+                    /*
+                    _this.Alert({
+                        msg:data.response.info,
+                        level:2
+                    });
+                    */
+                }
+            }).on("fileuploaderror",function(event, data){
+                var _this = $(this);
+                /*
+                 _this.Alert({
+                    msg:"附件上传失败,请联系技术部门！",
+                    level:2
+                });
+                */
+                 return false;
+            }).on("fileclear",function(){
+                $("input[name=files]").val("");
+            });
+
+            //输入框值联动
+            $('#bt-title').bind('input propertychange',
+                function() {
+                var datetime=new Date();
+                var year=datetime.getFullYear();
+                var x = $('#bt-title').val();
+                $('#biaoti2').val(x);
+                $('#biaoti3').val("齐装网装修效果图频道，提供"+year+"年" + x + "，定期更新上百套" + x + "，为您带来精彩的装修设计灵感。");
+                if (x == "") {
+                    $('#biaoti3').val("");
+                } else {
+                    return;
+                }
+            })
+        })
+    </script>
+</block>

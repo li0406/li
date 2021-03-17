@@ -1,0 +1,137 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>快速提问管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>快速提问管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homequickask">快速提问管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                <form id="searchform" action="" method="get">
+                    <div class="col-sm-2"  style="margin-top:10px">
+                        <select name="city_id" class="select2">
+                        <option value="">请选择城市</option>
+                        <option value="0">Q全站</option>
+                        <volist name="citys" id="vo">
+                        <option value="{$vo.cid}">{$vo.cname}</option>
+                        </volist>
+                        </select>
+                    </div>
+                    <div class="col-sm-2"  style="margin-top:10px">
+                        <select name="sortby" class="orderby" >
+                            <volist name="sortby" id="v">
+                                <option value="{$v.id}" {$v.now} >按{$v.name}排序</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-sm-3" style="margin-top:10px">
+                        <div class="input-group" >
+                            <input type="text" name="keyword" class="form-control pull-right" placeholder="提问内容" value="{$Think.get.keyword}">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>&nbsp;筛选</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">快速提问列表</h3>
+                    <div class="box-tools"></div>
+                </div>
+
+                <div class="box-body table-responsive no-padding">
+                  <table class="table table-hover table-bordered">
+                    <tbody>
+                    <tr style="font-size:14px;">
+                        <th width="1%"><i>#</i></th>
+                        <th style="text-align:left;"></th>
+                        <th width="130">电话号码</th>
+                        <th width="80">城市</th>
+                        <th width="130">发布时间</th>
+                        <th width="50">状态</th>
+                        <th width="80">操作</th>
+                    </tr>
+                    <volist name="list" id="v">
+                    <tr>
+                        <td>{$v.id}</td>
+                        <td style="text-align:left;font-size:13px">{$v.content}</td>
+                        <td>{$v.phone}</td>
+                        <td >{$v.city_name}<if condition="$v.city_name EQ '' ">全站</if></td>
+                        <td>{$v.post_time|date="Y-m-d H:i:s",###}</td>
+                        <td>
+                            <if condition="$v.status EQ '1' "><span class="badge bg-gray">删除</span></if>
+                        </td>
+                        <td>
+                            <if condition="$v.status NEQ '0' ">
+                                <span title="恢复" class="fa fa-toggle-off status" data-id="{$v.id}"></span>
+                            <else />
+                                <span title="删除" class="fa fa-toggle-on status" data-id="{$v.id}"></span>
+                            </if>
+                        </td>
+                    </tr>
+                    </volist>
+                  </tbody>
+                  </table>
+                </div>
+
+                <div class="box-footer clearfix"><ul class="pagination no-margin pull-right">{$page}</ul></div>
+
+              </div>
+            </div>
+          </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="padding:11%;">
+        <div class="modal-dialog " style="width:1235px;height:425px">
+            <div class="modal-content">
+                <div class="modal-body"><img src="" id="Preview" width="1205" height="405"></div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".select2").select2();
+        $(".select2").select2("val", '{$Think.get.city_id}');
+        $(".orderby").select2({
+            minimumResultsForSearch: Infinity
+        });
+
+        $('.fa-pencil').click(function(){
+            location.href="/homequickask/edit?id=" + $(this).attr('data-id');
+        });
+
+        $('.status').click(function(){
+            if(confirm("您确定要删除/恢复吗？")){
+                var id = $(this).attr('data-id');
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                location.href="/homequickask/status?id="+id;
+            }
+        });
+    </script>
+</block>

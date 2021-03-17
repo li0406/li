@@ -1,0 +1,111 @@
+<div class="windowbg">
+    <div class="order-window big-order-window">
+        <div class="tit">感谢您的申请！</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info"><p>
+            <span style="color:#FF5659">本服务由齐装网及具有资质合作的装修公司提供</span><br>近期申请人数较多，完善以下信息，我们将优先为您服务！
+            </p>
+            <div class="box-line"><br></div>
+
+            <div class="box-line edit-text">
+                <div class="edit-half-left">预算期望</div>
+                <select class="selectbox" name="yusuan">
+                    <option value="">请选择不包括家具、电器的预算</option>
+                    <volist name="step.yusuan" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+            <div class="box-line edit-text ">
+                <div class="edit-half-left">装修时间</div>
+                <select class="selectbox" name="start">
+                    <option value="">请选择开工时间</option>
+                    <option value="半个月内">半个月内</option>
+                    <option value="1个月">1个月</option>
+                    <option value="2个月">2个月</option>
+                    <option value="3个月">3个月</option>
+                    <option value="3个月以上">3个月以上</option>
+                    <option value="面议">面议</option>
+                </select>
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">楼盘名称</div>
+                <input type="text" name="xiaoqu" class="edit-half-right" placeholder="您的小区，以便精准匹配" />
+            </div>
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+            <button type="button">马上获取</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $(".windowbg .fa-remove").click(function(event) {
+            $(".windowbg").remove();
+        });
+
+        // $(".windowbg").click(function(event) {
+        //     $(".windowbg").remove();
+        // });
+
+        $(".big-order-window button").click(function(event) {
+            var container = $(".big-order-window");
+            $(".err").html('');
+
+
+            if ($("select[name=yusuan]", container).val() == '') {
+                $(".err").html("您还没有选择装修预算噢 ^_^!");
+                $("select[name=yusuan]", container).addClass('focus').focus();
+                return false;
+            }
+            $("select[name=yusuan]", container).removeClass('focus');
+
+            if ($("select[name=start]", container).val() == '') {
+                $(".err").html("您还没有选择开工时间噢 ^_^!");
+                $("select[name=start]", container).addClass('focus').focus();
+                return false;
+            }
+            $("select[name=start]", container).removeClass('focus');
+
+            if ($("input[name=xiaoqu]", container).val() == '') {
+                $(".err").html("您还没有填写楼盘名称噢 ^_^!");
+                $("input[name=xiaoqu]", container).addClass('focus').focus();
+                return false;
+            }
+            $("input[name=xiaoqu]", container).removeClass('focus');
+
+            $.ajax({
+                url: '/fb_order/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name:$("input[name=name]", container).val(),
+                    xiaoqu:$("input[name=xiaoqu]", container).val(),
+                    text:$("textarea[name=text]", container).val(),
+                    cs:$("select[name=cs]", container).val(),
+                    qx:$("select[name=qx]", container).val(),
+                    lx:$("select[name=lx]", container).val(),
+                    mianji:$("input[name=mianji]", container).val(),
+                    huxing:$("select[name=huxing]", container).val(),
+                    fangshi:$("select[name=fangshi]", container).val(),
+                    yusuan:$("select[name=yusuan]", container).val(),
+                    lftime:$("select[name=lftime]", container).val(),
+                    start:$("select[name=start]", container).val(),
+                    orderid:"{$step.orderid}",
+                    tel:"{$step.tel}",
+                    step:3
+                }
+            })
+            .done(function(data) {
+                container.remove();
+                if (data.status == 1) {
+                    window.location.href = "{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/details";
+                }
+            })
+            .fail(function(xhr) {
+                container.remove();
+            });
+        });
+    });
+</script>

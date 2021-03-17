@@ -1,0 +1,233 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>公装美图</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>公装美图管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/pubmeitu">公装美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content-header">
+        <a href="/pubmeitu/pubimg" class="btn btn-primary"><i class="fa fa-plus"></i> 添加美图</a>
+        <a href="/pubmeitu/att?type=lx" class="btn btn-primary"><i class="fa fa-plus"></i> 添加类型</a>
+        <a href="/pubmeitu/att?type=fg" class="btn btn-primary"><i class="fa fa-plus"></i> 添加风格</a>
+        <a href="/pubmeitu/att?type=mj" class="btn btn-primary"><i class="fa fa-plus"></i> 添加面积</a>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <span class="span">美图标题：</span>
+                            </div>
+                            <div class="col-xs-2">
+                                <input type="text" name="query" class="form-control"  placeholder="美图标题/ID" value="{$Think.get.id}{$Think.get.title}">
+                            </div>
+                            <div class="col-xs-1">
+                              <button type="submit" data-triger=".meituselect" class="key-down-event btn btn-primary meituselect"><i class="fa fa-search"></i>查询</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="col-xs-1">
+                            <span>美图类型：</span>
+                        </div>
+                        <div class="col-xs-11">
+                            <ul class="item">
+                                <li data-id="" data-type="lx"><i class="glyphicon glyphicon-tag"></i> 不限</li>
+                                <volist name="info.location" id="vl">
+                                    <if condition="$info['lx'] EQ $vl['id']">
+                                        <li  class="active" data-id="{$vl.id}" data-type="lx"><i class="glyphicon glyphicon-ok"></i> {$vl.name}</li>
+                                    <else/>
+                                        <li data-id="{$vl.id}" data-type="lx"><i class="glyphicon glyphicon-tag"></i> {$vl.name}</li>
+                                    </if>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="col-xs-1">
+                            <span>美图风格：</span>
+                        </div>
+                        <div class="col-xs-11">
+                            <ul class="item">
+                                <li data-id="" data-type="fg"><i class="glyphicon glyphicon-tag"></i> 不限</li>
+                                <volist name="info.fengge" id="vf">
+                                    <if condition="$info['fg'] EQ $vf['id']">
+                                        <li class=" active" data-id="{$vf.id}" data-type="fg"><i class="glyphicon glyphicon-ok"></i> {$vf.name}</li>
+                                    <else/>
+                                        <li data-id="{$vf.id}" data-type="fg"><i class="glyphicon glyphicon-tag"></i> {$vf.name}</li>
+                                    </if>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="col-xs-1">
+                            <span>美图面积：</span>
+                        </div>
+                        <div class="col-xs-11">
+                            <ul class="item">
+                                <li data-id="" data-type="mj"><i class="glyphicon glyphicon-tag"></i> 不限</li>
+                                <volist name="info.mianji" id="va">
+                                    <if condition="$info['mj'] EQ $va['id']">
+                                        <li class="active" data-id="{$va.id}" data-type="mj"><i class="glyphicon glyphicon-ok"></i> {$va.name}</li>
+                                    <else/>
+                                        <li data-id="{$va.id}" data-type="mj"><i class="glyphicon glyphicon-tag"></i> {$va.name}</li>
+                                    </if>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">美图列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                   <th>编号</th>
+                                   <th style="text-align: left">标题</th>
+                                   <th style="text-align: left">标签</th>
+                                   <th>操作人</th>
+                                   <th>创建时间</th>
+                                   <th>发布时间</th>
+                                   <th>状态</th>
+                                   <th>操作</th>
+                                </tr>
+                                <volist name="info.list" id="v">
+                                    <tr>
+                                       <td>{$v.id}</td>
+                                       <td style="text-align: left">
+                                            <if condition="$v.init_visible EQ '2' "><span class="label label-success"><i class="fa fa-clock-o"></i>预</span></if>
+                                            <if condition="$v.visible EQ '0'">
+                                                <a href="http://meitu.{:C('QZ_YUMING')}/g{$v.id}.html" target="_blank">{$v.title}</a>
+                                            <else />
+                                                {$v.title}
+                                            </if>
+                                            <if condition="$v.is_single EQ '1' ">
+                                                <span title="单图" class="label label-warning">单</span>
+                                            <else />
+                                                <span title="套图" class="label label-success">套</span>
+                                            </if>
+                                       </td>
+                                       <td style="text-align: left">{$v.tagname}</td>
+                                       <td>{$v.uname}</td>
+                                       <td>{$v.createtime|date='Y-m-d H:i:s',###}</td>
+                                       <td>
+                                            <eq name="v.visible" value="2">
+                                                -
+                                            <else />
+                                                {$v.time|date='Y-m-d H:i:s',###}
+                                            </eq>
+                                       </td>
+                                       <td>
+                                            <switch name="v.visible">
+                                                <case value="0"><span>已发布</span></case>
+                                                <case value="1"><span class="text-yellow">不可见</span></case>
+                                                <case value="2"><span class="text-aqua">预发布</span></case>
+                                            </switch>
+                                       </td>
+                                       <td>
+                                            <span title="编辑" class="fa fa-pencil edit" data-id="{$v.id}"></span>
+                                            <span title="删除" class="fa fa-trash" data-id="{$v.id}"></span>
+                                       </td>
+                                    </tr>
+                                </volist>
+                            </table>
+                            {$info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript">
+    $(".meituselect").click(function(event) {
+        var query = $("input[name=query]").val();
+        if(query == ""){
+            var url = "/pubmeitu/";
+            var i = 0;
+            $(".item").each(function(){
+                var li = $(this).find(".active");
+                if(li.length > 0){
+                    if(i == 0){
+                        url += "?"+li.attr("data-type")+"="+li.attr("data-id");
+                        i++;
+                    }else{
+                        url += "&"+li.attr("data-type")+"="+li.attr("data-id");
+                        i++;
+                    }
+                }
+            });
+            window.location.href = url;
+        }else{
+            var reg = /^\d+$/g;
+            var a = reg.test(query);
+            if(false === a){
+                window.location.href = "/pubmeitu/?title="+query;
+            }else{
+                window.location.href = "/pubmeitu/?id="+query;
+            }
+        }
+    });
+
+    $(".item li").click(function(event) {
+        var _this = $(this);
+        if(!_this.hasClass('active')){
+            _this.addClass('active').find('i').removeClass("glyphicon-tag").addClass('glyphicon-ok');
+        }else{
+            _this.removeClass("active").find("i").removeClass('glyphicon-ok').addClass('glyphicon-tag');
+        }
+    });
+
+    //编辑美图
+    $(".edit").click(function(event) {
+        var id = $(this).attr('data-id');
+        window.location.href="/pubmeitu/pubimg?id=" + id + "&p={$p}";
+    });
+
+    //删除
+    $('.fa-trash').click(function(){
+        if(confirm("您确定要删除吗？")){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            $.ajax({
+                url: '/pubmeitu/del/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    type: "img"
+                    },
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href="/pubmeitu/";
+                }
+            })
+        }
+    });
+</script>
+</block>

@@ -1,0 +1,180 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>全屋定制单统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{:C('168NEW_URL')}/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{:C('168NEW_URL')}/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+    <style type="text/css">
+        .sort{
+            cursor: pointer;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>全屋定制单统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <form action="/orderstat/quanwustat/" method="get" class="col-xs-12 no-padding">
+                            <div class="col-xs-2">
+                                <span class="pull-left lhh">城市：</span>
+                                <select id="city" name="city" data-search='1' type="text" class="form-control" tabindex="3">
+                                    <volist name="city" id="vo">
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                开始日期:<br/><input type="text" id="begin" name="begin" class="form-control datepicker" autocomplete="off"  placeholder="日期" value="{$begin}">
+                            </div>
+                            <div class="col-xs-2">
+                                结束日期:<br/><input type="text" id="end" name="end" class="form-control datepicker" autocomplete="off"  placeholder="日期" value="{$end}">
+                            </div>
+                            <div class="col-xs-2">
+                                <br/>
+                                <button type="submit" class="btn btn-info">查询</button>
+                                <button id="export" type="button" class="btn btn-success">导出</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table id="myTable" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>城市</th>
+                                <th class="sort" data-sort="all">总发单
+	                                <if condition="($order eq 'desc') and ($sort eq 'all') ">
+		                                <i class="fa fa-sort-desc"></i>
+		                            <elseif condition="($order eq 'asc') and ($sort eq 'all')"/>
+		                                <i class="fa fa-sort-asc"></i>
+		                            <else />
+		                                <i class="fa fa-sort"></i>
+	                                </if>
+
+                                </th>
+                                <th class="sort" data-sort="quanwu">装修单转全屋定制单
+	                                <if condition="($order eq 'desc') and ($sort eq 'quanwu') ">
+		                                <i class="fa fa-sort-desc"></i>
+		                                <elseif condition="($order eq 'asc') and ($sort eq 'quanwu')"/>
+		                                <i class="fa fa-sort-asc"></i>
+		                                <else />
+		                                <i class="fa fa-sort"></i>
+	                                </if>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo" key="key">
+                                <tr>
+                                    <td>{$key}</td>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.count|default=0}</td>
+                                    <td>{$vo.quanwu_count|default=0}</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd",
+            minViewMode:0,
+            autoclose:'ture'
+        }).on('changeDate',function(ev){
+            var end = $("#end").datepicker("getDate");
+            var start = $("#begin").datepicker("getDate");
+            var d = new Date(end);
+            var endTime = parseInt(d.getTime());
+
+            var d = new Date(start);
+            var startTime = parseInt(d.getTime());
+            $("button[type=submit]").attr("disabled",false);
+            if (endTime < startTime) {
+                $("button[type=submit]").attr("disabled","disabled");
+                alert("结束时间不能小于开始时间");
+                return false;
+            }
+        });
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "请选择"
+        });
+        $("#city").select2("val","{$Think.get.city}");
+
+        $("#export").click(function(event) {
+            var colums = [];
+            var data =[];
+            $('#myTable thead th').each(function(){
+                var sub =[];
+                sub["text"] = $(this).html().split('<i class')[0].trim();
+                colums.push(sub);
+            });
+            data.push(colums);
+            $('#myTable  tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+
+            $(this).exportExcel({
+                data:data,
+                title:'全屋定制单统计',
+                url:'/export/download/',
+                show:false
+            });
+        });
+
+        $(document).on('click','.sort',function(){
+        	var order = 'desc';
+            var orderEle = $(this).find('i');
+            if (orderEle.hasClass('fa-sort') || orderEle.hasClass('fa-sort-asc')){
+	            orderEle.addClass('fa-sort-desc');
+            }else {
+	            orderEle.addClass('fa-sort-asc');
+	            order = 'asc';
+            }
+
+	        //获取到当前城市，开始日期，结束日期
+	        var city = $("#city").find("option:selected").val();
+            if(isNaN(city)){
+                city = '';
+            }
+            var begin = $("#begin").val();
+            var end = $("#end").val();
+            var sort = $(this).attr('data-sort');
+
+	        window.location = '//'+window.location.host+'/orderstat/quanwustat/?city='+city+'&begin='+begin+'&end='+end+'&sort='+sort+'&order='+order;
+        });
+        function getCellValue(row, index){
+            return $(row).children('td').eq(index).text();
+        }
+
+    </script>
+</block>

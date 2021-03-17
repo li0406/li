@@ -1,0 +1,99 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>发单量数据分析-发单量总览</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>发单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-info">发单量走势</button>
+                            <a href="/orderstat/sendorderoverview/" class="btn btn-default">发单量总览</a>
+                            <a href="/orderstat/ordertrend/" class="btn btn-default">有效单总览</a>
+                            <a href="/orderstat/fenordertrend/" class="btn btn-default">分单量总览</a>
+                            <a href="/orderstat/zenordertrend/" class="btn btn-default">赠单量总览</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border text-center">
+                        <div class="box-title">今日发单量折线图</div>
+                    </div>
+                    <div class="box-body">
+                        <div id="canvas" class="col-xs-11 no-padding" style="height: 600px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:'ture'
+    });
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+    var option = {
+        tooltip: {
+            trigger: 'item',
+            // formatter: '{a} <br/>{b} : {c}'
+        },
+        legend: {
+            left: '150px',
+            top:'10px',
+            data: ['上月发单量平均值','本月发单量平均值','今日发单量'], // '本月发单量平均值'
+
+        },
+        xAxis: {
+            name: 'x',
+            data: ['00：00-01：00', '01：00-02：00', '02：00-03：00', '03：00-04：00', '04：00-05：00', '05：00-06：00', '06：00-07：00', '07：00-08：00', '08：00-09：00', '09：00-10：00',  '10：00-11：00', '11：00-12：00', '12：00-13：00', '13：00-14：00', '14：00-15：00', '15：00-16：00', '16：00-17：00', '17：00-18：00', '18：00-19：00', '19：00-20：00', '20：00-21：00', '21：00-22：00', '22：00-23：00', '23：00-24：00'],
+            axisLabel: {
+                interval: 0,
+                rotate: 60,
+            }
+        },
+        yAxis: {
+            name: 'y'
+        },
+        series: [
+            {
+                name: '上月发单量平均值',
+                type: 'line',
+                data: {$data.lastMonth|json_encode}
+            },
+            {
+                name: '本月发单量平均值',
+                type: 'line',
+                data: {$data.nowMonth|json_encode}
+            },
+            {
+                name: '今日发单量',
+                type: 'line',
+                data: {$data.nowDay|json_encode}
+            }
+        ]
+    };
+    myChart.setOption(option);
+
+    window.onresize=function(){
+        var myChart = echarts.init(Dom);
+        myChart.setOption(option);
+    }
+</script>
+</block>

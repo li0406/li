@@ -1,0 +1,268 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>渠道量房统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>渠道量房统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-1 reset-padding" style="width:11.4%">
+                                        <div>开始时间：</div>
+                                        <input type="text" name="start"
+                                               class="form-control datepicker clear-target" id="start_time"
+                                               placeholder="选择日期" AUTOCOMPLETE="off"
+                                               value="{$Think.get.start}">
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>结束时间：</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target"
+                                               id="end_time" AUTOCOMPLETE="off"
+                                               placeholder="选择日期" value="{$Think.get.end}">
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>部门:</div>
+                                        <select name="dept" id="dept" class="form-control">
+                                            <optgroup label="全部">
+                                                <option value="0">所有部门</option>
+                                            </optgroup>
+                                            <volist name="department" id="vo">
+                                                <optgroup label="{$key}">
+                                                    <volist name="vo.child" id="v">
+                                                        <option value="{$v.id}" <if condition="$_GET['dept'] == $v['id']">selected</if>>{$v.name}</option>
+                                                    </volist>
+                                                </optgroup>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>渠道组:</div>
+                                        <select class="group" name="group" id="group" type="text">
+                                            <volist name="group" id="vo">
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>来源名称:</div>
+                                        <select type="text" name="src" id="src" class="src">
+                                            <option value="">请选择</option>
+                                            <volist name="src" id="vo">
+                                                <option value="{$vo.src}">{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>渠道代号:</div>
+                                        <input type="text" name="alias" class="form-control" value="{$Think.get.alias}">
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>订单状态：</div>
+                                        <select class="order_status" name="order_status">
+                                            <option value="">全部</option>
+                                            <option value="1"> 分单</option>
+                                            <option value="2">赠单</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1" style="width:11.4%">
+                                        <div>量房状态：</div>
+                                        <select type="text" name="lf_status" class="lf_status">
+                                            <option value="">全部</option>
+                                            <option value="1">未量房</option>
+                                            <option value="2">待选择</option>
+                                            <option value="3">已量房</option>
+                                            <option value="4">已签约</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-xs-2" style="padding-top: 16px;">
+                                        <button type="submit" id="search" class="btn btn-primary col-xs-1"
+                                                style="width: 80px; float: none">查询
+                                        </button>
+                                        <button type="button" id="explode" class="btn btn-success col-xs-1"
+                                                style="width: 80px; float: none">导出
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th class="width-150">时间</th>
+                                <th>渠道组</th>
+                                <th>渠道名称</th>
+                                <th>标记代号</th>
+                                <th>渠道代号</th>
+                                <th>所属部门</th>
+                                <th>城市</th>
+                                <th>订单号</th>
+                                <th>订单状态</th>
+                                <th>量房状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="info" id="vo">
+                                <tr>
+                                    <td>{$vo.time_real|date='Y-m-d',###}</td>
+                                    <!--质检部看不到 渠道标识 a.1.1.23-->
+                                    <td><if condition="in_array(session('uc_userinfo.uid'),[23,66,69])">****<else />{$vo.group_name|default=''}</if></td>
+                                    <td><if condition="in_array(session('uc_userinfo.uid'),[23,66,69])">****<else />{$vo.src_name|default=''}</if></td>
+                                    <td><if condition="in_array(session('uc_userinfo.uid'),[23,66,69])">****<else />{$vo.src|default=''}</if></td>
+                                    <td>{$vo.alias|default=''}</td>
+                                    <td>{$vo.dept_name|default=''}</td>
+                                    <td>{$vo.cname|default=''}</td>
+                                    <td>{$vo.id|default=''}</td>
+                                    <td>
+                                        <switch name="vo.type_fw">
+                                            <case value="1">分单</case>
+                                            <case value="2">赠单</case>
+                                        </switch>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo.qianyue eq 4">
+                                            已签约
+                                        <elseif condition="$vo.liangfang eq 3" />
+                                            已量房
+                                        <elseif condition="$vo.choose eq 2" />
+                                            待选择
+                                        <elseif condition="$vo.no_liangfang eq 1" />
+                                            未量房
+                                            <else />
+                                            已见面/已到店
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page|default=''}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+</block>
+<block name="script">
+
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+
+
+        /*S-初始化插件*/
+        // 开始时间
+        $('#start_time').datepicker({
+            todayBtn: false,
+            autoclose: true,
+            endDate: new Date()
+        }).on('changeDate', function (e) {
+            var startTime = e.date,
+                endTime = new Date(e.date.getTime() + (3 * 31 * 24 * 60 * 60 * 1000));
+            // console.log(startTime);
+            $('#end_time').datepicker('setStartDate', startTime);
+            $('#end_time').datepicker('setEndDate', endTime);
+        });
+        //结束时间：
+        $('#end_time').datepicker({
+            todayBtn: false,
+            autoclose: true,
+            endDate: new Date()
+        }).on('changeDate', function (e) {
+            var startTime = new Date(e.date.getTime() - (3 * 31 * 24 * 60 * 60 * 1000)),
+                endTime = new Date(e.date.getTime() + (24 * 60 * 60 * 1000));
+            $('#start_time').datepicker('setStartDate', startTime);
+            $('#start_time').datepicker('setEndDate', endTime);
+        });
+        /*E-初始化插件*/
+
+
+        $('.select2').select2({
+            language: "zh-CN"
+        })
+
+        $('#group').select2();
+        $("#group").select2('val', '{$Think.get.group}');
+        $('#src').select2();
+        $("#src").select2('val', '{$Think.get.src}');
+        $('.order_status').select2();
+        $(".order_status").select2('val', '{$Think.get.order_status}');
+        $('.lf_status').select2();
+        $(".lf_status").select2('val', '{$Think.get.lf_status}');
+
+
+        //获取对应渠道来源
+        $("#group").on('click', function () {
+            $.ajax({
+                url: '/CompanyLiangFang/ajaxSrcList',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {group: $("#group").val()}
+            })
+                .done(function (data) {
+                    if (data.status == 1) {
+                        var html = '';
+                        $.each(data.info, function (k,v) {
+                            html += '<option value="' + v.src + '">' + v.name + '</option>';
+                        })
+                        $('#src').html(html);
+                        /*渠道格式化*/
+                        $('#src').select2();
+                        $("#src").select2('val', '{$Think.get.src}');
+                    }
+                });
+        });
+        //导出操作
+        $("#explode").on('click',function () {
+            var data = {
+                'src': '{$Think.get.src}',
+                'start': '{$Think.get.start}',
+                'end': '{$Think.get.end}',
+                'group': '{$Think.get.group}',
+                'dept': '{$Think.get.dept}',
+                'alias': '{$Think.get.alias}',
+                'order_status': '{$Think.get.order_status}',
+                'lf_status': '{$Think.get.lf_status}',
+            };
+            var uri = parseParam(data);
+            window.open('/export/exportLiangfangStatistics?' + uri);
+        });
+
+        //将对象转成url 参数
+        var parseParam = function (param, key) {
+            var paramStr = "";
+            if (param instanceof String || param instanceof Number || param instanceof Boolean) {
+                paramStr += "&" + key + "=" + encodeURIComponent(param);
+            } else {
+                $.each(param, function (i) {
+                    var k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
+                    paramStr += '&' + parseParam(this, k);
+                });
+            }
+            return paramStr.substr(1);
+        };
+    </script>
+</block>

@@ -1,0 +1,176 @@
+<extend name="Common:basic"/>
+<block name="link">
+<link href="/assets/mobile/meitu/css/swiper-3.3.1.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/sub/css/m-home.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+<link href="/assets/mobile/sheji/css/new-sheji.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="/assets/sub/huodong/css/juranzhijia.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="top">
+    <div class="m-header-his" >
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-tit"></div>
+</block>
+<block name="content">
+    <div class="hd-cd-topbox">
+        <img src="/assets/sub/huodong/image/huodong-banner.jpg?v={:C('STATIC_VERSION')}" alt="">
+    </div>
+    <div class="blue-color-bg" id="to-order">
+        <div class="hd-cd-order">
+            <div class="hd-cd-order-title">
+                <span>免费获取装修报价</span>
+            </div>
+            <ul class="get-design-box">
+                <li>
+                    <gt name="mapUseInfo.vipcount" value="0">
+                        <button id="showCityPicker2" class="c-zb-city" type="button">
+                            <i class="fa fa-map-marker"></i>
+                            <empty name="info.cityarea">
+                            请选择您所在的区域
+                            <else />
+                            {$mapUseInfo.provincefull} {$mapUseInfo.name} {$info.cityarea.name}
+                            </empty>
+                        </button>
+                        <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                        <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                        <input type="hidden" name="area" data-id="{$info.cityarea.id}">
+                    <else />
+                        <button id="showCityPicker2" class="c-zb-city" type="button">
+                            <i class=" fa fa-map-marker"></i>
+                            请选择您所在的区域
+                        </button>
+                        <input type="hidden" name="province" data-id="">
+                        <input type="hidden" name="city" data-id="">
+                        <input type="hidden" name="area" data-id="">
+                    </gt>
+                </li>
+                <li>
+                    <input type="text" name="name" placeholder="请输入您的姓名">
+                </li>
+                <li>
+                    <input type="text" name="tel" placeholder="请输入您的手机号获取装修设计方案" maxlength="11">
+                </li>
+                <li id="shenming">
+                    <input type="checkbox" checked="checked" id="mianze">
+                    <label for="mianze" id="check" class="fa fa-check"></label>
+                    <span>我已阅读并同意齐装网的</span>
+                    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+                </li>
+                <input type="hidden" name="fb_typetop" value="sheji">
+                <input type="hidden" name="source_top" value="{$source.top}">
+                <a href="javascript:void(0)" class="m-b-btn to-order">免费预约</a>
+            </ul>
+        </div>
+        
+    </div>
+    <img src="/assets/sub/huodong/image/huodong-jrzj.jpg" class="bottom-jpg">
+    <div style="background:#fff; padding:0.2rem 0.1rem;">
+        <a href="#to-order" class="m-b-btn">免费预约</a>
+    </div>
+    <div class="order-success">
+        <div class="success-img">
+ 
+            <div class="success-content">
+                <img src="/assets/sub/huodong/image/success.jpg" class="success-img">
+                <span class="closed-success">
+                    <img src="/assets/sub/huodong/image/close-img.png" class="close-img">
+                </span>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <input type="hidden" name="src" value="{$_GET[src]}">
+</block>
+
+<block name="script">
+<script type="text/javascript" src="/assets/mobile/sub/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+<script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+        // 城市选择插件
+        selectQz.init({
+            province:$("input[name=province]").attr("data-id"),
+            city:$("input[name=city]").attr("data-id"),
+            area:$("input[name=area]").attr("data-id")
+        });
+        //切换免责对勾  
+        $("#check").click(function(){
+            $(this).toggleClass('fa-check');
+        });
+        var src = $("input[name=src]").val();
+        $(".to-order").click(function(){
+            var checked = $("#mianze").is(':checked');
+            window.order({
+                url:"{$SCHEME_HOST.scheme_full}{:C('MPAPI_DOMAIN')}/v1/fb",
+                extra:{
+                    cs         :$('input[name=city]').attr('data-id'),
+                    qx         :$('input[name=area]').attr('data-id'),
+                    name     :$("input[name=name]").val(),
+                    tel        :$("input[name=tel]").val(),
+                    source     :19090725,
+                    src        :src
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+                    alert("发生了未知的错误,请稍后再试！");
+                        
+                },
+                success:function(data){
+                    if(data.error_code === 0){
+                        window.order({
+                            url:"{$SCHEME_HOST.scheme_full}{:C('MPAPI_DOMAIN')}/v1/fbmessage",
+                            extra:{
+                                tel        :$("input[name=tel]").val(),
+                                template    :201909061015
+                            },
+                            success:function(data){
+                                if(data.error_code == 0){
+                                    $(".order-success").fadeIn();
+                                }
+                            }
+                        })
+                    }else{
+                        alert(data.error_msg)
+                    } 
+                },
+                validate:function(item, value, method, info){
+                    if ('cs' == item || 'qx' == item) {
+                        alert(info);
+                        return false;
+                    };
+                    if ('name' == item && '' != method) {
+                        alert(info);
+                        $("input[name=name]").focus();
+                        $("input[name=name]").val('');
+                        return false;
+                    };
+                    if ('tel' == item) {
+                        alert(info);
+                        $("input[name=tel]").focus();
+                        $("input[name=tel]").val('');
+                        return false;
+                    };
+                    if(!checked){
+                        alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+                        return false;
+                    };
+                        
+                    return true;
+                }
+            });
+        })
+        $(".closed-success").click(function(){
+            $(".order-success").fadeOut();
+        })
+    })
+</script>
+</block>

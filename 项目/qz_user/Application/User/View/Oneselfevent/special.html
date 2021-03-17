@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>专用礼券</title>
+    <include file="Index:resource"/>
+    <include file="Home:resource"/>
+    <script type="text/javascript" src="/assets/user/event/js/jquery.smint.js?v={:C('STATIC_VERSION')}"></script>
+    <link rel="stylesheet" href="{$static_host}/assets/user/home/css/font-awesome.min.css?v={:C('STATIC_VERSION')}">
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/user/event/css/ht-gift.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+<include file="Home:header"/>
+
+<div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft"/>
+    <include file="header"/>
+    <div class="ht-main">
+        <div class="table-list">
+            <form id="searchform" method="get" action="/oneselfevent/special/">
+            <div class="c-event-sefl">
+                <span class="pull-left mr20">礼券状态:</span>
+                <select class="c-event-sefl-sel mr20" name="cardstatus">
+                    <option value="">全部</option>
+                    <option value="1" <if condition="$cardstatus EQ 1"> selected</if> > 可用</option>
+                    <option value="2" <if condition="$cardstatus EQ 2"> selected</if> >未生效</option>
+                    <option value="3" <if condition="$cardstatus EQ 3"> selected</if> >失效</option>
+                    <option value="4" <if condition="$cardstatus EQ 4"> selected</if> >下架</option>
+                </select>
+                <span class="pull-left mr20">审核状态:</span>
+                <select class="c-event-sefl-sel mr20" name="checkstatus">
+                    <option value="">全部</option>
+                    <option value="1" <if condition="$checkstatus EQ 1"> selected</if> >待审核</option>
+                    <option value="2" <if condition="$checkstatus EQ 2"> selected</if> >审核通过</option>
+                    <option value="3" <if condition="$checkstatus EQ 3"> selected</if> >未通过</option>
+                    <option value="4" <if condition="$checkstatus EQ 4"> selected</if> >撤回</option>
+                </select>
+                <input type="button" value="查询" class="c-gift-search">
+                <a class="c-event-sefl-new" href="/oneselfevent/addgift">添加礼券</a>
+            </div>
+            </form>
+            <div class="c-event-tit-sel">
+                <table class="c-event-table">
+                    <thead>
+                    <tr class="c-table-header">
+                        <th>礼券名称</th>
+                        <th class="thead-time">活动时间</th>
+                        <th class="thead-time">有效时间</th>
+                        <th>优惠活动</th>
+                        <th>发放数量</th>
+                        <th>已领数量</th>
+                        <th>礼券状态</th>
+                        <th>审核状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody class="c-table-body">
+                    <volist name="list" id="vo">
+                        <tr>
+                            <td><a href="/specialdetail/{$vo.id}" class="c-gift-name">{$vo.name}</a></td>
+                            <td class="c-table-time">
+                                <span>{$vo.activity_start|date="Y-m-d H:i:s",###}</span>至
+                                <span>{$vo.activity_end|date="Y-m-d H:i:s",###}</span>
+                            </td>
+                            <td class="c-table-time">
+                                <span>{$vo.start|date="Y-m-d H:i:s",###}</span>至
+                                <span>{$vo.end|date="Y-m-d H:i:s",###}</span>
+                            </td>
+                            <td style="width: 8%">
+                                {$vo.realt_discount}
+                            </td>
+                            <td>{$vo.amount}</td>
+                            <td><a href="/oneselfevent/getsearch?id={$vo.id}" class="green_1">{$vo.receive_num}</a></td>
+                            <!--礼券状态-->
+                            <if condition="$vo['card_status'] EQ 1">
+                                <td class="gift-status blue_1">未生效</td>
+                            <elseif condition="$vo['card_status'] EQ 2" />
+                                <td class="gift-status green_1">可用</td>
+                            <elseif condition="$vo['card_status'] EQ 3" />
+                                <td class="gift-status red">下架</td>
+                            <elseif condition="$vo['card_status'] EQ 4" />
+                                <td class="gift-status gray">失效</td>
+                            <else/>
+                                <td class="gift-status"></td>
+                            </if>
+                            <!--审核状态-->
+                            <if condition="$vo['check'] EQ 1">
+                                <td class="sh-status orange_1">待审核</td>
+                            <elseif condition="$vo['check'] EQ 2" />
+                                <td class="sh-status green_1">审核通过</td>
+                            <elseif condition="$vo['check'] EQ 3" />
+                                <td class="sh-status red">未通过</td>
+                            <else/>
+                                <td class="sh-status blue_1">撤回</td>
+                            </if>
+                            <!--操作-->
+                            <if condition="$vo['action_status'] EQ 1">
+                                <td class="c-operator"><a href="/editgift/{$vo.id}" class="orange_1">重新申请</a></td>
+                            <elseif condition="$vo['action_status'] EQ 2" />
+                                <td class="c-operator"><a class="green_1 operator-btn" data-cardid = "{$vo.id}">撤回</a></td>
+                            <elseif condition="$vo['action_status'] EQ 3" />
+                                <td class="c-operator"><a class="red operator-btn"  data-cardid = "{$vo.id}">下架</a></td>
+                            <else/>
+                                <td class="c-operator"><a class="red_1 operator-btn"  data-cardid = "{$vo.id}">上架</a></td>
+                            </if>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+                {$page}
+            </div>
+        </div>
+    </div>
+</div>
+<include file="Index:footer"/>
+</body>
+<script type="text/javascript">
+    $('.operator-btn').click(function () {
+        var _this = $(this)
+        layui.use('layer', function () {
+            var layer = layui.layer;
+            layer.confirm('确认' + _this.text() + '该礼券？', {
+                title: '',
+                btnAlign: 'c',
+                closeBtn: 0,
+                btn: ['确认', '取消']
+            }, function () {
+                layer.closeAll()
+                if (_this.text() == '下架') {
+                    var param = {};
+                    param.cardid = _this.attr("data-cardid");
+                    param.type = 2;
+                    //    ajax请求
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "POST",//方法类型
+                        dataType: "json",//预期服务器返回的数据类型
+                        url: "/oneselfevent/showOrHidenCard/" ,//url
+                        data:param,
+                        success: function (result) {
+                            console.log(result);//打印服务端返回的数据(调试用)
+                            if (result.error_code == 202) {
+                                msg(result.error_msg);
+                                history.go(0);
+                            }else{
+                                msg("撤回失败");
+                            }
+                        },
+                        error : function() {
+                            msg("网络异常，请稍后重试！");
+                        }
+                    });
+
+                    _this.text('上架')
+                } else if (_this.text() == '上架') {
+                    var param = {};
+                    param.cardid = _this.attr("data-cardid");
+                    param.type = 1;
+                    //    ajax请求
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "POST",//方法类型
+                        dataType: "json",//预期服务器返回的数据类型
+                        url: "/oneselfevent/showOrHidenCard/" ,//url
+                        data:param,
+                        success: function (result) {
+                            console.log(result);//打印服务端返回的数据(调试用)
+                            if (result.error_code == 202) {
+                                msg(result.error_msg);
+                                history.go(0);
+                            }else{
+                                msg("保存失败");
+                            }
+                        },
+                        error : function() {
+                            msg("网络异常，请稍后重试！");
+                        }
+                    });
+                    // _this.text('下架')
+                } else  if(_this.text() == '撤回'){
+                    var param = {};
+                    param.cardid = _this.attr("data-cardid");
+                    //    ajax请求
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "POST",//方法类型
+                        dataType: "json",//预期服务器返回的数据类型
+                        url: "/oneselfevent/regressionAction/" ,//url
+                        data:param,
+                        success: function (result) {
+                            console.log(result);//打印服务端返回的数据(调试用)
+                            if (result.error_code == 202) {
+                                msg(result.error_msg);
+                                history.go(0);
+                            }else{
+                                msg("撤回失败");
+                            }
+                        },
+                        error : function() {
+                            msg("网络异常，请稍后重试！");
+                        }
+                    });
+                }
+            }, function () {
+
+            });
+        })
+    })
+    //查询
+    $('.c-gift-search').on('click', function () {
+        var url = $('#searchform').serialize();
+        window.location.href = '/oneselfevent/special?'+url
+    })
+
+    function toTimeStamp(time) {
+        if (time != undefined) {
+            var date = time;
+            date = date.substring(0, 19);
+            date = date.replace(/-/g, '/');
+            var timestamp = new Date(date).getTime();
+            return timestamp;
+        }
+    };
+
+    function msg(msg, fn) {
+        layui.use('layer', function () {
+            var layer = layui.layer;
+            layer.msg(
+                msg,
+                {time: 5000,},
+                fn || function () {
+                }
+            )
+        })
+    }
+</script>
+</html>

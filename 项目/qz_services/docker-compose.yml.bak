@@ -1,0 +1,62 @@
+version: "3.1"
+services:
+  # 分词
+  fenci.service:
+    build: ./service/fenci/
+    image: registry.cn-shanghai.aliyuncs.com/qizuang/fenci.service:latest
+#    container_name: fenci.service
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "0.0.0.0:11001:11001"
+#    volumes:
+#      - "/data/app/fenci.service/dict/:/data/app/fenci.service/dict/"
+  # 抽词
+  chouci.service:
+    build: ./service/chouci/
+    image:  registry.cn-shanghai.aliyuncs.com/qizuang/chouci.service:latest
+#    container_name: chouci.service
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "0.0.0.0:11000:11000"
+  # qzsms短信
+  qzsms:
+    build: ./service/qzsms/
+    image:  registry.cn-shanghai.aliyuncs.com/qizuang/qzsms:latest
+    container_name: qzsms
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "0.0.0.0:12000:12000"
+    volumes:
+      - "/data/app/qzsms/config/:/data/app/qzsms/config/"
+# ---------- admin 管理后台 -------------#
+  admin-api.service:
+    build: ./admin-api
+    image: registry.cn-shanghai.aliyuncs.com/qizuang/admin-api.service:latest
+#    container_name: admin-api.service
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "0.0.0.0:20000:20000"
+    volumes:
+      - "/data/app/admin-api/config/:/data/app/admin-api/config/"
+  admin-ui.service:
+    build: ./admin-ui
+    image: registry.cn-shanghai.aliyuncs.com/qizuang/admin-ui.service:latest
+#    container_name: admin-ui.service
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "0.0.0.0:20001:80"

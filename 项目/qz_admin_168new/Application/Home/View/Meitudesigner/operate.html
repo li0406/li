@@ -1,0 +1,196 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>美图大师</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitudesigner/">美图大师</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 家居美图大师推荐</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form id="form" action="javascript:void(0)" method="POST">
+                            <div class="tab-content">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label>设计师名称</label>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <input type="text" name="name" placeholder="设计师名称" id="name" value="{$info.info.name}">
+                                                <input type="hidden" name="bm" id="bm" value="{$info.info.bm}"/>
+                                                <input type="hidden" name="uid" id="uid" value="{$info.info.uid}"/>
+                                                <input type="hidden" name="comid" id="comid" value="{$info.info.comid}"/>
+                                                <input type="hidden" name="comname" id="comname" value="{$info.info.comname}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>名称简写</label>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <input type="input" class="form-control validate[required]" name="shortname" placeholder="名称简写" id="shortname" value="{$info.info.shortname}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>排序(数字越大排序越靠前)</label>
+                                        <div class="row">
+                                            <div class="col-xs-3">
+                                                <input type="input" class="form-control validate[required]" name="px" placeholder="排序" id="px" value="{$info.info.px}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>是否推荐</label>
+                                        <select name="enabled" class="form-control" id="enabled" >
+                                            <eq name="info.info.enabled" value="1">
+                                                <option value="1" selected>是</option>
+                                                <option value="0">否</option>
+                                            <else />
+                                                <option value="1">是</option>
+                                                <option value="0" selected>否</option>
+                                            </eq>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-success btn-save">
+                                        <i class="fa fa-save"></i>&nbsp;保存
+                                    </button>
+                                    <button type="button" class="btn btn-default" onclick="history.back(-1)">
+                                        <i class="fa fa-mail-reply"></i>&nbsp;返回
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        // 自定义参数调用
+        $('#form').validationEngine('attach', {
+            promptPosition: 'centerRight',
+            autoHidePrompt: true,
+            autoHideDelay: '2000',
+            scroll: true
+        });
+
+        $('.btn-save').click(function(){
+            if(!$('#form').validationEngine('validate')){
+                return false;
+            }
+            var id = '{$Think.get.id}';
+            $.ajax({
+                url: '/meitudesigner/operate/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    uid:$('#uid').val(),
+                    name:$("#name").select2("data").text,
+                    bm:$('#bm').val(),
+                    comid:$('#comid').val(),
+                    comname:$('#comname').val(),
+                    shortname:$('#shortname').val(),
+                    px:$('#px').val(),
+                    enabled:$('#enabled').val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    window.location.href = '/meitudesigner/';
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+
+        $("#name").select2({
+            allowClear: true,
+            minimumInputLength: 1,
+            maximumInputLength:10,
+            query: function(query) {
+                var result = null;
+                $.ajax({
+                    url: '/api/getdesignerinfo',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        query: query.term
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        var result = {
+                            results: []
+                        };
+                        var company = data.data;
+                        for(var i in data.data){
+                            result.results.push({
+                                id:data.data[i].id + data.data[i].name,
+                                uid:data.data[i].id,
+                                text: data.data[i].name,
+                                bm: data.data[i].bm,
+                                comid: data.data[i].comid,
+                                comname:data.data[i].jc
+                            });
+                        }
+                        $('#name').change(function(){
+                            var bm = $("#name").select2("data").bm;
+                            var uid = $("#name").select2("data").uid;
+                            var comid = $("#name").select2("data").comid;
+                            var comname = $("#name").select2("data").comname;
+                            $('#bm').val(bm);
+                            $('#uid').val(uid);
+                            $('#comid').val(comid);
+                            $('#comname').val(comname);
+                        })
+                        query.callback(result);
+                    }
+                });
+            }
+        });
+        $("#name").select2("data",{text:"{$info.info.name}"});
+    </script>
+</block>

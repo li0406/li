@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/team/css/ht-team.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Team:header" />
+        <div class="ht-main">
+            <div class="ht-search-design">
+                <input name="keyword" type="text" placeholder="设计师名称" value="{$info.keyword}"><a class="search-btn" href="javascript:void(0)"><i class="icon-search mr10"></i>查找</a>
+                <a class="search-all" href="/teamsearch/">查看全部设计师</a>
+            </div>
+            <table class="ht-team-search" border="0" cellpadding="0" cellspacing="0">
+                <tr class="search-title">
+                    <td>头像</td>
+                    <td>姓名</td>
+                    <td>性别</td>
+                    <td>居住城市</td>
+                    <td>职业身份</td>
+                    <td>操作</td>
+                </tr>
+                <volist name="info.designers" id="vo">
+                <tr class="search-list">
+                    <td>
+                      <span class="userhead">
+                        <a href="{:C('QZ_YUMING_SCHEME')}://{$vo.bm}.{:C('QZ_YUMING')}/blog/{$vo.id}" target="_blank"><img src="{$vo.logo}" width="80" height="80"></a>
+                      </span>
+                    </td>
+                    <td><a href="{:C('QZ_YUMING_SCHEME')}://{$vo.bm}.{:C('QZ_YUMING')}/blog/{$vo.id}" target="_blank">{$vo.name}</a></td>
+                    <td>{$vo.sex}</td>
+                    <td>{$vo.cname}</td>
+                    <td>—</td>
+                    <td>
+                      <if condition="strpos($vo['comgroup'],$_SESSION['u_userInfo']['id']) nheq false">
+                        已邀请
+                      <else/>
+                        <a class="change-btn" href="javascript:void(0)" data-id="{$vo.id}">邀请入驻</a>
+                      </if>
+                    </td>
+                </tr>
+                </volist>
+            </table>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(function(){
+      $(".search-btn").click(function(event) {
+          window.location.href = "/teamsearch/"+$("input[name=keyword]").val();
+      });
+
+      $(".change-btn").click(function(event) {
+          var id = $(this).attr("data-id");
+          var _this = $(this);
+          $.ajax({
+            url: '/invite/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id:id
+            },
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                window.location.href = window.location.href;
+              }else{
+                $.pt({
+                  target: _this,
+                  content:data.info,
+                  width: 'auto'
+                 });
+              }
+          })
+          .fail(function() {
+              $.pt({
+                  target: _this,
+                  content:"发生了未知的错误,请刷新重试！",
+                  width: 'auto'
+                 });
+          });
+      });
+  });
+</script>
+</html>

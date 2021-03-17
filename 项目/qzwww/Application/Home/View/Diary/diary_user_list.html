@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <title>{$keys.title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <notempty name="info.header.canonical">
+    <link rel="canonical" href="{$info.header.canonical}"/>
+    </notempty>
+    <include file="Index:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+    <!--[if IE 7]>
+      <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/home/diary/css/detail.css?v={:C('STATIC_VERSION')}" />
+    <link href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {$headerTmp}
+    <div class="wrap oflow">
+        <div class="bread"><a href="/">首页</a>><a href="/riji/">装修日记</a>>{$user_info.name}的装修日记</div>
+        <div class="de-main">
+            <div class="user-top">
+                <span><img src="{$user_info.logo}"></span>
+                <h1>{$user_info.name}的装修日记</h1>
+
+            </div>
+            <ul class="user-dairy">
+              <volist name="list" id="vo">
+                <li>
+                  <div class="de-userinfo">
+                    <p>
+                       <span class="t t1">{$vo.child.first_name}</span>
+                       <span class="t">{$vo.child.second_name}</span>
+                       <if condition="$vo['cid'] NEQ ''">
+                          <a href="/riji/s{$vo.id}/" target="_blank">{$vo.title}</a>
+                       <else/>
+                          <a href="/riji/d{$vo.id}.html" target="_blank">{$vo.title}</a>
+                       </if>
+                       <i>{$vo.child.add_time|date='Y-m-d',###}</i>
+                       <span class="pull-right">
+                         <span>浏览<i class="red">( {$vo.page_view} )</i></span><span>关注<i class="red">( {$vo.concern_count} )</i></span>
+                       </span>
+                    </p>
+                    <p>
+                      <span>基本信息:</span><span>{$vo.mianji}㎡</span><span>{$vo.hx}</span><span> {$vo.fg}</span>
+                      <if condition="$vo['company_name'] neq ''">
+                          <if condition="$vo['company_id'] neq 0">
+                            <a class="link" href="{$SCHEME_HOST.scheme_full}{$vo.bm}.{$SCHEME_HOST.domain}/company_home/{$vo.company_id}" target="_blank">{$vo.company_name}</a>
+                            <else/>
+                            {$vo.company_name}
+                          </if>
+                        <else/>
+                          未选择装修公司
+                        </if>
+                    </p>
+                    <p>
+                      <volist name="vo.child.imgs" id="v" offset="0" length='5'>
+                         <if condition="$v['img_host'] eq 'qiniu'">
+                            <img  src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.img_path}-w300.jpg" width="120" height="100"  />
+                          <else/>
+                          </if>
+                      </volist>
+                    </p>
+                  </div>
+                </li>
+              </volist>
+            </ul>
+            {$page}
+        </div>
+        <div class="de-lesser">
+            <if condition="isset($_SESSION['u_userInfo']) AND $_SESSION['u_userInfo']['classid'] EQ 1">
+               <a rel="nofollow" class="xiriji" href="{$SCHEME_HOST.scheme_full}u.{$SCHEME_HOST.domain}/diary/" target="_blank"><i class="icon-book mr10"></i>写装修日记</a>
+              <div class="mt10">
+            <else/>
+              <div>
+            </if>
+              {$orderTmp}
+            </div>
+            {$hot_diary}
+            {$decorate}
+
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script type="text/javascript">
+    // 加载省市 为了弹窗做准备
+    var shen = null,
+    shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+
+    $(function(){
+      $("input[name='tel']").focus();//选中手机号码
+
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+﻿<extend name="citybasic"/>
+<block name="title">城市选择</block>
+<block name="link">
+    <link rel="stylesheet" href="{$static_host}/assets/home/adv/css/citypage.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="pagename">
+    <div class="m-header-tit">城市选择</div>
+</block>
+<block name="content">
+     <article>
+    <div class="c-before location">
+            <span class="auto-location">
+                <i class="c-pag fa fa-map-marker"></i>当前定位:<em>定位中</em>
+            </span>
+            <div class="c-opt clearfix">
+                <div class="c-opt-l">
+                    <select name="cs" class="province m-row-int2 m-bj-edit-list" ></select>
+                </div>
+                <div class="c-opt-r">
+                    <select name="qx" class="city m-row-int2 m-bj-edit-list" ></select>
+                </div>
+                <a class="into" href="javascript:void(0)">进入</a>
+            </div>
+            <div class="c-hot">
+                <div class="c-hot-box">
+                    <h4 class="c-hot-tle">
+                        热门城市
+                    </h4>
+                    <div class="c-town clearfix">
+                        <ul class="clearfix uls">
+                            <empty name="showall">
+                                <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}">全国</a></li>
+                            </empty>
+                            <volist name="hotcitytop" id="v">
+                                <if condition="!empty($redirect['baojia'])">
+                                    <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}{$redirect.baojia}{$v.bm}">{$v.cname}</a></li>
+                                <elseif condition="!empty($redirect['zxgstj'])" />
+                                    <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}{$redirect.zxgstj}?bm={$v.bm}">{$v.cname}</a></li>
+                                <else />
+                                    <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}/{$v.bm}/">{$v.cname}</a></li>
+                                </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+                <div class="c-hot-box">
+                    <h4 class="c-hot-tle">
+                        按字母查找城市
+                    </h4>
+                    <div class="c-town c-row clearfix">
+                        <ul class="clearfix uls">
+                            <volist name="cityInfo.accordCity" id="vo">
+                                <li><a href="#{$vo.pname}">{$vo.pname}</a></li>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+                <volist name="cityInfo.accordCity" id="vo">
+                    <div class="c-hot-box">
+                        <h4 class="c-hot-tle" id="{$vo.pname}">
+                            {$vo.pname}
+                        </h4>
+                        <div class="c-town clearfix">
+                            <ul class="clearfix uls">
+                                <volist name="vo.child" id="v">
+                                    <if condition="!empty($redirect['baojia'])">
+                                        <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}{$redirect.baojia}{$v.bm}">{$v.cname}</a></li>
+                                    <elseif condition="!empty($redirect['zxgstj'])" />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}{$redirect.zxgstj}{$v.bm}?bm={$v.bm}">{$v.cname}</a></li>
+                                    <else />
+                                        <li><a href="{$SCHEME_HOST.scheme_full}m.{:C('QZ_YUMING')}/{$v.bm}/">{$v.cname}</a></li>
+                                    </if>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                </volist>
+            </div>
+         </div>
+        <div class="call-tel">
+            <a href="tel:{:OP('QZ_CONTACT_TELNUM400')}"> 装修咨询热线</a>
+        </div>
+    </article>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/mobile/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/assets/common/js/App.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{:C('QINIU_SCHEME')}://{:C('QINIU_DOMAIN')}/common/js/allcity201803051345.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+         //城市下拉
+                var shen  = null,shi = null, cid = null;
+                    shen      = citys["shen"];
+                    shi       = citys["shi"];
+
+                getLocation();
+
+                $(function(){
+                    //绑定城市下拉
+                    App.citys.init("select[name=cs]","select[name=qx]",shen,shi,'{$cityInfo.id}',"",true);
+                    $(".uls li a").click(function(){
+                        $(this).addClass("c-current")
+                                .parent("li")
+                                .siblings("li")
+                                .children("a")
+                                .removeClass("c-current")
+                                .parent("li")
+                                .parent(".uls")
+                                .parent(".c-town")
+                                .parent(".c-hot-box")
+                                .siblings(".c-hot-box")
+                                .children(".c-town")
+                                .children(".uls")
+                                .children("li")
+                                .children("a")
+                                .removeClass("c-current")
+                        ;
+                    })
+
+                    $(".into").click(function(event) {
+                        var cs = $(".c-opt select[name=cs]").val();
+                        $.ajax({
+                            url: '/getcitybm/',
+                            type: 'get',
+                            dataType: 'json',
+                            data: {cs: cs, go:'1'}
+                        })
+                        .done(function(data) {
+                            if(data.status == 1){
+                                window.location.href = "/"+data.info+"/";
+                            }
+                        });
+                    });
+                });
+         function getLocation() {
+             var city = '';
+             var href = '{$SCHEME_HOST.scheme_full}{:C("MOBILE_DONAMES")}/sz/';
+             //定义调整链接
+             var redirect = {
+                 'baojia':'{$redirect.baojia}'
+             };
+             $.ajax({
+                 url: '/city/baidulocation/',
+                 type: 'get',
+                 dataType: 'json',
+                 success:function (data) {
+                     if (data.status == 1) {
+                         console.log(data.data.cname);
+                         city = data.data.cname;
+                         App.citys.init("select[name=cs]", "select[name=qx]", shen, shi, data.data.cid, "", true);
+                         if ('' != redirect.baojia) {
+                             href = redirect.baojia + data.data.bm;
+                         } else {
+                             href = '{$SCHEME_HOST.scheme_full}{:C("MOBILE_DONAMES")}/' + data.data.bm + '/';
+                         }
+                     }else {
+                         if ('' != redirect.baojia) {
+                             href = redirect.baojia + 'sz';
+                         }
+                     }
+                 }
+             })
+                 .done(function(data) {
+                     $(".location .auto-location em").html(city);
+                 });
+
+         }
+        </script>
+</block>

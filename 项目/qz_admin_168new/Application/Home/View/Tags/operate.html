@@ -1,0 +1,121 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>标签操作</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/tags/">标签管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 标签操作</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form id="form" action="javascript:void(0)" method="POST">
+                            <div class="tab-content">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label>标签名</label>
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <input type="input" class="form-control validate[required]" name="name" placeholder="标签名" id="name" value="{$info.info.name}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>是否推荐</label>
+                                        <select name="istop" class="form-control" id="istop" >
+                                            <eq name="info.info.istop" value="1">
+                                                <option value="1" selected>是</option>
+                                                <option value="0">否</option>
+                                            <else />
+                                                <option value="1">是</option>
+                                                <option value="0" selected>否</option>
+                                            </eq>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-success btn-save">
+                                        <i class="fa fa-save"></i>&nbsp;保存
+                                    </button>
+                                    <button type="button" class="btn btn-default" onclick="history.back(-1)">
+                                        <i class="fa fa-mail-reply"></i>&nbsp;返回
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        // 自定义参数调用
+        $('#form').validationEngine('attach', {
+          promptPosition: 'centerRight',
+          autoHidePrompt: true,
+          autoHideDelay: '2000',
+          scroll: true
+        });
+
+        $('.btn-save').click(function(){
+            if(! $('#form').validationEngine('validate')){
+                return false;
+            }
+            var id = '{$Think.get.id}';
+            $.ajax({
+                url: '/tags/operate/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    name:$('#name').val(),
+                    istop:$('#istop').val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    window.location.href = window.location.href;
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    </script>
+</block>

@@ -1,0 +1,133 @@
+<!--pages/user_mark/user_mark.wxml-->
+<import src="../../component/line/line.wxml"/>
+<template is="line"/>
+<scroll-view style='width:100%;height:1200rpx;' scroll-y="true" scroll-with-animation="true" bindscrolltolower="downLoad">
+<view>
+    <view class="nav-tab">
+        <view class="xgt tab-item {{isHide[0]?'actived':''}}" data-index="0" bindtap='showModal'>
+            <view class="item-tit">效果图</view>
+        </view>
+        <view class="zxgs tab-item {{isHide[1]?'actived':''}}" data-index="1" bindtap='showModal'>
+            <view class="item-tit">装修攻略</view>
+        </view>
+        <view class="zxgl tab-item {{isHide[2]?'actived':''}}" data-index="2" bindtap='showModal'>
+            <view class="item-tit">装修公司</view>
+        </view>
+    </view>
+    <view class="nav-content xgt-content" wx:if="{{isHide[0]}}">
+        <view class='full xgt-full'>
+             <block wx:for="{{xgtArr}}" wx:key> 
+            <view class='xgt-box'>
+            <view class='item-content'>
+                <view class='item-img' bindtap='toxgtDet' data-id='{{item.classid}}' data-title='{{item.title}}'><image src="{{oImgUrl}}{{item.img_path}}"></image></view>
+                <view class="item-info">
+                    <view class="info-title">{{item.title}}</view>
+                    <view class="info-row">
+                        <view class='xgt-canshu'>{{item.wz}}/{{item.fg}}/{{item.hx}}/{{item.ys}}</view>
+                        <view class='operation'>
+                            <text class='iconfont icon-shoucang1' style='color:#ff5353;' bindtap='toDel' data-id='{{item.classid}}' data-style="xgt" data-userid="{{item.userid}}">已收藏</text>
+                        </view>
+                        <text class='iconfont icon-eye'> {{item.pv}}</text>
+                        
+                    </view>
+                </view>
+            </view>
+            </view>
+             </block> 
+        </view>
+        <view class='empty' hidden='{{isEmpty[0]}}'>
+            <view class='empty-img'><image src='../../img/searchku.png'></image></view>
+            <view class='lookMore' bindtap='toXGT'>暂无数据，去逛逛</view>
+        </view>
+    </view>
+    <view class="nav-content" wx:elif="{{isHide[1]}}">
+        <view class='full'>
+            <block wx:for="{{zxglArr}}" wx:key> 
+            <view class="item-article">
+                <view class="item-img" bindtap='tozxglDet' data-id='{{item.classid}}' data-title='{{item.title}}'>
+                    <image src="{{oImgUrl}}{{item.face}}"></image>
+                </view>
+                <view class="item-info" bindtap='tozxglDet' data-id='{{item.classid}}' data-title='{{item.title}}'>
+                    <view class='title'>{{item.title}}</view>
+                    <view class='info'>{{item.title}}</view>
+                </view>
+            </view>
+             </block>
+        </view>
+        <view class='empty' hidden='{{isEmpty[2]}}'>
+            <view class='empty-img'><image src='../../img/searchku.png'></image></view>
+            <view class='lookMore' bindtap='toZXGL'>暂无数据，去逛逛</view>
+        </view>
+    </view>
+    <view class="nav-content" wx:elif="{{isHide[2]}}">
+        <view class='full'>
+            <block wx:for="{{zxgsArr}}" wx:key>
+            <view class="item-company">
+                <view class="company-box">
+                    <view class="company-img" bindtap="tozxgsDet" data-id='{{item.classid}}' data-title='{{item.qc}}'>
+                        <image src="{{item.logo}}"></image>
+                    </view>
+
+                    <view class="company-info" bindtap="tozxgsDet" data-id='{{item.classid}}' data-title='{{item.qc}}'>
+                        <view class="company-name">{{item.qc}}</view>
+                        <view class="company-trust"><text>信赖度：</text>
+                            <view wx:if="{{item.star >= 1}}" class="star"><image src="../../img/star.png"></image></view>
+                            <view wx:if="{{item.star >= 2}}" class="star"><image src="../../img/star.png"></image></view>
+                            <view wx:if="{{item.star >= 3}}" class="star"><image src="../../img/star.png"></image></view>
+                            <view wx:if="{{item.star >= 4}}" class="star"><image src="../../img/star.png"></image></view>
+                            <view wx:if="{{item.star >= 5}}" class="star"><image src="../../img/star.png"></image></view>
+                            <view class="company-good-comment"><text>案例数：</text><text class="yellow">{{item.anli_count}}</text></view>
+                        </view>
+                    </view>
+
+                    <view class='tosheji' bindtap='getShejiPop'>免费设计</view>
+                </view>
+            </view>
+            </block>
+        </view>
+        <view class='empty' hidden='{{isEmpty[1]}}'>
+            <view class='empty-img'><image src='../../img/searchku.png'></image></view>
+            <view class='lookMore' bindtap='toZXGS'>暂无数据，去逛逛</view>
+        </view>
+    </view>
+</view>
+</scroll-view>
+<!-- 设计弹窗设计 -->
+<view class='yinying' hidden="{{shejiPopHide}}">
+    <view class='formsheji'>
+        <view class='fadan-close' bindtap='shejiclose'>
+            <text class='iconfont icon-close'></text>
+        </view>
+        <view class='titlekz'>
+            <text>免费获取</text>4份装修设计方案
+        </view>
+        <view class='titlexkz'>大牌设计师1对1服务，打造您的私人订制</view>
+        <view class="select-city {{isColor?'isColor':''}}" bindtap="selectHandle" style='color:#999'>
+            <text class="iconfont icon-dingwei {{isColor?'isColor':''}}" style='color:#999;'></text>{{selectTextDefault}}{{selectText}}</view>
+        <view class="input-name">
+            <input placeholder='怎么称呼您' value='{{emptyName}}' placeholder-style='color:#999;' style='color:#333' bindinput='getNamesj'></input>
+        </view>
+        <view class="input-phone">
+            <input placeholder='输入手机号获取设计方案' value='{{emptyPhone}}' placeholder-style='color:#999;' style='color:#333' maxlength="11" bindinput='getPhonesj'></input>
+        </view>
+        <view class="get" bindtap='getSheJi'>马上获取</view>
+    </view>
+</view>
+<!--城市选择  -->
+<view class="select-box {{isHideCity?'transtion-off':'transtion-on'}}">
+    <view class="select-top">
+        <view class="close" bindtap="closebtn">取消</view>
+        <view class="ok" bindtap="okbtn">确定</view>
+    </view>
+    <picker-view indicator-style="height: 72rpx;" value="{{valuecity}}" bindchange="bindChange">
+        <picker-view-column>
+            <view wx:for="{{prev}}" wx:key>{{item.text}}</view>
+        </picker-view-column>
+        <picker-view-column>
+            <view wx:for="{{city}}" wx:key>{{item.text}}</view>
+        </picker-view-column>
+        <picker-view-column>
+            <view wx:for="{{area}}" wx:key>{{item.text}}</view>
+        </picker-view-column>
+    </picker-view>
+</view>

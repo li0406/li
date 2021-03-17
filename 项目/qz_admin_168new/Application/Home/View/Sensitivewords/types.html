@@ -1,0 +1,295 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网标签管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/icheck/skins/all.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/js/plugins/icheck/skins/flat/grey.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/home/css/tags.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <style type="text/css">
+        #myModal {margin-top: 10%;}
+        .wordconn {margin:10px;}
+        .in-area {margin:10px 0;}
+        .little-tip {color:#cbcbcb;margin:5px 2px;}
+        .content-area {margin-bottom: 10px;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>敏感词分类管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <a href="/sensitivewords/index/" class="btn btn-default">敏感词库</a>
+                            <button type="button" class="btn btn-info">类别管理</button>
+                        </div>
+                        <div class="col-xs-2 pull-right">
+                            <button type="button" class="btn btn-block btn-info normal" id="addType"><i class="fa fa-plus-circle"></i>添加分类</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>编号</th>
+                                        <th>敏感词类别</th>
+                                        <th>类别描述</th>
+                                        <th>创建者</th>
+                                        <th>创建时间</th>
+                                        <th>启用状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="list" id="vo">
+                                        <tr>
+                                            <td>{$vo.id}</td>
+                                            <td>{$vo.name}</td>
+                                            <td>{$vo.description}</td>
+                                            <td>{$vo.creator}</td>
+                                            <td>{$vo.time|date="Y-m-d H:i:s",###}</td>
+                                            <td style="color:<eq name="vo.status" value="1">#f00<else/>#0f0</eq>"><eq name="vo.status" value="1"><span>已停用</span><else/>已启用</eq></td>
+                                            <td data-id='{$vo.id}'>
+                                                <if condition="$vo.id NEQ 1">
+                                                    <a href="javascript:void(0);" class="editType" data-id="{$vo.id}">
+                                                        <span title="编辑" class="fa fa-pencil-square-o" data-recommend="0"></span>
+                                                    </a>
+                                                    <a href="javascript:void(0);" class="status" data-id="{$vo.id}">
+                                                        <eq name="vo.status" value="0">
+                                                            <span title="停用" class="fa fa-toggle-on data-status" data-status="1"></span>
+                                                        <else/>
+                                                            <span title="启用" class="fa fa-toggle-off data-status" data-status="0"></span>
+                                                        </eq>
+
+                                                    </a>
+                                                    <a href="javascript:void(0);" class="delType" data-id="{$vo.id}">
+                                                        <span title="删除" class="fa fa-trash"></span>
+                                                    </a>
+                                                </if>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body" style="padding: 10px 15px;">
+                    <h4 style="margin-left: 12px;">添加敏感词类别</h4>
+                    <div class="tableRow">
+                        <div class="col-sm-12 in-area">
+                            <label class="col-sm-3 control-label wordconn">类别名称:</label>
+                            <div class="col-sm-6">
+                                 <input type="text" name="name" class="form-control content-area" placeholder="请输入敏感词类别"  value="">
+                                 <span class="little-tip">不支持批量添加类别名称</span>
+                            </div>
+                            <div class="col-sm-3 link-error tips"></div>
+                        </div>
+
+                        <div class="col-sm-12 in-area">
+                            <label class="col-sm-3 control-label wordconn">类别描述:</label>
+                            <div class="col-sm-6">
+                                 <input type="text" name="description" class="form-control  content-area" placeholder="请输入类别描述"  value="">
+                            </div>
+                            <div class="col-sm-3 link-error tips"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveNow">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body" style="padding: 10px 15px;">
+                    <h4 style="margin-left: 12px;">修改敏感词类别</h4>
+                    <div class="tableRow">
+                        <div class="col-sm-12 in-area">
+                            <label class="col-sm-3 control-label wordconn">类别名称:</label>
+                            <div class="col-sm-6">
+                                 <input type="text" name="edit-name" class="form-control content-area" value="">
+                                 <span class="little-tip">不支持批量添加类别名称</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 in-area">
+                            <label class="col-sm-3 control-label wordconn">类别描述:</label>
+                            <div class="col-sm-6">
+                                 <input type="text" name="edit-des" class="form-control  content-area" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="thisId" value="">
+                    <button type="button" class="btn btn-primary" id="editNow">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //添加一个类别
+            $("#addType").on('click',function(event){
+                $("#myModal").modal();
+            });
+            //新增类别
+            $("#saveNow").on('click',function(){
+                var name = $("input[name=name]").val();
+                var description = $("input[name=description]").val();
+                if(name == ''){
+                    alert("请输入类别名称");
+                    return false;
+                }
+                if(description == ''){
+                    alert("请输入类别描述");
+                    return false;
+                }
+                $.ajax({
+                    url: '/sensitivewords/addtype/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        name: name,
+                        description: description
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("操作失败,请联系技术部门！");
+                })
+            });
+            //编辑
+            $(".editType").on('click',function(event){
+                var id = $(this).attr("data-id");
+                var name = $(this).parent().prev().prev().prev().prev().prev().text();
+                var desc = $(this).parent().prev().prev().prev().prev().text();
+                $("input[name=edit-name]").val(name);
+                $("input[name=edit-des]").val(desc);
+                $("#thisId").val(id);
+                $("#editModal").modal();
+            });
+            $('#editNow').on('click',function(){
+                var name = $("input[name=edit-name]").val();
+                var description = $("input[name=edit-des]").val();
+                var id = $("#thisId").val();
+                if(name == ''){
+                    alert("请输入类别名称");
+                    return false;
+                }
+                $.ajax({
+                    url: '/sensitivewords/edittype/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        name:name,
+                        description:description
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("操作失败,请联系技术部门！");
+                })
+            });
+
+            //停用、启用
+            $('.status').on('click',function(){
+                var id = $(this).attr("data-id");
+                var status = $(this).children().attr("data-status");
+                if(status == 0){
+                    if(confirm("确定启用该分类吗？")){}else{return false;}
+                }else{
+                    if(confirm("确定停用该分类吗？")){}else{return false;}
+                }
+                $.ajax({
+                    url: '/sensitivewords/edittype/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:status
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("操作失败,请联系技术部门！");
+                })
+            });
+
+            //删除
+            $('.delType').on('click',function(){
+                var id = $(this).attr("data-id");
+                if(confirm("确定删除分类吗？此删除无法再恢复哦(⊙o⊙)")){
+                    $.ajax({
+                        url: '/sensitivewords/deltype/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            alert(data.info);
+                            window.location.href = window.location.href;
+                        }else{
+                            alert(data.info);
+                            return false;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        alert("操作失败,请联系技术部门！");
+                    })
+                }
+            });
+
+
+        })
+    </script>
+</block>

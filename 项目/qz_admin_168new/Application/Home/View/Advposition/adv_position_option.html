@@ -1,0 +1,225 @@
+<!--广告位置设置-->
+
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/adposition/css/adposlist.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/jstree/themes/default/style.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>广告位置</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="advposition/position_detail/">广告位置</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <div class="jstree" id="treeDemo">
+                                    <ul>
+                                        <li data-jstree='{ "opened" : true }' id="0" level="0">全部位置
+                                            <ul>
+                                                <volist name="list" id="v1">
+                                                    <li data-jstree='{ "opened" : true }' id="{$v1.id}" level="{$v1.level}">
+                                                        {$v1.name}
+                                                        <if condition="isset($v1['children'])">
+                                                            <ul>
+                                                                <volist name="v1.children" id="v2">
+                                                                    <li data-jstree='{ "opened" : true }' id="{$v2.id}" level="{$v2.level}">
+                                                                        {$v2.name}
+                                                                        <if condition="isset($v2['children'])">
+                                                                            <ul>
+                                                                                <foreach name="v2.children" item="v3">
+                                                                                    <li data-jstree='{ "opened" : true }' id="{$v3.id}" level="{$v3.level}">
+                                                                                        {$v3.name}
+                                                                                        <if condition="isset($v3['children'])">
+                                                                                            <ul>
+                                                                                                <volist name="v3.children" id="v4">
+                                                                                                    <li data-jstree='{ "opened" : true }' id="{$v4.id}" level="{$v4.level}">
+                                                                                                        {$v4.name}
+                                                                                                    </li>
+                                                                                                </volist>
+                                                                                            </ul>
+                                                                                        </if>
+                                                                                    </li>
+                                                                                </foreach>
+                                                                            </ul>
+                                                                        </if>
+                                                                    </li>
+                                                                </volist>
+                                                            </ul>
+                                                            </if>
+                                                        </if>
+                                                    </li>
+                                                </volist>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-xs-5" id="advPositionInfo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/jstree/jstree.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var Global_Adv_Url = '/advposition/adv_position_option_page',
+            Global_Adv_Del_Url = '/advposition/adv_position_option_delete',
+            $advPositionInfo = $('#advPositionInfo');
+
+        $('#treeDemo').jstree({
+            'core': {
+                "animation" : 0,
+                "check_callback": true,
+                "themes" : {
+                    "stripes" : true
+                },
+                'multuple': true
+            },
+            "plugins" : [ "contextmenu", "search", "types", 'themes', 'change' ],
+            "contextmenu": {
+                "items": {
+                    "create": null,
+                    "rename": null,
+                    "remove": null,
+                    "ccp": null,
+                    "add": {
+                        "label": "新增位置",
+                        "action": function (obj) {
+                            var inst = jQuery.jstree.reference(obj.reference);
+                            var clickedNode = inst.get_node(obj.reference);
+                            if(clickedNode.li_attr.level >= 4) {
+                                layer.msg('当前层级不允许添加子级')
+                                return
+                            }
+                            $.ajax({
+                                url: Global_Adv_Url,
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data:{
+                                    level: parseInt(clickedNode.li_attr.level) + 1,
+                                    parentid:clickedNode.li_attr.id
+                                }
+                            })
+                            .done(function(data) {
+                                if (data.status == 1) {
+                                    $advPositionInfo.html(data.data);
+                                };
+                            })
+                            .fail(function() {
+                                var e = dialog({
+                                    title: '消息',
+                                    content: '操作失败,请联系技术部门！',
+                                    okValue: '确 定',
+                                    quickClose: true,
+                                    ok: function () {}
+                                });
+                                e.show();
+                            });
+                        }
+                    },
+                    "delete": {
+                        "label": "删除位置",
+                        "action": function (obj) {
+                            var inst = jQuery.jstree.reference(obj.reference);
+                            var clickedNode = inst.get_node(obj.reference);
+                            console.log(clickedNode)
+                            if(clickedNode.children.length > 0) {
+                                layer.msg('此位置存在下级，无法删除')
+                                return
+                            }
+                            if(clickedNode.li_attr.level == 0) {
+                                layer.msg('根目录不允许删除')
+                                return
+                            }
+                            $.ajax({
+                                url: Global_Adv_Del_Url,
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data:{
+                                    id:clickedNode.li_attr.id
+                                }
+                            })
+                            .done(function(res) {
+                                if (res.status == 0) {
+                                    layer.msg(res.info)
+                                }else{
+                                    layer.msg('删除成功')
+                                    location.reload();
+                                };
+                            })
+                            .fail(function() {
+                                var e = dialog({
+                                    title: '消息',
+                                    content: '操作失败,请联系技术部门！',
+                                    okValue: '确 定',
+                                    quickClose: true,
+                                    ok: function () {}
+                                });
+                                e.show();
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        $('#treeDemo').on("changed.jstree", function (e, data) {
+            if(data.node.id == 0) {
+                return
+            }
+            if(data.selected.length) {
+                $.ajax({
+                    url: Global_Adv_Url,
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id: data.selected[0]
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $advPositionInfo.html(data.data);
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                });
+            }
+        });
+    </script>
+</block>
+
+
+

@@ -1,0 +1,181 @@
+<!-- 入库审批 -->
+<link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" type="text/css" href="/assets/home/contractmanage/css/stockapproval.css?v={:C('STATIC_VERSION')}">
+<style type="text/css">
+    .ms-container {width: 535px !important;}
+</style>
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">
+            入库审批
+        </span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line">
+        </span>
+    </div>
+    <div class="step1 step-container middlexians stockapproval-wrap">
+        <div class="col-sm-12 form-horizontal">
+            <div class="col-sm-6 role-setting-content">
+                <div class="col-sm-12 stock-approval-info">合同编号审批</div>
+                <div class="col-sm-6 margin-bottom-xs">
+                    <button  class="stock-approval-contract-all button nobg">全选</button>
+                </div>
+                <div class="col-sm-6 margin-bottom-xs">
+                    已选择
+                </div>
+                <div class="col-sm-12">
+                    <div class="ms-container contract-container">
+                        <select id='stockApprovalContract' multiple='multiple'></select>
+                    </div>
+                </div>
+                <div class="col-sm-12 stock-approval-info stock-approval-contract-count"></div>
+                <div class="col-sm-12 stock-approval-btn-wrap">
+                    <button type="button" data-isexamine="2" data-type="Contract" class="btn btn-default btn-sm stock-approval-operate">审批入库</button>
+                    <button type="button" data-isexamine="3" data-type="Contract" class="btn btn-default btn-sm stock-approval-operate">不通过</button>
+                </div>
+            </div>
+            <div class="col-sm-5 role-setting-content">
+                <div class="col-sm-12 stock-approval-info">票据编号审批</div>
+                <div class="col-sm-6 margin-bottom-xs">
+                    <button class="stock-approval-piaoju-all button nobg">全选</button>
+                </div>
+                <div class="col-sm-12">
+                    <div class="ms-container piaoju-container">
+                        <select id='stockApprovalPiaoju' multiple='multiple'></select>
+                    </div>
+                </div>
+                <div class="col-sm-12 stock-approval-info stock-approval-piaoju-count"></div>
+                <div class="col-sm-12 stock-approval-btn-wrap">
+                    <button type="button" data-isexamine="2" data-type="Piaoju" class="btn btn-default btn-sm stock-approval-operate">审批入库</button>
+                    <button type="button" data-isexamine="3" data-type="Piaoju" class="btn btn-default btn-sm stock-approval-operate">不通过</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    /*票据编号审批*/
+    $.ajax({
+        url: '/contractmanage/getwaitapprovalpiaojucontractlist/',
+        type: 'GET',
+        dataType: 'JSON'
+    })
+    .done(function(data) {
+        //获取数据后初始化
+        $('#stockApprovalContract').html(data.data.contractHtml);
+        $('#stockApprovalPiaoju').html(data.data.piaojuHtml);
+        $('.stock-approval-contract-count').html('待申请总数：' + data.data.contractCount);
+        $('.stock-approval-piaoju-count').html('待申请总数：' + data.data.piaojuCount);
+
+        /*合同编号审批*/
+        $('#stockApprovalContract').multiSelect({
+            selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+            selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+            afterInit: function(ms){
+                var that = this,
+                $selectableSearch = that.$selectableUl.prev(),
+                $selectionSearch = that.$selectionUl.prev(),
+                selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+                selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+                that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                .on('keydown', function(e){
+                    if (e.which === 40){
+                        that.$selectableUl.focus();
+                        return false;
+                    }
+                });
+
+                that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                .on('keydown', function(e){
+                    if (e.which == 40){
+                        that.$selectionUl.focus();
+                        return false;
+                    }
+                });
+            },
+            afterSelect: function(){
+                this.qs1.cache();
+                this.qs2.cache();
+            },
+            afterDeselect: function(){
+                this.qs1.cache();
+                this.qs2.cache();
+            }
+        });
+        $('.stock-approval-contract-all').click(function(){
+            $('#stockApprovalContract').multiSelect('select_all');
+        });
+
+        /*票据编号审批*/
+        $('#stockApprovalPiaoju').multiSelect({
+            selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+            selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+            afterInit: function(ms){
+                var that = this,
+                $selectableSearch = that.$selectableUl.prev(),
+                $selectionSearch = that.$selectionUl.prev(),
+                selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+                selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+                that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                .on('keydown', function(e){
+                    if (e.which === 40){
+                        that.$selectableUl.focus();
+                        return false;
+                    }
+                });
+
+                that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                .on('keydown', function(e){
+                    if (e.which == 40){
+                        that.$selectionUl.focus();
+                        return false;
+                    }
+                });
+            },
+            afterSelect: function(){
+                this.qs1.cache();
+                this.qs2.cache();
+            },
+            afterDeselect: function(){
+                this.qs1.cache();
+                this.qs2.cache();
+            }
+        });
+        $('.stock-approval-piaoju-all').click(function(){
+            $('#stockApprovalPiaoju').multiSelect('select_all');
+        });
+
+        /*是否审核通过*/
+        $('.stock-approval-operate').click(function(event) {
+            var isexamine = $(this).attr('data-isexamine');
+            var ids = $('#stockApproval' + $(this).attr('data-type')).val();
+            $.ajax({
+                url: '/contractmanage/stockapproval/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    isexamine:isexamine,
+                    ids:ids
+                }
+            })
+            .done(function(data) {
+                alert(data.info);
+                window.location.href = window.location.href;
+            })
+            .fail(function(xhr) {
+                alert('入库审批审核失败');
+            });
+        });
+    })
+    .fail(function(xhr) {
+        alert('入库审批票据获取失败');
+    });
+})
+</script>

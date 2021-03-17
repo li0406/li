@@ -1,0 +1,164 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/erp/css/erpindex.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <section class="content-header">
+            <h4 class="big_title">意见反馈</h4>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <form id="searchForm" class="form-horizontal" action="/yxb/suggest/" method="get">
+                                <div class="row">
+                                    <div class="shurubdwk">
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle">用户账号：</span>
+                                            <input class="form-control loginhao" name="account" type="text" value="{$Think.get.account}"
+                                                   placeholder="请输入" maxlength="12">
+                                        </div>
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle changwid">公司名称/ID：</span>
+                                            <input class="form-control companyname" type="text"
+                                                   name="company" placeholder="请输入" autocomplete="off" maxlength="12" value="{$Think.get.company}">
+                                        </div>
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle">所属城市：</span>
+                                            <select class="select2" id="city" name="city" placeholder="选择城市">
+                                                <option value="">请选择</option>
+                                                <volist name="city" id="vo">
+                                                    <if condition="$_GET['city'] EQ $vo['cid']">
+                                                        <option value="{$vo.cid}" selected>{$vo.cname}</option>
+                                                        <else/>
+                                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                                    </if>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle">反馈渠道：</span>
+                                            <select class="select2" id="qudao" name="qudao" placeholder="请选择" style="width: 90%;">
+                                                <option value="">请选择</option>
+                                                <volist name="channel" id="channel">
+                                                    <option value="{$channel.id}"  <if condition="$qudao eq $channel['id']">selected="selected"</if>>{$channel.channel_name}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="clearbt"></div>
+                                        <div class="col-xs-3 inputfather datedwwk">
+                                            <span class="saixtitle changwid2">反馈时间：</span>
+                                            <input class="form-control date" name="date" type="text" value="{$Think.get.date}">
+                                             <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle changwid">处理人：</span>
+                                            <input class="form-control chuliren"  placeholder="请输入"name="chuliren" type="text" value="{$Think.get.chuliren}">
+                                        </div>
+                                        <div class="col-xs-3 inputfather">
+                                            <span class="saixtitle">处理状态：</span>
+                                            <select class="select2" id="chuli" name="handlestatus" placeholder="请选择" style="width: 90%;">
+                                                <option value="" <if condition="$handlestatus eq ''">selected="selected"</if>>请选择</option>
+                                                <option value="1" <if condition="$handlestatus eq '1'">selected="selected"</if>>待处理</option>
+                                                <option value="2" <if condition="$handlestatus eq '2'">selected="selected"</if>>处理中</option>
+                                                <option value="3" <if condition="$handlestatus eq '3'">selected="selected"</if>>已处理</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="bdniuwaik">
+                                        <div class="col-xs-1 floatright">
+                                          <span class="btn btn-block  btn-warning dianjireset">重置</span>
+                                        </div>
+                                        <div class="col-xs-1 floatright">
+                                          <button type="submit" class="btn btn-block btn-primary dianjisos">搜索</button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="box-body">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                                <tr>
+                                    <th>公司ID
+                                        <if condition="$_GET['ordertype'] eq 1 and $_GET['order'] eq 2">
+                                            <i class="fa fa-caret-up paixupic" data-type="1"  data-order="{$ordertype[1]|default=1}"></i>
+                                        <else/>
+                                            <i class="fa fa-caret-down paixupic" data-type="1"  data-order="{$ordertype[1]|default=2}"></i>
+                                        </if>
+                                        <!-- <i class="fa fa-caret-down paixupic" data-type="1"  data-order=""></i> -->
+                                    </th>
+                                    <th>公司名称</th>
+                                    <th>所属城市</th>
+                                    <th>用户账号</th>
+                                    <th>用户角色</th>
+                                    <th id="start_time" data-type="1">反馈时间
+                                        <if condition="$_GET['ordertype'] eq 2 and $_GET['order'] eq 2">
+                                            <i class="fa fa-caret-up paixupic" data-type="2"  data-order="{$ordertype[2]|default=1}"></i>
+                                        <else/>
+                                            <i class="fa fa-caret-down paixupic" data-type="2"  data-order="{$ordertype[2]|default=2}"></i>
+                                        </if>
+                                        <!-- <i class="fa fa-caret-down paixupic" data-type="2" data-order="{$ordertype[2]|default=1}"></i> -->
+                                    </th>
+                                    <th>反馈渠道</th>
+                                    <th>处理状态</th>
+                                    <th id="" data-type="1">最新处理时间
+                                        <if condition="$_GET['ordertype'] eq 3 and $_GET['order'] eq 2">
+                                            <i class="fa fa-caret-up paixupic" data-type="3"  data-order="{$ordertype[3]|default=1}"></i>
+                                        <else/>
+                                            <i class="fa fa-caret-down paixupic" data-type="3"  data-order="{$ordertype[3]|default=2}"></i>
+                                        </if>
+                                        <!-- <i class="fa fa-caret-down paixupic" data-type="2" data-order="{$ordertype[2]|default=1}"></i> -->
+                                    </th>
+                                    <th>处理人</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="list">
+                                <tr>
+                                    <td>{$list.company_id}</td>
+                                    <td>{$list.companyname}</td>
+                                    <td>{$list.cityname}</td>
+                                    <td>{$list.account}</td>
+                                    <td>{$list.position}</td>
+                                    <td>{$list.addtime|date="Y-m-d H:i:s",###}</td>
+                                    <td>{$list.feedback_channel}</td>
+                                    <td>
+                                        <if condition="$list['handle_status'] EQ 2 ">
+                                            <span class="yanse_red">{$list.status_handle}</span>
+                                        <elseif condition="$list['handle_status'] EQ 3 "/>
+                                            <span class="yanse_success">{$list.status_handle}</span>
+                                        <else/>
+                                            {$list.status_handle}
+                                        </if>
+                                    </td>
+                                    <td>{$list.updata_time|date="Y-m-d H:i:s",###}</td>
+                                    <td>{$list.handler_name}</td>
+                                    <td><a href="/yxb/sugcheck?id={$list.id}">查看</a></td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        <div class="pull-right">
+                           {$page}
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/erp/js/suggest.js?v={:C('STATIC_VERSION')}"></script>
+</block>

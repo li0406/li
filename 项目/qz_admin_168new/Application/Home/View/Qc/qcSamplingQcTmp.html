@@ -1,0 +1,144 @@
+<div class="qc-header">
+	抽检信息
+</div>
+<div class="qc-body">
+	<form id="samplingForm" class="qc-inline">
+		<div class="qc-group">
+			<div class="col-sm-3 no-padding">
+				<label class="qc-label">抽检状态:</label>
+				<if condition="empty($qcInfo['sampling_id'])">
+					未抽检
+				<else/>
+					已抽检
+				</if>
+			</div>
+			<div class="col-sm-6 no-padding">
+				<label class="qc-label">抽检日期:</label>
+				<p class="qc-info">{$qcInfo.sampling_time|default='-'|date="Y-m-d H:i:s",###}</p>
+			</div>
+			<div class="col-sm-3 no-padding">
+				<label class="qc-label">抽检人:</label>
+				<p class="qc-info">{$qcInfo.sampling_name|default='-'}</p>
+			</div>
+		</div>
+		<div class="qc-header">
+			抽检结果
+		</div>
+		<div class="qc-group">
+			<dl class="qc-list">
+				<dt>
+					抽检结论:
+					<if condition="$qcInfo['sampling_status'] EQ 1">
+					<div class="radiobox" style="display: inline;">
+						<label style="width: auto;">
+					      	<input name="sampling_status" type="radio" value="2"> 合格
+					    </label>
+						<label style=" width: auto;">
+					      	<input name="sampling_status" type="radio" value="1"  checked="checked"> 不合格
+					    </label>
+					</div>
+					<else/>
+					<div class="radiobox" style="display: inline;">
+						<label style="width: auto;">
+					      	<input name="sampling_status" type="radio" value="2" checked="checked"> 合格
+					    </label>
+						<label style=" width: auto;">
+					      	<input name="sampling_status" type="radio" value="1" > 不合格
+					    </label>
+					</div>
+					</if>
+				</dt>
+				<if condition="$qcInfo['sampling_status'] EQ 1">
+				<dd class="qc-item">
+				<else/>
+				<dd class="qc-item" style="display: none;">
+				</if>
+					<volist name="sampling_item" id="vo">
+					<div class="col-sm-6 no-padding">
+						<div class="checkbox">
+						    <label>
+						    	<if condition="in_array($vo['id'],$qcInfo['item'])">
+						    	<input name="sampling_item[]" type="checkbox" value="{$vo.id}" checked> {$vo.name}
+						      	<else/>
+						      	<input name="sampling_item[]" type="checkbox" value="{$vo.id}"> {$vo.name}
+						      	</if>
+						    </label>
+						</div>
+					</div>
+					</volist>
+				</dd>
+			</dl>
+		</div>
+		<div class="qc-group">
+			<dl class="qc-list">
+				<dt>
+					备注:
+				</dt>
+				<dd class="qc-item">
+					<textarea class="qc-control" name="remark" style="height: 100px;">{$qcInfo.sampling_remark}</textarea>
+				</dd>
+			</dl>
+		</div>
+		<div class="qc-header">
+			优秀/问题录音审核
+		</div>
+		<div class="qc-group">
+			<div class="col-sm-4 no-padding">
+				<label class="qc-label">录音状态:</label>
+				<p class="qc-info">
+					<switch name="videoInfo.state">
+						<case value="0">未推荐</case>
+						<case value="1">申请推荐</case>
+						<case value="2">已推荐</case>
+						<default/> -
+					</switch>
+				</p>
+			</div>
+			<div class="col-sm-3 no-padding">
+				<label class="qc-label">申请类型:</label>
+				<switch name="videoInfo.type">
+					<case value="1">优秀录音</case>
+					<case value="2">问题录音</case>
+					<default/> -
+				</switch>
+			</div>
+			<div class="col-sm-5 no-padding">
+				<label class="qc-label">审核结果:</label>
+				<select name="video_status"  class="qc-select width_60">
+					<if condition="$videoInfo['status'] EQ 1">
+					<option value="">请选择</option>
+					<option value="1" selected="selected">通过</option>
+					<option value="2">不通过</option>
+					<elseif condition="$videoInfo['status'] EQ 2"/>
+					<option value="">请选择</option>
+					<option value="1">通过</option>
+					<option value="2" selected="selected">不通过</option>
+					<else/>
+					<option value="">请选择</option>
+					<option value="1">通过</option>
+					<option value="2">不通过</option>
+					</if>
+				</select>
+			</div>
+		</div>
+		<if condition="isset($isSampling)">
+		<div class="qc-group">
+			<div class="qc-footer">
+				<div class="col-sm-8 no-padding pull-right">
+					<if condition="$qcInfo['status'] EQ 1">
+					<button class="btn btn-default btn-sm" data-dismiss="modal">关闭</button>
+					<button id="btnSave" type="button" class="btn btn-primary btn-sm">保存</button>
+					</if>
+					<button id="btnReset" type="button" class="btn btn-danger btn-sm">撤销</button>
+					<input type="hidden" name="videoid" value="{$videoInfo['id']}" />
+				</div>
+			</div>
+		</div>
+		</if>
+	</form>
+</div>
+<script type="text/javascript">
+<if condition="!isset($isSampling)">
+$("#samplingForm *").not("#btnReset").attr('disabled', 'disabled');
+</if>
+</script>

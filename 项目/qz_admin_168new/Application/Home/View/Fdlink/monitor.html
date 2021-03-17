@@ -1,0 +1,247 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>友情链接监测后台 - 齐装网</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/friendlink/css/monitor.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>友情链接监测</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/fdlink/">友情链接</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                选择站点：
+                                <select name="cs" class="select2" id='cs'>
+                                    <option value="">全部城市</option>
+                                    <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.char_name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                选择链接页面：
+                                <select name="link_page" class="form-control" id='link_page'>
+                                    <option value="" selected>请选择</option>
+                                    <volist name="category" id="vo">
+                                        <option value="{$key}">{$vo}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                选择状态：
+                                <select name="monitor_status" class="form-control" id='monitor_status'>
+                                    <option value="" selected>请选择</option>
+                                    <option value="1">请求出错</option>
+                                    <option value="2">对方链接正常</option>
+                                    <option value="3">对方无链接</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br/>
+                                <input type="hidden" value="1" name="dl">
+                                <button type="button" id="exportExcel" class="btn btn-flat btn-success"><i class="fa fa-download"></i>&nbsp;导出 Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">数据列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>添加时间</th>
+                                        <th>站点</th>
+                                        <th>链接页面</th>
+                                        <th>锚文本</th>
+                                        <th>链接</th>
+                                        <th>对方锚文本</th>
+                                        <th>对方链接</th>
+                                        <th>当前状态</th>
+                                        <th>添加用户</th>
+                                        <th>刷新时间</th>
+                                        <th width="140px">操作</th>
+                                    </tr>
+                                    <volist name="main.info.list" id="vo">
+                                        <tr class="bjgb">
+                                            <td>{$key+1}</td>
+                                            <td>{$vo.addtime}</td>
+                                            <td>
+                                                <notempty name="vo.bm">
+                                                    <a href="http://{$vo.bm}.{:C('QZ_YUMING')}" target="_blank">
+                                                        {$vo.cname}
+                                                    </a>
+                                                </notempty>
+                                            </td>
+                                            <td>
+                                                {$category[$vo['link_page']]}
+                                            </td>
+                                            <td>{$vo.link_name}</td>
+                                            <td>
+                                                <notempty name="vo.link_url">
+                                                    <a href="{$vo.link_url}" target="_blank">
+                                                        {$vo.link_url}
+                                                    </a>
+                                                </notempty>
+                                            </td>
+                                            <td>{$vo.monitor_text}</td>
+                                            <td>
+                                                <notempty name="vo.monitor_href">
+                                                    <a href="{$vo.monitor_href}" target="_blank">
+                                                        {$vo.monitor_href}
+                                                    </a>
+                                                </notempty>
+                                            </td>
+                                            <switch name="vo.monitor_status">
+                                                <case value="1">
+                                                    <td class="fd-bg-error">请求出错</td>
+                                                </case>
+                                                <case value="2">
+                                                    <td class="fd-bg-success">对方链接正常</td>
+                                                </case>
+                                                <case value="3">
+                                                    <td class="fd-bg-error">对方无链接</td>
+                                                </case>
+                                                <default />
+                                                    <td></td>
+                                            </switch>
+                                            <td>{$vo.adminuser_name}</td>
+                                            <td>{$vo.monitor_time}</td>
+                                            <td data-id="{$vo.id}">
+                                                <a href="/fdlink/operate/?id={$vo.link_id}" target="_blank">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" class="remove-btn" data-id="{$vo.link_id}">
+                                                    <span title="删除" class="fa fa-trash"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$main.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            /*S-初始化*/
+            $(".select2").select2();
+            $(".select2").select2("val", '{$Think.get.cs}');
+            $('select[name=link_page]').val('{$Think.get.link_page}');
+            $('select[name=monitor_status]').val('{$Think.get.monitor_status}');
+            /*E-初始化*/
+
+            /*S-删除友情链接*/
+            $('.remove-btn').click(function(event) {
+                var id = $(this).attr('data-id');
+
+                if (confirm('确认删除该条友情链接吗?')) {
+                    $.ajax({
+                        url: '/fdlink/remove/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                };
+            });
+            /*E-删除友情链接*/
+
+            $('#search').click(function(){
+                var cs             = $('select[name=cs]').val();
+                var link_page      = $('select[name=link_page]').val();
+                var monitor_status = $('select[name=monitor_status]').val();
+                window.location.href = '/fdlink/monitor/?cs='+cs+'&link_page='+link_page+'&monitor_status='+monitor_status;
+            })
+
+
+            $('.bjgb').click(function() {
+                if($(this).hasClass('djclick')){
+                    $(this).removeClass('djclick')
+                }else{
+                    $(this).addClass('djclick')
+                }
+            })
+
+                        /*导出excel文件*/
+
+
+
+            $('#exportExcel').on('click', function(){
+                var page = $('input[name="dl"]').val();
+                var cs = $('#cs').val();
+                var link_page = $('#link_page').val();
+                var monitor_status = $('#monitor_status').val();
+                window.location.href = '/fdlink/monitor/?page='+page+'&cs='+cs+'&link_page='+link_page+'&monitor_status='+monitor_status;
+                page = parseInt(page) + 1;
+                $('input[name="dl"]').val(page);
+            });
+        })
+    </script>
+</block>

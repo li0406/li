@@ -1,0 +1,116 @@
+<div class="windowbg">
+    <div class="order-window">
+        <div class="tit">获取报价详情</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="znbj-order">
+            <p>请正确填写您的信息，免费获取报价结果</p>
+            <ul class="znbj-order-list">
+                <li><span><i class="fa f-red">*</i>您的称呼：</span>
+                    <input type="text" name="name" placeholder="您的称呼">
+                </li>
+                <li><span><i class="fa f-red">*</i>手机号码：</span>
+                    <input type="text" name="tel"  placeholder="手机号码">
+                </li>
+                <li>
+                    <button id="btnUp" type="button">提交</button>
+                </li>
+            </ul>
+            <img class="weiximg" src="/assets/home/zxbj/img/we51.jpg" alt="齐装网" />
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $(".znbj-edit .fa-remove").click(function(event) {
+            $(".windowbg").remove();
+        });
+
+        $("input[name=name],input[name=tel]",$(".znbj-edit")).blur(function(event) {
+            var container = $(".znbj-edit");
+            $(".focus", container).removeClass('focus');
+            $(".height_auto", container).removeClass('height_auto');
+            $(".valdate-info", container).remove();
+            if (!App.validate.run($("input[name=name]",container).val())) {
+                $("input[name=name]",container).parents("li").addClass('height_auto');
+                $("input[name=name]",container).addClass('focus').focus();
+                var span = $("<em class='valdate-info'></em>");
+                span.html("姓名不能为空");
+                $("input[name=name]",container).parents("li").append(span);
+                return false;
+            }
+
+            if (!App.validate.run($("input[name=tel]",container).val(),"moblie")) {
+                $("input[name=tel]",container).parents("li").addClass('height_auto');
+                $("input[name=tel]",container).addClass('focus').focus();
+                var span = $("<em class='valdate-info'></em>");
+                span.html("手机号码不能为空");
+                $("input[name=tel]",container).parents("li").append(span);
+                return false;
+            }
+        });
+
+        $("#btnUp").click(function(event) {
+            var container = $(".znbj-edit");
+            $(".focus", container).removeClass('focus');
+            $(".height_auto", container).removeClass('height_auto');
+            $(".valdate-info", container).remove();
+
+            if (!App.validate.run($("input[name=name]",container).val())) {
+                $("input[name=name]",container).parents("li").addClass('height_auto');
+                $("input[name=name]",container).addClass('focus').focus();
+                var span = $("<em class='valdate-info'></em>");
+                span.html("姓名不能为空");
+                $("input[name=name]",container).parents("li").append(span);
+                return false;
+            }
+
+            if (!App.validate.run($("input[name=tel]",container).val(),"moblie")) {
+                $("input[name=tel]",container).parents("li").addClass('height_auto');
+                $("input[name=tel]",container).addClass('focus').focus();
+                var span = $("<em class='valdate-info'></em>");
+                span.html("手机号码不能为空");
+                $("input[name=tel]",container).parents("li").append(span);
+                return false;
+            }
+
+            var data = {
+                lx:$("#rdoLx .rdobox.checked",container).prev().val(),
+                zxdc:$("#rdoZxdc .rdobox.checked",container).prev().val(),
+                mianji:$("input[name=mianji]",container).val(),
+                huxing:$("select[name=hx]",container).val(),
+                cs:$("select[name=cs]",container).val(),
+                qx:$("select[name=qy]",container).val(),
+                xiaoqu:$("input[name=dz]",container).val(),
+                name:$("input[name=name]",container).val(),
+                tel:$("input[name=tel]",container).val(),
+                source:30
+            }
+
+            window.order({
+                extra:data,
+                error:function(){
+                    $("input[name=tel]",container).parents("li").addClass('height_auto');
+                    $("input[name=tel]",container).addClass('focus').focus();
+                    var span = $("<em class='valdate-info'></em>");
+                    span.html("获取报价失败,请刷新页面");
+                    $("input[name=tel]",container).parents("li").append(span);
+                },
+                success:function(data, status, xhr){
+                    if(data.status == 1){
+                        window.location.href = "/details/?random="+Math.random();
+                    }else{
+                        $("input[name=tel]",container).parents("li").addClass('height_auto');
+                        $("input[name=tel]",container).addClass('focus').focus();
+                        var span = $("<em class='valdate-info'></em>");
+                        span.html(data.info);
+                        $("input[name=tel]",container).parents("li").append(span);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+    });
+
+</script>

@@ -1,0 +1,252 @@
+<div class="qcc-popup" id="qcc-popup">
+    <div class="qcc-popup-form">
+        <h5>查询验证</h5>
+        <div class="form-item">
+            <div class="form-icon"><img src="/assets/mobile/qcc/img/icon-user.png" alt=""></div>
+            <input type="tel" maxlength="11" placeholder="请输入手机号" id="qcc-phone">
+            <div class="red" id="phone-mark"></div>
+        </div>
+        
+        <div class="form-item form-item-b">
+            <div class="form-icon"><img src="/assets/mobile/qcc/img/iconcode.png" alt=""></div>
+            <input type="tel" maxlength="6" placeholder="请输入验证码" id="qcc-code">
+            <div class="code-btn">
+                <span id="qcc-getcode">获取验证码</span>
+                <span id="qcc-codetext" class="qcc-hide">00秒后获取</span>
+            </div>
+            <div class="red" id="code-warn"></div>
+        </div>
+        <div class="form-item">
+            <div id="embed-captcha"></div>
+        </div>
+        <div class="btn" id="qcc-loginbtn">确认</div>
+        <div class="popup-close" id="close-btn">
+            <img src="/assets/mobile/qcc/img/close-icon.png" alt="">
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    var apiUrl = '{:C("ZXS_API")}'
+    var qccPhone = $("#qcc-phone");
+    var qccCode = $("#qcc-code");
+    var loginBtn = $("#qcc-loginbtn");
+    var getCodeBtn = $("#qcc-getcode");
+    var AppEnv = 'platform=WEB&user-agent='+ navigator.userAgent;
+
+    $("#close-btn").click(function () {
+        $("#qcc-popup").fadeOut();
+        qccPhone.val("");
+        qccCode.val("");
+        $('#code-warn').html('');
+        $('#phone-mark').html('');
+    })
+
+    // 验证码登陆
+    loginBtn.click(function () {
+        $("#phone-mark").html('');
+        var phone = qccPhone.val();
+        var verify_code = qccCode.val();
+        var keyword = $('#top-input').val();
+        if (phone == '') {
+            $("#phone-mark").html('请填写您的手机号');
+            return false;
+        } else {
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if (!phone.match(reg)) {
+                $("#phone-mark").html('请填写11位正确手机号');
+                qccPhone.focus();
+                return false;
+            }
+        };
+        if (verify_code == '') {
+            $('#code-warn').html('请输入6位数短信验证码');
+            return false;
+        } else {
+            if (verify_code.length < 6) {
+                $('#code-warn').html('请输入6位数短信验证码');
+                return false;
+            }
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: apiUrl + '/uc/v1/pc/login',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'App-From':'9f6910a77bc9c8d4cf9db31ed41af490',
+                'Addr': 'PC_QZ',
+                'App-env': AppEnv
+            },
+            data: { phone: phone, verify_code: verify_code },
+            dataType: 'json',
+            success: function (res) {
+                if (res.error_code == 0) {
+                    $.cookie('center_password_token', res.data.jwt_token, {
+                        expires: 1,
+                        path: '/',
+                        domain: '.qizuang.com'
+                    });
+                    setTimeout(function(){
+                        fadan(phone);
+                        window.location.href = '/qcc?keyword=' + keyword;
+                    },1000)
+                } else {
+                    $('#code-warn').html(res.error_msg);
+                }
+            },
+            error: function (res) {
+                console.log(res)
+                console.log("登录失败，请稍后重试")
+            }
+        })
+    });
+
+    function fadan(tel) {
+        window.order({
+            extra:{
+                tel:tel,
+                fb_type:'nosms',
+                source: '20042230',
+            },
+            submitBtn:{
+                className:$(this),
+                type:'btn'
+            },
+            error:function(){
+                alert("发生了未知的错误,请稍后再试！");
+
+            },
+            success:function(data, status, xhr){
+                console.log(data)
+            },
+            validate:function(item, value, method, info){
+                console.log(item)
+            }
+        });
+    }
+
+    // 获取短信验证码
+    $("#qcc-getcode").click(function () {
+        console.log('123')
+        $("#phone-mark").html('');
+        var tel = qccPhone.val();
+        if (tel == '') {
+            $("#phone-mark").html('请填写11位正确手机号');
+        } else {
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if (!qccPhone.val().match(reg)) {
+                $("#phone-mark").html('请填写11位正确手机号');
+                qccPhone.focus();
+            } else {
+                $("#qcc-getcode").hide();
+                $("#qcc-codetext").show();
+                $("#qcc-codetext").text("获取验证码")
+                initG2();
+            }
+        };
+    });
+
+    //倒计时
+    function countDown(obj, btn, num) {
+        if (num > 0) {
+            obj.show();
+            obj.text(num + " 秒后重新发送");
+            btn.hide();
+            num--;
+            setTimeout(function (obj, btn, num) {
+                countDown(obj, btn, num);
+            }, 1000, obj, btn, num);
+        } else {
+            obj.hide();
+            obj.text("获取验证码")
+            btn.show();
+        }
+    };
+    function sendSms(tel, type, target, chanllenge) {
+        var json = {};
+        json["phone"] = tel;
+        json["type"] = type;
+        json["verify_type"] = 2;
+        json['challenge'] = chanllenge;
+        $("#phone-mark").html("");
+        $("#qcc-getcode").hide();
+        $("#qcc-codetext").show();
+        $("#qcc-codetext").text("获取验证码")
+        $.ajax({
+            type: "POST",
+            url: apiUrl + "/uc/v1/msg/send",
+            dataType: "json",
+            data: json,
+            success: function (data) {
+                if (data.error_code == 0) {
+                    $("#code-warn").html('短信发送成功');
+                    $("#phone-mark").html("");
+                    countDown($("#qcc-codetext"), $("#qcc-getcode"), 60);
+                } else {
+                    $("#code-warn").html(data.error_msg);
+                    $("#qcc-getcode").show();
+                    $("#qcc-codetext").hide();
+                }
+            },
+            error: function (xhr) {
+                $("#code-warn").html("发送失败,请稍后再试！");
+                $("#qcc-getcode").show();
+                $("#qcc-codetext").hide();
+            }
+        });
+    }
+
+    /******************  极验  ******************************************/
+    var initG2 = function () {
+        $("#embed-captcha").html("");
+        $.ajax({
+            url: apiUrl + "/v2/geetestapi1?t=" + (new Date()).getTime(), // 加随机数防止缓存
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                client_type: "web"
+            }
+        })
+            .done(function (data) {
+                initGeetest({
+                    // 以下配置参数来自服务端 SDK
+                    gt: data.gt,
+                    challenge: data.challenge,
+                    new_captcha: data.new_captcha,
+                    product: "embed", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
+                    offline: !data.success // 表示用户后台检测极验服务器是否宕机，一般不需要关注
+                }, function (captchaObj) {
+                    // 这里可以调用验证实例 captchaObj 的实例方法
+                    $("#embed-captcha").html("");
+                    captchaObj.appendTo("#embed-captcha");
+                    captchaObj.onSuccess(function () {
+                        var validate = captchaObj.getValidate();
+                        $.ajax({
+                            url: apiUrl + "/v2/geetestapi2?t=" + (new Date()).getTime(), // 加随机数防止缓存
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                client_type: "web",
+                                geetest_challenge: validate.geetest_challenge,
+                                geetest_validate: validate.geetest_validate,
+                                geetest_seccode: validate.geetest_seccode
+                            }
+                        }).done(function (data) {
+                            if (data.status == 'success') {
+                                $("#phone-mark").html('');
+                                sendSms(qccPhone.val(), 2, $('#qcc-getcode'), validate.geetest_validate);
+                            } else {
+                                initG2();
+                            }
+                        });
+                    });
+                })
+            });
+    }
+
+    /***********************  极验  *************************/
+
+})
+</script>

@@ -1,0 +1,227 @@
+<div class="yinying"></div>
+<div class="tancleft">
+    <div class="zhunr">
+        <div class="jianyao">
+            <img class="tuplef" src="//{:C('QINIU_DOMAIN')}/{$info.thumb}" alt="">
+            <div class="turight">
+                <h4>{$info.item}</h4>
+                <p>{$info.description}</p>
+                <div class="timerq">{:date('Y-m-d H:i:s', $info['post_time'])}</div>
+            </div>
+        </div>
+        <div class="mulujs">
+            <empty name="main.catalog">
+                {$info.content}
+            <else />
+                <div class="ximulu">
+                    <h2>
+                        目录
+                    </h2>
+                    <div class="ximulu_xx">
+                        <ol>
+                            <volist name="main.catalog" id="vi">
+                                <li class="level1">
+                                    <a href="javascript:void(0)">
+                                        {$vi}
+                                    </a>
+                                </li>
+                            </volist>
+                        </ol>
+                    </div>
+                </div>
+                <volist name="main.catalog" id="vi">
+                    <div class="para_title">
+                        <div class="title_text">{$vi}</div>
+                        <div class="suxian_bj"></div>
+                    </div>
+                    <div class="fwbnr">
+                        {$main['content'][$key]}
+                    </div>
+                </volist>
+            </empty>
+        </div>
+    </div>
+</div>
+<div class="tancright">
+    <div class="tcytitl">{$info.item}</div>
+    <ul class="ybul">
+        <li>ID:{$info.id}</li>
+        <li>
+            分类：<a href="http://{:C('QZ_YUMINGWWW')}/baike/{$info.category_url}">{$info.category}</a>><a href="http://{:C('QZ_YUMINGWWW')}/baike/{$info.sub_category_url}">{$info.sub_category}</a>
+        </li>
+        <li>
+            发布人：
+            <eq name="info.source" value="1">
+                {$info.register_uname}|注册用户
+            <else />
+                {$info.system_uname}|系统发布
+            </eq>
+        </li>
+    </ul>
+    <div class="yydb">
+        当前状态：
+        <if condition="$info.review EQ '0' ">
+            <i>待审核</i>
+        <else />
+            <if condition="$info.visible EQ '1' "><i style="color:red">不通过审核</i></if>
+            <if condition="$info.visible EQ '0' "><i style="color:green">通过审核</i></if>
+        </if>
+    </div>
+    <div class="zongk">
+        <div class="zuojt btn-preview" data-sort="next">
+            <div class="jtzb"></div>
+            <div>上一条</div>
+        </div>
+        <div class="youjt btn-preview" data-sort="prev">
+            <div class="jtyb"></div>
+            <div>下一条</div>
+        </div>
+    </div>
+    <div class="anniukz">
+        <span class="butg forbid-btn-{$info.id}" data-container="body" data-toggle="popover" data-placement="left">
+            审核不通过
+        </span>
+        <span class="tongg allow-btn-{$info.id}">
+            审核通过
+        </span>
+    </div>
+</div>
+<div class="guanbi">X</div>
+<script>
+    $(function(){
+        //设置显示的不通过原因
+        var reason = '{$info.review}';
+
+        //关闭
+        $('.guanbi').click(function() {
+            $('.preview-wrap').empty();
+        });
+
+        //审核通过
+        $('.allow-btn-{$info.id}').click(function(event) {
+            $.ajax({
+                url: '/baike/operatestatus/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:'{$info.id}',
+                    review:'1',
+                    visible:'0'
+                }
+            })
+            .done(function(data) {
+                var e = dialog({
+                    title: '消息',
+                    content: data.info,
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,网络错误！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            });
+        });
+
+        //审核不通过
+        $(".anniukz .forbid-btn-{$info.id}").popover({
+            html: true,
+            content: function() {
+                return '<div class="zhunrk reason-wrap-{$info.id}"><div class="titlesh">请输入审核不通过原因</div><textarea class="wenbenk" name="review_textarea_{$info.id}">'+reason+'</textarea><div class="lssrnr">历史输入</div><div class="lssrnrwbk"><ul>{$history_string}</ul></div><div class="anniukz"><span class="quxiao quxiao-btn-{$info.id}">取消</span><span class="queding queding-btn-{$info.id}">确定</span></div></div>';
+            }
+        });
+        //审核不通过-取消
+        $(document).on('click', '.zhunrk .anniukz .quxiao-btn-{$info.id}',function() {
+            $(".anniukz .forbid-btn-{$info.id}").popover('hide');
+        });
+        //审核不通过-确定
+        $(document).on('click', '.zhunrk .anniukz .queding-btn-{$info.id}',function() {
+            $(".anniukz .forbid-btn-{$info.id}").popover('hide');
+            reason = $('textarea[name=review_textarea_{$info.id}]').text();
+            $.ajax({
+                url: '/baike/operatestatus/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:'{$info.id}',
+                    review:$('textarea[name=review_textarea_{$info.id}]').text(),
+                    visible:'1'
+                }
+            })
+            .done(function(data) {
+                var e = dialog({
+                    title: '消息',
+                    content: data.info,
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,网络错误！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            });
+        });
+
+        //提示信息
+        $(document).on('click', '.reason-wrap-{$info.id} ul .review_info',function() {
+            $('textarea[name=review_textarea_{$info.id}]').text($(this).attr('data-value'));
+        });
+
+        //上一个或下一个
+        //解除之前绑定
+        $('.btn-preview').unbind('click');
+        $('.btn-preview').click(function(event) {
+            var sort = $(this).attr('data-sort');
+            $.ajax({
+                url: '/baike/preview/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id:'{$info.id}',
+                    sort:sort,
+                    status:$('select[name=status]').val()
+                }
+            })
+            .done(function(data) {
+                if ('1' == data.status) {
+                    $('.preview-wrap').html(data.data);
+                } else {
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,网络错误！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            });
+        });
+    })
+</script>

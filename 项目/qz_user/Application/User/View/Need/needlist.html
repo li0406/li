@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="User:resource" />
+    <link rel="stylesheet" href="/assets/user/need/css/yh-need.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="User:header" />
+    <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+        <div class="yh-main">
+          <h1 class="yh-tit">我的装修需求</h1>
+          <if condition="$info['orders']">
+          <table border="0" cellpadding="0" cellspacing="0" class="yh-order-list">
+            <tr class="order-title">
+              <td>发布日期</td>
+              <td >小区/楼盘</td>
+              <td>所在区域</td>
+              <td>装修预算</td>
+              <td>装修风格</td>
+              <td>签单状态</td>
+              <td>操作</td>
+            </tr>
+            <volist name="info.orders" id="vo">
+            <tr class="order-list">
+              <td>{$vo.time|date="Y-m-d",###}</td>
+              <td>{$vo.xiaoqu|default="-"}</td>
+              <td>{$vo.qx|default="-"}</td>
+              <td>{$vo.yusuan|default="-"}</td>
+              <td>{$vo.fengge|default="-"}</td>
+              <td>
+                <if condition="$vo['qiandan_companyid'] NEQ 0">
+                  已签单
+                <else/>
+                  <if condition="$vo['qiandan_companyid'] EQ 0 AND $vo['count'] GT 0 AND $vo['on'] EQ 4">
+                      报价中
+                  <elseif condition="$vo['qiandan_companyid'] EQ 0 AND $vo['count'] GT 0 AND $vo['on'] NEQ 4"/>
+                      订单已关闭
+                  <else/>
+                      审核中
+                  </if>
+                </if>
+              </td>
+              <td>
+                <if condition="$vo['count'] NEQ 0 AND $vo['on'] EQ 4">
+                  <a class="red ht-del" data-id="{$vo.id}" href="javascript:void(0)"><em>点击查看装修公司</em><i class="icon-double-angle-down"></i></a>
+                <else/>
+                  -
+                </if>
+              </td>
+            </tr>
+            <tr>
+              <td id="ht-{$vo.id}" colspan="7" class="ht-company">
+                <volist name="vo.company" id="v">
+                  <a href="{:C('QZ_YUMING_SCHEME')}://{$v.bm}.{:C('QZ_YUMING')}/company_home/{$v.comid}" target="_blank">
+                    <img src="{$v.logo}" width="126" height="63" />
+                  </a>
+                </volist>
+              </td>
+            </tr>
+            </volist>
+          </table>
+          <else/>
+            <div class="order-none">
+                <p>您还没有发布装修需求哦!</p>
+                <a href="/need/">现在发布，获取4份免费设计方案</a>
+            </div>
+          </if>
+          {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(".ht-del").click(function(event) {
+      var id = $(this).attr("data-id");
+      if($("#ht-"+id).is(":hidden")){
+        $(this).find("em").html("点击收起");
+        $(this).find(".icon-double-angle-down").removeClass('icon-double-angle-down').addClass('icon-double-angle-up');
+          $("#ht-"+id).show();
+      }else{
+        $(this).find("em").html("点击查看装修公司")
+        $(this).find(".icon-double-angle-up").removeClass('icon-double-angle-up').addClass('icon-double-angle-down');
+          $("#ht-"+id).hide();
+      }
+  });
+</script>
+</html>

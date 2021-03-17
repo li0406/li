@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/article/css/ht-article.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Companyarticle:header" />
+        <div class="ht-main">
+            <table class="ht-article-list" border="0" cellspacing="0" cellpadding="0">
+                <tr class="ht-article-tit">
+                    <td>文章标题</td>
+                    <td>文章分类</td>
+                    <td>发布时间</td>
+                    <td>最后修改时间</td>
+                    <td>状态</td>
+                    <td>操作</td>
+                </tr>
+                <volist name="info.articles" id="vo">
+                <tr class="main-list">
+                    <td>{$vo.title}</td>
+                    <td>{$vo.bname}</td>
+                    <td>{$vo.time|date="Y-m-d",###}</td>
+                    <td>
+                        <if condition="$vo['uptime'] EQ ''">
+                            -
+                        <else/>
+                         {$vo.uptime|date="Y-m-d",###}
+                        </if>
+                    </td>
+                    <td>
+                      <if condition="$vo['on'] EQ 1">
+                        已审核
+                      <else/>
+                        未审核
+                      </if>
+                    </td>
+                    <td><a class="blue"target='_blank' href="{:C('QZ_YUMING_SCHEME')    }://{$Think.SESSION.u_userInfo.bm}.{:C('QZ_YUMING')}/zixun_info/{$vo.id}.shtml">查看</a><a class="blue btn-edit" href="/articleup/{$vo.id}">编辑</a><a class="red btn-del" href="javascript:void(0)" data-id="{$vo.id}">删除</a></td>
+                </tr>
+                </volist>
+            </table>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(function(){
+        $(".btn-del").click(function(event) {
+            var _this = $(this);
+            if(confirm("确定删除文章吗?")){
+                var id = $(this).attr("data-id");
+                $.ajax({
+                    url: '/delarticle/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href =  window.location.href;
+                    }else{
+                        $.pt({
+                            target: _this,
+                            content:data.info,
+                            width: 'auto'
+                        });
+                    }
+                })
+                .fail(function() {
+                    $.pt({
+                        target: _this,
+                        content:"发生了未知的错误,请刷新重试！",
+                        width: 'auto'
+                    });
+                });
+            }
+        });
+    });
+</script>
+</html>

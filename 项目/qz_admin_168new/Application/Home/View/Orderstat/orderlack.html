@@ -1,0 +1,324 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>缺单城市统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/orderstat/css/orderlack.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市缺单统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                    <div class="c-title">
+                        <div class="old">已开站城市</div>
+                        <div class="new">新开站/过期城市</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <!-- 城市缺单统计 -->
+                <div class="box-body act-box" id="old-city">
+                    <div class="tongji">城市缺单统计</div>
+                    <form id="searchform" class="clearfix" action="/orderstat/orderlack/" method="get">
+                        <div class="col-sm-1 w11">
+                            <span class="span">查询月份</span>
+                            <select name="month">
+                            <option value="">请选择</option>
+                            <volist name="info.month" id="vo" key="i">
+                                <option value="{$vo.key}">{$vo.value}</option>
+                            </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">城市</span>
+                            <select name="city_id" id="city1">
+                                <option value="">请选择</option>
+                                <volist name="info.city" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">城市类别</span>
+                            <select name="city_level">
+                                <option value="">请选择</option>
+                                <option value="1">A类</option>
+                                <option value="2">B类</option>
+                                <option value="3">C类</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">标识</span>
+                            <select name="whole_month">
+                                <option value="">请选择</option>
+                                <option value="1">整月</option>
+                                <option value="2">非整月</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary" id="search"><i class="fa fa-search"></i>&nbsp;查询</button>
+                                    <button type="button" class="btn btn-success export" id="excel"><i class="fa fa-search"></i>&nbsp;导出EXCEL</button>
+                                    <input type="hidden" name="tab" value="1" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="warn"><span>总缺单量:</span><span class="red">{$info.all_count|default=0}</span></div>
+                    <div class="table-box   no-padding" id="old-table">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>月份</th>
+                                    <th>城市</th>
+                                    <th>城市类别</th>
+                                    <th>标识</th>
+                                    <th>平均分单</th>
+                                    <th>平均会员数</th>
+                                    <th>缺单量</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="info.list" id="vo">
+                                <tr>
+                                    <td>{$key+1}</td>
+                                    <td>{$vo.date}</td>
+                                    <td>{$vo.city_name}</td>
+                                    <td>
+                                    <switch name="vo.city_level">
+                                        <case value="1">A类</case>
+                                        <case value="2">B类</case>
+                                        <case value="3">C类</case>
+                                    </switch>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['whole_month'] EQ  1">
+                                        整月
+                                        <elseif condition="$vo['whole_month'] EQ  2"/>
+                                        非整月
+                                        <else/>
+                                        -
+                                        </if>
+                                    </td>
+                                    <td>{$vo.order_count}</td>
+                                    <td>{$vo.vip_count}</td>
+                                    <td>{$vo.missing_order}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- 新开站/过期城市统计 -->
+                <div class="box-body act-box" id="new-city" style="display:none">
+                    <div class="tongji">新开站/过期城市统计</div>
+                    <form id="searchform" class="clearfix" action="/orderstat/orderlack/" method="get">
+                        <div class="col-sm-1 w11">
+                            <span class="span">查询月份</span>
+                            <select name="month">
+                            <option value="">请选择</option>
+                            <volist name="info.month" id="vo" key="i">
+                                <option value="{$vo.key}">{$vo.value}</option>
+                            </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">城市</span>
+                            <select name="city_id" id="city2">
+                                <option value="">请选择</option>
+                                <volist name="info.city" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">城市类别</span>
+                            <select name="city_level">
+                                <option value="">请选择</option>
+                                <option value="1">A类</option>
+                                <option value="2">B类</option>
+                                <option value="3">C类</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1 w11">
+                            <span class="span">标识</span>
+                            <select name="ismark">
+                                <option value="">请选择</option>
+                                <option value="1">过期</option>
+                                <option value="2">新开站</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary" id="search"><i class="fa fa-search"></i>&nbsp;查询</button>
+                                    <button type="button" class="btn btn-success export" id="excel"><i class="fa fa-search"></i>&nbsp;导出EXCEL</button>
+                                    <input type="hidden" name="tab" value="2" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="table-box" id="new-table">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>城市</th>
+                                    <th>城市类别</th>
+                                    <th>标识</th>
+                                    <th>时间</th>
+                                    <th>平均分单量</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="info.newList" id="vo">
+                                <tr>
+                                    <td>{$key+1}</td>
+                                    <td>{$vo.city_name}</td>
+                                    <td>
+                                        <switch name="vo.city_level">
+                                            <case value="1">A类</case>
+                                            <case value="2">B类</case>
+                                            <case value="3">C类</case>
+                                        </switch>
+                                    </td>
+                                    <td>
+                                    <if condition= "$vo['isnew'] EQ 1">
+                                        新开站
+                                    <elseif condition = "$vo['isend'] EQ 1"/>
+                                        过期
+                                    </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['isnew'] EQ  1">
+                                        {$vo.date}
+                                        <else/>
+                                        -
+                                        </if>
+                                    </td>
+                                    <td>{$vo.order_count}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row" id="zhushi">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box orange">
+                        <p>说明：</p>
+                        <p>A类城市缺单量=（15-X）*该城市每个订单平均分配给几家会员；其中，X参数提取“老后台->平均订单排行”里面，每月最后一天，颜色为绿色的数据；</p>
+                        <p>B类城市缺单量=（12-X）*该城市每个订单平均分配给几家会员；</p>
+                        <p>C类城市缺单量=（5-X）*该城市每个订单平均分配给几家会员；</p>
+                        <p>总缺单量=所有A类城市缺单量+所有B类城市缺单量+所有C类城市缺单量；</p>
+                        <p>平均会员数=当月每天的会员数累加/累加天数；多倍会员按照多个会员进行计算；</p>
+                        <p>该城市每个订单平均分配给几家会员=当月该城市的总分单量/当月该城市已分订单数；</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $("[name=month]").val("{$Think.get.month}");
+        $("[name=city_id]").val("{$Think.get.city_id}");
+        $("[name=city_level]").val("{$Think.get.city_level}");
+        $("[name=whole_month]").val("{$Think.get.whole_month}");
+        $("[name=ismark]").val("{$Think.get.ismark}");
+
+        $('.old').click(function(){
+            $(this).addClass('cur').siblings('.new').removeClass('cur')
+            $('#old-city').show()
+            $('#new-city').hide()
+            $('#zhushi').show()
+
+        })
+        $('#city1').select2({
+            allowClear: true,
+            placeholder: "请选择"
+        })
+        $('#city2').select2({
+            allowClear: true,
+            placeholder: "请选择"
+        })
+        // 切换新开站/过期城市
+        $('.new').click(function(){
+            $(this).addClass('cur').siblings('.old').removeClass('cur')
+            $('#new-city').show()
+            $('#old-city').hide()
+            $('#zhushi').hide()
+        })
+        // 缺单城市统计排序
+        $('#all_list').DataTable({
+            paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+        //    scrollY:"600px",
+           "bSort":true,
+
+        });
+        $(".act-box .c-title > div").removeClass("cur").eq({$Think.get.tab|default=1}-1).addClass('cur').trigger('click');
+
+        $(".export").click(function(event) {
+            var index = $(".export").index($(this));
+            var table = $("table").eq(index);
+
+            var colums = [];
+            var data =[];
+            table.find('thead th').each(function(){
+                var sub =[];
+                sub["text"] = $(this).html().trim();
+                colums.push(sub);
+            });
+            data.push(colums);
+            table.find('tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data:data,
+                title:'城市缺单统计',
+                url:'/export/download/',
+                show:false
+            });
+        });
+    </script>
+</block>
+

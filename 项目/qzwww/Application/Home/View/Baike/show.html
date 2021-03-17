@@ -1,0 +1,609 @@
+<extend name="Index:basic"/>
+<block name="meta">
+    <title>{$info.header.title}</title>
+    <link rel="alternate" media="only screen and (max-width: 640px)" href="{$alternate}" >
+    <meta name="keywords" content="{$info.header.keywords}" />
+    <meta name="description" content="{$info.header.description}" />
+    <meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/baike/{$info.id}.html" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.thumb}" />
+    <notempty name="info.header.canonical">
+        <link rel="canonical" href="{$info.header.canonical}"/>
+    </notempty>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/baike/css/bk-tagend.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/baike/css/newbk-tagend.css?v={:C('STATIC_VERSION')}">
+    <link href="{$static_host}/assets/common/css/baojia8.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        .citiaoml_right2 img{width: 100%;height: 100%;}
+        .bk-td-msg {right:0px !important;top:-20px;}
+        .zhengwen a{color:blue !important;}
+        .zhengwen a:hover {color:red !important;}
+    </style>
+    <!--[if lt IE 9]>
+    <script src="/assets/common/js/html5shiv.min.js?v={:C('STATIC_VERSION')}"></script>
+    <![endif]-->
+</block>
+<block name="content">
+    <div class="wrap oflow">
+        <div class="bread revise">
+            <a href="/">齐装网</a> &gt;
+            <a href="/baike/">装修百科</a> &gt;
+            <a href="/baike/{$info.bigCateUrl}/">{$info.bigCate}</a> &gt;
+            <a href="/baike/{$info.categoryUrl}/">{$info.categoryName}</a> &gt;
+            <!--{$info.item}-->
+            正文
+        </div>
+        <div class="leftsider clearfix">
+            <div class="baojia-box">
+                <div class="baojia-tit">8秒免费获取<span class="zxbj">装修报价</span></div>
+                <!-- 报价计算器模块 -->
+                <div class="atl-baojia baojia-jisuanqi-wrap">
+                    <div class="baojia-value">
+                        <div class="miaosuan">装修计算器<span>8秒估算报价结果</span></div>
+                        <div class="city-sel">
+                            <select class="gl_box_cs" name="cs"></select>
+                            <select class="gl_box_qx" name="qx"></select>
+                            <p class="error-info"></p>
+                        </div>
+                        <div class="house-input">
+                            <input type="number" name="mianji" placeholder="请输入您的房屋面积" style="color: #333333">
+                            <i class="order-icon">㎡</i>
+                            <p class="error-info"></p>
+                        </div>
+                        <div class="tel-num">
+                            <input type="text" name="money_tel" id="baojia" placeholder="请输入您的手机号，报价明细将发送到您手机" maxlength="11" style="color: #333333">
+                            <input type="hidden" name="fb_type" value="baojia">
+                            <p class="error-info"></p>
+                        </div>
+                        <div class="miaosuan_mz">
+                            <!--S-免责声明-->
+                            <include file="Common@Order/disclamer"/>
+                            <!--E-免责声明-->
+                        </div>
+
+                    </div>
+                    <div class="baojia-btn"></div>
+                    <div class="baojia-line"></div>
+                    <div class="baojia-result">
+                        <div class="result-all">
+                            <p>
+                                您的装修预算为<span class="result-all-val counter" id="total-price"></span>元
+                            </p>
+                        </div>
+                        <div class="result-item">
+                            <span>客厅：</span>
+                            <span>元</span>
+                            <span id="kt-price" class="result-item-val counter"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>卫生间：</span>
+                            <span>元</span>
+                            <span id="wsj-price" class="result-item-val counter"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>厨房：</span>
+                            <span>元</span>
+                            <span id="cf-price"  class="result-item-val counter"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>卧室：</span>
+                            <span>元</span>
+                            <span id="zw-price" class="result-item-val counter"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>其他：</span>
+                            <span>元</span>
+                            <span id="other-price"  class="result-item-val counter"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ls-box clearfix">
+                <div class="ls-box-main">
+                    <div class="bk-td-imgtopic">
+                        <div class="td-img"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.thumb}" alt="{$info.item}" title="{$info.item}"></div>
+                        <div class="item_wz">
+                            <h1 class="baike-title">{$info.title}</h1>
+                            <p class="description" style="height: 84px; overflow:hidden;">{$info.description}</p>
+                            <div class="item-bottom">
+                                <span>{:date('Y-m-d H:i:s', $info['post_time'])}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mulu_xq">
+                <empty name="main.catalog">
+                    {$info.content}
+                    <else />
+                    <div class="lemma-catalog">
+                        <div class="muluwaikz">
+                            <div class="mululeft">目录</div>
+                            <ul class="muluright">
+                                <volist name="main.catalog" id="vi">
+                                    <li data-scroll-nav="{$key}">
+                                        <span class="index">
+                                            {$key + 1}、
+                                        </span>
+                                        <span class="text">
+                                            <a href="javascript:void(0)">
+                                                {$vi}
+                                            </a>
+                                        </span>
+                                    </li>
+                                </volist>
+                            </ul>
+                        </div>
+                    </div>
+                    <notempty name="main.brief">
+                        <div class="citiaoml">
+                            {$main.brief}
+                        </div>
+                    </notempty>
+                    <volist name="main.catalog" id="vi">
+                        <div class="citiaoml">
+                            <div class="citiaoml_left addkuandu" data-scroll-index="{$key}">
+                                <span class="liredstyle">{$key + 1}</span>
+                                <h2 class="titlecitiao">{$vi}</h2>
+                                <div class="zhengwen">{$main['content'][$key]}</div>
+
+                                    <div class="js_flag" style="display: none;">
+                                        <div class="moregengd">
+                                            <span class="zhankai">展开<i class="fa fa-angle-double-down"></i></span>
+                                        </div>
+                                        <div class="moregengd">
+                                            <span class="shouqi">收起<i class="fa fa-angle-double-up"></i></span>
+                                        </div>
+                                    </div>
+                            </div>
+                            <notempty name="main['imgs'][$key]">
+                                <div class="citiaoml_right2"><img src="{$main['imgs'][$key]}" alt="{$vi}" title="{$vi}"></div>
+                            </notempty>
+                        </div>
+                    </volist>
+                </empty>
+                <!--固定广告位-->
+                <div class="citiaoml">
+                    <div class="citiaoml_left">
+                        <a href="javascript:;" rel="nofollow" id="baojia_text"><div class="titlecitiao"><span class="liredstyle"><?php echo count($main['catalog'])+1;?></span>装修一个新家大概要花多少钱？装修预算怎么定才合理</div></a>
+                        <a href="javascript:;" rel="nofollow" id="baojia_content"><div class="zhengwen3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;装修一个美美的新家要花多少要钱呢?点击文字或右侧图片让我们来为您算算新房装修预算价格,旧房装修价格由实际工程量决定,稍后会有装修管家致电您,为您提供免费的装修咨询服务和详情的装修报价明细。</div></a>
+                    </div>
+                    <a href="javascript:;" rel="nofollow" id="baojia_img"><div class="baojiatan"></div></a>
+                </div>
+                <!--固定广告位-->
+                <div class="zhuanti-title">
+                    <ul>
+                        <volist name="keywords" id="vo">
+                            <li><a target="_blank" href="/zhishi/{$vo.id}/" target="_blank">{$vo.name}</a></li>
+                        </volist>
+                    </ul>
+                </div>
+            </div>
+            <if condition="!empty($info['recommend_company_bottom'])">
+            <div class="company-recommend-left">
+                <p class="recommend-left-tit">答案不满意？问问下面的专业人士</p>
+                <div class="recommend-left-box">
+                    <ul>
+                        <volist name="info.recommend_company_bottom" id="vo">
+                            <li>
+                                <div class="recommend-left-top">
+                                    <div class="company-left-logo">
+                                        <img src="{$vo.logo}" />
+                                    </div>
+                                    <p  class="recommend-left-name">{$vo.jc|default=''}</p>
+                                    <p class="recommend-left-common">{$vo.city_name|default=''}{$vo.area_name|default=''}</p>
+                                    <p class="recommend-left-common">已有<span style="color: #D02825">{$vo.ping|default=0}</span>位业主点评过该公司</p>
+                                </div>
+                                <a href="{$SCHEME_HOST.scheme_full}{$vo.bm}.{$SCHEME_HOST.domain}/company_home/{$vo.id}/" class="zixun-left">向TA咨询</a>
+                            </li>
+                        </volist>
+                    </ul>
+                </div>
+
+            </div>
+            </if>
+            <div class="mt20 mb20" style="width: 870px;">
+                <img src="/assets/home/baike/images/last-weixinqe.png" alt="" style="display: block;width: 100%;">
+            </div>
+            <!--新相关百科-->
+            <notempty name="otherBaike">
+                <div class="wrapwkzxgbk">
+                    <div class="aboutbk" style="padding-top: 10px;text-indent: 0.5em;">相关百科</div>
+                    <!-- <div class="tuwenkz">
+                        <a href="https://www.qcc.com/?utm_source=qizuang&utm_medium=cpc&utm_term=%E7%99%BE%E7%A7%91" target="_blank" style="display:block;width: 870px;">
+                            <img src="http://{:C('QINIU_DOMAIN')}/custom/20200411/FmWuMnu7OzFUPExCHuSgF3B7WSUk" alt="" style="display:block;width: 100%;">
+                        </a>
+                    </div> -->
+                    <!--S 商务DB-710-->
+                    <!-- <div class="tuwenkz">
+                        <script type="text/javascript" src="//bd888.qizuang.com/production/i/static/dalaj/openjs/c_m/common/z.js"></script>
+                    </div> -->
+                    <!--E 商务DB-710-->
+                    <volist name="otherBaike" id="v" key="k">
+                        <div class="tuwenkz">
+                            <div class="tupbj"><a href="/baike/{$v.id}.html" target="_blank"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.thumb}" alt="{$v.title}" title="{$v.title}" style="width: 100%;height: 100%;"></a></div>
+                            <div class="wenzhangms">
+                                <div class="tuwenbt"><a href="/baike/{$v.id}.html" target="_blank">{$v.title}</a></div>
+                                <div class="tuwennr"><a href="/baike/{$v.id}.html" target="_blank">{$v.des}</a></div>
+                            </div>
+                        </div>
+                        <if condition="$k EQ 1">
+                            <div class="tuwenkz">
+                                <a href="javascript:;" rel="nofollow" id="sheji_img"><div class="tupbjsjtk"></div></a>
+                                <div class="wenzhangms">
+                                    <a href="javascript:;" rel="nofollow" id="sheji_text"><div class="tuwenbt">买了房子想装修成什么样？点击立即免费获取4份装修设计图！</div></a>
+                                    <a href="javascript:;" rel="nofollow" id="sheji_content"><div class="tuwennr">齐装网装修设计大礼包，知名设计师，为您定制4份设计方案，全面PK，不满意重新设计，点击图片或文字立即获取。</div></a>
+                                </div>
+                            </div>
+                            <elseif condition="$k EQ 2"/>
+                            <div class="tuwenkz">
+                                <a href="javascript:;" rel="nofollow" id="hl_img"><div class="tupbjzxjr"></div></a>
+                                <div class="wenzhangms">
+                                    <a href="javascript:;" rel="nofollow" id="hl_text"><div class="tuwenbt">不看后悔一辈子，{:date('Y')}装修吉日是哪几天？点击立即测算您的装修吉日！</div></a>
+                                    <a href="javascript:;" rel="nofollow" id="hl_content"><div class="tuwennr">{:date('Y')}年，爱房装修开工哪天好？点击图片或文字立即填写信息，10秒钟获取您的装修吉日，轻松解决装修小烦恼！装修找齐装，全程工程监理，保障施工品质，让装修更省心！</div></a>
+                                </div>
+                            </div>
+                        </if>
+                    </volist>
+                    <!-- <div class="tuwenkz">
+                        <script type="text/javascript" src="//bd888.qizuang.com/common/qli/common/t/static/a/resource/ndi/k.js"></script>
+                    </div> -->
+                </div>
+            </notempty>
+        </div>
+        <div class="rightsider clearfix">
+            <div class="company-recommend">
+                <if condition="!empty($info['recommend_company_right'])">
+                    <p class="recommend-tit">擅长解决该问题的企业</p>
+                    <volist name="info.recommend_company_right" id="vo">
+                        <div class="company-list">
+                            <div class="company-top">
+                                <div class="company-logo">
+                                    <img src="{$vo.logo}" />
+                                </div>
+                                <p class="company-name">{$vo.jc|default=''}</p>
+                                <p class="company-location company-common">{$vo.city_name|default=''}{$vo.area_name|default=''}</p>
+                                <p class="total-num">已有<span style="color: #D02825">{$vo.ping|default=0}</span>位业主点评过该公司</p>
+                            </div>
+                            <a href="{$SCHEME_HOST.scheme_full}{$vo.bm}.{$SCHEME_HOST.domain}/company_home/{$vo.id}/" class="company-zixun">向TA咨询</a>
+                        </div>
+                    </volist>
+                </if>
+            </div>
+            {$orderTmp}
+            <!-- 新增二维码 -->
+            <div class="special-img">
+                <img src="/assets/home/baike/images/baike-erweima.jpg" alt="">
+            </div>
+            <div class="mt15">
+                <img class="mb20" src="/assets/home/baike/images/baike-wechatqe.jpg" alt="">
+            </div>
+            <!-- <div class="bk-new-gao">
+                <script type="text/javascript" src="//bd888.qizuang.com/common/mh/e/resource/q/common/gedgi.js"></script>
+            </div> -->
+            <div class="bk-new-tag">
+                <div><a href="javascript:;">装修手册</a></div>
+                <ul class="shoufengq">
+                    <li>
+                        <volist name="info.righttags" id="tags" key="k">
+                        <div class="lititle"><span class="lititle-smalltitle">{$tags.name}</span><span class="defaicon"></span></div>
+                        <div class="zhanshishow <if condition="$k==1">xianshi</if>">
+                            <ul class="zhanshishowul">
+                            <volist name="tags.sub_tags" id="tag">
+                                <li><span class="sequencexl"></span><a target="_blank" href="{$tag.url}" class="sub_tag zxsclist" style="font-size: 12px !important;">{$tag.name}</a></li>
+                            </volist>
+                            <if condition="$k == 2"><li><span class="sequencexl"></span><a rel="nofollow" href="{$SCHEME_HOST.scheme_host}/zxbj/?src=xzh" class="guanggys" target="_blank">免费获取报价清单</a></li></if>
+                            <if condition="$k == 4"><li><span class="sequencexl"></span><a  rel="nofollow" href="{$SCHEME_HOST.scheme_full}/sheji/?src=xzh" class="guanggys" target="_blank">0元获取装修设计方案</a></li></if>
+                            <if condition="$k == 6"><li><span class="sequencexl"></span><a rel="nofollow" href="{$SCHEME_HOST.scheme_full}/hl/?src=xzh" class="guanggys" target="_blank" >10秒测试装修吉日</a></li></if>
+                            </ul>
+                        </div>
+                        </volist>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="article_menu_box">
+            <div class="list-head">
+                <ul>
+                    <volist name="info.bottomtags" id="tags" key="k">
+                        <li id="{$k}" class="">
+                            <a>{$tags.name}</a>
+                            <span>
+                            <i class="fa fa-sort-up"></i>
+                        </span>
+                        </li>
+                    </volist>
+                </ul>
+            </div>
+            <div class="gray-back">
+                <volist name="info.bottomtags" id="tags" key="k">
+                    <div class="back_item">
+                        <volist name="tags.sub_tags" id="tag">
+                            <a target="_blank" href="{$tag.url}" class="sub_tag">{$tag.name}</a>
+                        </volist>
+                    </div>
+                </volist>
+            </div>
+        </div>
+    </div>
+
+    <include file="Common@Friendlink/index"/>
+    <include file="Common@Order/bottom_fadan" type="2" />
+    <include file="Common@CooperationAd/index" />
+    <include file="Common@lotteryDraw/index" />
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/scrollIt/js/scrollIt.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/baike/js/baojiaEight.js?v={:C('STATIC_VERSION')}"></script>
+    <if condition="$open">
+        <script>$("#s-zxsj").trigger('click');</script>
+    </if>
+    <script>
+        $(".zhengwen").each( function(element, index) {
+            var p=$(index).children('p');
+            var pheight=0;
+            p.each(function(ele,thisIndex){
+                if($(thisIndex).text()==""){
+                    $(thisIndex).remove();
+                }else{
+                    pheight=pheight+$(thisIndex).height();
+                }
+            });
+            if(pheight>180){
+                $(index).next(".js_flag").css("display","block")
+            }
+
+
+        });
+        $('.secbox_form').css({'width':'300px'});
+        $('.new_fadan_box').children('div').html('');
+        $(function () {
+
+
+        //  装修手册
+
+         $('.shoufengq .defaicon').first().addClass('iconbj');
+            $('.shoufengq li .lititle').eq($('.shoufengq li .lititle').length - 1).css('border', "none")
+         $('.shoufengq li .lititle').click(function(event) {
+            var that=this;
+            if($(this).next(".zhanshishow").hasClass('xianshi')){
+				$(this).children('.defaicon').removeClass('iconbj')
+
+				$(this).next(".zhanshishow").stop().animate({height:"hide"},500,function(){
+					$(that).next(".zhanshishow").removeClass('xianshi');
+				});
+
+			}else{
+
+
+
+                $(this).children('.defaicon').addClass('iconbj')
+				$(this).siblings().find(".defaicon").removeClass('iconbj');
+
+                $(this).next(".zhanshishow").stop().animate({height:"show"},500);
+				$(this).next(".zhanshishow").siblings(".zhanshishow").hide();
+
+				$(this).next(".zhanshishow").addClass('xianshi');
+				$(this).next(".zhanshishow").siblings(".zhanshishow").removeClass('xianshi');
+
+
+				$(this).parent().removeClass('heightauto');
+				$(this).parent().siblings().addClass("heightauto");
+
+			}
+
+         });
+
+
+
+            //默认选中效果
+            $(".article_menu_box li:eq(0)").addClass('head-active');
+            $(".gray-back .back_item:eq(0)").addClass('item_active');
+            $(".sub_tag").on('mouseover', function () {
+                $(this).attr('style', 'color:#ff5353 !important;');
+            }).on('mouseout', function () {
+                $(this).attr('style', 'color:#333 !important;font-size:12px');
+            })
+
+            $(".list-head ul li").hover(function(){
+                var index=$(this).index();
+                $(this).addClass("head-active");
+                $(this).siblings().removeClass("head-active");
+                $($(".back_item")[index]).addClass("item_active");
+                $($(".back_item")[index]).siblings().removeClass("item_active");
+            });
+
+        });
+        $(document).ready(function(){
+            var shen, shi;
+            shen = citys["shen"];
+            shi = citys["shi"];
+
+            initCity('{$theCityId}');
+            function initCity(cityId){
+                App.citys.init("#top_hl_cs","#top_hl_qx",shen,shi,cityId);
+            }
+
+            $.scrollIt({
+                topOffset : -100 //偏移量（距离顶部）100px
+            });
+
+            $("#baojia_text,#baojia_img,#baojia_content").on('click',function(){
+                var _this = $(this);
+                $.ajax({
+                    url: '/dispatcher/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:"bj",
+                        source:'18010828',
+                        action:"load"
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            $("body").append(data.data);
+                            if(navigator.appName == "Microsoft Internet Explorer"){
+                                $(".zxfb").show();
+                                _this.hide();
+                            }else{
+                                $(".zxfb").fadeIn(400,function(){
+                                    $(this).find("input[name='bj-xiaoqu']").focus();
+                                });
+                                $(".zxbj_content").removeClass('smaller');
+                            }
+                        }
+                    });
+            });
+
+            $("#sheji_text,#sheji_img,#sheji_content").on('click',function(){
+                var _this = $(this);
+                $.ajax({
+                    url: '/dispatcher/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type: "sj",
+                        source:'18010854',
+                        action: "load"
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            $("body").append(data.data);
+                            $(".zb_box_sj").fadeIn(400, function() {
+                                $(this).find("input[name=lf-name]").focus();
+                            });
+                        }
+                    });
+            });
+
+            $("#hl_img,#hl_text,#hl_content").on('click',function(){
+                var _this = $(this);
+                $.ajax({
+                    url: '/dispatcher/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type: "hl",
+                        source:'18010843',
+                        action: "load"
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            $("body").append(data.data);
+                            $(".zb_box_sj").fadeIn(400, function() {
+                                $(this).find("input[name=lf-name]").focus();
+                            });
+                        }
+                    });
+            });
+
+            $('.muluwaikz .mululeft').height($('.muluwaikz').height());
+            $('.moregengd .zhankai').click(function(){
+                $(this).parent().parent().parent().find('.zhengwen').addClass('zhankaigaodu');
+                // $('.citiaoml_left .zhengwen').addClass('zhankaigaodu');
+                $(this).hide();
+                $(this).parent().siblings().find('.shouqi').show();
+            });
+            $('.moregengd .shouqi').click(function(){
+                $(this).parent().parent().parent().find('.zhengwen').removeClass('zhankaigaodu');
+                // $('.citiaoml_left .zhengwen').addClass('zhankaigaodu');
+                $(this).parent().siblings().find('.zhankai').show();
+                $(this).hide();
+            });
+
+            $('.wrapwkzxgbk .tuwenkz .tupbjzxjr').click(function(){
+                $('.yinying').show();
+                $('.zxjrkz').show();
+            });
+
+            $('.zxjrkz .closegb').click(function(){
+                $('.yinying').hide();
+                $('.zxjrkz').hide();
+            });
+
+            // 设计报价滚动到1282px 悬浮
+            $(window).scroll(function(event) {
+                if($(window).scrollTop() >= $(".rightsider").height()+200){
+                    $('.secbox_form').css({
+                        "width":"300px",
+                        "margin-top":"0",
+                        "zIndex":2
+                    });
+                    }else{
+                        $('.secbox_form').css({
+                        // "margin-top":"15px",
+                        "position":"",
+                        "top":"",
+                        "zIndex":''
+                    });
+                }
+            });
+        })
+        $(function () {
+            // 异业合作广告显示
+            $(document).on('click', function (event) {
+                var $target = $(event.target),
+                    className = $target[0].className && $target[0].className.toLowerCase(),
+                    id = $target[0].id && $target[0].id.toLowerCase(),
+                    source = 21;
+                if(className == 'butt'){
+                    source = 21;
+                }else if(className == 'input_line' || id == 'tijiao_fadan'){
+                    source = 22;
+                }
+                if(className == 'butt' || className == 'input_line' || id == 'tijiao_fadan') {
+                    $.ajax({
+                        url: "/getPartnerad",
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            source: source,
+                        }
+                    }).done(function (res) {
+                        if(res.error_code == 0) {
+                            $(".cooperation_box").find(".ad-area").html('<img src="'+res.data.pc_img+'">')
+                            $(".cooperation_box").find("#ad-link").attr('href', res.data.pc_url)
+                            $(".cooperation_box").find("#ad-link").on('click', function () {
+                                countAdPv(res.data.id)
+                            })
+                            $(".cooperation_ad_mask").fadeIn(0)
+                            $(".cooperation_box").fadeIn(0)
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+    <script type="text/javascript">
+      var shen = null,
+          shi = null;
+      shen = citys["shen"];
+      shi = citys["shi"];
+      initCity('{$theCityId}');
+      var source = 20102815
+      function initCity(cityId){
+        App.citys.init(".baojia-jisuanqi-wrap .gl_box_cs", ".baojia-jisuanqi-wrap .gl_box_qx", shen, shi,cityId);
+        App.citys.init(".baojia-jisuanqi-wrap .gl_box_cs", ".baojia-jisuanqi-wrap .gl_box_qx", shen, shi,cityId);
+        App.citys.init(".baojia-jisuanqi-wrap .gl_box_cs", ".baojia-jisuanqi-wrap .gl_box_qx", shen, shi,cityId);
+      }
+    </script>
+    <!--1353-->
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$baidu.url}",
+            "appid": "1575859058891466",
+            "title": "{$baidu.title}",
+            "pubDate": "{$baidu.addtime}",
+            "upDate": "{$baidu.optime}"
+        }
+    </script>
+</block>

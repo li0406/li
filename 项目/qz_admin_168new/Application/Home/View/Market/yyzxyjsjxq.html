@@ -1,0 +1,240 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>运营中心业绩 - 控制台</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+	<section class="content-header">
+		<div class="box">
+	        <div class="box-header with-border no-padding" style="line-height: 55px;">
+	         	<h3 class="box-title pull-left col-xs-2" style="width: 140px; line-height: 55px;">运营中心业绩</h3>
+				<div class="col-xs-1 text-center no-padding"><a href="/market/">月概览</a></div>
+				<div class="col-xs-1 text-center no-padding"><a href="/market/yyzxcngl/">财年概览</a></div>
+				<div class="col-xs-1 text-center bg-info no-padding">数据详情</div>
+	        </div>
+	    </div>
+	    <div class="box">
+	        <div class="box-header with-border">
+	         	<h3 class="box-title">条件查询</h3>
+	        </div>
+	        <div class="box-body">
+	        	<form action="/market/yyzxyjsjxq/" method="get">
+	        	<span class="pull-left" style="line-height: 34px;">选择时间：</span>
+	          	<div class="col-xs-2">
+	          		<input type="text" name="begin" class="form-control  datepicker btn-flat" value="{$Think.get.begin}" placeholder="开始时间">
+	          	</div>
+	          	<div class="col-xs-2">
+	          		<input type="text" name="end" class="form-control  datepicker btn-flat" value="{$Think.get.end}" placeholder="结束时间">
+	          	</div>
+	          	<button type="submit" class="btn btn-info"><i class="fa fa-search"></i>&nbsp;查询</button>
+	          	</form>
+	        </div>
+	    </div>
+	    <div class="box no-border">
+	        <div class="box-body no-padding">
+	        	<div class="col-xs-4 text-center">
+					<div id="canvas1" style="height: 300px;">
+
+					</div>
+	        	</div>
+	        	<div class="col-xs-1 text-center" style="height: 300px;">
+	        		<select id="state" class="form-control no-padding" style="margin-top: 20px;">
+	        			<option value="order">发单量</option>
+	        			<option value="fen">分单量</option>
+	        			<option value="real">实际分单量</option>
+	        			<option value="uv">访客数(UV)</option>
+	        		</select>
+	        	</div>
+	        	<div class="col-xs-7 text-center">
+	        		<div id="canvas2" style="height: 300px;">
+
+	        		</div>
+	        	</div>
+	        </div>
+	    </div>
+	    <div class="box no-border">
+	    	<div class="box-header">
+	    		<h4>数据列表</h4>
+	    	</div>
+	    	<div class="box-body">
+	    		<div class="table-responsive">
+					<table class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>序号</th>
+								<th>来源</th>
+								<th>访客数(UV)</th>
+								<th>发单量</th>
+								<th>发单率</th>
+								<th>分单量</th>
+								<th>分单率</th>
+								<th>实际分单量</th>
+								<th>实际分单率</th>
+							</tr>
+						</thead>
+						<tbody>
+							<volist name="order.list" id="vo">
+							<tr>
+								<td>{$i}</td>
+								<td>{$vo.name}</td>
+								<td>{$vo.uv|default=0}</td>
+								<td>{$vo.order_count|default=0}</td>
+								<td>{$vo.turn_rate|default=0}%</td>
+								<td>{$vo.order_fen_count|default=0}</td>
+								<td>{$vo.fen_rate|default=0}%</td>
+								<td>{$vo.real_fen_count|default=0}</td>
+								<td>{$vo.real_fen_rete|default=0}%</td>
+							</tr>
+							</volist>
+						</tbody>
+						<tfoot>
+							<th>汇总</th>
+							<td>-</td>
+							<td>{$order.all.uv|default=0}</td>
+							<td>{$order.all.order_count|default=0}</td>
+							<td>{$order.all.turn_rate|default=0}%</td>
+							<td>{$order.all.order_fen_count|default=0}</td>
+							<td>{$order.all.fen_rate|default=0}%</td>
+							<td>{$order.all.real_fen_count|default=0}</td>
+							<td>{$order.all.real_fen_rete|default=0}%</td>
+						</tfoot>
+					</table>
+				</div>
+	    	</div>
+	    </div>
+	</section>
+</block>
+<block name="script">
+	<script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script>
+		$(function(){
+			var dom1 = document.getElementById('canvas1');
+			var dom2 = document.getElementById('canvas2');
+			var myChart1 = echarts.init(dom1);
+			var myChart2 = echarts.init(dom2);
+			var jsonData = JSON.parse('{$order|json_encode}');
+
+			$("#state").change(function(event) {
+				var val = $(this).val();
+				init(val);
+			});
+			$("#state").trigger('change');
+
+			function init(state) {
+
+				myChart1.clear();
+				myChart2.clear();
+
+				// 饼图的参数设置
+				var option1 = {
+				    tooltip : {
+				        trigger: 'item',
+				        formatter: "{a} <br/>{b} : {c} ({d}%)"
+				    },
+				    legend: {
+				        y: '20px',
+				        data:['推广部付费','推广部免费','流量部免费']
+				    },
+				    calculable : true,
+				    series : [
+				        {
+				            name:'访问来源',
+				            type:'pie',
+				            radius : '55%',
+				            center: ['50%', '60%'],
+				            data:[
+				                {value:typeof jsonData["part1"][state][1][2] == "undefined"?0:jsonData["part1"][state][1][2]["count"], name:'推广部付费'},
+				                {value:typeof jsonData["part1"][state][1][1] == "undefined"?0:jsonData["part1"][state][1][1]["count"], name:'推广部免费'},
+				                {value:typeof jsonData["part1"][state][2][1] == "undefined"?0:jsonData["part1"][state][2][1]["count"], name:'流量部免费'},
+				            ]
+				        }
+				    ],
+				    color: ['#ff7f50','#87cefa','#da70d6']
+				};
+				// 线型图的参数设置
+				var option2 = {
+				    tooltip : {
+				        trigger: 'axis'
+				    },
+				    legend: {
+				    	y:'20px',
+				        data:['推广部付费','推广部免费','流量部免费']
+				    },
+				    calculable : true,
+				    xAxis : [
+				        {
+				            type : 'category',
+				            boundaryGap : false,
+				            data : {$month|json_encode},
+				            axisLabel:{
+				                //X轴刻度配置
+				                interval:0,
+				                rotate:60
+				            }
+				        }
+				    ],
+				    yAxis : [
+				        {
+				            type : 'value'
+				        }
+				    ],
+				    series : [
+				    	{
+				            name:'推广部付费',
+				            type:'line',
+				            stack: '推广部付费总量',
+				            itemStyle: {normal: {areaStyle: {type: 'default'}}},
+				            smooth:true,
+				            data: typeof jsonData["char2"][state][1][2] == "undefined"?"":jsonData["char2"][state][1][2]
+				        },
+				        {
+				            name:'推广部免费',
+				            type:'line',
+				            stack: '推广部免费总量',
+				            itemStyle: {normal: {areaStyle: {type: 'default'}}},
+				            smooth:true,
+				            data:typeof jsonData["char2"][state][1][1] == "undefined"?"":jsonData["char2"][state][1][1]
+				        },
+				        {
+				            name:'流量部免费',
+				            type:'line',
+				            stack: '流量部免费总量',
+				            itemStyle: {normal: {areaStyle: {type: 'default'}}},
+				            smooth:true,
+				            data:typeof jsonData["char2"][state][2][1] == "undefined"?"":jsonData["char2"][state][2][1]
+				        }
+				    ],
+				    color: ['#ff7f50','#87cefa','#da70d6']
+				};
+				//  饼图+线型图惨canvas渲染图形
+				myChart1.setOption(option1, true);
+				myChart2.setOption(option2, true);
+
+				// 页面尺寸改变时canvas重新渲染
+				$(window).on('resize',function(){
+					var myChart1 = echarts.init(dom1);
+					myChart1.setOption(option1, true);
+					var myChart2 = echarts.init(dom2);
+					myChart2.setOption(option2, true);
+
+				});
+			}
+
+			// 时间选择
+			$(".datepicker").datetimepicker({
+				startView:2,
+				minView:'decade',
+				format:"yyyy-mm-dd",
+				autoclose:true,
+				pickerPosition: "bottom-left"
+			});
+		});
+	</script>
+</block>

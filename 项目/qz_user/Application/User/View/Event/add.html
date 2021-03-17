@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/team/css/ht-team.css?v={:C('STATIC_VERSION')}">
+    <script src="https://open.web.meitu.com/sources/xiuxiu.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="header" />
+<script type="text/javascript">
+$(".ht-nav-tit li").removeClass("active").eq("{$tabNav|default='1'}").addClass('active');
+</script>
+        <div class="ht-main">
+            <dl class="team-add">
+                <if condition="!$info['designer']">
+                <dt><h2>您可以在此管理业主帐号，展现贵公司的实力，业主拥有独立的后台上传丰富资料。</h2></dt>
+                </if>
+                <dd>
+                <form id="myForm" method="POST" action="/peruser/add" enctype="multipart/form-data">
+                    <ul>
+
+                        <li>
+                        <span><i class="red">*</i>登录帐号：</span>
+                            <input name="user" type="text" placeholder="登录帐号">
+                            <em class="red err-tips" id="username"></em>
+                        </li>
+                        <li><span><i class="red">*</i>用户昵称：</span>
+                            <input name="name" type="text" placeholder="用户昵称">
+                            <em class="red err-tips"></em>
+                        </li>
+                        <li>
+                            <span><i class="red">*</i>密码:</span>
+                            <input name="password" type="password" placeholder="密码">
+                            <em class="red err-tips"></em>
+                        </li>
+
+                        <li><span>所在区域:</span>
+                        <select class="half mr20" name="cs">
+                        <volist name="city" id="s">
+                        <option value="{$s.id}">{$s.oldname}</option>
+                        </volist>
+                        </select>
+                        <select class="half" name="qx">
+                        <volist name="quyu" id="q">
+                        <option value="{$q.qz_areaid}" <if condition="$info['user']['qx'] eq $q['qz_areaid']">selected="selected"</if> >{$q.oldName}</option>
+                        </volist>
+                        </select>
+                        </li>
+                      <li>
+                          <span>性别:</span>
+                          <if condition="!$info['designer'] OR $info['designer']['sex'] EQ '先生'">
+                            <input name="sex" type="radio" class="icheck" value="先生" checked>&nbsp;先生
+                            <input name="sex" type="radio" class="icheck" value="女士">&nbsp;女士
+                          <else/>
+                            <input name="sex" type="radio" class="icheck" value="先生" >&nbsp;先生
+                            <input name="sex" type="radio" class="icheck" value="女士" checked>&nbsp;女士
+                          </if>
+                      </li>
+                    </ul>
+                    <div class="userlogo">
+                      <if condition="$info['designer']">
+                          <img src="{$info.designer.logo}" />
+                      <else/>
+                           <img src="{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}" />
+                      </if>
+                      <button type="button" id="uplogo" >上传头像</button>
+                      <button type="button" id="reset" class="reset" >重置</button>
+                      <input type="hidden" name="avatar" id="avatar" value="" />
+                    </div>
+                    <input name="uid" type="hidden" value="{$info.uid}" />
+                    </form>
+                </dd>
+            </dl>
+            <div id="message" style="padding:15px;height:60px;font-size:16px;color:red;text-align:center;display:none"></div>
+            <div class="ht-yes"><a id="btnSave" href="javascript:void(0)"><i class="icon-ok mr10"></i>注册帐号</a></div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <div class="win_box dialog_form">
+      <div class="win_box_bg"></div>
+      <div class="win_box_content">
+        <div id="logo_form"></div>
+        <script src="https://open.web.meitu.com/sources/xiuxiu.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+        <script type="text/javascript">
+            xiuxiu.setLaunchVars("quality", 100);
+            //图片生成大小
+            xiuxiu.setLaunchVars("maxFinalWidth","180");
+            xiuxiu.setLaunchVars("maxFinalHeight","180");
+            //裁剪尺寸
+            xiuxiu.setLaunchVars("cropPresets","180x180");
+            //设置上传URL
+            xiuxiu.setUploadURL("{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/peruser/add/upload/avatar");
+            //设置上传类型
+            xiuxiu.setUploadType (2);
+            //加载文件
+            xiuxiu.embedSWF("logo_form",5,600,500,"xiuxiuForm");
+            xiuxiu.onInit = function(id){
+
+            };
+            //上传图片前调用
+            xiuxiu.onBeforeUpload = function(data, id) {
+                var types="jpg,png,gif";
+                if(types.indexOf(data.type) < 0){
+                  return false;
+                }
+                return true;
+            }
+            //上传响应
+            xiuxiu.onUploadResponse= function(data,id) {
+                if(typeof data == "string"){
+                   data = eval("("+data+")");
+                }
+                if(data.status == 1){
+                  var src = "{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/"+data.data.key;
+                  $(".userlogo img").attr("src",src);
+                  $("#avatar").val(src);
+                }else{
+                  $(".userlogo img").html(data.info);
+                }
+                $(".dialog_form").hide();
+            }
+
+            //调试
+            xiuxiu.onDebug = function (data){
+
+            }
+
+            $(".dialog_form .win_box_bg").click(function(event) {
+                $(".dialog_form").hide();
+            });
+        </script>
+      </div>
+    </div>
+</body>
+<script type="text/javascript">
+  $(function(){
+      $('.all').iCheck({
+        checkboxClass: 'icheckbox_minimal-red',
+        radioClass: 'iradio_minimal-red',
+        increaseArea: '' // optional
+      }).on("ifChecked",function(event){
+          var target = $(event.target);
+          target.iCheck('check');
+          var area = target.attr("data-area");
+          $('input[name='+area+'\\[\\]]').iCheck("check");
+      }).on("ifUnchecked",function(event){
+          var target = $(event.target);
+          target.iCheck('uncheck');
+          var area = target.attr("data-area");
+          $('input[name='+area+'\\[\\]]').iCheck("uncheck");
+      });
+
+      $('.icheck').iCheck({
+        checkboxClass: 'icheckbox_minimal-red',
+        radioClass: 'iradio_minimal-red',
+        increaseArea: '' // optional
+      }).on("ifChecked",function(event){
+          var target = $(event.target);
+          target.attr("checked","checked");
+      }).on("ifUnchecked",function(event){
+          var target = $(event.target);
+          target.attr("checked",false);
+          target.parent().parent().find(".all").iCheck("uncheck");
+      });
+
+      $("#uplogo").click(function(event) {
+          $(".dialog_form").show();
+      });
+
+      $("#reset").click(function(event) {
+          if(App.validate.run($("input[name=logo]").val())){
+            $(".userlogo img").attr("src",$("input[name=logo]").val());
+          }else{
+            $(".userlogo img").attr("src","//{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}");
+          }
+      });
+
+    $("#btnSave").click(function(event) {
+        $(".focus").removeClass('focus');
+        $(".err-tips").html('');
+        var _this = $(this);
+        if(!App.validate.run($("input[name=user]").val())){
+            $("input[name=user]").focus();
+            $("input[name=user]").addClass('focus');
+            $("input[name=user]").parent().find(".err-tips").html("请填写登录帐号");
+            return false;
+        }
+        if(!App.validate.run($("input[name=name]").val())){
+            $("input[name=name]").focus();
+            $("input[name=name]").addClass('focus');
+            $("input[name=name]").parent().find(".err-tips").html("请填写用户昵称");
+            return false;
+        }
+        if(!App.validate.run($("input[name=password]").val())){
+            $("input[name=password]").focus();
+            $("input[name=password]").addClass('focus');
+            $("input[name=password]").parent().find(".err-tips").html("请填写用户密码");
+            return false;
+        }
+        if(!App.validate.run($("input[name=password]").val().length,"length",6)){
+            $("input[name=password]").focus();
+            $("input[name=password]").addClass('focus');
+            $("input[name=password]").parent().find(".err-tips").html("密码长度至少6位");
+            return false;
+        }
+
+        var data = $("#myForm").serializeArray();
+        $.ajax({
+            url: '/peruser/add/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.href="/success/preuser/"+data.info;
+            }else{
+                if(data.status == 2 || data.status == 3){
+                    $("#username").html(data.info);
+                }
+            }
+        })
+        .fail(function(xhr) {
+             $("#message").html("注册失败,请刷新再试！");
+        });
+
+    });
+});
+</script>
+</html>

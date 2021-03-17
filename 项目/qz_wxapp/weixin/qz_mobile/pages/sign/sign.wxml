@@ -1,0 +1,190 @@
+<!--pages/sign/sign.wxml-->
+<view class="{{showXibao ? 'top-hide' : ''}}">
+<view class='header'>
+  <view class='h_search'>
+    <image src='../../img/search.png'></image>
+    <input placeholder='订单号，公司名称，小区名' bindconfirm="searchWord" bindinput='watchPassWord' confirm-type="search"></input>
+  </view>
+  <view class='h_site' bindtap='toCity'>
+    <image src='../../img/dingwei.png'></image>
+    <view class='dingwei'>{{curCity}}</view>
+  </view>
+</view>
+
+<view class='tab-back'>
+  <view class='tab'>
+    <view class="flex1">
+      <picker class="flex_text" value="{{fen[fen_index].id}}" data-selecthx="{{fen[fen_index].name}}" range="{{fen}}" range-key="{{'name'}}" bindchange="bindPickerChange_fen">
+        <view wx:if="{{fen_index==-1}}">分/赠</view>
+        <view wx:else="{{fem_index!=0}}"> {{fen[fen_index].name}}</view>
+
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+
+    <view class="flex1">
+      <picker class="flex_text" value="{{yu[yu_index].id}}" data-selecthx="{{yu[yu_index].name}}" range="{{yu}}" range-key="{{'name'}}" bindchange="bindPickerChange_yu">
+        <view wx:if="{{yu_index==-1}}">审核状态</view>
+        <view wx:else="{{yu_index!=0}}">{{yu[yu_index].name}}</view>
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+
+    <view class="flex1">
+      <picker class="flex_text small" mode="date" value="{{start}}" start="{{createTime}}" end="{{nowTime}}" data-time="start" bindchange="dateChange">
+        <view class="picker">
+          {{start?start:timeStart}}
+        </view>
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+
+    <view class="flex1">
+      <picker class="flex_text small" mode="date" value="{{end}}" start="{{start||createTime}}" end="{{nowTime}}" data-time="end" bindchange="dateChange">
+        <view class="picker">
+          {{end?end:nowTime}}
+        </view>
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+  </view>
+</view>
+
+<view class='con-scoll'>
+  <navigator url="{{item.url}}" hover-class='none' wx:for="{{list}}" wx:for-index='index' wx:key>
+    <view class='con'>
+      <view class='con-item name'>
+        <view class='item-x'>{{item.qc}}</view>
+        <view class="xz {{item.type_fw =='1'?'':'act'}}">{{item.type_fw =='1'?'分':'赠'}}</view>
+        <view class="xibao" catchtap="xibao" data-name="{{item.jc}}">喜报</view>
+      </view>
+      <view class='con-item'>
+        城市：
+        <text>{{item.city.cname}}-{{item.area.qz_area}}</text>
+      </view>
+      <view class=' con-item '>
+        小区：
+        <text>{{item.xiaoqu}}</text>
+      </view>
+      <view class='con-item '>
+        面积：
+        <text>{{item.mianji}}m²</text>
+      </view>
+      <view class='con-item '>
+        金额：
+        <text>{{item.qiandan_jine}}万</text>
+      </view>
+      <view class='con-item '>
+        业主：
+        <text>{{item.name}}</text>
+      </view>
+      <view class='con-item '>
+        审核状态：
+        <text class='item-s' wx:if="{{item.qiandan_status == 0}}">请审核
+        </text>
+        <text class='item-q' wx:elif="{{item.qiandan_status == 1}}">已签单
+        </text>
+        <text class='item-j' wx:elif="{{item.qiandan_status == 2}}">继续跟进
+        </text>
+        <text wx:else="{{item.qiandan_status == null}}">无签单
+        </text>
+      </view>
+      <view class='con-num con-shen'>
+        申请签单时间：
+        <text>{{item.qiandan_addtime}}</text>
+      </view>
+      <view class='con-item con-num '>
+        发单时间：
+        <text>{{item.time}}</text>
+      </view>
+      <view class='log-report clearfix'>
+        <view class='edit' data-id='{{item.id}}' data-cooperation_type="{{item.cooperation_type}}" catchtap='cancel' wx:if="{{item.qiandan_status == 1}}">
+          <image src='../../img/chehui.png'></image>
+          <text>取消</text>
+        </view>
+        <view class='edit' data-id='{{item.id}}' data-name="{{item.qc}}"  data-status="{{item.qiandan_status}}" catchtap='showPopup' wx:if="{{item.qiandan_status == 0 || item.qiandan_status == 2}}">
+          <image src='../../img/shenhe.png'></image>
+          <text>审核</text>
+        </view>
+        <view class='del' data-id='{{item.id}}' data-status='{{item.exam_status}}' catchtap='toDetail' data-url='{{item.url}}'>
+          <image src='../../img/chakan.png'></image>
+          <text>查看</text>
+        </view>
+        <view class='del' data-id='{{item.id}}' data-status='{{item.exam_status}}' catchtap='rebates' wx:if="{{item.qiandan_status == 1}}">
+          <image src='../../img/baobei.png'></image>
+          <text>返点</text>
+        </view>
+      </view>
+    </view>
+  </navigator>
+  <view class='page' wx:if='{{page}}'>
+    <view class="pre {{pageCurrent =='1'?'active':''}}" bindtap='prevBtn'>上一页</view>
+    <view class='total'>
+      <picker bindchange="toPage" value="" range="{{pageNumber}}">
+        <view class="picker">
+          <view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+        </view>
+      </picker>
+    </view>
+    <view class="next {{pageCurrent == pageTotalNumber?'active':''}}" bindtap='nextBtn'>下一页</view>
+  </view>
+  <view class='no-result' wx:if='{{noResult}}'>
+    <image src='../../img/no_result.png'></image>
+    <view>暂无搜索结果</view>
+  </view>
+  <view class='no-result' wx:if='{{noInternet}}'>
+    <image src='../../img/no_internet.png'></image>
+    <view>网络开了小差~请稍等</view>
+    <button bindtap='toCustom'>重新加载</button>
+  </view>
+</view>
+
+
+<view class='shade' hidden='{{popup}}' bindtap='hidePopup'></view>
+<view class='shade_box popup' hidden='{{popup}}'>
+  <view class='p-title'>审核详情</view>
+  <view class='p-status'>
+    状态：
+    <text wx:if="{{popupStatus == 0}}">请审核</text>
+    <text wx:elif="{{popupStatus == 1}}">已签单</text>
+    <text wx:elif="{{popupStatus == 2}}">继续跟进</text>
+    <text wx:else="{{popupStatus == null}}">无签单</text>
+  </view>
+  <view class='p-status p-company'>
+    公司:
+    <text class='qc'>{{popupCompanyName}}</text>
+  </view>
+
+  <radio-group class="p-group" bindchange="signStatus">
+    <label>
+      <radio value="1" checked="{{infoStatus== 1 ?true:false}}">通过</radio>
+    </label>
+
+    <label>
+      <radio value="2" checked="{{infoStatus== 2 ?true:false}}">继续跟进</radio>
+
+    </label>
+
+  </radio-group>
+
+
+  <view class='p-info'>
+    <view class='msg left' bindtap='hidePopup'>关闭</view>
+    <view class='msg' bindtap='report'>提交</view>
+  </view>
+</view>
+<view  hidden="{{!showXibao}}" class="xibao-canvas" bindtap="hideXibao" catchlongpress='saveImg'>
+  <canvas canvas-id="shareImg" style="width:750rpx;height:1206rpx;margin-top:{{mt}}rpx"></canvas>
+</view>
+<view class='open-seting-bg' wx:if='{{openSet}}' catchtap='cancleSet'>
+  <view class='open-set-inner'>
+    <view class='set-title'>是否打开授权设置？</view>
+    <view class='btn-openset'>
+      <view catchtap='cancleSet'>取消</view>
+          <view>
+              <button open-type='openSetting' class='button-style' catchtap='cancleSet'>确定</button>
+          </view>
+    </view>
+  </view>
+</view>
+</view>

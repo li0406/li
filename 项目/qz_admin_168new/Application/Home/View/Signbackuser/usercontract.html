@@ -1,0 +1,256 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .signbackedit_nav { padding: 20px; margin-bottom: 20px;}
+        .signbackedit_nav li { font-size: 18px; float: left; padding: 0 15px; line-height: 2;}
+        .signbackedit_nav li a { color: inherit;}
+        .signbackedit_nav li.active {border-bottom: 1px solid #FF0000; color: #FF0000;}
+
+        .layout_operator {display: none;}
+        .layout_operator .layout_bg {position: fixed; top:0;right:0;bottom:0;left:0;background:#000;z-index: 1100;opacity: 0.6;}
+        .layout_operator .layout_body {position: fixed;top: 120px; width: 400px; left: calc(50% - 200px); z-index: 1200;background: #FFF;}
+        .layout_operator .layout_title {text-align: center; font-size: 18px; padding: 10px; position: relative;}
+        .layout_operator .layout_close {font-size: 30px; position: absolute; right: 10px; top: 8px;cursor: pointer;}
+        .layout_operator .layout_content {padding: 10px; min-height: 120px;}
+        .layout_operator .layout_content .btn_box {text-align: center; margin-top: 15px;}
+        .layout_operator .layout_content p label {text-align: right; font-weight: normal; width: 140px;}
+
+        .layout_operator#layoutLog .layout_body {width: 500px;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box-header with-border">
+                <h3 class="box-title">签返会员管理/编辑会员</h3>
+            </div>
+
+            <!-- 会员信息部分 -->
+            <include file="accountedit" />
+
+            <div class="box">
+                <ul class="signbackedit_nav">
+                    <li><a href="/signbackuser/signlist?company_id={$company_id}">签单记录</a></li>
+                    <li class="active">会员时间</li>
+                    <li><a href="/signbackuser/packageinfo?company_id={$company_id}">订单数量</a></li>
+                    <li><a href="/signbackuser/packagelist?company_id={$company_id}">保证金</a></li>
+                </ul>
+
+                <div class="box-body">
+                    <div style="margin: 5px 30px; border: 1px solid #CCCCCC;">
+                        <notempty name="noAllInfo">
+                            <p style="padding: 8px 30px;">下次合同时间：{$noAllInfo.start_time} 至 {$noAllInfo.end_time}</p>
+                        </notempty>
+
+                        <div class="row" style="margin: 15px;">
+                            <input type="hidden" name="all_contract_id" value="{$info.all_id}" />
+                            <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">{$contract_name}</label>
+                            <label class="col-sm-1 control-label" style="text-align: right; line-height: 34px;">总合同时间:</label>
+                            <div class="col-sm-2">
+                                <input id="allbegin" type="text" class="form-control datepicker" readonly value="{$info.all_start_time}"/>
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="allend" type="text" class="form-control datepicker" readonly value="{$info.all_end_time}" />
+                            </div>
+                            <div class="col-sm-1" style="line-height: 34px;">
+                                {:getTwoDateDays($info["all_start_time"], $info["all_end_time"])}天
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row" style="margin: 15px;">
+                            <input type="hidden" name="now_contract_id" value="{$info.id}" />
+                            <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">本次合同</label>
+                        </div>
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">本次合同时间:</label>
+                            <div class="col-sm-2">
+                                <input id="begin" type="text" class="form-control datepicker" readonly value="{$info.start_time}" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="end" type="text" class="form-control datepicker" readonly value="{$info.end_time}" />
+                            </div>
+                            <div class="col-sm-1" style="line-height: 34px;">
+                                {:getTwoDateDays($info["start_time"], $info["end_time"])}天
+                            </div>
+                        </div>
+
+                        <notempty name="otherList">
+                        <volist name="otherList" id="child">
+                            <eq name="child.type" value="4">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">暂停:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.start_time}" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.end_time}" />
+                                    </div>
+                                    <div class="col-sm-2">
+                                        {:getTwoDateDays($child["start_time"], $child["end_time"])}天
+                                    </div>
+                                </div>
+                                
+                                <notempty name="child.delay_day">
+                                    <div class="row" style="margin: 15px;">
+                                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期天数:</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" readonly value="{$child.delay_day}" />
+                                        </div>
+                                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" readonly value="{$child.delay_time}"  />
+                                        </div>
+                                    </div>
+                                </notempty>
+                            </eq>
+
+                            <eq name="child.type" value="5">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_day}" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+
+                            <eq name="child.type" value="7">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">退费:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+
+                            <eq name="child.type" value="9">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">转让:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+                        </volist>
+                        </notempty>
+                        
+                        <notempty name="info">
+                            <form action="">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">广告报备:</label>
+                                    <div class="col-sm-9">
+                                        <div class="row advform" style="margin: 0; border-radius: 5px; border: 1px solid #CCC; padding: 10px;">
+                                            <div class="row form-group">
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">投放位置:</label>
+                                                <div class="col-sm-4">
+                                                    <select name="type" class="form-control">
+                                                        <option value="1" <eq name="advreport.flag" value="1">selected</eq> >老站</option>
+                                                        <option value="2" <eq name="advreport.flag" value="2">selected</eq> >新站</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">轮显:</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" name="lunbo" placeholder="轮显报备时长" value="{$advreport[1][0]['total']}" />
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏A:</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" name="tl_A" placeholder="通栏A报备时长"  value="{$advreport[2][1]['total']}" />
+                                                </div>
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏B:</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" name="tl_B" placeholder="通栏B报备时长"  value="{$advreport[2][2]['total']}" />
+                                                </div>
+                                            </div>
+                                            <div class="row form-group adv-item" <eq name="advreport.flag" value="2">style="display: none;"</eq> >
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏C:</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" name="tl_C" placeholder="通栏C报备时长"  value="{$advreport[2][3]['total']}" />
+                                                </div>
+                                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏D:</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" name="tl_D" placeholder="通栏D报备时长"  value="{$advreport[2][101]['total']}" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1"></div>
+                                </div>
+
+                                <div class="row" style="margin: 15px;">
+                                    <div class="col-sm-2"></div>
+                                    <div class="col-sm-1">
+                                        <button type="button" class="btn btn-primary btn_adv_save">保存</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </notempty>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script type="text/javascript">
+        $(function() {
+            $("select[name=type]").change(function(event) {
+                var parent = $(this).parents(".advform");
+                $(".adv-item", parent).show();
+                if ($(this).val() == 2) {
+                    $(".adv-item", parent).hide();
+                }
+            });
+
+            $(".btn_adv_save").click(function(){
+                var data = $("form").serializeArray();
+
+                data.push({
+                    name: "company_id",
+                    value: "{$company_id}"
+                });
+
+                data.push({
+                    name: "start_time",
+                    value: "{$info.start_time}"
+                });
+
+                data.push({
+                    name: "end_time",
+                    value: "{$info.end_time}"
+                });
+
+                $.ajax({
+                    url: '/signbackuser/editAdvReport/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: data
+                })
+                .done(function(data) {
+                    if (data.code == 200) {
+                        alert("编辑成功");
+                        window.location.reload();
+                    } else {
+                        alert(data.errmsg);
+                    };
+                });
+            });
+        });
+    </script>
+</block>

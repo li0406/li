@@ -1,0 +1,136 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">
+        账号城市管辖设置
+        </h1>
+        <ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ul>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <div class="box-header">
+                        条件查询
+                    </div>
+                    <div class="box-body">
+                        <form method="get" action="/adminuser/city">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    <label for="exampleInputEmail1">帐号名称：</label>
+                                    <select id="account" name="id" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="users" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="department">所属角色：</label>
+                                    <select id="role" name="role" class="col-sm-12">
+                                        <option value="">请选择</option>
+                                        <volist name="list.roles" id="vo">
+                                        <option value="{$key}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="department">所属部门：</label>
+                                    <select id="department" name="dept" class="col-sm-12">
+                                        <option value="">请选择</option>
+                                        <volist name="list.department" id="vo">
+                                        <option value="{$key}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label >&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">账号名称</th>
+                                    <th class="col-sm-1">所属角色</th>
+                                    <th class="col-sm-2">所属部门</th>
+                                    <th class="col-sm-1">是否在职</th>
+                                    <th class="col-sm-6">管辖城市</th>
+                                    <th class="col-sm-1">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.list" id="vo">
+                                    <tr>
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.role_name}</td>
+                                        <td>{$vo.department}</td>
+                                        <td>
+                                        <if condition="$vo['state'] EQ 1">
+                                            <span class="green">在职</span>
+                                        <else/>
+                                             <span class="red">离职</span>
+                                        </if>
+                                        </td>
+                                        <td style="text-align: left;">
+                                            <volist name="vo.city" id="v">
+                                            <span class="label label-info" style="display: inline-block; margin-right: 5px;">{$v}</span>
+                                            </volist>
+                                        </td>
+                                        <td>
+                                            <a href="/adminuser/cityup?id={$vo.id}" href="javascript:void(0)">编辑</a>
+                                            <a class="del" href="javascript:void(0)" data-id="{$vo.id}" >删除</a>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$("#role").select2();
+$("#role").select2("val","{$Think.get.role}");
+$("#department").select2();
+$("#department").select2("val","{$Think.get.dept}");
+$("#account").select2();
+$("#account").select2("val","{$Think.get.id}");
+
+$(".del").click(function(event) {
+    if (confirm("确认取消该账号管辖城市？")) {
+        var _this = $(this);
+        $.ajax({
+            url: '/adminuser/clearcity/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id:_this.attr("data-id")
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = window.location.href;
+            } else {
+                alert(data.info);
+            }
+        });
+    }
+});
+</script>
+</block>

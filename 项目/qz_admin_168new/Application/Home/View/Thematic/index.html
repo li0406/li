@@ -1,0 +1,473 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>标签库管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/specialkeyword/css/index.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>标签库管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                        <div class="col-xs-6 pull-right">
+                            <br/>
+                            <a target="_blank" href="https://staticqn.qizuang.com/custom/thematic/stop.dic" class="pull-right">
+                                <button class="btn btn-block btn-success normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-add"></i>停止词库下载
+                                </button>
+                            </a>
+                            <a target="_blank" href="https://staticqn.qizuang.com/custom/thematic/dict.dic" class="pull-right">
+                                <button class="btn btn-block btn-success normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-add"></i>词库下载
+                                </button>
+                            </a>
+                            <a href="javascript:void(0)" class="pull-right">
+                                <button id="upWord" class="btn btn-block btn-success normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-add"></i>词库上传
+                                </button>
+                            </a>
+                            <a target="_blank" href="https://staticqn.qizuang.com/custom/20191008/Fs154QOd8OsWGbEQnAdJ_ICkA1Tm.xlsx" class="pull-right">
+                                <button class="btn btn-block btn-info normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-add"></i>模板下载
+                                </button>
+                            </a>
+                            <a href="/thematic/uploadspecialkeyword/" class="pull-right">
+                                <button class="btn btn-block btn-info normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-plus"></i>批量导入
+                                </button>
+                            </a>
+                            <a href="/thematic/operate/" class="pull-right">
+                                <button class="btn btn-block btn-info normal" style="width:auto;margin-left: 10px;">
+                                    <i class="fa fa-add"></i>新增标签
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="/thematic" method="get">
+                                <div class="col-xs-2">
+                                标签名称：<input type="text" name="name" class="form-control" maxlength="45"
+                                            placeholder="请输入标签名" value="{$Think.get.name}">
+                                </div>
+                                <div class="col-xs-2">
+                                    标签栏目：
+                                    <select name="module" class="form-control" >
+                                        <option value="">请选择</option>
+                                        <option value="1">装修攻略</option>
+                                        <option value="2">装修百科</option>
+                                        <option value="3">装修问答</option>
+                                        <option value="4">分站咨询</option>
+                                        <option value="5">家装美图</option>
+                                        <option value="6">工装美图</option>
+                                        <option value="7">案例效果图</option>
+                                        <option value="99">其他</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    标签类型：
+                                    <select name="type" class="form-control" >
+                                        <option value="">请选择</option>
+                                        <option value="1">图文</option>
+                                        <option value="2">图片</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div class=" lh-34" >添加时间-开始：</div>
+                                    <input type="text" id="start" name="start" class="form-control datetimepicker" autocomplete="off"
+                                           placeholder="添加时间-开始" value="{$Think.get.start}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div class=" lh-34" >添加时间-结束：</div>
+                                    <input type="text" id="end" name="end" class="form-control datetimepicker" autocomplete="off"
+                                           placeholder="添加时间-结束" value="{$Think.get.end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit" id="search" class="btn  btn-primary normal btn-small">
+                                        <i class="fa fa-search"></i>查询
+                                    </button>
+                                    <button type="reset" id="reset" class="btn  btn-default normal btn-small">
+                                        <i class="fa fa-default"></i>重置
+                                    </button>
+                                    <button id="explode" class="btn btn-primary normal btn-small">
+                                        <i class="fa fa-default"></i>导出
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header list">
+                        数据列表
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table id="myTable" class="table table-hover dataTable">
+                                <thead>
+                                    <tr>
+                                        <th width="150">
+                                            <input type="checkbox" id="reverse">
+                                            <label for="reverse">全选</label>
+                                            <a href="javascript:void(0);" id="deleteall">批量删除</a>
+                                        </th>
+                                        <th>标签名称</th>
+                                        <th>分词</th>
+                                        <th>标签栏目</th>
+                                        <th>标签类型</th>
+                                        <th>添加人</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <volist name="info.list" id="vo">
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="selected[]" value="{$vo.id}" class="bids" data-id="{$vo.id}">
+                                            </td>
+                                            <td>
+                                                <if condition="$vo['is_show'] EQ 1">
+                                                    <a href="{$vo.link}" target="_blank">{$vo.name}</a>
+                                                <else/>
+                                                    {$vo.name}
+                                                </if>
+                                            </td>
+                                            <td>{$vo.words}</td>
+                                            <td>
+                                                <switch name="vo.module">
+                                                    <case value="1"><span class="module-zz">装修攻略</span></case>
+                                                    <case value="2"><span class="module-bk">装修百科</span></case>
+                                                    <case value="3"><span class="module-wd">装修问答</span></case>
+                                                    <case value="4"><span class="module-wd">分站咨询</span></case>
+                                                    <case value="5"><span class="module-wd">家装美图</span></case>
+                                                    <case value="6"><span class="module-wd">工装美图</span></case>
+                                                    <case value="7"><span class="module-wd">案例效果图</span></case>
+                                                    <case value="99"><span class="module-wd">其他</span></case>
+                                                    <default /> -
+                                                </switch>
+                                            </td>
+                                            <td>
+                                                <switch name="vo.type">
+                                                    <case value="1"><span class="module-zz">图文</span></case>
+                                                    <case value="2"><span class="module-bk">图片</span></case>
+                                                    <default /> -
+                                                </switch>
+                                            </td>
+                                            <td>{$vo.op_uname}</td>
+                                            <td>{$vo.createtime|date='Y-m-d H:i:s',###}</td>
+                                            <td data-id="{$vo.id}">
+                                                <if condition="$vo['is_delete'] EQ 2">
+                                                <a href="javascript:void(0)" class="delete red" data-id="{$vo.id}">
+                                                    恢复
+                                                </a>
+                                                <else/>
+                                                <a href="/thematic/operate/?id={$vo.id}">
+                                                    编辑
+                                                </a>
+                                                    |
+                                                <a href="javascript:void(0)" class="delete red">
+                                                    删除
+                                                </a>
+                                                </if>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="fileupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    请上传词库
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label >词库类别</label>
+                        <select name="class" class="form-control">
+                            <option value="1">词库</option>
+                            <option value="2">停止词库</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            <input type="file" id="uploadfile" name="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            /*初始化插件*/
+            $(".datetimepicker").datetimepicker({
+                format:"yyyy-mm-dd",
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 2,
+                autoclose: true
+            }).on("change", function () {
+                if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+                    msg("结束时间不得早于开始时间", function () {
+                        $("input[name=end]").val("");
+                    });
+                }
+            });
+            //反选
+            $('#reverse').click(function(){
+                $("input[class='bids']").each(function() {
+                      var flag = $(this).prop("checked");
+                    $(this).prop("checked", !flag);
+                })
+            })
+
+            $("#uploadfile").fileinput({
+                language: 'zh', //设置语言
+                uploadUrl:"/thematic/upfile/", //上传的地址
+                allowedFileExtensions: ['txt',"dic"],//接收的文件后缀
+                uploadAsync: true, //默认异步上传
+                showUpload:true, //是否显示上传按钮
+                showRemove :true, //显示移除按钮
+                showPreview :true, //是否显示预览
+                showCaption:false,//是否显示标题
+                browseClass:"btn btn-primary", //按钮样式
+                dropZoneEnabled: false,//是否显示拖拽区域
+                uploadExtraData:function(){
+                    return {
+                        prefix:'thematic',
+                        class:$("select[name=class]").val()
+                    }
+                },
+                maxFileCount:1, //表示允许同时上传的最大文件个数
+                enctype:'multipart/form-data',
+                validateInitialCount:true,
+                previewFileIcon: "<iclass='glyphicon glyphicon-king'></i>",
+                msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+            }).on("fileuploaded", function (event, data, previewId, index){
+                if(1 == data.response.status){
+                    alert("上传成功");
+                    $(".close").trigger("click")
+                }else{
+                    alert(data.response.info);
+                    return false;
+                }
+            });
+
+            $('select[name=module]').val('{$Think.get.module|default=""}');
+            $('select[name=type]').val('{$Think.get.type|default=""}');
+
+            $('.delete').click(function(){
+                var id = $(this).parent().attr('data-id');
+                if(confirm("确定操作吗？")){
+                    $.ajax({
+                        url: '/thematic/delete/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                }
+            });
+
+
+            //批量删除
+            $('#deleteall').click(function(){
+                var ids = new Array();
+
+                $(".bids").each(function(){
+                    var _this = $(this);
+                    if (_this.prop("checked") == true){
+                        ids.push(_this.attr("data-id"))
+                    }
+                });
+
+                if (ids.length == 0){
+                    var d = dialog({
+                        title: '消息',
+                        content: '请选择需要删除的关键字！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    d.show();
+                    return false;
+                }
+
+                if (confirm('确定要批量删除所选标签名称吗？')) {
+                    $.ajax({
+                        url: '/thematic/deleteall/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            ids:ids
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,网络错误！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                };
+            })
+
+            //导出操作
+            $("#explode").on('click',function () {
+                var start = $('input[name=start]').val();
+                var end = $('input[name=end]').val();
+                var name = $('input[name=name]').val();
+                var module = $('select[name=module]').val();
+                var type = $('select[name=type]').val();
+
+                var data = {
+                    'start': start,
+                    'end': end,
+                    'name': name,
+                    'module': module,
+                    'type': type,
+                };
+                var uri = parseParam(data);
+                window.open('/export/exportthematic?' + uri);
+            });
+            //将对象转成url 参数
+            var parseParam = function (param, key) {
+                var paramStr = "";
+                if (param instanceof String || param instanceof Number || param instanceof Boolean) {
+                    paramStr += "&" + key + "=" + encodeURIComponent(param);
+                } else {
+                    $.each(param, function (i) {
+                        var k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
+                        paramStr += '&' + parseParam(this, k);
+                    });
+                }
+                return paramStr.substr(1);
+            };
+            /**
+             * 手动重置表单内所有数据
+             */
+            $(function () {
+                var $resetBtn = $("button[type='reset']");
+                $resetBtn.on("click", function () {
+                    $('input[name="start"]').attr('value', '');
+                    $('input[name="end"]').attr('value', '');
+                    $('input[name="keyword"]').attr('value', '');
+                    $('select[name="keyword_module"]').find("option").attr("selected",false);
+                })
+            });
+            function toTimeStamp(time){
+                if(time!=undefined){
+                    var date = time;
+                    date = date.substring(0,19);
+                    date = date.replace(/-/g,'/');
+                    var timestamp = new Date(date).getTime();
+                    return timestamp;
+                }
+            }
+            function msg(msg, fn) {
+                layer.msg(
+                    msg,
+                    {time: 2000,},
+                    fn || function () {
+                    }
+                )
+            }
+        });
+
+        $("#upWord").click(function(){
+            $("#fileupModal").modal();
+        });
+
+        $("#search").click(function(){
+            if ($("#start").val() != "" && $("#end").val() == ""){
+                alert("请选择添加结束时间");
+                return false;
+            }
+
+            if ($("#start").val() > $("#end").val()) {
+                alert("开始时间不能大于结束时间");
+                return false;
+            }
+        });
+    </script>
+</block>

@@ -1,0 +1,270 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/home/basicinfo/css/relationcity.css?v={:C('STATIC_VERSION')}" rel="stylesheet"
+          type="text/css"/>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" action="">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>城市：</div>
+                                        <select id="city" name="cid" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <volist name="quyuList" id="item">
+                                                <option value="{$item.cid}" <eq name="item.cid" value="$cid">selected</eq> >{$item.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市类型：</div>
+                                        <select id="citytype" name="is_exclusive" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <option value="1" <eq name="_GET.is_exclusive" value="1">selected</eq> >独家</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>关联区县：</div>
+                                        <select id="aboutcity" name="relation_cs" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="quyuList" id="item">
+                                                <option value="{$item.cid}" <eq name="item.cid" value="$relation_cs">selected</eq> >{$item.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>&nbsp;</div>
+                                        <select id="area" name="relation_qx" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="areaGroup[$relation_cs]" id="item">
+                                                <option value="{$item.qz_areaid}" <eq name="item.qz_areaid" value="$relation_qx">selected</eq> >{$item.qz_area}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>关联状态：</div>
+                                        <select id="is_relation" name="is_relation" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <option value="1" <eq name="is_relation" value="1">selected</eq> >已关联</option>
+                                            <option value="2" <eq name="is_relation" value="2">selected</eq> >未关联</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <button type="submit" id="search" class="btn btn-info">搜索</button>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div id="chongzhi">重置</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h5 class="box-title">红色字体的城市，表示未开站</h5>
+                    </div>
+                    <div class="box-body no-padding col-xs-4">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th class="col-xs-3">城市</th>
+                                <th class="col-xs-6">关联城市</th>
+                                <th class="col-xs-3">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="item">
+                                    <tr>
+                                        <eq name="item.is_open_city" value="1">
+                                            <td>{$item.cname}</td>
+                                        <else/>
+                                            <td style="color: red">{$item.cname}</td>
+                                        </eq>
+                                        <td>
+                                            <div class="aboutcity">
+                                                <if condition="$item.is_relation == 1">
+                                                    <span class="col-xs-6 relation_cs_name">
+                                                        <if condition="$quyuList[$item['relation_cs']]['is_open_city'] == 1">
+                                                            {$quyuList[$item["relation_cs"]]["cname"]}
+                                                        <else />
+                                                            <font color="red">{$quyuList[$item["relation_cs"]]["cname"]}</font>
+                                                        </if>
+                                                    </span>
+                                                    <span class="col-xs-6 relation_qx_name">{$areaGroup[$item["relation_cs"]][$item["relation_qx"]]["qz_area"]}</span>
+                                                <else />
+                                                    <span class="col-xs-6 relation_cs_name"></span>
+                                                    <span class="col-xs-6 relation_qx_name"></span>
+                                                    <span class="col-xs-12 relation_no" style="color: #ccc;">未关联任何区县</span>
+                                                </if>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="edit bianji" data-id="{$item.cid}" data-cs="{$item.relation_cs}" data-qx="{$item.relation_qx}" data-name="{$item.cname}" data-toggle="modal" data-target="">
+                                                编辑
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="page">
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 顶部select
+        $("#city").select2();
+        $("#aboutcity").select2();
+        $("#area").select2();
+
+        $('#chongzhi').click(function(){
+            $("#city").select2('val', '0')
+            $("#citytype").val('0')
+            $("#aboutcity").select2('val', '')
+            $("#area").select2('val', '')
+            $("#is_relation").val('0')
+        })
+
+        $('.bianji').click(function(){
+            var that = this;
+            var cid = $(this).data("id");
+            var cityName = $(this).data("name");
+            var trElement = $(this).parents("tr");
+
+            layer.open({
+                title: cityName,
+                btn: ['确定', '取消'],
+                btnAlign: 'r',
+                area: '500px',
+                // scrollbar: false,
+                content: `<div class="layui-form-item">
+                    <label class="layui-form-label">关联城市：</label>
+                    <select name="city" lay-verify="required" id="editaboutcity" class="col-xs-4">
+                        <option value="">请选择</option>
+                        <volist name="quyuList" id="item">
+                            <option value="{$item.cid}">{$item.cname}</option>
+                        </volist>
+                    </select>
+                    <select name="city" lay-verify="required" id="editarea" class="col-xs-4">
+                        <option value="">请选择</option>
+                    </select>
+                </div>`,
+                // 确定按钮的回调
+                yes: function(index, layero){
+                    var relation_cs = $("body").find("#editaboutcity").val();
+                    var relation_qx =  $("body").find("#editarea").val();
+
+                    $.post("{:u('editRelationcity')}", {
+                        cid: cid,
+                        relation_cs: relation_cs,
+                        relation_qx: relation_qx
+                    }, function(resp){
+                        layer.closeAll();
+                        if (resp.status == 1) {
+                            trElement.find(".relation_no").hide();
+                            trElement.find(".relation_qx_name").html(resp["data"]["area"]);
+
+                            var cnameHtml = resp["data"]["cname"];
+                            if (resp["data"]["is_open_city"] != "1") {
+                                cnameHtml = "<font color='red'>"+resp["data"]["cname"]+"</font>";
+                            }
+
+                            trElement.find(".relation_cs_name").html(cnameHtml);
+
+                            $(that).data("cs", relation_cs);
+                            $(that).data("qx", relation_qx);
+                        } else {
+                            layer.alert(resp.msg)
+                        }
+                    });
+                },
+                // 取消按钮的回调
+                btn2: function(index, layero){
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                },
+                cancel: function(index, layero){
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                }
+            });
+            // 列表select
+            $("#editaboutcity").select2();
+            $("#editarea").select2();
+
+            $('body').css({
+                "overflow-x":"hidden",
+                "overflow-y":"hidden"
+            });
+
+            var cs = $(this).data("cs");
+            var qx = $(this).data("qx");
+            if (cs != "" && qx != "") {
+                $("#editaboutcity").select2("val", cs);
+                relationCityChange(cs, $("#editarea"), function(){
+                    $("#editarea").select2("val", qx);
+                });
+            }
+        })
+
+        // 关联区县-城市改变事件
+        $("#aboutcity").on("change", function(){
+            var cid = $(this).val();
+            relationCityChange(cid, $("#area"));
+        });
+
+        $("body").on("change", "#editaboutcity", function(){
+            var cid = $(this).val();
+            $("#editarea").select2("val", "");
+            relationCityChange(cid, $("body").find("#editarea"));
+        });
+
+        // 城市改变
+        function relationCityChange(cid, areaElement, callback){
+            $.post("{:u('get_area_list')}", {
+                cid: cid
+            }, function(resp){
+                if (resp.status == 1) {
+                    var optionHtml = '<option value="">请选择</option>';
+                    var list = resp["data"]["list"]
+                    for (var i in list) {
+                        optionHtml += '<option value="'+list[i]["qz_areaid"]+'">'+list[i]["qz_area"]+'</option>';
+                    }
+
+                    areaElement.html(optionHtml);
+
+                    if (callback) {
+                        callback();
+                    }
+                }
+            });
+        }
+    </script>
+</block>

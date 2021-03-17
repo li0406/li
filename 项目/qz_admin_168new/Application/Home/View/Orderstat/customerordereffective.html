@@ -1,0 +1,671 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新客服分单统计</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/css/customerordereffective.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content-header">
+    <h1>新客服分单统计</h1>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/"><i class="fa fa-dashboard"></i> 控制面板</a>
+        </li>
+        <li>
+            <a href="/orderstat/customerordereffective/">新客服分单统计</a>
+        </li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="row">
+                    <form class="form-horizontal" method="GET" action="/orderstat/customerordereffective/">
+                        <div class="col-xs-12">
+                            <ul class="npoc-tab-wrap">
+                            <li class="npoc-tab" data-tab='1'>
+                                <span style="font-size: 14px;">按人统计</span>
+                            </li>
+                            <li class="npoc-tab" data-tab='2'>
+                                按组统计
+                            </li>
+                            <li class="npoc-tab" data-tab='3'>
+                                按师统计
+                            </li>
+                            <li class="npoc-tab" data-tab='4'>
+                                按日统计
+                            </li>
+                            <li class="npoc-tab" data-tab='5'>
+                                客服中心统计
+                            </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab1">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerordereffective/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服姓名</div>
+                        <select id="kfList" name="kf" data-search='1' class="form-control" name="kf">
+                            <option value=" ">请选择</option>
+                            <volist name="kflist" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups1" name="groups" data-search='1' type="text" class="form-control" tabindex="3">
+                            <option value=" ">请选择</option>
+                            <volist name="groups" id="vo">
+                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" autocomplete="off" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" autocomplete="off" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="1" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="1">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table id="myTable2" class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>客服姓名</th>
+                                <th>客服组</th>
+                                <th>登陆天数</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>赠转分</th>
+                                <th>综合分单量</th>
+                                <th>分单率</th>
+                                <th>综合分单率</th>
+                                <th>总有效率</th>
+                                <th>分单有效占比</th>
+                                <th>赠单有效占比</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <volist name="list" id="vo">
+                        <tr>
+                            <td>{$key+1}</td>
+                            <td class="center-middle">{$vo.name}</td>
+                            <td>{$vo.kfgroup}</td>
+                            <td>{$vo.day|default=0}</td>
+                            <td>{$vo.all|default=0}</td>
+                            <td>{$vo.fen|default=0}</td>
+                            <td>{$vo.zen|default=0}</td>
+                            <td>{$vo.zentofen|default=0}</td>
+                            <td>{$vo.fen_zen|default=0}</td>
+                            <td>{$vo.fen_rate|default=0}%</td>
+                            <td>{$vo.fen_zen_rate|default=0}%</td>
+                            <td>{$vo.yx|default=0}%</td>
+                            <td>{$vo.fen_yx|default=0}%</td>
+                            <td>{$vo.zen_yx|default=0}%</td>
+                        </tr>
+                        </volist>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab2">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerordereffective/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups2" name="groups" data-search='1' class="form-control" type="text">
+                            <option value=" ">请选择</option>
+                            <volist name="groups" id="vo">
+                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager1" name="manager" data-search='1' name="cs" type="text" class="form-control" tabindex="3">
+                            <option value=" ">请选择</option>
+                            <volist name="manager" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" autocomplete="off" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" autocomplete="off" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="2" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button"  class="btn-success form-control export" data-tab="2">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>客服组</th>
+                                <th>客服组长</th>
+                                <th>客服师</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>赠转分</th>
+                                <th>综合分单量</th>
+                                <th>分单率</th>
+                                <th>综合分单率</th>
+                                <th>总有效率</th>
+                                <th>分单有效占比</th>
+                                <th>赠单有效占比</th>
+                            </tr>
+                    </thead>
+                        <tbody>
+                            <volist name="grouplist" id="vo" >
+                            <tr>
+                                <td class="center-middle">{$key+1}</td>
+                                <td>{$vo.kfgroup}</td>
+                                <td>{$vo.groupmanager}</td>
+                                <td>{$vo.manager}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.zentofen|default=0}</td>
+                                <td>{$vo.fen_zen|default=0}</td>
+                                <td>{$vo.fen_rate|default=0}%</td>
+                                <td>{$vo.fen_zen_rate|default=0}%</td>
+                                <td>{$vo.yx|default=0}%</td>
+                                <td>{$vo.fen_yx|default=0}%</td>
+                                <td>{$vo.zen_yx|default=0}%</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab3">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerordereffective/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager2" name="manager" data-search='1' class="form-control" type="text">
+                            <option value=" ">请选择</option>
+                            <volist name="manager" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="3" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="3">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>客服组数</th>
+                                <th>负责人</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>赠转分</th>
+                                <th>综合分单量</th>
+                                <th>分单率</th>
+                                <th>综合分单率</th>
+                                <th>总有效率</th>
+                                <th>分单有效占比</th>
+                                <th>赠单有效占比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="managerlist" id="vo">
+                            <volist name="vo.child" id="v">
+                            <tr>
+                                <td>{$v.kfgroup}组</td>
+                                <td>{$v.groupmanager}</td>
+                                <td>{$v.all|default=0}</td>
+                                <td>{$v.fen|default=0}</td>
+                                <td>{$v.zen|default=0}</td>
+                                <td>{$v.zentofen|default=0}</td>
+                                <td>{$v.fen_zen|default=0}</td>
+                                <td>{$v.fen_rate|default=0}%</td>
+                                <td>{$v.fen_zen_rate|default=0}%</td>
+                                <td>{$v.yx|default=0}%</td>
+                                <td>{$v.fen_yx|default=0}%</td>
+                                <td>{$v.zen_yx|default=0}%</td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle"><b>汇总</b></td>
+                                <td><b>{$vo.manager}</b></td>
+                                <td><b>{$vo.all|default=0}</b></td>
+                                <td><b>{$vo.fen|default=0}</b></td>
+                                <td><b>{$vo.zen|default=0}</b></td>
+                                <td><b>{$vo.zentofen|default=0}</b></td>
+                                <td><b>{$vo.fen_zen|default=0}</b></td>
+                                <td><b>{$vo.fen_rate|default=0}%</b></td>
+                                <td><b>{$vo.fen_zen_rate|default=0}%</b></td>
+                                <td><b>{$vo.yx|default=0}%</b></td>
+                                <td><b>{$vo.fen_yx|default=0}%</b></td>
+                                <td><b>{$vo.zen_yx|default=0}%</b></td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle">总计</td>
+                                <td>-</td>
+                                <td>{$total.all|default=0}</td>
+                                <td>{$total.fen|default=0}</td>
+                                <td>{$total.zen|default=0}</td>
+                                <td>{$total.zentofen|default=0}</td>
+                                <td>{$total.fen_zen|default=0}</td>
+                                <td>{$total.fen_rate|default=0}%</td>
+                                <td>{$total.fen_zen_rate|default=0}%</td>
+                                <td>{$total.yx|default=0}%</td>
+                                <td>{$total.fen_yx|default=0}%</td>
+                                <td>{$total.zen_yx|default=0}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab4">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerordereffective/" method="get">
+                    <div class="col-xs-2">
+                        <div>客服姓名</div>
+                        <select id="kfList4" name="kf" data-search='1' class="form-control" name="kf" autocomplete="off">
+                            <option value=" ">请选择</option>
+                            <volist name="kflist" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups4" name="groups" data-search='1' class="form-control" type="text" >
+                            <option value=" ">请选择</option>
+                            <volist name="groups" id="vo">
+                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager4" name="manager" data-search='1' class="form-control" type="text" >
+                            <option value=" ">请选择</option>
+                            <volist name="manager" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}" autocomplete="off">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}" autocomplete="off">
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="4" />
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="4">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>负责人</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>赠转分</th>
+                                <th>综合分单量</th>
+                                <th>分单率</th>
+                                <th>综合分单率</th>
+                                <th>总有效率</th>
+                                <th>分单有效占比</th>
+                                <th>赠单有效占比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="dayList.child" id="vo">
+                            <tr>
+                                <td>{$vo.date}</td>
+                                <td>{$vo.op_name}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.zentofen|default=0}</td>
+                                <td>{$vo.fen_zen|default=0}</td>
+                                <td>{$vo.fen_rate|default=0}%</td>
+                                <td>{$vo.fen_zen_rate|default=0}%</td>
+                                <td>{$vo.yx|default=0}%</td>
+                                <td>{$vo.fen_yx|default=0}%</td>
+                                <td>{$vo.zen_yx|default=0}%</td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle">总计</td>
+                                <td>-</td>
+                                <td>{$dayList.all.all|default=0}</td>
+                                <td>{$dayList.all.fen|default=0}</td>
+                                <td>{$dayList.all.zen|default=0}</td>
+                                <td>{$dayList.all.zentofen|default=0}</td>
+                                <td>{$dayList.all.fen_zen|default=0}</td>
+                                <td>{$dayList.all.fen_rate|default=0}%</td>
+                                <td>{$dayList.all.fen_zen_rate|default=0}%</td>
+                                <td>{$dayList.all.yx|default=0}%</td>
+                                <td>{$dayList.all.fen_yx|default=0}%</td>
+                                <td>{$dayList.all.zen_yx|default=0}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab5">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/orderstat/customerordereffective/" method="get">
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="5" />
+                    </div>
+                    <div class="col-xs-1 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="5">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>赠单量</th>
+                                <th>赠转分</th>
+                                <th>综合分单量</th>
+                                <th>分单率</th>
+                                <th>综合分单率</th>
+                                <th>总有效率</th>
+                                <th>分单有效占比</th>
+                                <th>赠单有效占比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="center.child" id="vo">
+                            <tr>
+                                <td>{$vo.date}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.zentofen|default=0}</td>
+                                <td>{$vo.fen_zen|default=0}</td>
+                                <td>{$vo.fen_rate|default=0}%</td>
+                                <td>{$vo.fen_zen_rate|default=0}%</td>
+                                <td>{$vo.yx|default=0}%</td>
+                                <td>{$vo.fen_yx|default=0}%</td>
+                                <td>{$vo.zen_yx|default=0}%</td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle">总计</td>
+                                <td>{$center.all.all|default=0}</td>
+                                <td>{$center.all.fen|default=0}</td>
+                                <td>{$center.all.zen|default=0}</td>
+                                <td>{$center.all.zentofen|default=0}</td>
+                                <td>{$center.all.fen_zen|default=0}</td>
+                                <td>{$center.all.fen_rate|default=0}%</td>
+                                <td>{$center.all.fen_zen_rate|default=0}%</td>
+                                <td>{$center.all.yx|default=0}%</td>
+                                <td>{$center.all.fen_yx|default=0}%</td>
+                                <td>{$center.all.zen_yx|default=0}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function() {
+        $('#myTable2').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true,
+           order:[9,"desc"]
+        });
+
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+        $("#kfList").select2({
+            allowClear: true,
+            placeholder: "选择客服"
+        });
+        $("#kfList").select2("val","{$Think.get.kf}");
+        $("#kfList4").select2({
+            allowClear: true,
+            placeholder: "选择客服"
+        }).on('select2:select', function (e) {
+            $("#groups4,#manager4").attr("disabled","disabled");
+        }).on("select2:unselect",function(e){
+            $("#kfList4,#groups4,#manager4").attr("disabled",false);
+        });
+
+        $("#kfList4").select2("val","{$Think.get.kf}");
+        $("#groups1").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#groups1").select2("val","{$Think.get.groups}");
+        $("#groups2").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#groups2").select2("val","{$Think.get.groups}");
+        $("#groups4").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        }).on('select2:select', function (e) {
+            $("#kfList4,#manager4").val("");
+            $("#kfList4,#manager4").attr("disabled","disabled");
+        }).on("select2:unselect",function(e){
+             $("#kfList4,#groups4,#manager4").attr("disabled",false);
+        });
+        $("#groups4").select2("val","{$Think.get.groups}");
+        $("#manager1").select2({
+            allowClear: true,
+            placeholder: "选择师长"
+        });
+        $("#manager1").select2("val","{$Think.get.manager}");
+        $("#manager2").select2({
+            allowClear: true,
+            placeholder: "选择师长"
+        });
+        $("#manager2").select2("val","{$Think.get.manager}");
+        $("#manager4").select2({
+            allowClear: true,
+            placeholder: "选择师长"
+
+        }).on('select2:select', function (e) {
+            $("#kfList4,#groups4").val("");
+            $("#kfList4,#groups4").attr("disabled","disabled");
+        }).on("select2:unselect",function(e){
+             $("#kfList4,#groups4,#manager4").attr("disabled",false);
+        });
+        $("#manager4").select2("val","{$Think.get.manager}");
+        $('.npoc-tab-wrap li.npoc-tab').eq({$Think.get.index|default=1}-1).addClass('npoc-tab-active');
+        //tab切换
+        $('.npoc-tab').on('click', function() {
+            $('.npoc-tab').removeClass('npoc-tab-active');
+            $(this).addClass('npoc-tab-active');
+            var tabIndex = $(this).attr('data-tab');
+            $("#tab1,#tab2,#tab3,#tab4,#tab5").hide();
+            $('#tab'+tabIndex).show();
+        });
+        $(".npoc-tab-active").trigger('click');
+
+        if ($("#kfList4").select2("val") != null) {
+            $("#kfList4").attr("disabled",false);
+            $("#groups4,#manager4").attr("disabled","disabled");
+        }
+
+        if ($("#groups4").select2("val") != null) {
+            $("#groups4").attr("disabled",false);
+            $("#kfList4,#manager4").attr("disabled","disabled");
+        }
+
+        if ($("#manager4").select2("val") != null) {
+            $("#manager4").attr("disabled",false);
+            $("#groups4,#kfList4").attr("disabled","disabled");
+        }
+        $(".export").click(function(event) {
+             var _this = $(this);
+             var tab =  _this.attr("data-tab");
+             var taget = $("#tab"+tab+" .table");
+             if (tab == 1) {
+                  taget = $("#tab"+tab+" #myTable2");
+             }
+             var colums = [];
+             var data = [];
+             taget.find("th").each(function() {
+                    var text = $(this).text().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    sub["fontColor"] = $(this).css("color");
+                    sub["bgColor"] = $(this).css("background-color");
+                    colums.push(sub);
+             });
+             data.push(colums);
+             taget.find("tbody tr").each(function(i) {
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function() {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text: text,
+                            fontColor: $(this).css("color"),
+                            bgColor: $(this).css("background-color")
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+            });
+
+             _this.exportExcel({
+                    data: data,
+                    title: "新客服分单统计",
+                    url: "/export/download",
+                    show:true
+             });
+        });
+    });
+
+
+</script>
+</block>

@@ -1,0 +1,178 @@
+<extend name="Common:basic"/>
+<block name="link">
+	<script src="/assets/mobile/js/750rem.js?v={:C('STATIC_VERSION')}"></script>
+	<link rel="canonical" href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}{$info.canonical}">
+	<link href="/assets/mobile/common/css/top-appentry.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+	<link href="{$static_host}/assets/mobile/common/css/m-version.two.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="content">
+<article>
+	<div class="search" style="background-color: transparent;">
+        <form action="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/search">
+            <input type="search" placeholder="客厅墙漆颜色" id="search" value="{$keyword|default=''}" name="keyword">
+            <!-- <iframe name='frameFile' style="display: none;"></iframe> -->
+            <i class="fa fa-search"></i>
+        </form>
+    </div>
+<div class="main">
+	<div class="thumbnail-nav">装修攻略 > 搜索结果页</div>
+	<!-- 搜索结果列表 -->
+	<empty name="hot">
+		<div class="search-list pb3">
+			<volist name="list" id="v">
+				<div class="item">
+
+                        <div class="thumb-pic">
+                            <a href="/gonglue/{$v.shortname}/{$v.id}.html">
+                                <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.face}-w400.jpg" alt="">
+                            </a>
+                        </div>
+                        <div class="item-main">
+                            <div class="title text-nowrap"><a href="/gonglue/{$v.shortname}/{$v.id}.html">{$v.title}</a></div>
+                            <div class="desc">
+                                <a href="/gonglue/{$v.shortname}/{$v.id}.html">{$v.jianjie}</a>
+                            </div>
+                            <div class="action">
+                                <i class="fa fa-eye"></i>
+                                <span class="mr2">{$v.pv}</span>
+                                <span class="approve" data-id="{$v.likes}">
+                                    <i class="fa fa-heart-o"></i>
+                                    <span>{$v.likes}</span>
+                                </span>
+                            </div>
+                        </div>
+				</div>
+			</volist>
+			<div class="page">
+				{$page_tmp}
+			</div>
+		</div>
+	</empty>
+
+
+
+	<!-- 无搜索结果 -->
+	<empty name="list">
+		<div class="search-none">
+			<img src="/assets/mobile/common/img/xiaolu.png" class="icon">
+			<span class="tips">没有搜索到相关攻略哦</span>
+		</div>
+		<div class="recommend-list pb3">
+			<h2 class="common-title">热门推荐</h2>
+			<volist name="hot" id="hotv">
+			<div class="item">
+				<div class="thumb-pic">
+					<a href="/gonglue/{$hotv.shortname}/{$hotv.id}.html"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$hotv.face}-w400.jpg" alt=""></a>
+				</div>
+				<div class="item-main">
+					<div class="title text-nowrap"><a href="/gonglue/{$hotv.shortname}/{$hotv.id}.html">{$hotv.title}</a></div>
+					<div class="desc">
+						<a href="/gonglue/{$hotv.shortname}/{$hotv.id}.html">{$hotv.jianjie}</a>
+					</div>
+					<div class="action">
+						<i class="fa fa-eye"></i>
+						<span class="mr2">{$hotv.pv}</span>
+						<span class="approve" data-id="{$hotv.likes}">
+							<i class="fa fa-heart-o"></i>
+							<span>{$hotv.likes}</span>
+						</span>
+					</div>
+				</div>
+			</div>
+			</volist>
+		</div>
+	</empty>
+
+
+	<!-- 搜索推荐列表 -->
+</div>
+</article>
+<div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+</block>
+<block name="script">
+<script type="text/javascript" src="//assets.qizuang.com/g-js/jquery/1.11.1/jquery.min.js"></script>
+<script>
+$(function () {
+	// 三个全局变量用于搜索
+    var randomNum = 0;
+    var kyws = ["客厅墙漆颜色", "卧室墙漆颜色", "热水器漏水", "高层窗户漏风的小窍门", "合格地板", "浴霸灯", "圆柱空调", "马桶", "小空间创意装饰", "隔音毡"];
+    var timer = null;
+
+	// 搜索框文字随机切换
+    + function ($) {
+        kywRandom();
+        $("#search").blur(function(){
+            kywRandom();
+        });
+    }(jQuery)
+
+    // 搜索跳转
+    + function ($) {
+        var $search = $("#search");
+        var kyw = ""
+        var submitKyw = function () {
+            kyw = $search.val();
+            if (!kyw) {
+                kyw = kyws[randomNum];
+            }
+            location.href = "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/search?keyword=" + kyw;
+        };
+        // document.getElementById('search_form').onsubmit = function(){
+        //     submitKyw();
+        // }
+        document.addEventListener("keyup", function(evnet){
+            if(event.keyCode == 13){
+                clearInterval(timer);
+                submitKyw();
+            }
+            return false;
+        }, false)
+    }(jQuery)
+
+    // 回到顶部
+    +function(){
+        $("#gotop").click(function(){
+            $('body,html').animate({scrollTop:0},1000);
+            return false;
+        });
+    }()
+
+    function kywRandom(){
+        var $search = $("#search");
+            randomNum = Math.floor(Math.random() * 10);
+            $search.attr("placeholder", kyws[randomNum]);
+    }
+
+    +function(){
+        // 点击心变色
+        $('.approve').click(function () {
+            $(this).find("i").toggleClass('cf53');
+            $(this).find("i").toggleClass('fa-heart-o').addClass('fa-heart');
+            var _this = $(this);
+            $.ajax({
+                url: '/dolike/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    id:_this.attr("data-id")
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    _this.unbind("click");
+                    var i = _this.find("span").text();
+                    i = parseInt(i)+1;
+                    _this.find("span").html(i);
+                }
+            });
+
+            return false;
+        });
+    }(jQuery)
+})
+</script>
+<!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+<script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+
+</block>

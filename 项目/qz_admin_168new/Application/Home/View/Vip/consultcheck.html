@@ -1,0 +1,524 @@
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>装修公司咨询审核</title></block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+	<link rel="stylesheet" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/home/vip/css/consultcheck.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+
+	<section class="content-header">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="box-body">
+						<h4>装修公司咨询审核</h4>
+					</div>
+				</div>
+				<div class="box box-default">
+					<div class="box-header with-border">
+						<h3 class="box-title">条件查询</h3>
+					</div>
+					<div class="box-body">
+						<form action="/vip/consultcheck" method="get" id="biaodantj">
+							<input type="hidden" name="psize" value="20">
+							<div class="row">
+								<div class="col-xs-2">
+									所属城市：
+									<select id="city" name="city" class="form-control">
+										<option value="">请选择城市</option>
+										<volist name="citys" id="vo">
+											<option value="{$vo.cid}" {$_GET['city']==$vo['cid']?'selected':''}>{$vo.cname}</option>
+										</volist>
+									</select>
+								</div>
+								<div class="col-xs-2">
+									公司名称：
+									<input type="text" name="company" class="form-control" value="{$_GET['company']|default=''}">
+								</div>
+								<div class="col-xs-2">
+									联系方式：
+									<input type="text" name="tel" class="form-control" value="{$_GET['tel']|default=''}">
+								</div>
+								<div class="col-xs-2">
+									合作状态：
+									<select class="form-control" type="text" name="cpstatus">
+										<option value="">全部</option>
+										<option value="1" {$_GET['cpstatus']==1?'selected':''}>--</option>
+										<option value="2" {$_GET['cpstatus']==2?'selected':''}>谈判中</option>
+										<option value="3" {$_GET['cpstatus']==3?'selected':''}>不合作</option>
+										<option value="4" {$_GET['cpstatus']==4?'selected':''}>已合作</option>
+									</select>
+								</div>
+								<div class="col-xs-2">
+									咨询日期：
+									<input type="text" id="tianjiariqi" class="form-control pull-right">
+									<input type="hidden" name="start_time" value="{$_GET['start_time']|default=''}">
+									<input type="hidden" name="end_time" value="{$_GET['end_time']|default=''}">
+								</div>
+								<div class="col-xs-2">
+									合作类型：
+									<select class="form-control" type="text" name="cp_type">
+										<option value="" >未选择</option>
+										<option value="2" <if condition="$Think.get.cp_type == 2">selected</if>>装修公司入驻</option>
+										<option value="1" <if condition="$Think.get.cp_type == 1">selected</if>>其他</option>
+									</select>
+								</div>
+								<div class="col-xs-2" style="margin-top: 10px">
+									处理状态：
+									<select class="form-control" type="text" name="operate_status">
+										<option value="">请选择</option>
+										<option value="1" {$_GET['operate_status']==1?'selected':''}>未处理</option>
+										<option value="2" {$_GET['operate_status']==2?'selected':''}>已处理</option>
+									</select>
+								</div>
+								<div class="col-xs-4">
+									<button class="btn btn-primary"><i class="fa fa-search"></i> 查询</button>
+									<button type="button" class="btn btn-primary chongzhi"><i class="fa fa-refresh"></i>重置</button>
+									<a class="btn btn-primary" target="_blank" href="/vip/consultcheck?down=1&{$query}"><i class="fa fa-download"></i>导出</a>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="box">
+					<div class="box-body no-padding">
+						<table class="table table-hover table-bordered">
+							<thead>
+							<tr>
+								<th>公司名称</th>
+								<th>IP地址</th>
+								<th>咨询日期</th>
+								<th>所属区域</th>
+								<th>客户名称</th>
+								<th>合作类型</th>
+								<th>合作状态</th>
+								<th>联系方式</th>
+								<th>留言</th>
+								<th>处理人</th>
+								<th>处理时间</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							<foreach name="list" item="vo">
+								<tr>
+									<input type="hidden" name="" value="{$vo.id}">
+									<td>{$vo.name}</td>
+									<td>
+										<notempty name="vo.ip">{$vo.ip}
+											<if condition="$vo.time egt 2"><span class="repeat-ip" data-ip="{$vo.ip}">重{$vo['time']-1}</span>
+											</if>
+										</notempty>
+									</td>
+									<td>{$vo.add_time|date="Y-m-d",###}</td>
+									<td>
+										<if condition="!$vo['city'] && !$vo['area']">
+											--
+										<else/>
+											{$vo.city|default="-"}<notempty name="vo.area">-{$vo.area}</notempty>
+										</if>
+									</td>
+									<td>{$vo.linkman}</td>
+									<td>
+										{$vo['cooperation_type']==1?'其他':($vo['cooperation_type']==2?'装修公司入驻':'已合作')}
+									</td>
+									<td>
+										{$vo['record_status']==1?'--':($vo['record_status']==2?'谈判中':($vo['record_status']==3?'不合作':'已合作'))}
+									</td>
+									<td>
+										<notempty name="vo.tel">{$vo.tel}
+											<if condition="$vo.tel_repeat egt 2">
+												<span class="repeat-tel" data-tel="{$vo.tel}">重{$vo['tel_repeat']-1}</span>
+											</if>
+										</notempty>
+									</td>
+									<td>{$vo.remark|default='--'}</td>
+									<td>
+										<if condition="$vo.operate_status eq 2">
+											{$vo.operator|default='--'}
+											<else/>
+											--
+										</if>
+									</td>
+									<td>
+										<if condition="$vo.operate_status eq 2">
+											{$vo.operate_time|date="Y-m-d",###}
+											<else/>
+											--
+										</if>
+									</td>
+									<td>
+										<div class="manipulate">
+											<if condition="$vo.operate_status eq 2">
+												<span class="is_operate">已处理</span>
+												<else/>
+												<span class="rdy_operate" data-id="{$vo.id}">处理</span>
+											</if>
+											<span class="historycode">历史记录
+                                                <div class="historytank"><div class="col-xs-12 tablewaik">
+							                    <div class="box no-border">
+							                        <div class="box-body no-padding">
+
+							                            <table class="table table-hover table-bordered" id="tablelist">
+							                                <thead>
+							                                <tr>
+							                                    <th>跟踪人员</th>
+                                                                <th>部门</th>
+							                                    <th>公司地址</th>
+							                                    <th>意向等级</th>
+							                                    <th>跟踪方式</th>
+							                                    <th>谈话重点内容</th>
+							                                    <th>合作状态</th>
+							                                    <th>记录日期</th>
+							                                </tr>
+							                                </thead>
+							                                <tbody>
+                                                            <if condition="!empty($consult_record[$vo['id']])">
+                                                                <foreach name="consult_record[$vo['id']]" item="vovo">
+                                                                <tr>
+                                                                    <td>{$vovo.deal_man}</td>
+                                                                    <td>{$vovo.dept_name|default='--'}</td>
+                                                                    <td>{$vovo.address|default='--'}</td>
+                                                                    <td>
+                                                                        <switch name="vovo.success_level">
+                                                                            <case value="1">A</case>
+                                                                            <case value="2">B</case>
+                                                                            <case value="3">C</case>
+                                                                        </switch>
+                                                                    </td>
+                                                                    <td>
+                                                                      <switch name="vovo.deal_type">
+                                                                        <case value="1">上门</case>
+                                                                        <case value="2">电话</case>
+                                                                        <case value="3">微信/QQ</case>
+                                                                      </switch>
+                                                                    </td>
+                                                                    <td>
+                                                                    	<span class="seecontent" data="{$vovo.communication}">查看内容</span></td>
+                                                                    <td>
+                                                                      <switch name="vovo.status">
+                                                                          <case value="2">谈判中</case>
+                                                                          <case value="3">不合作</case>
+                                                                          <case value="3">已合作</case>
+                                                                      </switch>
+                                                                    </td>
+                                                                    <td>{$vovo.time|date="Y-m-d",###}</td>
+                                                                </tr>
+                                                                </foreach>
+                                                                </if>
+							                                </tbody>
+							                            </table>
+							                        </div>
+							                    </div>
+							                </div></div>
+                                            </span>
+											<span class="addcode" data="{$vo.id}">新增记录</span>
+										</div>
+									</td>
+								</tr>
+							</foreach>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="col-xs-1">
+							<select class="form-control xianshei" id="yema">
+								<option value="10" {$psize==10?'selected':''}>显示10条</option>
+								<option value="20" {$psize==20?'selected':''}>显示20条</option>
+								<option value="50" {$psize==50?'selected':''}>显示50条</option>
+							</select>
+						</div>
+						<div class="col-xs-11 xianshei">
+							{$page}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="tcyinying"></div>
+		<div class="addjltc">
+			<form action="/consult/deal" method="post" id="addbiaodan">
+				<input type="hidden" name="consult_id" value="">
+				<i class="fa fa-close add_guanbi"></i>
+				<div class="add_title">新增记录</div>
+				<div class="addinformation">
+					<div class="add_hang">
+						<div class="bufen">
+							<div class="lefttitle"><span class="redmember">*</span>跟踪人员</div>
+							<input class="genzongry" name="deal_man" type="text" value="{:session('uc_userinfo.name')}">
+						</div>
+					</div>
+					<div class="add_hang">
+						<div class="bufen">
+							<div class="lefttitle">公司地址</div>
+							<input class="gongsinput" name="address" type="text"></div>
+					</div>
+					<div class="add_hang">
+						<div class="bufen">
+							<div class="lefttitle"><span class="redmember">*</span>跟踪方式</div>
+							<select name="deal_type" id="genzongfs" name="deal_type">
+								<option value="">请选择</option>
+								<option value="1">上门</option>
+								<option value="2">电话</option>
+								<option value="3">QQ/微信</option>
+							</select>
+						</div>
+					</div>
+					<div class="add_hang">
+						<div class="bufen">
+							<div class="lefttitle"><span class="redmember">*</span>意向等级</div>
+						</div>
+						<div class="dengjixz">
+							<input type="radio" name="success_level" value="1">A
+							<input type="radio" name="success_level" value="2">B
+							<input type="radio" name="success_level" value="3">C
+						</div>
+					</div>
+					<div class="dengjixz_ts">
+						*A代表意向很大；B代表意向还行；C代表意向很一般
+					</div>
+					<div class="add_hang">
+						<div class="bufen">
+							<div class="lefttitle"><span class="redmember">*</span>谈话内容</div>
+						</div>
+						<textarea name="communication" id="saidnr" cols="30" rows="10" placeholder="请简述谈话重点内容"></textarea>
+					</div>
+					<div class="add_hang">
+						<div class="hezuo">
+							<div class="bufen">
+								<div class="lefttitle"><span class="redmember">*</span>合作状态</div>
+							</div>
+							<select name="status" class="hezuo_select">
+								<option value="">请选择</option>
+								<option value="2">谈判中</option>
+								<option value="3">不合作</option>
+								<option value="4">已合作</option>
+							</select>
+						</div>
+					</div>
+					<div class="add_hang">
+						<span class="btn btn-primary tatijiaoniu">提交</span>
+					</div>
+					<div class="closetishi">
+						<div class="closetishi_neir">提示:关闭后将不保存本次跟踪记录</div>
+						<div class="niuwaik">
+							<a class="queren">确认</a>
+							<a class="cancelqux">取消</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script src="/assets/common/js/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$ ("#jump").click (function () {
+			var skip = $ ('#skipPage').val ();
+			var url = $ (this).val ();
+			if (!skip) {
+				alert ('请输入要跳转的页码');
+			} else {
+				window.location.href = url + 'p=' + skip;
+			}
+		});
+		$ ("#dateriqi").datetimepicker ({
+			startView: 2,
+			minView: 'decade',
+			format: "yy-mm-dd",
+			autoclose: true,
+			pickerPosition: "bottom-left",
+			todayBtn: 1,
+			clearBtn: true
+		});
+
+		+function () {
+			var startshijian = $ ("input[name='start_time']").val ();
+			var endshijian = $ ("input[name='end_time']").val ();
+			if (startshijian && endshijian) {
+				$ ("#tianjiariqi").val (startshijian + " - " + endshijian);
+			}
+			$ ('#tianjiariqi').daterangepicker ({
+					alwaysShowCalendars: true,
+					linkedCalendars: false,
+					autoUpdateInput: false,
+					locale: {
+						format: 'YYYY-MM-DD',
+						applyLabel: '确定',
+						cancelLabel: '取消',
+						fromLabel: '起始时间',
+						toLabel: '结束时间',
+						resetLabel: "重置",
+						customRangeLabel: '自定义',
+						daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+						monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+						firstDay: 1
+					}
+				},
+				function (start, end, label) {
+					if (!this.startDate) {
+						this.element.val ('');
+					} else {
+						this.element.val (this.startDate.format (this.locale.format) + this.locale.separator + this.endDate.format (this.locale.format));
+					}
+					startshijian = $ ("input[name='start_time']").val (this.startDate.format (this.locale.format));
+					endshijian = $ ("input[name='end_time']").val (this.endDate.format (this.locale.format));
+				});
+		} (jQuery);
+
+		$ (function () {
+			$ ('#city').select2 ();
+			$ ('#yema').change (function () {
+				var psize = $ (this).val ();
+				$ ('input[name="psize"]').val (psize);
+				var search_form = $ ('#biaodantj');
+				search_form.submit ();
+			});
+
+			//添加跟踪谈话记录
+			$ ('.addcode').click (function () {
+				var consult_id = $ (this).attr ('data');
+				$ ('.addjltc input[name=consult_id]').val (consult_id);
+				$ ('.tcyinying').show ();
+				$ ('.addjltc').fadeIn ();
+			});
+
+			//踪谈话记录关闭确认
+			$ ('.addjltc .add_guanbi').click (function () {
+				var lindex = layer.confirm ('提示：关闭后将不保存本次跟踪记录', {
+					btn: ['确定', '取消']
+				}, function () {
+					layer.close (lindex);
+					$ ('.tcyinying').hide ();
+					$ ('.addjltc').hide ();
+					$ ('.addjltc .closetishi').hide ();
+				}, function () {
+					layer.closeAll ();
+				});
+			});
+
+			//查看历史记录
+			$ ('.historycode').click (function () {
+				layer.open ({
+					type: 1,
+					title: '历史记录',
+					area: ['800px', '800px'],
+					shadeClose: true,
+					content: $ (this).find ('.tablewaik').html ()
+				});
+				$ ('.seecontent').click (function () {
+					var lookshujv = $ (this).attr ('data');
+					layer.open ({
+						type: 1,
+						title: '谈话内容',
+						skin: 'layui-layer-rim',
+						area: ['420px', '240px'],
+						shadeClose: true,
+						content: '<div class="col-xs-12" style="margin-top:10px">' + lookshujv + '</div>',
+					});
+				});
+			});
+
+			$ ('.tatijiaoniu').click (function () {
+				var Genzongry = $ ('.add_hang .bufen .genzongry').val (),
+					Genzongfs = $ ('.add_hang .bufen #genzongfs').val (),
+					Danxuan = $ ('input:radio[name=success_level]:checked').val (),
+					Saidnr = $.trim ($ ('#saidnr').val ()),
+					Hezuo_select = $ ('.hezuo_select').val ();
+				if (!Genzongry) {
+					layer.msg ('请填写跟踪人员');
+					return false;
+				}
+				if (!Genzongfs) {
+					layer.msg ('请填写跟踪方式');
+					return false;
+				}
+				if (!Danxuan) {
+					layer.msg ('请填写意向等级');
+					return false;
+				}
+				if (!Saidnr) {
+					layer.msg ('请填写谈话内容');
+					return false;
+				}
+				if (!Hezuo_select) {
+					layer.msg ('请填写合作状态');
+					return false;
+				}
+				$ ('#addbiaodan').submit ();
+				return false;
+			});
+
+			$ ('.chongzhi').click (function () {
+				$ ('#biaodantj select,#biaodantj input[type=text]').val ('');
+				$ ('#biaodantj input[name=start_time],#biaodantj input[name=end_time]').val ('');
+				$ ('#city').select2 ('');
+			});
+
+			//查看重复IP
+			$ ('.repeat-ip').click (function () {
+				var ip = $ (this).data ('ip');
+				var url = '/vip/ipconsult?ip=' + ip;
+				layer.open ({
+					type: 2,
+					title: '记录列表',
+					area: ['1080px', '650px'],
+					content: [url],
+					success: function () {
+						$ (':focus').blur ();
+					}
+				})
+			});
+			//查看重复手机
+			$ ('.repeat-tel').click (function () {
+				var tel = $ (this).data ('tel');
+				var url = '/vip/telconsult?tel=' + tel;
+				layer.open ({
+					type: 2,
+					title: '记录列表',
+					area: ['1080px', '650px'],
+					content: [url],
+					success: function () {
+						$ (':focus').blur ();
+					}
+				});
+			});
+
+			//处理状态
+			$ (".rdy_operate").on ('click', function () {
+				let id = $ (this).attr ('data-id');
+				let url = '/vip/operate';
+				let data = {id: id};
+				let lindex = layer.confirm ('提示：是否确认该条信息已处理？', {
+					btn: ['确定', '取消']
+				}, function () {
+					layer.close (lindex);
+					$.ajax ({
+						url: url, type: 'post', data: data, success: function (response) {
+							if (response.error_code === 0) {
+								window.history.go (0);
+							} else {
+								layer.msg (response.error_msg);
+							}
+						}, error: function () {
+							layer.msg ('未知错误~');
+						}
+					})
+				}, function () {
+					layer.closeAll ();
+				});
+
+			});
+		})
+	</script>
+</block>

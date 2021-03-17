@@ -1,0 +1,189 @@
+<extend name="Common:basic"/>
+<block name="title"><title></title></block>
+<block name="keywords"><meta name="keywords" content="" /></block>
+<block name="description"><meta name="description" content="" /></block>
+<block name="link">
+    <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/" rel="canonical"/>
+    <link href="/assets/mobile/activity/css/hengda.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+</block>
+<block name="content">
+    <div class="content-box">
+        <div class="top_banner">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200613/Fr7UUZwyq7AwGSHJ4uys5-KRIwCR" alt="">
+        </div>
+        <div class="fadan-box" id="fadan-box">
+            <ul class="">
+                <li>
+                    <gt name="mapUseInfo.vipcount" value="0">
+                        <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                        <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                        <input type="hidden" name="area" data-id="{$mapUseInfo.areaid}">
+                        <else />
+                        <input type="hidden" name="province" data-id="">
+                        <input type="hidden" name="city" data-id="">
+                        <input type="hidden" name="area" data-id="">
+                    </gt>
+                </li>
+                <li class="input-li">
+                    <input class="item" type="text" name="name" maxlength="13" placeholder="姓名" autofocus="true">
+                </li>
+                <li class="input-li">
+                    <input class="item" type="tel" name="tel" maxlength="11" placeholder="请输入手机号获取结果">
+                </li>
+                <li class="input-li" id="shenming">
+                    <input type="checkbox" checked="checked" id="mianze">
+                    <label for="mianze" id="check" class="fa fa-check"></label>
+                    <span>我已阅读并同意齐装网的</span>
+                    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer" style="border-bottom:1px solid #fff;"><span>《免责声明》</span></a>
+                </li>
+            </ul>
+            <a href="javascript:void(0)" class="submit-btn">获取领奖短信</a>
+            <p>活动说明：在活动期间，凭短信到场领取以下好礼。</p>
+        </div>
+        <div class="activity-img">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/FiQseUHI-ae8ldQvG7YfLNQ5N6Dm" alt="">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/FiEaFBQvkb-b5gSrfUAIXsT1nxwz" alt="">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/FtvxcwszMJFNshYaf3btYI0fgzD_" alt="">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/FjbVBMYKmzaHoVk3Q4UzXdTEEv9O" alt="">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/FnjHoFyZwLbJrdG-K6Umj5dFobOe" alt="">
+            <img src="//{:C('QINIU_DOMAIN')}/custom/20200615/Fpyn0wDvEl1Nc9QxQjxgA7acFFPn" alt="">
+        </div>
+        <div class="footer">
+            <p class="tip-one">到店就有大礼拿，惊喜多多>>></p>
+            <p class="tip-two">
+                活动时间：6.18—6.28 <br>
+                活动地点：浦东新区成山路500号A栋恒大建材(生活家)
+            </p>
+            <p class="tip-three">
+                ——欢迎您的莅临——
+            </p>
+        </div>
+
+        <div class="success_bg">
+            <div class="success_box">
+                <div class="header">
+                    领取成功
+                </div>
+                <img class="message" src="/assets/mobile/activity/images/message.png" alt="">
+                <span>短信已发送</span>
+                <p>请及时关注，并于6月28日之前凭该短信到现场领取</p>
+                <img class="success_foot" src="/assets/mobile/activity/images/close.png" alt="">
+            </div>
+        </div>
+        <input type="hidden" name="hide_city_id" value="{$mapUseInfo.areaid}">
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/mobile/sub/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+      //切换免责对勾
+      $("#check").click(function(){
+        $(this).toggleClass('fa-check');
+      });
+      var flag = '';
+
+      $(".submit-btn").click(function(event) {
+
+        // 处理软键盘弹出后导致的空白事件
+        $("input[name='name']")[0].blur();
+        $("input[name='tel']")[0].blur();
+        //return false;
+
+        var name = $("input[name=name]").val();
+        var tel = $("input[name=tel]").val();
+
+        var cs = $('input[name=city]').attr('data-id');
+        var qx = $('input[name=area]').attr('data-id');
+        if (!App.validate.run(name)) {
+          alertTips("请输入您的称呼");
+          return false;
+        }else{
+          var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+          if(!reg.test(name)){
+            alertTips("请输入正确的称呼，只支持中文和英文 ^_^!");
+            return false;
+          }
+        }
+
+        if (!App.validate.run(tel)) {
+          alertTips("请输入您的手机号码");
+          return false;
+        }else{
+          var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+          if(!reg.test(tel)){
+            alertTips("请填写正确的手机号码");
+            return false;
+          }
+        }
+        var checked = $("#mianze").is(':checked');
+        if(!checked){
+          alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+          return false;
+        }
+        window.order({
+          extra:{
+            cs: cs,
+            qx: qx,
+            name:$("input[name=name]").val(),
+            tel:$("input[name=tel]").val(),
+            source_in: "{$source_in}",
+            src: "{$src}",
+            fb_type: "{$fb_type}"
+          },
+          submitBtn:{
+            className:$(this),
+            type:'btn'
+          },
+          error:function(){
+          },
+          success:function(data, status, xhr){
+            if(data.status == 1){
+              $(".success_bg").css("display","block");
+              $("input[name=name]").val('')
+              $("input[name=tel]").val('')
+            }else{
+              alert(data.info);
+            }
+          },
+          validate:function(item, value, method, info){
+            return true;
+          }
+        });
+      });
+
+
+      $(".success_foot").click(function(){
+        $(".success_bg").fadeOut();
+      });
+
+      window.onload = function(){
+        setTimeout(function(){
+          selectQz.init({
+            province: $("input[name=province]").attr("data-id"),
+            city: $("input[name=city]").attr("data-id"),
+            area: $("input[name=area]").attr("data-id")
+          });
+        }, 500);
+      }
+
+      $("a[href='#fadan-box']").on("click",function(){
+        setTimeout(function(){
+          $("input[name='name']")[0].focus();
+        },0);
+      });
+
+
+      function alertTips(msg){
+        msg = msg ? msg : "";
+        setTimeout(function(){
+          alert(msg);
+        },400);
+      }
+    </script>
+</block>

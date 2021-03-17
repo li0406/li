@@ -1,0 +1,161 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <form id="searchForm" action="" method="GET">
+            <div class="col-xs-1">
+                风格：
+                <select name="fengge" class="form-control">
+                    <option value="0">请选择</option>
+                    <volist name="info.category" id="v">
+                        <eq name="v.type" value="1">
+                            <eq name="v.id" value="$Think.get.fengge">
+                                <option selected value="{$v.id}">{$v.name}</option>
+                            <else />
+                                <option value="{$v.id}">{$v.name}</option>
+                            </eq>
+                        </eq>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                户型：
+                <select class="form-control" name="huxing">
+                    <option value="0">请选择</option>
+                    <volist name="info.category" id="v">
+                        <eq name="v.type" value="2">
+                            <eq name="v.id" value="$Think.get.huxing">
+                                <option selected value="{$v.id}">{$v.name}</option>
+                            <else />
+                                <option value="{$v.id}">{$v.name}</option>
+                            </eq>
+                        </eq>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                发布人：
+                <select class="form-control" name="adminuser_id">
+                    <option value="0">请选择</option>
+                    <volist name="info.adminuser" id="v">
+                        <eq name="v.id" value="$Think.get.adminuser_id">
+                            <option selected value="{$v.id}">{$v.name}</option>
+                        <else />
+                            <option value="{$v.id}">{$v.name}</option>
+                        </eq>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                发布人：
+                <input class="form-control" name="title" type="text" placeholder="输入标题" value="{$Think.get.title}">
+            </div>
+            <div class="col-xs-1">
+                选取状态：
+                <select name="is_choice" id="is_choice" class="form-control">
+                    <option value="0">请选择</option>
+                    <option value="1">已选取</option>
+                    <option value="2">未选取</option>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                <br/>
+                <button type="submit" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                    <i class="fa fa-search"></i>查询
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-bordered table-hover dataList">
+            <tr>
+               <th>序号</th>
+                <th>标题</th>
+                <th>ID</th>
+                <th>标签</th>
+                <th>发布人</th>
+                <th>发布时间</th>
+                <th>操作</th>
+            </tr>
+            <volist name="info.list" id="v">
+                <tr>
+                    <td>{$key+1}</td>
+                    <td>
+                        <a target="_blank" href="http://meitu.{:C('QZ_YUMING')}/3d-conten{$v.id}.html" img-src="{$v.face}" >
+                            {$v.title}
+                        </a>
+                    </td>
+                    <td>{$v.id}</td>
+                    <td>{$v.tagsname}</td>
+                    <td>{$v.adminuser}</td>
+                    <td>{$v.update_time}</td>
+                    <td><span class="fa {$v.toggleIcon} choice" data-id="{$v.id}"></span></td>
+                </tr>
+            </volist>
+        </table>
+        {$info.page}
+    </div>
+</div>
+<div class="imgPreviewBox" id="imgbox">
+    <img src="" id="Preview">
+</div>
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#is_choice').val('{$Think.get.is_choice|default=0}');
+
+    $('.dataList a').hover(function(){
+        var imgUrl = "https://staticqn.qizuang.com/" + $(this).attr('img-src') + '-s3.jpg';
+        $("#Preview").attr("src",imgUrl);
+        $('#imgbox').show();
+    },function(){
+        $('#imgbox').hide();
+    });
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('{$info.module}');
+
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 5){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,6);
+            }
+            Cookies.set('{$info.module}',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('{$info.module}',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+        console.log(Cookies.get('{$info.module}'));
+    });
+
+    $('#search').click(function(event) {
+        var fengge = $('select[name=fengge]').val();
+        var huxing = $('select[name=huxing]').val();
+        var condition = $('input[name=condition]').val();
+        var adminuser_id = $('select[name=adminuser_id]').val();
+        var is_choice = $('#is_choice').val();
+        window.location.href = '/meituhome/threedbox?fengge=' + fengge + '&huxing=' + huxing + '&condition=' + condition + '&adminuser_id=' + adminuser_id+'&is_choice='+is_choice;
+    });
+
+})
+</script>
+</block>

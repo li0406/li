@@ -1,0 +1,166 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>美图首页管理 - 控制台</title>
+</block>
+<block name="style">
+<style>
+.meituListBox {width:100%; height:100%; background: rgba(0,0,0,0.8);position: fixed; left:0px;top:0px;  z-index: 99999; display: none;}
+.win-box{width:98%; height:calc(100% - 40px); background: #fff; margin:20px auto;}
+.win-head{overflow: hidden; border-bottom: 1px solid #DEDEDE; font-size:16px; padding:10px 0px; }
+.win-head span{padding:3px 10px;display: inline-block; cursor: pointer;}
+.win-body{padding:5px 10px; height:calc(100% - 105px); overflow: auto}
+.chose-box{margin-bottom: 20px; display: none;}
+</style>
+</block>
+
+<block name="content">
+
+    <section class="content-header">
+        <nav class="navbar navbar-default" style="margin-bottom:0px;">
+        <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="javascript:;">美图首页管理</a></div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="h4 no-margin"><a href="/meituhome">局部之美</a></li>
+                    <li class="h4 no-margin active"><a href="/meituhome?category=huxing">户型之美</a></li>
+                    <li class="h4 no-margin"><a href="/meituhome?category=fengge">设计之美</a></li>
+                    <li class="h4 no-margin"><a href="/meituhome/pubmeitu">公装效果图</a></li>
+                    <li class="h4 no-margin"><a href="/meituhome/threed">3D效果图</a></li>
+                    <li class="h4 no-margin"><a href="/meituhome/mingshi">名师作品</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+    </section>
+
+    <section class="content">
+        <div class="row">
+        <div class="col-xs-12">
+            <volist name="category" id="v">
+            <div class="box box-widget">
+                <div class="box-header with-border">
+                    <div><h4 class="h4 no-margin">{$v.name}</h4></div>
+                    <div class="box-tools">
+                        <button type="button" class="btn btn-success btn-sm selectBox" category_name="{$v.name}" category_id="{$v.id}">
+                            <i class="fa fa-plus-circle"></i>&nbsp;选取
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <table class="table table-hover" >
+                        <thead>
+                            <tr style="font-size:14px;font-weight:normal;background:#F5F5F5">
+                                <th width="60">ID</th>
+                                <th style="text-align:left">标题</th>
+                                <th style="text-align:left">关键字</th>
+                                <th style="text-align:left">标签</th>
+                                <th width="120">操作人</th>
+                                <th width="180">发布时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="{$info.category}-{$v.id}-list">
+                            <volist name="list[$v[id]]" id="vs">
+                            <tr>
+                                <td>{$vs.id}</td>
+                                <td style="text-align:left">
+                                <a title="{$vs.title}" href="http://meitu.{:C('QZ_YUMING')}/p{$vs.item_id}.html" target="_blank">
+                                {$vs.title|mbstr=0,20}</a>
+                                <if condition="$vs.is_single EQ '1' ">
+                                    <span title="单个" class="label label-warning">单个</span>
+                                </if></td>
+                                <td style="text-align:left">{$vs.keyword}</td>
+                                <td style="text-align:left">{$vs.tagsname}</td>
+                                <td>{$vs.uname}</td>
+                                <td>{$vs.times}</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </volist>
+
+        </div>
+        </div>
+
+        <div class="meituListBox">
+            <div class="win-box">
+                <div class="win-head"><span class="pull-left win-title"></span></div>
+                <div class="win-body" style="overflow-y:visible;">
+                    <iframe src="" width="100%" height="100%" id="selectBox" frameborder="0" scrolling="no"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="module" name="module" value="">
+                    <button type="button" class="btn btn-default pull-left hideLoading" id="cancel">取消</button>
+                    <button type="button" class="btn btn-primary hideLoading" id="saveBtn">保存</button>
+              </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    <volist name="category" id="v">
+    //
+    Cookies.set('{$info.category}-{$v.id}',JSON.stringify([<volist name="list[$v[id]]" id="vs">"{$vs.item_id}",</volist>]));
+    </volist>
+});
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('select[name=is_home]').val('{$Think.get.is_home|default=0}');
+
+    //Cookies.remove('meituList');
+    //Cookies.remove('caseList');
+    //Cookies.remove('articleList');
+
+    $('.selectBox').click(function(event){
+        var name = $(this).attr('category_name');
+        var id = $(this).attr('category_id');
+
+        $(".meituListBox").fadeIn();
+        $(".win-title").text('选取'+name+'美图');
+        $('#module').val('{$info.category}-'+id);
+        $("#selectBox",parent.document.body).attr("src","/meituhome/meitubox?module={$info.category}&{$info.category}="+id)
+    });
+
+    //保存选择
+    $('#saveBtn').click(function(){
+        var module = $('#module').val();
+        $.ajax({
+            url: '/meituhome/updatemeituitem',
+            type: 'GET',
+            dataType: 'JSON',
+            data:{
+                module:module
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.reload();
+            }else{
+                if(data.status == 0){
+                    alert(data.msg);
+                }else{
+                    alert('数据出错');
+                }
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败,网络错误！');
+        })
+        //$(".meituListBox").fadeOut();
+    });
+
+    $('#cancel').click(function(){
+        $(".meituListBox").fadeOut();
+    });
+
+
+})
+</script>
+</block>

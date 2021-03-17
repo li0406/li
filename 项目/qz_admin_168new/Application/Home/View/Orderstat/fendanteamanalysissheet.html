@@ -1,0 +1,143 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-分单量总览</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/branchorderoverview/">分单量总览</a>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/customerorderstatistics/">分时段统计</a>
+                            </button>
+                            <button type="button" class="btn btn-info">团队分析</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="col-xs-12 no-padding">
+                            <div class="col-xs-2">
+                                开始日期:<br/><input type="text" name="start_time" class="form-control datepicker"  placeholder="日期" value="{$Think.get.start_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                结束日期:<br/><input type="text" name="end_time" class="form-control datepicker"  placeholder="日期" value="{$Think.get.end_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                <br/>
+                                <button class="btn btn-info search-btn">查询</button>
+                            </div>
+                            <div class=" pull-right">
+                                <br/>
+                                <eq name="Think.get.average" value="1">
+                                    <button data-value="0" class="btn btn-info average-btn" style="margin-left: 20px;">切换至团队</button>
+                                <else />
+                                    <button data-value="1" class="btn btn-info average-btn" style="margin-left: 20px;">切换至日人均</button>
+                                </eq>
+                            </div>
+                            <div class="pull-right">
+                                <br/>
+                                <a class="btn btn-info" href="/orderstat/fendanteamanalysischart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                    切换至图表
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>时间段</th>
+                                    <th>
+                                        <if condition="$_GET['average'] EQ 1">
+                                        人均值
+                                        <i class="fa fa-question-circle text-info" title="单日客服组该时段分单量人均值"></i>
+                                        <else/>
+                                        团队均值
+                                        <i class="fa fa-question-circle text-info" title="客服组该时段团队均值"></i>
+                                        </if>
+                                    </th>
+                                    <volist name="main.group" id="vi">
+                                        <th>{$vi}团</th>
+                                    </volist>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.list" id="vi">
+                                    <tr>
+                                        <th>{$vi.begin}~{$vi.end}</th>
+                                        <td>{$vi.avg|default=0}</td>
+                                        <volist name="vi.group" id="vj">
+                                            <td>{$vj.avg|default="0"}</td>
+                                        </volist>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                            <!-- <tfoot>
+                                <tr>
+                                    <th>
+                                        平均值
+                                        <i class="fa fa-question-circle text-info" title="客服组每日单时段平均值"></i>
+                                    </th>
+                                    <th>-</th>
+                                    <volist name="main.group" id="vi">
+                                        <th>{:number_format($main['info']['group'][$vi] / count($main['time']), 2)}</th>
+                                    </volist>
+                                </tr>
+                                <tr>
+                                    <th>汇总</th>
+                                    <th>-</th>
+                                    <volist name="main.group" id="vi">
+                                        <th>{:number_format($main['info']['group'][$vi], 2)}</th>
+                                    </volist>
+                                </tr>
+                            </tfoot> -->
+                        </table>
+                    </div>
+                    <div class="box box-default">
+                        <div class="alert alert-warning">
+                            <p>说明</p>
+                            <p>1、团队均值=团队当前时间段分单量/当前团队数</p>
+                            <p>2、团队分单量=当前时间段内团队内所有人分单量之和</p>
+                            <p>3、人均值=当前所有人员分单量/当前坐席数/查询天数</p>
+                            <p>4、日人均分单量=当前时间段该团队分单量/该团队当前作坐席数/查询天数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:'ture'
+    });
+
+    $('.search-btn').click(function(event) {
+        var average = ('{$Think.get.average}' === '' ? '0' : '{$Think.get.average}');
+        window.location.href = '/orderstat/fendanteamanalysissheet/?start_time=' + $('input[name=start_time]').val() + '&end_time=' + $('input[name=end_time]').val() + '&average=' + average;
+    });
+
+    $('.average-btn').click(function(event) {
+        window.location.href = '/orderstat/fendanteamanalysissheet/?start_time=' + $('input[name=start_time]').val() + '&end_time=' + $('input[name=end_time]').val() + '&average=' + $(this).attr('data-value');
+    });
+</script>
+</block>

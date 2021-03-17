@@ -1,0 +1,95 @@
+ <div class="fujin-sider">
+    <a href="javascript:void(0)" class="shutdowns"></a>
+    <div class="fujin-window">
+        <div class="aim s1"></div>
+        <div class="aim s2"></div>
+        <div class="zore"><em><img src="{$static_host}/assets/sub/index/img/zore.png" width="20" height="20"></em></div>
+        <h1>寻找身边附近口碑好的装修公司</h1>
+        <p>
+            <input name="xiaoqu" type="text" placeholder="您所在的小区">
+        </p>
+        <p>
+            <input name="tel" type="text" placeholder="您的手机号码">
+        </p>
+        <p>
+            <input name="name" type="text" placeholder="您的姓名">
+        </p>
+        <p><a href="javascript:void(0)" class="btn">免费将装修公司发送至手机</a></p>
+        <p>小提示：为了您能够收到消息，请保持手机的畅通</p>
+
+    </div>
+</div>
+<script type="text/javascript">
+    $(".fujin-sider .shutdowns").click(function(){
+        $(".fujin-sider").remove();
+    });
+      $(".fujin-window .btn").click(function(event) {
+        var _this = $(this);
+        $(".fujin-window .err-tips").removeClass('err-tips');
+        $(".fujin-window .err-bg").removeClass('err-bg');
+        if(!App.validate.run($(".fujin-window input[name=tel]").val())){
+            $(".fujin-window input[name=tel]").addClass('err-tips err-bg').focus();
+
+            return false;
+        }
+
+        if(!App.validate.run($(".fujin-window input[name=tel]").val(),"moblie")){
+            $(".fujin-window input[name=tel]").addClass('err-tips').focus();
+            return false;
+        }
+
+        window.order({
+            extra:{
+                cs:"{$cityInfo.id}",
+                xiaoqu: $(".fujin-window input[name=xiaoqu]").val(),
+                tel: $(".fujin-window input[name=tel]").val(),
+                name:$(".fujin-window input[name=name]").val(),
+                source: 3,
+                safecode: "{$safecode}",
+                safekey: "{$safekey}",
+                ssid: "{$ssid}"
+            },
+            error:function(){
+                $.pt({
+                    target: _this,
+                    content: "发布失败,请刷新页面！",
+                    width: 'auto'
+                });
+            },
+            success:function(data, status, xhr){
+                $(".yzm img").attr("src","/verify?rand="+Math.random());
+                if (data.status == 1) {
+                    $(".fujin-sider").fadeOut(100,function(){
+                        $("#safecode").val(data.data.safecode);
+                        $("#safekey").val(data.data.safekey);
+                        _this.Alert({
+                            css:{
+                                "width":"200px",
+                                "height":"60px",
+                                "background":"#E76363",
+                                "margin-left":"-100px",
+                                "margin-top":"-30px",
+                                "font-size":"20px",
+                                "line-height":"60px"
+                            },
+                            text:"发布成功！"
+                        });
+                    });
+                } else {
+                    $.pt({
+                        target: _this,
+                        content: data.info,
+                        width: 'auto'
+                    });
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+
+    $(".yzm img").click(function(event) {
+        $(this).attr("src","/verify?rand="+Math.random());
+    });;
+</script>

@@ -1,0 +1,332 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/selftel.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">自助打电话</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="col-sm-2">
+                            <label>呼叫对象</label>
+                            <select name="calltowho" class="form-control">
+                                <option value="">请选择</option>
+                                <option value="1">销售</option>
+                                <option value="2">装修公司</option>
+                                <option value="3">业主</option>
+                                <option value="4">招聘</option>
+                                <option value="5">报到跟进</option>
+                                <option value="10">其他</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>被叫号码</label>
+                            <input name="calltel" type="text" class="order_id form-control ipt-comid" placeholder="请输入被叫号码" value="">
+                        </div>
+                        <div class="col-sm-2">
+                            </br>
+                            <button id="voipcalltel" type="button" class="my_sub btn btn-success " title="IP电话呼叫">
+                                <i class="fa fa-headphones"></i> 拨打
+                            </button>
+                            <EQ name="Think.session.setting_YTX_CALL_MODE" value="2">
+                            <button id="calltel" type="button" class="my_sub btn btn-success " title="无线话机呼叫">
+                                <i class="fa fa-headphones"></i> 拨打
+                            </button>
+                            </EQ>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div class="b-title">自助拨打呼叫记录</div>
+                        <form action="/admintel/self_tel" class="clearfix">
+                            <div class="col-sm-2">
+                                <label>呼叫对象</label>
+                                <select name="scalltowho" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="call_obj" key="k" id="vo">
+                                        <option value="{$k}">{$vo}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label>主叫号码</label>
+                                <input name="fromtel" type="text" class="order_id form-control" placeholder="请输入主叫号码" value="{$_GET['fromtel']}">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>被叫号码</label>
+                                <input name="scalltel" type="text" class="order_id form-control" placeholder="请输入被叫号码" value="{$_GET['scalltel']}">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>时间范围(起)</label>
+                                <input type="text" name="starttime" value="{$_GET['starttime']}" id="beginDate" placeholder="请选择"  class="form-control datepicker">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>时间范围(止)</label>
+                                <input type="text" name="endtime" value="{$_GET['endtime']}" id="beginDate" placeholder="请选择" class="form-control datepicker">
+                            </div>
+                            <div class="col-sm-2">
+                                <br>
+                               <button id="search" type="submit" class="my_sub btn btn-success">
+                                    <i class="fa fa-search"></i> 搜索
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>主叫</th>
+                                        <th>呼叫对象</th>
+                                        <th>呼叫人</th>
+                                        <th>呼叫时间</th>
+                                        <th>通话时长</th>
+                                        <th>操作</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <tr>
+                                    <td>{$vo.id}</td>
+                                    <td>{$vo.fromtel}</td>
+                                    <td>
+                                        <switch name='vo.calltowho'>
+                                            <case value='1'>销售</case>
+                                            <case value='2'>装修公司</case>
+                                            <case value='3'>业主</case>
+                                            <case value='4'>招聘</case>
+                                            <case value='5'>报道跟进</case>
+                                            <case value='10'>其他</case>
+                                            <default/>无数据
+                                        </switch>
+                                    </td>
+                                    <td>{$vo.admin_user}</td>
+                                    <td>{$vo.time_add}</td>
+                                    <td>{$vo.duration|timeS2MS}</td>
+                                    <td>
+                                        <a href="javascript:void(0)" class="detail" data-channel="{$vo.channel}" title="id {$vo.id} 的电话呼叫记录" data-callsid="{$vo.callsid}">录音&详情</a>
+                                    </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        <div class="page">{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>产生时间</th>
+                                <th>呼叫动作</th>
+                                <th>挂机类型（代码）</th>
+                                <th>通话录音</th>
+                                <th>callsid（callID）</th>
+                                <th>主叫号码</th>
+                                <th>被叫号码</th>
+                            </tr>
+                        </thead>
+                        <tbody class="t-body">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 录音弹窗 -->
+    <div id="box-bg" class="col-xs-12 hidden-record">
+        <div id="box">
+            <div class="box-prompt"><span>提示</span>
+                <input type="button" name="" value="×">
+            </div>
+            <div id="pic">
+                <!--content-->
+            </div>
+            <div class="auto-record hidden-record">
+                <audio class="player" src="" autoplay="" preload="auto" controls=""  data-on="0">
+                    您的浏览器不支持 audio 标签。
+                </audio>
+            </div>
+            <button id="confirm" class="box-btn">确定</button>&nbsp;
+            <button id="cancel">取消</button>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0
+    });
+
+    function shiting(e){
+        var that = e;
+        var call_sid = that.attr("data-callsid");
+        var channel = that.attr("data-channel");
+        var url = '/voip/hollyRecordFile?call_sid='+call_sid;
+
+        if (channel == "clink") {
+            url = '/voip/clinkRecordFile?call_sid='+call_sid;
+        }
+
+        //创建XMLHttpRequest对象
+        var xhr = new XMLHttpRequest();
+        //配置请求方式、请求地址以及是否同步
+        xhr.open('GET',url , true);
+        //设置请求结果类型为blob
+        xhr.responseType = 'blob';
+        //请求成功回调函数
+        xhr.onload = function (e) {
+            if (this.status === 200) {
+                //获取blob对象
+                var blob = this.response;
+                //获取blob对象地址，并把值赋给容器
+                //document.getElementById("sound").setAttribute("src", URL.createObjectURL(blob));
+                $(".player").attr("src", URL.createObjectURL(blob));
+                $("#box-bg").removeClass("hidden-record");
+                $("#box-bg button").addClass("hidden-record");
+                $(".box-prompt span").html("录音播放");
+                $("#pic").addClass("hidden-record");
+                $(".auto-record").removeClass("hidden-record");
+                // that.hide();
+                //取消
+                $(".box-prompt input").on("click", function() {
+                    $("#box-bg").addClass("hidden-record");
+                    $("#box-bg button").removeClass("hidden-record");
+                    $(".box-prompt span").html("提示");
+                    $("#pic").removeClass("hidden-record");
+                    $(".auto-record").addClass("hidden-record");
+                    $(".player").removeAttr("src");
+                });
+            }else{
+                //打开弹窗
+                $("#box-bg").removeClass("hidden-record");
+                $("#box-bg button").addClass("hidden-record");
+                $("#pic").html("播放录音失败");
+
+                $(".box-prompt input").on("click", function() {
+                    $("#box-bg").addClass("hidden-record");
+                    $("#box-bg button").removeClass("hidden-record");
+                });
+            }
+        }
+        xhr.send();
+    }
+    $(function() {
+        var scalltowho = '{$_GET.scalltowho}';
+        var scalltel  = '{$_GET.scalltel}';
+        var starttime = '{$_GET.starttime}';
+        var endtime   = '{$_GET.endtime}';
+        var fromtel   = '{$_GET.fromtel}';
+        $('[name=scalltowho]').val(scalltowho);
+        $('[name=scalltel]').val(scalltel);
+        $('[name=starttime]').val(starttime);
+        $('[name=endtime]').val(endtime);
+        $('[name=fromtel]').val(fromtel);
+
+        $('#calltel').click(function(event) {
+            var calltel = $("[name=calltel]").val();
+            var calltowho = $("[name=calltowho]").val();
+            if (calltowho == "") {
+                alert("请选择呼叫对象!");
+                return false;
+            };
+            if (calltel == "") {
+                alert("请输入电话号码!");
+                return false;
+            };
+            $.post('/admintel/diytel_callBack?chkid={$Think.session.admin_id}', {
+                    calltel: $("[name=calltel]").val(),
+                    calltowho: $("[name=calltowho]").val()
+                },
+                function(json) {
+                    if (1 == json.status) {
+                        alert(json.info);
+                        location.reload();
+                    } else {
+                        alert(json.info);
+                    };
+                }, 'json');
+        });
+
+        $('#voipcalltel').click(function(event) {
+            var calltel = $("[name=calltel]").val();
+            var calltowho = $("[name=calltowho]").val();
+            if (calltowho == "") {
+                alert("请选择呼叫对象!");
+                return false;
+            };
+            if (calltel == "") {
+                alert("请输入电话号码!");
+                return false;
+            };
+            $.post('/voip/tel_diy_voipcallback', {
+                    calltel: $("[name=calltel]").val(),
+                    calltowho: $("[name=calltowho]").val()
+                },
+                function(json) {
+                    if (200 == json.code) {
+                        alert(json.errmsg);
+                        location.reload();
+                    } else {
+                        alert(json.errmsg);
+                    };
+                }, 'json');
+        });
+
+        $('table').on('click','.detail',function(){
+            $('.modal').modal('show');
+            var id = $(this).attr("data-callsid");
+            $.ajax({
+                url: '/admintel/get_tel_info',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    call_sid:id,
+                    channel:$(this).attr("data-channel")
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    $('.t-body').html('');
+                    $.each(data.info, function (i, pro) {
+                        $('.t-body').append('<tr>'+
+                                '<td>'+pro.time_add+'</td>'+
+                                '<td>'+pro.action_name+'</td>'+
+                                '<td>'+pro.byetype_name+'</td>'+
+                                '<td>'+
+                                    '<button class="play-record" data-channel="'+pro.channel+'" data-callsid="'+pro.call_sid+'" onclick="shiting($(this));" title="点击播放 和 下载">'+
+                                    '<img src="/assets/home/img/imgother/u95.png"></button>'+
+                                '</td>'+
+                                '<td>'+pro.call_sid+'</td>'+
+                                '<td>'+pro.caller+'</td>'+
+                                '<td>'+pro.called+'</td>'+
+                            '</tr>');
+                    });
+                } else {
+                    alert(data.info);
+                }
+            });
+        });
+
+    })
+    </script>
+</block>

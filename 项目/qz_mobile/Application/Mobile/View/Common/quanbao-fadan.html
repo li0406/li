@@ -1,0 +1,173 @@
+<script type="text/javascript" src="//assets.qizuang.com/g-js/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="/assets/mobile/calculator/css/calculator.css?v={:C('STATIC_VERSION')}">
+<!-- <script src="/assets/mobile/calculator/js/calculator.js?v={:C('STATIC_VERSION')}"></script> -->
+<div id="calculator">
+    <div class="calculator-container">
+        <div class="calculator-area">
+            <div class="closed"><i id="calculator-closed" class="fa fa-times"></i></div>
+            <div class="calculator-item">
+                <table class="calculator-title">
+                    <td style="font-size:0.2rem"><span>找专业顾问为你选择装修模式</span></td>
+                </table>
+            </div>
+            <form action="">
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <gt name="mapUseInfo.vipcount" value="0">
+                            <button id="showCityPicker5" class="c-zb-city" type="button">
+                                <i class="fa fa-map-marker"></i>
+                                <empty name="mapUseInfo.id">
+                                    请选择您所在的区域
+                                    <else/>
+                                    {$mapUseInfo.provincefull} {$mapUseInfo.name} {$mapUseInfo.cityarea}
+                                </empty>
+                            </button>
+                            <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                            <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                            <input type="hidden" name="area" data-id="{$mapUseInfo.areaid}">
+                            <else/>
+                            <button id="showCityPicker5" class="c-zb-city" type="button">
+                                <i class="site fa fa-map-marker"></i>
+                                请选择您所在的区域
+                            </button>
+                            <input type="hidden" name="province" data-id="">
+                            <input type="hidden" name="city" data-id="">
+                            <input type="hidden" name="area" data-id="">
+                        </gt>
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="text" placeholder="怎么称呼您" name="name">
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="tel" minlength="11" maxlength="11" placeholder="请输入手机号码获取结果" name="tel">
+                    </div>
+                </div>
+                <div class="calculator-item" id="shenming2">
+                    <input type="checkbox" checked="checked" id="mianze2">
+                    <label for="mianze2" id="check2" class="fa fa-check"></label>
+                    <span>我已阅读并同意齐装网的</span>
+                    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box border-none">
+                        <div id="btnSave">立即免费申请</div>
+                    </div>
+                </div>
+                <div class="prompt">
+                    <span>*</span> 为了您的权益，您的隐私将被严格保密
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //切换免责对勾
+    $("#check2").click(function () {
+        $(this).toggleClass('fa-check');
+    });
+    $("#calculator #btnSave").click(function (event) {
+        var container = $(this).parents("#calculator");
+
+        var tel = $("input[name=tel]", container).val();
+        var name = $("input[name=name]", container).val();
+        var cs = $('input[name=city]', container).attr('data-id');
+        var qx = $('input[name=area]', container).attr('data-id');
+
+        if (!App.validate.run(name)) {
+            $(".m-bj-edit input[name=name]").focus();
+            alert("请输入您的称呼");
+            return false;
+        }
+        var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+        if (!reg.test(name)) {
+            $(".m-bj-edit input[name=name]").focus();
+            alert("请输入正确的称呼，只支持中文和英文 ^_^!");
+            return false;
+        }
+
+        if (tel.length < 1) {
+            alert('请输入您的手机号码');
+            return false;
+        }
+        if (tel.length < 11) {
+            alert('请填写正确的手机号码');
+            $("input[name=tel]").focus().val('');
+            return false;
+        }
+        var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+        if (!reg.test(tel)) {
+            $("input[name=tel]").focus().val('');
+            alert("请填写正确的手机号码");
+            return false;
+        }
+        if (cs == '' || qx == '') {
+            alert('请选择您所在的区域 ≧▽≦')
+            return false;
+        }
+        var checked2 = $("#mianze2").is(':checked');
+        if (!checked2) {
+            alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+            return false;
+        }
+
+        window.order({
+            extra: {
+                cs: cs,
+                qx: qx,
+                mianji: $("input[name=mianji]", container).val(),
+                tel: $("input[name=tel]", container).val(),
+                name: $("input[name=name]", container).val(),
+                source: '18052419',
+                step: 'baojia'
+            },
+            submitBtn:{
+                className:$(this),
+                type:'btn'
+            },
+            error: function () {
+                return true;
+            },
+            success: function (data, status, xhr) {
+                if (data.status == 1) {
+                    $("#calculator").hide();
+                    $('.beijyiny').show();
+                    $('.tjsuccess').show();
+                } else {
+                    alert(data.info);
+                }
+            },
+            validate: function (item, value, method, info) {
+                return true;
+            }
+        });
+    });
+    $("#calculator-closed").click(function(){
+        $('body,html').css({
+                     "position":"relative",
+                     "width":"100%",
+                     "overflow":"auto",
+                     "height":"auto"
+                });
+        App.setCookie("w_index",1,3600*24);
+        $("#calculator,#calculator2").fadeOut(function(){
+            // $(this).remove();
+            // location.reload();
+        });
+        $("body").css('overflow','auto');
+        $("body").css("position","relative");
+    });
+
+    $("#calculator-exit").click(function(){
+        $('body').css("position","relative");
+        $("#calculator2").fadeOut(function(){
+
+        });
+        $("body").css('overflow','auto');
+        $("body").css("position","relative");
+
+    });
+</script>

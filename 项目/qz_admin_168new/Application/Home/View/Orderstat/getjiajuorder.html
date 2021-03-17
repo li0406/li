@@ -1,0 +1,292 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服生成家具单统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/orderstat/css/getjiajuorder.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" >
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>客服生成家具单统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="" class="myform">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>开始时间:</div>
+                                        <input type="text" name="start" class="form-control datepicker" autocomplete="off" placeholder="开始时间" value="{$Think.get.start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>结束时间:</div>
+                                        <input type="text" name="end" class="form-control datepicker" autocomplete="off" placeholder="结束时间" value="{$Think.get.end}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>客服:</div>
+                                        <select id="kefu" name="kf_id">
+                                            <option value="">请选择</option>
+                                            <volist name="kflist" id="vo">
+                                                <if condition="$vo['id'] EQ $_GET['kf_id']">
+                                                    <option value="{$vo.id}" selected>{$vo.name}</option>
+                                                    <else/>
+                                                    <option value="{$vo.id}">{$vo.name}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>客服组:</div>
+                                        <select id="kefu-group" name="kfgroup">
+                                            <option value="">请选择</option>
+                                            <volist name="groups" id="vo">
+                                                <if condition="$vo['kfgroup'] EQ $_GET['kfgroup']">
+                                                    <option value="{$vo.kfgroup}" selected>{$vo.name}</option>
+                                                    <else/>
+                                                    <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <br>
+                                        <button type="submit" id="search" class="btn btn-primary">搜索</button>
+                                        <button type="reset" id="reset" class="btn btn-default">重置</button>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <br>
+                                        <button type="button" id="export" class="btn btn-success daochu">导出数据</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="row mt20">
+                            <div class="t-box" id="t-table">
+                                <div class="jisuan">综合分单量=分单量+赠单量/10</div>
+                                <div class="scroll-y">
+                                    <form role="form" class="list-form">
+                                    <table class="table table-hover table-bordered">
+                                        <thead class="t-head">
+                                            <tr>
+                                                <th class="t1">序号</th>
+                                                <th class="t2">客服</th>
+                                                <th class="t3">客服组</th>
+                                                <th class="t4">分单量</th>
+                                                <th class="t5">赠单量</th>
+                                                <th class="t6">综合分单量</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <volist name="result.list" id="vo">
+                                                    <tr>
+                                                        <td width="15%">{$key+1}</td>
+                                                        <td width="15%">{$vo.kf_name}</td>
+                                                        <td width="15%"><notempty name='vo.kfgroup'>组{$vo.kfgroup}</notempty></td>
+                                                        <td width="15%">{$vo.fen_count}</td>
+                                                        <td width="15%">{$vo.zeng_count}</td>
+                                                        <td width="25%">{$vo.zonghe}</td>
+                                                    </tr>
+                                                </volist>
+                                        </tbody>
+                                        <tfoot class="t-foot">
+                                            <tr>
+                                                <td class="f1">总计</td>
+                                                <td class="f2">-</td>
+                                                <td class="f3">-</td>
+                                                <td class="f4">{$result.total.fen_count|default = 0}</td>
+                                                <td class="f5">{$result.total.zeng_count|default = 0}</td>
+                                                <td class="f6">{$result.total.zonghe|default = 0}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                        </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content-footer">
+        <div class="shuoming">说明：此功能统计装修客服手动拨打装修订单过程中，产生的家具有效单。</div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var w = $('table').width();
+    var h = $('.list-form').height();
+    var wt = 0;
+    var t1 = $(".t1")[0].offsetWidth,t2 = $(".t2")[0].offsetWidth,t3 = $(".t3")[0].offsetWidth,
+        t4 = $(".t4")[0].offsetWidth,t5 = $(".t5")[0].offsetWidth,t6 = $(".t6")[0].offsetWidth;
+    $('.scroll-y').scroll(function(){
+        if($(this).scrollTop() > 0){
+            $('.list-form table').height(h+50);
+            var htop = 217;
+            var ftop = 255;
+            htop = htop-wt;
+            ftop = ftop-wt;
+            $('.t-head').css({'position':'fixed','top':htop+'px','width':w,'background':'#fff','border-top':'1px solid #eee'});
+            $('.t-foot').css({'position':'fixed','top':ftop+'px','width':w});
+            $('.f1').width(t1);
+            $('.f2').width(t2);
+            $('.f3').width(t3);
+            $('.f4').width(t4);
+            $('.f5').width(t5);
+            $('.f6').width(t6);
+        }else {
+            $('.t-head').css({'position':'unset','top':'0'});
+            $('.t-foot').css({'position':'unset','top':'0'});
+        }
+    })
+    $(window).scroll(function(){
+        wt = $(this).scrollTop();
+        $('.t-head').css({'position':'unset','top':'0'});
+        $('.t-foot').css({'position':'unset','top':'0'});
+        return wt
+    })
+    $(".datepicker").datetimepicker({
+        format:"yyyy-mm-dd",
+        endDate : new Date(),
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        minView: 2,
+        autoclose: true
+    }).on("change", function () {
+        var time = 31*24*60*60*1000;
+        var t = toTimeStamp($("input[name=end]").val()) - toTimeStamp($("input[name=start]").val());
+        if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+            msg("结束时间不得早于开始时间", function () {
+                $("input[name=end]").val("");
+            });
+        };
+        if (t > time) {
+            msg("开始至结束时间不能超过31天", function () {
+                $("input[name=start]").val("");
+                $("input[name=end]").val("");
+            });
+        };
+    });
+    $("#kefu").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
+    $("#kefu-group").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
+    // 排序
+    $('#t-table table').DataTable({
+        paging:false,
+        searching:false,
+        language:{
+            zeroRecords: "没有内容",
+            info:""
+        },
+        sWidth:"96%",
+        bInfo:false,
+        "bSort":true
+    });
+
+    function toTimeStamp(time){
+        if(time!=undefined){
+            var date = time;
+            date = date.substring(0,19);
+            date = date.replace(/-/g,'/');
+            var timestamp = new Date(date).getTime();
+            return timestamp;
+        }
+    };
+    function msg(msg, fn) {
+        layer.msg(
+            msg,
+            {time: 2000,},
+            fn || function () {
+            }
+        )
+    }
+    /**
+    * 手动重置表单内所有数据
+    */
+    $(function () {
+        var $resetBtn = $("button[type='reset']");
+        $resetBtn.on("click", function () {
+            $('input[name="start"]').attr('value', '');
+            $('input[name="end"]').attr('value', '');
+            $('#kefu').select2("val", "");
+            $("#kefu").find('option').attr("selected", false);
+            $('#kefu-group').select2("val", "");
+            $("#kefu-group").find('option').attr("selected", false);
+        })
+    });
+
+    //导出功能
+    $('#export').click(function(event) {
+        var colums = [];
+        var data =[];
+        $(".list-form .t-head th").each(function(){
+            var text = $(this).html().trim();
+            text = text.split("/")[0];
+            var sub =[];
+            sub["text"] = text;
+            sub["fontColor"] = $(this).css("color");
+            sub["bgColor"] = $(this).css("background-color");
+            colums.push(sub);
+        });
+        data.push(colums);
+        $(".list-form tbody tr").each(function(i){
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function(){
+                var text = $(this).text().trim();
+                text = text.split("(")[0];
+                var _td = {
+                    text:text,
+                    fontColor:$(this).css("color"),
+                    bgColor:$(this).css("background-color")
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+        $(".list-form tfoot tr").each(function(i){
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function(){
+                var text = $(this).text().trim();
+                text = text.split("(")[0];
+                var _td = {
+                    text:text,
+                    fontColor:$(this).css("color"),
+                    bgColor:$(this).css("background-color")
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+        $(this).exportExcel({
+            data:data,
+            title:"客服生成家具单统计",
+            url:"/export/download"
+        });
+    });
+</script>
+</block>

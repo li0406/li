@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-168uc
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: admin-168uc
+  template:
+    metadata:
+      labels:
+        app: admin-168uc
+    spec:
+      imagePullSecrets:
+        - name: "container-registry-a"
+      containers:
+        - name: admin-168uc
+          # image: registry.cn-shanghai.aliyuncs.com/qizuang/admin-168uc:master-040ce9e
+          image: <K8S_IMAGE>
+          imagePullPolicy: Always
+          # command: [ "echo", "SUCCESS" ]
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          # envFrom:
+          # - configMapRef:
+          #     name: env-app-config
+          volumeMounts:
+            - name: config-volume
+              mountPath: /data/app/admin-168uc/.env
+              subPath: .env
+            - name: ssl-volume
+              mountPath: /etc/nginx/ssl
+      volumes:
+        - name: config-volume
+          configMap:
+            name: app-config
+            items:
+              - key: .env
+                path: .env
+        - name: ssl-volume
+          secret:
+            secretName: app-ssl
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: admin-168uc
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: admin-168uc
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  type: ClusterIP

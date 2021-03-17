@@ -1,0 +1,193 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/taglist.css?v={:C('STATIC_VERSION')}">
+
+
+</block>
+
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <form action="">
+                <div class="col-xs-2">
+                    城市：
+                    <input type="text" class="form-control" value="{$tagInfo.cname}" disabled>
+                    <input type="hidden" name="tag_id" value="{$tagInfo.id}">
+                </div>
+                <div class="col-xs-2">
+                    <div>案例类型：</div>
+                    <select name="classid" class="form-control" id="select_classid">
+                        <option value="0">请选择</option>
+                        <option value="1" <eq name="input.classid" value="1">selected</eq> >家装案例</option>
+                        <option value="2" <eq name="input.classid" value="2">selected</eq>>公装案例</option>
+                        <option value="3" <eq name="input.classid" value="3">selected</eq>>在建工地</option>
+                    </select>
+
+                    <select class="form-control classid_item classid_default" <notempty name="input.classid">style="display: none;"</notempty> >
+                        <option value="0">请选择</option>
+                    </select>
+
+                    <select name="huxing" class="form-control classid_item" <if condition="!in_array($input['classid'], [1,3])">style="display: none;"</if> >
+                        <option value="0">请选择</option>
+                        <volist name="options.huxing" id="item">
+                            <option value="{$item.id}" <eq name="input.huxing" value="$item['id']">selected</eq> >{$item.name}</option>
+                        </volist>
+                    </select>
+
+                    <select name="leixing" class="form-control classid_item" <neq name="input.classid" value="2">style="display: none;"</neq> >
+                        <option value="0">请选择</option>
+                        <volist name="options.leixing" id="item">
+                            <option value="{$item.id}" <eq name="input.leixing" value="$item['id']">selected</eq> >{$item.name}</option>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    风格：
+                    <select name="fengge" class="form-control">
+                        <option value="0">请选择</option>
+                        <volist name="options.fengge" id="item">
+                            <option value="{$item.id}" <eq name="input.fengge" value="$item['id']">selected</eq> >{$item.name}</option>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    小区名：
+                    <input name="xiaoqu" class="form-control" value="{$input.xiaoqu}" placeholder="请输入小区名称" />
+                </div>
+                <div class="col-xs-1">
+                    选取状态：
+                    <select name="checked" class="form-control">
+                        <option value="0">请选择</option>
+                        <option value="1" <eq name="input.checked" value="1">selected</eq> >已选取</option>
+                        <option value="2" <eq name="input.checked" value="2">selected</eq> >未选取</option>
+                    </select>
+                </div>
+                <div class="col-xs-1">
+                    <br/>
+                    <button type="submit" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                        <i class="fa fa-search"></i>查询
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-hover dataList" id="box">
+            <tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>图片</th>
+                    <th>小区名</th>
+                    <th>所属公司</th>
+                    <th>会员状态</th>
+                    <th>装修风格</th>
+                    <th>标识</th>
+                    <th>操作</th>
+                </tr>
+
+                <volist name="data.list" id="item">
+                    <tr>
+                        <td>{$item.id}</td>
+                        <td class="ylimg">
+                            <a href="javascript:;" data-img="{$item.img_path}" data-host="{$item.img_host}">预览</a>
+                        </td>
+                        <td>{$item.title}</td>
+                        <td>{$item.jc}</td>
+                        <td>{$item.on_name}</td>
+                        <td>{$item.fengge_name}</td>
+                        <td>{$item.tags}</td>
+                        <td>
+                            <div>
+                                <input class="switch" data-id="{$item.id}" type="checkbox" <eq name="item.checked" value="1">checked</eq> >
+                            </div>
+                        </td>
+                    </tr>
+                </volist>
+                <empty name="data.list">
+                    <tr>
+                        <td colspan="8" align="center">暂无数据</td>
+                    </tr>
+                </empty>
+            </tbody>
+        </table>
+    </div>
+    <div class="box-footer no-border fenye">
+        <div class="col-xs-12">{$data.page}</div>
+    </div>
+</div>
+<div class="imgPreviewBox" id="imgbox">
+    <img src="" id="Preview">
+</div>
+</block>
+<block name="script">
+<script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".select2").select2();
+
+        $("#select_classid").change(function(){
+            var classid = $(this).val();
+            $(".classid_item").hide();
+            $("select[name='huxing'],select[name='leixing']").val("0");
+            if (classid == "2") {
+                $("select[name='leixing']").show();
+            } else if (classid == "0") {
+                $(".classid_default").show();
+            } else {
+                $("select[name='huxing']").show();
+            }
+        });
+
+        $('.dataList a').hover(function(){
+            var img = $(this).data('img');
+            if (img != "") {
+                if ($(this).data("host") == "qiniu") {
+                    var imgUrl = "//{:C('QINIU_DOMAIN')}/" + img + '-s3.jpg';
+                } else {
+                    var imgUrl = "http://{:C('STATIC_HOST1')}/" + img;
+                }
+
+                $("#Preview").attr("src",imgUrl);
+                $('#imgbox').show();
+            }
+        },function(){
+            $('#imgbox').hide();
+        });
+
+        //选取操作
+        $('.table .switch').bootstrapSwitch({
+            onText: "开启",
+            offText: "关闭",
+            onColor: "success",
+            offColor: "default",
+            size: "small",
+            onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                    var is_relation = 2;
+                }else{
+                    var is_relation = 1;
+                    $el.attr("checked","checked");
+                }
+
+                $.post("/subtag/set_relation", {
+                    type: "case",
+                    tag_id: "{$tagInfo.id}",
+                    relation_id: $el.data("id"),
+                    is_relation: is_relation
+                }, function(data){
+                    if (data.status == 0) {
+                        alert(dta.info);
+                    }
+                    window.location.reload();
+                });
+            }
+        });
+    });
+</script>
+</block>

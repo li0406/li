@@ -1,0 +1,128 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link href="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link href="/assets/common/js/plugins/listnav/listnav.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link href="/assets/home/css/orderadjoincity.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/basicinfo/css/city.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <style>
+        .areaList li {
+            min-height: 85px;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <a href="/basicinfo/index/"><span>区域城市管理</span></a>
+                            <a href="/basicinfo/index"><span class="cur"><i class="fa fa-home"></i>&nbsp;城市管理</span></a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="top">
+            <a href="/basicinfo/edit">
+                <div class="btn">增加分站城市</div>
+            </a>
+            <a href="javascript:;">
+                <div class="btn" id="updateCityCache" >更新前台城市缓存</div>
+            </a>
+            <p>说明：灰色背景的是外销管理城市，带☆星号的是地级城市</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 ">
+                <form class="form-horizontal box" onsubmit="return false">
+                    <div class="box-body">
+                        <form id="form1" action="" method="POST">
+                            <div class="panel-body" style="padding:0px">
+                                <div class="button" style="position:absolute;right:90px;">
+                                    <div class="btn"><a href="/basicinfo/index?dujia=1">独家城市</a></div>
+                                    <div class="btn <if condition='$Think.get.fen EQ 1'>cur</if>" id="fendan-city">智能分单城市</div>
+                                    <div class="btn <if condition='$Think.get.ptype EQ 1'>cur</if>" id="mark-city">南方城市</div>
+                                </div>
+                                <ul id="demoSix" class="areaList">
+                                    <volist name="quyuList" id="v">
+                                        <if condition="$v.manager EQ '1' ">
+                                            <li style="background:#eee">
+                                                <else />
+                                            <li>
+                                        </if>
+                                        <h2><a href="/basicinfo/quyu?id={$v.cid}">{$v.cname}</a></h2>
+                                        <p class="last-name">
+                                            <a href="http://{$v.bm}.{:C('QZ_YUMING')}" target="_blank">{$v.bm}</a>
+                                        </p>
+                                        <p>{$v.qz_province|mbstr=0,6}
+                                            <if condition="$v['little'] eq 0 ">&nbsp;☆</if>
+                                        </p>
+                                        </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/listnav/listnav.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $('#demoSix').listnav({
+            filterSelector: '.last-name',
+            includeNums: true,
+            removeDisabled: true,
+            includeOther: true,
+            //initLetter: 'a',
+            allText: '全部'
+        });
+
+        $('#updateCityCache').click(function(){
+            if(confirm("您确定要更新前台缓存吗？不要随意操作！")){
+                location.href="/basicinfo/updateVipCityData";
+            }
+        })
+        // 智能分单城市
+        $('#fendan-city').click(function(){
+            $(this).toggleClass('cur');
+
+            var str = '';
+            if($(this).hasClass('cur')){
+                str += '?fen=1';
+            }else{
+                str += '?fen=2';
+            }
+
+            if($('#mark-city').hasClass('cur')){
+                str += '&ptype=1';
+            }else{
+                str += '&ptype=2';
+            }
+            window.location.href = '/basicinfo/index/'+str;
+        })
+        // 未标记南方/北方
+        $('#mark-city').click(function(){
+            $(this).toggleClass('cur');
+            var str = '';
+            if($(this).hasClass('cur')){
+                str += '?ptype=1';
+            }else{
+                str += '?ptype=2';
+            }
+
+            if($('#fendan-city').hasClass('cur')){
+                str += '&fen=1';
+            }else{
+                str += '&fen=2';
+            }
+            window.location.href = '/basicinfo/index/'+str;
+        })
+    </script>
+</block>

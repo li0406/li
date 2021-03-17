@@ -1,0 +1,124 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市有效单统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市有效单统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">城市有效单统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <form id="searchform" action="/orderstat/ordereffective" method="get">
+                            <div class="col-sm-2" style="margin-top:10px">
+                                <input type="text" class="form-control datepicker" name="month" placeholder="开始时间" value="{$Think.get.end}">
+                            </div>
+                            <div class="col-sm-1" style="margin-top:10px">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="box-tools"></div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <div class="col-sm-7">
+                            <table class="table table-hover table-bordered " id="all_list">
+                                <thead >
+                                    <tr style="font-size:14px;color:#000">
+                                        <th>日期</th>
+                                        <th>分单</th>
+                                        <th>赠单</th>
+                                        <th>有会员城市发单量</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataLists">
+                                    <volist name="list" id="vo">
+                                        <tr>
+                                            <td>{$vo.date}</td>
+                                            <td><a href="javascript:void(0)" data-date="{$vo.date}" data-type="1">{$vo.fen}</a></td>
+                                            <td><a href="javascript:void(0)" data-date="{$vo.date}" data-type="2">{$vo.zen}</a></td>
+                                            <td>{$vo.count|default="-"}</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>合计</td>
+                                        <td>{$all.fen}</td>
+                                        <td>{$all.zen}</td>
+                                        <td>{$all.all}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+            <p>分单/赠单详细页面:点击分单/赠单数量进入详细页面</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $("#city").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("#city").select2("val", "{$Think.get.city_id}");
+
+    $(".datepicker").datepicker({
+          format:"yyyy-mm",
+          minViewMode:1,
+          autoclose:true
+    });
+
+    $('#all_list').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+       "bSort":false
+    });
+
+    $("#dataLists a").click(function(event) {
+        window.location.href = "/orderstat/ordereffectivedetails?type="+$(this).attr("data-type")+"&date="+$(this).attr("data-date");
+    });
+    </script>
+</block>

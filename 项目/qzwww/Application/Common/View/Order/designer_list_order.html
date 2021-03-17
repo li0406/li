@@ -1,0 +1,168 @@
+<link rel="stylesheet" href="/assets/common/css/designer-order.css?v={:C('STATIC_VERSION')}">
+<div class="beijingyiny"></div>
+<div class="appointment clearfix">
+  <div class="fl sheji-teach">
+    <div class="designer-info-box">
+      <div class="info-img">
+        <img src="{:C('QINIU_SCHEME')}://{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}" id="avatar">
+      </div>
+      <div class="info-introduce">
+        <p class="info-name-indroduce">
+          <span class="info-name" id="info-name"></span>
+          <span class="info-post" id="info-post"></span>
+        </p>
+        <p class="desinger-info">
+          <span class="info-title">设计收费：</span>
+          <span class="info-price" id="info-price">{$userInfo.designer.cost}</span>
+        </p>
+        <p class="desinger-info">
+          <span class="info-title">从业时间：</span>
+          <span class="info-time" id="info-years">{$userInfo.designer.jobtime}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="fr c-result-box">
+    <div class="c-form">
+      <div class="guanbiniu">×</div>
+      <div class="yuyue_title"><img src="/assets/common/image/design.png" />预约-高级设计师</div>
+      <div class="yuyue-des">丰富的设计经验，严谨的设计态度</div>
+      <div class="yuyue-des" style="margin-bottom: 10px;">为您打造一个满意的家</div>
+      <div class="waikuangz">
+        <select id="c_cs" class="freesj_cs" name="cs"></select>
+        <select id="c_qy" class="freesj_qy" name="qy"></select>
+      </div>
+      <div class="c_errorArea-tit"></div>
+      <div class="waikuangz">
+        <input class="chenghushuru" type="text" name="c_name" placeholder="怎么称呼您？">
+      </div>
+      <div class="c_errorName-tit"></div>
+      <div class="waikuangz">
+        <input class="shoujihaoma" type="text" name="c_tel" placeholder="请输入您的手机号" maxlength="11">
+      </div>
+      <div class="c_errorTel-tit"></div>
+      <!--S-免责声明-->
+      <div class="disclamer-line">
+        <span class="disclamer-check pull-left" data-checked="true"><i class="fa fa-check"></i></span>
+        <span class="disclamer-text pull-left">我已阅读并同意齐装网的</span>
+        <a href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/about/disclamer" target="_blank" class="pull-left" rel="nofollow"><span>《免责声明》</span></a>
+      </div>
+      <div class="lijiyuyue">
+        <button class="entrust" id="entrust">立即申请</button>
+      </div>
+    </div>
+    <div class="c-result">
+      <div class="guanbiniu">×</div>
+      <h3 class="c-result-title">已收到设计申请啦~</h3>
+      <div class="c-result-img">
+        <img src="/assets/sub/designer/img/img-shoudaoshenqing.png" alt="">
+      </div>
+      <div class="c-result-content">
+        <p>稍后会有专人客服联系您</p>
+        <p>确认相关设计方案</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(function () {
+    var $appointment = $('.appointment'),
+        $beijingyiny = $(".beijingyiny");
+    $appointment.find('.guanbiniu').on('click', function () {
+      $appointment.fadeOut(0)
+      $beijingyiny.fadeOut(0)
+      $(".pt").fadeOut(0)
+    })
+    $(".c_errorArea-tit").html('');
+    $(".c_errorName-tit").html('');
+    $(".c_errorTel-tit").html('');
+    $(".de-button").click(function(event) {
+      var avatar = $(this).attr("data-icon"),
+        name = $(this).attr("data-name"),
+        zw = $(this).attr("data-zw"),
+        price = $(this).attr("data-cost"),
+        years = $(this).attr("data-jobtime");
+      $('#info-name').text(name)
+
+      $('#info-price').text(price)
+      $('#info-years').text(years)
+      if(avatar.indexOf('default_logo.png') > -1) {
+        $('#avatar').attr('src', avatar).css('height', '100%')
+      }else{
+        $('#avatar').attr('src', avatar).css('height', 'auto')
+      }
+      if(!zw) {
+        $('#info-post').fadeOut(0)
+      }else{
+        $('#info-post').text(zw).fadeIn(0)
+      }
+      $appointment.fadeIn(0)
+      $beijingyiny.fadeIn(0)
+      $(".c-form").fadeIn(0).find('input').val('')
+      $(".c-result").fadeOut(0)
+    });
+  })
+
+  // 委托设计
+  $("#entrust").click(function(event) {
+    var _this = $(this);
+    if(!checkDisclamer(".c-form")){
+      return false;
+    }
+    window.order({
+      wrap:'.desinger-order',
+      extra:{
+        source: '19061032' ,//这里额外参数只有source，获取的是wrap属性下的class包含order-item的参数的值
+        cs: $('#c_cs').val(),
+        qx: $('#c_qy').val(),
+        name: $('input[name="c_name"]').val(),
+        tel: $('input[name="c_tel"]').val()
+      },
+      success:function(res, status, xhr){
+        if (res.status == 1) {
+          $(".c-form").fadeOut(0)
+          $(".c-result").fadeIn(0)
+        }else{
+          $.pt({
+            target: $('#entrust'),
+            content: res.info,
+            width: 'auto'
+          });
+        }
+      },
+      validate:function(item, value, method, info){
+        if ('cs' == item && 'notempty' == method) {
+          $(".c_errorArea-tit").html('请选择城市');
+          return false;
+        }
+        if ('qx' == item && 'notempty' == method) {
+          $(".c_errorArea-tit").html('请选择城市');
+          return false;
+        }else{
+          $(".c_errorArea-tit").html('');
+        }
+        if ('name' == item && 'notempty' == method) {
+          $(".c_errorName-tit").html('请输入您的姓名');
+          return false;
+        }
+        if ('name' == item && 'isword' == method) {
+          $(".c_errorName-tit").html('请输入正确的姓名');
+          return false;
+        }else{
+          $(".c_errorName-tit").html('');
+        }
+        if ('tel' == item && 'notempty' == method) {
+          $(".c_errorTel-tit").html('请输入联系方式');
+          return false;
+        }
+        if ('tel' == item && 'ismobile' == method) {
+          $(".c_errorTel-tit").html('请输入正确手机号');
+          return false;
+        }else{
+          $(".c_errorTel-tit").html('');
+        }
+        return true;
+      }
+    });
+  });
+</script>

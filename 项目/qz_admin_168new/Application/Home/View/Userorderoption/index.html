@@ -1,0 +1,341 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link href="/assets/home/userorderoption/css/index.css?v={:C('STATIC_VERSION')}" rel="stylesheet"
+          type="text/css"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>会员订单设置</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-9">
+                                    <div class="col-xs-2">
+                                        <div>会员名称：</div>
+                                        <input type="text" name="condition" class="form-control clear-target"
+                                               placeholder="会员ID/会员简称" value="{$_GET['condition']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市：</div>
+                                        <select id="city" name="city" type="text" class="form-control select2">
+                                            <option value="0">请选择</option>
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>开始日期：</div>
+                                        <input type="text" name="begin" class="form-control datepicker clear-target"
+                                               placeholder="选择日期" value="{$_GET['begin']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>结束日期：</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target"
+                                               placeholder="选择日期" value="{$_GET['end']}">
+                                    </div>
+                                    <div class="col-xs-2" style="margin-top:18px;">
+                                        <button type="submit" id="user_order_search" class="btn btn-info">查询</button>
+                                        <button type="button" id="user_order_add" class="btn btn-info">新增</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">会员订单设置</h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>会员ID</th>
+                                <th>会员简称</th>
+                                <th>所在城市</th>
+                                <th>开始日期</th>
+                                <th>结束日期</th>
+                                <th>所需订单</th>
+                                <th>操作人</th>
+                                <th>添加时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$key+1}</td>
+                                    <td>{$vo.company_id}</td>
+                                    <td>{$vo.jc}</td>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.start_time|date='Y-m-d H:i:s',###}</td>
+                                    <td>{$vo.end_time|date='Y-m-d H:i:s',###}</td>
+                                    <td>
+                                        <if condition="$vo.all_rob eq 1">全部抢单</if>
+                                        <!--<if condition="$vo.get_other_company eq 1">（包含相邻城市）-->
+                                            <!--<else/>-->
+                                            <!--（不包含相邻城市）-->
+                                        <!--</if>-->
+                                        <if condition="$vo.all_give eq 1 && $vo.all_rob eq 1">、</if>
+                                        <if condition="$vo.all_give eq 1">全部赠单</if>
+                                    </td>
+                                    <td>{$vo.op_name}</td>
+                                    <td>{$vo.add_time|date='Y-m-d H:i:s',###}</td>
+                                    <td class="blu">
+                                        <span class="edit" data-id="{$vo.id}">编辑</span>&nbsp;|
+                                        <span class="delete" data-id="{$vo.id}">删除</span>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--编辑模态框-->
+    <div class="cover">
+        <div class="order_option_modal">
+            <div class="order_option_modal_top">
+                <label>新增</label>
+                <span class="closed">×</span>
+            </div>
+            <from id="order_option">
+                <div class="order_option_modal_center">
+                    <div>
+                        <span>会员ID：</span>
+                        <input type="text" name="custom_id" class="form-control">
+                    </div>
+                    <div>
+                        <span>会员简称：</span>
+                        <input type="text" name="custom_jc" class="form-control" disabled>
+                    </div>
+                    <div>
+                        <span>所在城市：</span>
+                        <input type="text" name="custom_cs" class="form-control" disabled>
+                    </div>
+                    <div>
+                        <span>开始日期：</span>
+                        <input type="text" name="custom_begin" class="form-control datepicker">
+                    </div>
+                    <div>
+                        <span>结束日期：</span>
+                        <input type="text" name="custom_end" class="form-control datepicker">
+                    </div>
+                    <div class="modal-choose">
+                        <span>所需订单：</span>
+                        <input type="checkbox" id="custom_allorder" name="custom_allorder" value="1"><label
+                            for="custom_allorder"
+                            class="mar-r">全部抢单</label>
+                    </div>
+                    <div class="modal-choose">
+                        <span></span>
+                        <input type="checkbox" id="zengdan_allorder" name="zengdan_allorder" value="1"><label
+                            for="zengdan_allorder">全部赠单</label>
+                        <label class="red">（请先确保该会员公司可以接受赠单）</label>
+                    </div>
+                </div>
+                <input type="hidden" name="edit_id">
+                <div class="order_option_modal_bottom">
+                    <button type="button" class="save-btn">保存</button>
+                    <button type="button" class="cancel-btn">取消</button>
+                </div>
+            </from>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('.select2').select2();
+            $("#city").select2('val', '{$_GET["city"]}');
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+            //点击编辑按钮
+            $(".edit").click(function () {
+                $.ajax({
+                    url: '/userorderoption/getCompanyOrderOptionInfo/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: $(this).attr('data-id')
+                    }
+                })
+                    .done(function (data) {
+                        if (data.error_code == 0) {
+                            $("input[name='custom_id']").attr('disabled', 'true')
+                            $("input[name='edit_id']").val(data.info.id)
+                            $("input[name='custom_id']").val(data.info.company_id)
+                            $("input[name='custom_jc']").val(data.info.jc)
+                            $("input[name='custom_cs']").val(data.info.cname)
+                            $("input[name='custom_begin']").val(data.info.start)
+                            $("input[name='custom_end']").val(data.info.end)
+                            $("input[name='custom_allorder'][value=" + data.info.all_rob + "]").prop('checked', true)
+                            $("input[name='xianglin-cs'][value='" + data.info.get_other_company + "']").prop('checked', true)
+                            $("input[name='zengdan_allorder'][value='" + data.info.all_give + "']").prop('checked', true)
+                            $(".cover").show();
+                            $("body").css({"overflow": "hidden", "height": "100%"});
+                            $(".order_option_modal_top label").html("编辑");
+                        } else {
+                            alert(data.error_msg);
+                        }
+                    });
+            });
+            //点击删除按钮
+            $(".delete").click(function () {
+                if(confirm("是否确认删除?")){
+                    $.ajax({
+                        url: '/userorderoption/delOrderOption/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: $(this).attr('data-id')
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.error_code == 0) {
+                                window.location.href = '/userorderoption';
+                            } else {
+                                alert(data.error_msg);
+                            }
+                        });
+                }
+            });
+            //点击新增按钮
+            $("#user_order_add").click(function () {
+                $("input[name='edit_id']").val('')
+                $("input[name='custom_id']").removeAttr('disabled')
+                $(".cover").show();
+                $("body").css({"overflow": "hidden", "height": "100%"});
+                $(".order_option_modal_top label").html("新增");
+            });
+            //点击弹框的取消或关闭按钮
+            $(".closed,.cancel-btn").click(function () {
+                if ($(".order_option_modal_top label").html() == "新增") {
+                    $(".order_option_modal_center input").val("");
+                    $(".order_option_modal_center input[type=checkbox]").attr("checked", false);
+                    $(".order_option_modal_center input[type=radio]").attr("checked", false);
+                }
+                $(".cover").hide();
+                $("body").css({"overflow": "inherit", "height": "100%"});
+            });
+            $("body").on("click", "#user_order_search", function () {
+                var begin = $("input[name=begin]").val();
+                var end = $("input[name=end]").val();
+
+                if (end == "" && begin != "") {
+                    alert("请选择结束时间");
+                    return false;
+                } else if (end != "" && begin == "") {
+                    alert("请选择开始时间");
+                    return false;
+                } else if (toTimeStamp(begin) > toTimeStamp(end)) {
+                    alert("结束时间不能小于开始时间");
+                    return false;
+                }
+            });
+            $("body").on("click", ".save-btn", function () {
+                var begin = $("input[name=custom_begin]").val();
+                var end = $("input[name=custom_end]").val();
+                var company_id = $("input[name=custom_id]").val();
+                var all_rob = $("input[name=custom_allorder]:checked").val();
+                var other_company = '';
+                var all_give = $("input[name=zengdan_allorder]:checked").val();
+                var edit_id = $("input[name=edit_id]").val();
+                if (end == "" && begin != "") {
+                    alert("请选择结束时间");
+                    return false;
+                } else if (end != "" && begin == "") {
+                    alert("请选择开始时间");
+                    return false;
+                } else if(end == "" && begin == ""){
+                    alert("请选择开始时间");
+                    return false;
+                }else if (toTimeStamp(begin) > toTimeStamp(end)) {
+                    alert("结束时间不能小于开始时间");
+                    return false;
+                }
+                if(!all_rob && !all_give){
+                    alert("请选择所需订单");
+                    return false;
+                }
+                $.ajax({
+                    url: '/userorderoption/saveOrderOption/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        company_id: company_id,
+                        begin: begin,
+                        end: end,
+                        all_rob: all_rob,
+                        other_company: other_company,
+                        all_give: all_give,
+                        edit_id: edit_id,
+                    }
+                })
+                    .done(function (data) {
+                        if (data.error_code == 0) {
+                            window.location.href = '/userorderoption';
+                        } else {
+                            alert(data.error_msg);
+                        }
+                    });
+            });
+
+            //查询装修公司信息
+            $("input[name=custom_id]").on('blur', function () {
+                var data = $(this).val();
+                if (data.length > 0) {
+                    $.ajax({
+                        url: '/userorderoption/getCompanyInfo/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {company_id: data}
+                    })
+                        .done(function (data) {
+                            if (data.error_code == 0) {
+                                $("input[name='custom_jc']").val(data.info.jc)
+                                $("input[name='custom_cs']").val(data.info.cname)
+                            } else {
+                                alert(data.error_msg);
+                            }
+                        });
+                }
+            });
+            $("input[name=custom_id]").on('click', function () {
+                $("input[name='custom_jc']").val('')
+                $("input[name='custom_cs']").val('')
+            });
+
+            function toTimeStamp(time) {
+                if (time != undefined) {
+                    var date = time;
+                    date = date.substring(0, 19);
+                    date = date.replace(/-/g, '/');
+                    var timestamp = new Date(date).getTime();
+                    return timestamp;
+                }
+            }
+        })
+    </script>
+</block>

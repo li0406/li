@@ -1,0 +1,237 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>各部门业绩统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+<section class="content-header">
+    <h1><small class="ftjz">各部门业绩统计</small></h1>
+</section>
+<section class="content">
+    <div class="box">
+        <div class="box-header with-border">
+            <div class="box-title">条件查询</div>
+        </div>
+        <div class="box-body">
+            <div class="col-xs-6 no-padding">
+                <span class="pull-left lh-34">时间选择：</span>
+                <div class="col-xs-4">
+                    <input type="text" name="date" class="form-control datepicker btn-flat" value="{$main.year}">
+                </div>
+                <div class="col-xs-2">
+                    <button id="search" data-triger="#search" class="btn btn-info"><i class="fa fa-search"></i> 查询</button>
+                </div>
+            </div>
+            <div class="from-item pull-right">
+                <button id="export" type="button" class="btn btn-primary">导出</button>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header with-border">
+            <div class="btn-group">
+                <button type="button" class="btn btn-info">
+                    推广部
+                </button>
+                <button type="button" class="btn btn-default">
+                    <a href="/market/gbmyjtjllb/">流量部</a>
+                </button>
+            </div>
+            <div class="col-xs-2 pull-right ">
+                <select name="select-list" class="form-control">
+                    <option value="#ff-table">付费分单量业绩</option>
+                    <option value="#mf-table">免费分单量业绩</option>
+                </select>
+            </div>
+            <div class="pull-right lh-34">数据项选择:</div>
+        </div>
+        <div id="ff-table" class="box-body box-table">
+            <table class="table table-bordered table-hover dataTable no-footer" role="grid">
+                <thead>
+                    <tr role="row">
+                        <th>月份</th>
+                        <th>推广指标</th>
+                        <th>推广完成</th>
+                        <th>完成率</th>
+                        <th>天数</th>
+                        <th>时间占比</th>
+                        <th>时间进度</th>
+                        <th>完成进度</th>
+                        <th>累计高于时间进度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="main.time" id="vi">
+                        <if condition="strtotime($vi) lt time()">
+                            <tr role="row" class="odd">
+                                <td class="bold">{$vi}</td>
+                                <td>{$main['list_ff'][$vi]['plan_ff']}</td>
+                                <td>{$main['list_ff'][$vi]['wc']}</td>
+                                <td>{$main['list_ff'][$vi]['wcl']}%</td>
+                                <td>{$main['list_ff'][$vi]['days']}</td>
+                                <td>{$main['list_ff'][$vi]['days_rate']}%</td>
+                                <td>{$main['list_ff'][$vi]['days_progress']}%</td>
+                                <td>{$main['list_ff'][$vi]['wc_progress']}%</td>
+                                <td>{$main['list_ff'][$vi]['overflow']}%</td>
+                            </tr>
+                        <else />
+                            <tr role="row" class="odd">
+                                <td class="bold">{$vi}</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                        </if>
+                    </volist>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="bold">财年合计</td>
+                        <td>{$main.summary.ff}</td>
+                        <td>{$main.summary.ff_wc}</td>
+                        <td>{:number_format(($main['summary']['ff_wc'] / $main['summary']['ff'] * 100), 2)}%</td>
+                        <td>{$main.past_days}</td>
+                        <td>{:number_format(($main['past_days'] / $main['year_days'] * 100), 2)}%</td>
+                        <td>{$main['list_ff'][date('Y-m')]['days_progress']}%</td>
+                        <td>{$main['list_ff'][date('Y-m')]['wc_progress']}%</td>
+                        <td>{$main['list_ff'][date('Y-m')]['overflow']}%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div id="mf-table" class="box-body box-table hidden">
+            <table class="table table-bordered table-hover dataTable no-footer" role="grid">
+                <thead>
+                    <tr role="row">
+                        <th>月份</th>
+                        <th>推广指标</th>
+                        <th>推广完成</th>
+                        <th>完成率</th>
+                        <th>天数</th>
+                        <th>时间占比</th>
+                        <th>时间进度</th>
+                        <th>完成进度</th>
+                        <th>累计高于时间进度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="main.time" id="vi">
+                        <if condition="strtotime($vi) lt time()">
+                            <tr role="row" class="odd">
+                                <td class="bold">{$vi}</td>
+                                <td>{$main['list_mf'][$vi]['plan_mf']}</td>
+                                <td>{$main['list_mf'][$vi]['wc']}</td>
+                                <td>{$main['list_mf'][$vi]['wcl']}%</td>
+                                <td>{$main['list_mf'][$vi]['days']}</td>
+                                <td>{$main['list_mf'][$vi]['days_rate']}%</td>
+                                <td>{$main['list_mf'][$vi]['days_progress']}%</td>
+                                <td>{$main['list_mf'][$vi]['wc_progress']}%</td>
+                                <td>{$main['list_mf'][$vi]['overflow']}%</td>
+                            </tr>
+                        <else />
+                            <tr role="row" class="odd">
+                                <td class="bold">{$vi}</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                        </if>
+                    </volist>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="bold">财年合计</td>
+                        <td>{$main.summary.mf}</td>
+                        <td>{$main.summary.mf_wc}</td>
+                        <td>{:number_format(($main['summary']['mf_wc'] / $main['summary']['mf'] * 100), 2)}%</td>
+                        <td>{$main.past_days}</td>
+                        <td>{:number_format(($main['past_days'] / $main['year_days'] * 100), 2)}%</td>
+                        <td>{$main['list_mf'][date('Y-m')]['days_progress']}%</td>
+                        <td>{$main['list_mf'][date('Y-m')]['wc_progress']}%</td>
+                        <td>{$main['list_mf'][date('Y-m')]['overflow']}%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+        $('#search').click(function(event) {
+            window.location.href = '/market/gbmyjtjtgb/?year=' + $('.datepicker').val();
+        });
+        $('.datepicker').datetimepicker({
+            format:'yyyy',
+            startView:4,
+            minView:4,
+            autoclose:true,
+            pickerPosition:'bottom-left'
+        });
+        $('select[name=select-list]').change(function(event) {
+            $('.box-table').addClass('hidden');
+            $($(this).val()).removeClass('hidden');
+        });
+        $("#export").click(function(event) {
+            var obj = $('select[name=select-list]').val();
+            var title = $('select[name=select-list]')[0].options[$('select[name=select-list]')[0].selectedIndex].text;
+            var colums = [];
+            var data =[];
+            $(obj + ' table thead th').each(function(){
+                var sub =[];
+                sub["text"] = $(this).html().trim();
+                colums.push(sub);
+            });
+            data.push(colums);
+            $(obj + ' table tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(obj + ' table tfoot tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data:data,
+                title:'推广部' + title,
+                url:'/export/download/'
+            });
+        });
+    })
+</script>
+</block>

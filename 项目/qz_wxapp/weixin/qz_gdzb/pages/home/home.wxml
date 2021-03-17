@@ -1,0 +1,104 @@
+<!--pages/home/home.wxml-->
+<view class='header'>
+  <view class='search_img'>
+    <image src='../../img/sou.png'></image>
+  </view>
+  <view bindtap='toSearch' class='tosearch'>
+    小区/业主姓名
+  </view>
+</view>
+<view class='tab'>
+  <view class='tab-item' bindtap='changeType' data-type='true' data-state='1'>
+    <text class='{{tabActive?"tab-active":""}}'>施工中</text>
+  </view>
+  <view class='tab-item' bindtap='changeType' data-type='false' data-state='2'>
+    <text class='{{!tabActive?"tab-active":""}}' >已竣工</text>
+  </view>
+</view>
+<block wx:if="{{isData}}">
+  <view class='construct-box'>
+    <view class='construct-list' wx:for="{{getInfoList}}" wx:key='index'>
+      <view class='construct-content'>
+        <view bindtap="toDetail" data-id='{{item.id}}'>
+          <view class='construct-tit'>
+            <image src='../../img/jianzhu.png'></image>
+            <text>{{item.xiaoqu ? item.xiaoqu : '--'}}</text>
+          </view>
+          <view class='construct-detail'>
+            <text class='detail-list'>
+              <text>业主：</text>
+              <text class='detail-col'>{{item.yz_name}}</text>
+            </text>
+            <text class='detail-list'>
+              <text>区域：</text>
+              <text class='detail-col'>{{item.area_name}}</text>
+            </text>
+          </view>
+          <view class='construct-detail'>
+            <text class='detail-list'>
+              <text>户型：</text>
+              <text class='detail-col' wx:if='{{item.order_type == 1}}'>{{item.huxing_name ? item.huxing_name : '--'}}</text>
+              <text class='detail-col' wx:if='{{item.order_type == 2}}'>{{item.huxing_other_name ? item.huxing_other_name : '--'}}</text>
+            </text>
+            <text class='detail-list'>
+              <text>面积：</text>
+              <text class='detail-col'>{{item.mianji ? item.mianji : '--'}}<text wx:if='{{item.mianji}}'>㎡</text></text>
+            </text>
+          </view>
+          <view class='construct-detail detail-address'>
+            <text>
+              <text>地址：</text>
+              <text class='detail-col'>{{item.dz ? item.dz : '--'}}</text>
+            </text>
+          </view>
+          <view class='construct-detail'>
+            <text>
+              <text>施工编号：</text>
+              <text class='detail-col'>{{item.code}}</text>
+            </text>
+          </view>
+          <view class='construct-detail' wx:if='{{tabActive}}'>
+            <text>
+              <text>上次施工：</text>
+              <text class='detail-col' wx:if='{{item.last_work ? true : false}}'>{{item.last_work}}</text>
+              <text class='detail-col' wx:if='{{item.last_time ? true : false}}'>{{item.last_time}}</text>
+              <text class='detail-col' wx:if='{{item.last_work ? false : true}}'>暂无施工信息</text>
+            </text>
+          </view>
+          <view class='construct-detail' wx:if='{{!tabActive}}'>
+            <text>
+              <text>竣工时间</text>
+              <text class='detail-col'>{{item.endtime}}</text>
+            </text>
+          </view>
+        </view>
+        <view class='construct-btn'>
+          <text class='complete-btn' bindtap='completeConfirm' wx:if='{{tabActive}}' data-id='{{item.id}}'>竣工</text>
+          <text class='addinfo-btn' bindtap="toSgDetail" data-id='{{item.id}}'>新增施工信息</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</block>
+<block>
+  <view wx:if="{{!isData}}" class='nodata'>
+    <image src='../../img/nodata.png'></image>
+    <view class='nodata-tit'>{{infoShow}}</view>
+    <view class='nodata-content' wx:if='{{tabActive}}'>请点击底部绑定施工编号按钮，绑定施工信息</view>
+  </view>
+</block>
+<view class='bind-order' bindtap='chooseOrder' wx:if='{{tabActive}}'>
+  <image src='../../img/add.png'></image>
+  <text>绑定施工编号</text>
+</view>
+<view class='bindorder-mask' wx:if='{{isShow}}'>
+  <view class='bindorder-modal'>
+    <view class='bindorder-tit'>绑定施工编号</view>
+    <text class='closeBtn' bindtap='closeOrder'>×</text>
+    <input placeholder='请输入施工编号' bindinput="searchOrder" name='order' value='{{orderInfo}}' focus='true'></input>
+    <view class='bindorde-des'>请联系所在装修公司负责人给出对应工地的施工编号</view>
+    <button bindtap='bindconfirm'>确认绑定</button>
+  </view>
+</view>
+<view class='errorTit' wx:if='{{errorTit}}'>{{errorInfo}}</view>
+

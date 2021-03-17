@@ -1,0 +1,169 @@
+<script type="text/javascript" src="//assets.qizuang.com/g-js/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="/assets/mobile/calculator/css/calculator.css?v={:C('STATIC_VERSION')}">
+<script src="/assets/mobile/calculator/js/calculator.js?v={:C('STATIC_VERSION')}"></script>
+<div id="calculator">
+    <div class="calculator-container">
+        <div class="calculator-area">
+            <div class="closed"><i id="calculator-closed" class="fa fa-times"></i></div>
+            <div class="calculator-item">
+                <table class="calculator-title">
+                    <td style="font-size:0.2rem"> <span>10</span> </td><td>秒免费申请 <span>4</span> 份户型设计</td>
+                </table>
+                <p style="padding-bottom: 0">今天已有 <span id="num">{:fbrs()}</span> 位业主获取了免费设计</p>
+            </div>
+            <form action="">
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="number" placeholder="输入您的房屋面积" name="mianji" class="mianji"/><div class="danwei">㎡</div>
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <gt name="mapUseInfo.vipcount" value="0">
+                            <button id="showCityPicker4" class="c-zb-city" type="button">
+                                <i class="site fa fa-map-marker"></i>
+                                <empty name="info.cityarea">
+                                请选择您所在的区域
+                                <else />
+                                {$mapUseInfo.provincefull} {$mapUseInfo.name} {$info.cityarea.name}
+                                </empty>
+                            </button>
+                            <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                            <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                            <input type="hidden" name="area" data-id="{$info.cityarea.id}">
+                        <else />
+                            <button id="showCityPicker4" class="c-zb-city" type="button">
+                                <i class="site fa fa-map-marker"></i>
+                                请选择您所在的区域
+                            </button>
+                            <input type="hidden" name="province" data-id="">
+                            <input type="hidden" name="city" data-id="">
+                            <input type="hidden" name="area" data-id="">
+                        </gt>
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="text" placeholder="输入您的小区" name="xiaoqu">
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="text" minlength="11" maxlength="11" placeholder="输入手机号码获取设计方案" name="tel">
+                    </div>
+                </div>
+                <div class="calculator-item" id="shenming2" style="width: 80%;margin: 0 auto;">
+                        <input type="checkbox" checked="checked" id="mianze2">
+                        <label for="mianze2" id="check2" class="fa fa-check"></label>
+                        <span>我已阅读并同意齐装网的</span>
+                        <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box border-none" style="margin-top:2px;margin-bottom: 10px;">
+                         <div id="btnSave">免费申请</div>
+                    </div>
+                </div>
+            </form>
+            <div class="prompt">
+                <span>*</span>  为了您的权益，您的隐私将被严格保密
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //切换免责对勾
+    $("#check2").click(function(){
+        $(this).toggleClass('fa-check');
+    });
+    $("#calculator #btnSave").click(function(event) {
+        var container = $(this).parents("#calculator");
+
+        var mianji = $("input[name=mianji]",container).val();
+        var xiaoqu = $("input[name=xiaoqu]",container).val();
+        var tel = $("input[name=tel]",container).val();
+
+        var cs = $('input[name=city]',container).attr('data-id');
+        var qx = $('input[name=area]',container).attr('data-id');
+
+
+
+        if (!App.validate.run(mianji)) {
+           $("input[name=mianji]",container).focus();
+            alert("请输入您的面积");
+            return false;
+        }
+        if (xiaoqu == '') {
+            alert("亲，您还没有填写小区名称！");
+            return false;
+        }
+        var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+        if (re.test(xiaoqu)) {
+            $("input[name=xiaoqu]",container).focus();
+            alert("亲，请填写正确的小区名称！");
+            return false;
+        }
+
+        if (!App.validate.run(xiaoqu)) {
+            $("input[name=xiaoqu]",container).focus();
+            alert("请输入您的小区");
+            return false;
+        }
+        if (!App.validate.run(tel)) {
+            $("input[name=tel]",container).focus();
+            $("input[name=tel]",container).val('');
+            alert("请填写正确的手机号码 ^_^!");
+            return false;
+        }else{
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if(!reg.test(tel)){
+                $("input[name=tel]",container).focus();
+                $("input[name=tel]",container).val('');
+                alert("请填写正确的手机号码 ^_^!");
+                return false;
+            }
+        }
+
+        if('' == cs || '' == qx){
+            alert('请选择您所在的区域 ≧▽≦')
+            return false;
+        }
+
+        var checked2 = $("#mianze2").is(':checked');
+        if(!checked2){
+            alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+            return false;
+        }
+
+        window.order({
+            extra:{
+                cs: cs,
+                qx: qx,
+                mianji:$("input[name=mianji]",container).val(),
+                tel:$("input[name=tel]",container).val(),
+                xiaoqu:$("input[name=xiaoqu]",container).val(),
+                source: '341',
+                step:'sheji'
+            },
+            submitBtn:{
+                className:$(this),
+                type:'btn'
+            },
+            error:function(){
+                return true;
+            },
+            success:function(data, status, xhr){
+                if(data.status == 1){
+                     $("body").find("#calculator").remove();
+                     // $("body").append(data.data.tmp);
+                     location.reload();
+                }else{
+                    alert(data.info);
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+</script>

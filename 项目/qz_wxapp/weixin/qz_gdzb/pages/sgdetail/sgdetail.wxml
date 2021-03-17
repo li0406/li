@@ -1,0 +1,117 @@
+<scroll-view class="l-mian" scroll-top='{{topNum}}' scroll-y lower-threshold="100" bindscrolltolower="lower" bindscroll="scrollBig">
+  <view class="contain nobottom">
+    <view class='c-name'>
+      <image class='img' src='../../img/jianzhu.png'></image>
+      <view class='n-con'>{{info.xiaoqu ? info.xiaoqu: '--' }}</view>
+    </view>
+    <view class='c-one'>
+      <view class='c-line'>业主：
+        <text>{{info.yz_name}}</text>
+      </view>
+      <view class='c-line'>区域：
+        <text>{{info.area_name}}</text>
+      </view>
+    </view>
+    <view class='c-one'>
+      <view class='c-line' wx:if="{{info.order_type == 1}}">户型：
+        <text>{{info.huxing_name ? info.huxing_name : '--' }}</text>
+      </view>
+      <view class='c-line' wx:if="{{info.order_type == 2}}">户型：
+        <text>{{info.huxing_other_name ? info.huxing_other_name : '--' }}</text>
+      </view>
+      <view class='c-line'>面积：
+        <text>{{info.mianji ? info.mianji+'㎡' : '--' }} </text>
+      </view>
+    </view>
+    <view class='c-one'>
+      <view class='c-xia'>施工编号：
+        <text>{{info.code}}</text>
+      </view>
+    </view>
+    <view class='c-one'>
+      <view class='c-xia'>地址：
+        <text>{{info.dz ? info.dz : '--'}}</text>
+      </view>
+    </view>
+  </view>
+  <view class='contain detail'>
+    <image class='d-logo' src="{{company_info.logo ? company_info.logo : '../../img/comlogo.png'}}"></image>
+    <view class='d-xq'>
+      <view class='x-title'>{{company_info.qc}}</view>
+      <view class='x-des'>地址：{{company_info.dz}}</view>
+    </view>
+  </view>
+  <view class="contain sify {{scrollInfo>300 ? 'page-group-position' : ''}}" wx:if="{{stepLen>0}}">
+    <scroll-view class="scroll-view_H" scroll-x="true" bindscroll="scroll" style="width: 100%">
+      <view class="scroll-view-item_H {{step==''?'active':''}}" bindtap="chooseItem" data-cid="">全部</view>
+      <view class="scroll-view-item_H {{step==item.id?'active':''}}" wx:for="{{step_list}}" wx:for-index="key" wx:key="{{item.id}}" bindtap="chooseItem" data-step="{{item.id}}">{{item.name}}</view>
+    </scroll-view>
+  </view>
+  <view class='goods' wx:if="{{stepLen>0}}">
+    <view class='g-item' wx:for="{{stepList}}" wx:for-index="key" wx:key="{{item.id}}">
+      <view class='g-top'>
+        <view class='t-left'>
+          <image src="{{item.wx_headimg ? item.wx_headimg : '../../img/hulogo.png' }}"></image>
+          <view class='name'>{{item.wx_nickname}}</view>
+        </view>
+        <view class='t-right'>
+          <view>{{item.step_name}}</view>
+          <view class='time'>{{item.created_date}}</view>
+        </view>
+      </view>
+      <view class='g-bottom'>
+        <view class='des'>
+          {{item.content}}
+        </view>
+        <view class='tu' wx:if="{{item.videoInfo ==1}}">
+          <image wx:for="{{item.media_list}}" wx:for-item="it" wx:key="{{it.id}}" bindtap="tuClick" data-id="{{item.id}}" data-tid="{{it.id}}" mode="{{item.tuLen == 1 ? 'widthFix' : 'aspectFill'}}" class="tu1 {{item.tuLen==1 ? '' : item.tuLen ==2 || item.tuLen == 4 ? 'tu2':'tu3'}}"
+            src='{{it.url_full}}'></image>
+          <image class='tu3 clear'></image>
+        </view>
+        <view class='tu' wx:if="{{item.videoInfo ==2}}">
+          <video wx:for="{{item.media_list}}" wx:for-item="it" wx:key="{{it.id}}" class="tu1" src='{{it.url_full}}'></video>
+        </view>
+        <view class='edit' wx:if="{{item.infoName && item.step != 17}}">
+          <view class='e-xiu' bindtap='xiuDetail' data-id='{{item.id}}'>
+            <image src='../../img/bian.png'></image>
+            <view>修改</view>
+          </view>
+          <view class='e-san' bindtap='sanDetail' data-id='{{item.id}}'>
+            <image src='../../img/shan.png'></image>
+            <view>删除</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="btm-nomore" wx:if="{{nomore!=2}}">{{nomore==1?'':nomore==3?'没有更多记录了···':'请求中'}}</view>
+  </view>
+  <view class='nodata' wx:if="{{stepLen==0}}">
+    <image src='../../img/over.png'></image>
+    <view>暂无施工信息</view>
+  </view>
+</scroll-view>
+<view class='handle' wx:if="{{info.state == 1}}">
+  <view class='h-item' bindtap='junGong'>竣工</view>
+  <view class='line'></view>
+  <view class='h-item add' bindtap="toItem" data-url="../addsg/addsg">新增施工信息</view>
+</view>
+<view class='handle' wx:if="{{info.state == 2}}">
+  <view class='add' bindtap="toItem" data-url="../addsg/addsg">新增施工信息</view>
+</view>
+
+<view class="swiper-mask" wx:if="{{largeView}}" bindtap='getLargeImage'>
+  <view class="swiper-wrap" style="height:100%">
+    <swiper duration="500" interval="500" circular="true" current="{{currentIndex-1}}" bindchange="swiperChange" style="height:100%">
+      <block wx:for="{{swiperData}}" wx:for-index="key" wx:key="{{item.id}}">
+        <swiper-item item-id="{{item.id}}">
+          <view style="height:100%;position:relative;">
+            <image src="{{item.url_full}}" mode="widthFix" style="width:100%;position:absolute;left:0px;right:0px;top:0px;bottom:0px;margin:auto;"></image>
+          </view>
+        </swiper-item>
+      </block>
+    </swiper>
+  </view>
+  <view class="num-box">
+    {{currentIndex}}/{{swiperLen}}
+  </view>
+</view>

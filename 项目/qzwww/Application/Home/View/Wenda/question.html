@@ -1,0 +1,653 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>{$ask.title}-齐装网装修问答</title>
+<meta name="keywords" content="{$ask.keywords}" />
+<meta name="description" content="{$ask.description}" />
+<meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/wenda/x{$ask.id}.html" />
+<notempty name="info.header.canonical">
+<link rel="alternate" media="only screen and (max-width: 640px)" href="{$alternate}">
+<link rel="canonical" href="{$info.header.canonical}"/>
+</notempty>
+
+<include file="Index:resource" />
+<link rel="stylesheet" href="{$static_host}/assets/home/ask/css/ask.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="{$static_host}/assets/common/css/step.css?v={:C('STATIC_VERSION')}" />
+<!--[if IE 7]>
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+<![endif]-->
+</head>
+<body>
+{$headerTmp}
+<div class="wrap oflow">
+    <div class="bread position"><a href="/wenda/">在线问答</a> &gt;
+    <a href="/wenda/ask-{$ask.cid}/">{$ask.category_name}</a> &gt; <notempty name="ask.sub_category" ><a href="/wenda/ask-{$ask.sub_category}/">{$ask.sub_category_name}</a> &gt; </notempty>
+        <!--{$ask.title}-->正文
+    </div>
+  <div class="leftsider">
+  {$hlBaoJia}
+    <div class="qestion-main">
+        <h1>{$ask.title}</h1>
+        <div class="clearfix"></div>
+        <if condition="$ask.is_modify eq '1'">
+        <ul class="question-info">
+            <li>地点：{$ask.area} - {$ask.city}</li>
+            <li>浏览次数：{$ask.views}</li>
+            <li>提问时间：{$ask.post_time}</li>
+            {$ask.modify_time}
+        </ul>
+            <p class="img">
+        <volist name="qImg" id="v">
+            <img src="{:C('QINIU_SCHEME')}://{:C('QINIU_DOMAIN')}/{$v.path}" alt="{$ask.title}" >
+        </volist>
+        </p>
+        <div class="answer-edit">
+            <h2>修改问题内容</h2>
+            <textarea id="contents">{$ask.content}</textarea>
+            <input type="hidden" name="qid" id="qid" value="{$ask.id}">
+            <p>
+                <span class="info">还可以输入<i>1500</i>个字</span><a href="javascript:;" id="addAskBtn" >确定修改</a>
+                <div id="popup-captcha"></div>
+            </p>
+        </div>
+        <else />
+        <p>{$ask.content}</p>
+        <p class="img">
+        <volist name="qImg" id="v">
+            <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.path}" alt="{$ask.title}" >
+        </volist>
+        </p>
+
+        <ul class="question-info">
+            <li>提问者：{$ask.username}</li>
+            <if condition="$ask['bm'] neq ''">
+                <li>地点：<a href="{$SCHEME_HOST.scheme_full}{$ask['bm']}.{:C('QZ_YUMING')}" title="{$ask.city}装修网" target="_blank"  rel="nofollow">{$ask.area} - {$ask.city}</a></li>
+            <else/>
+                <li>地点：{$ask.area} - {$ask.city}</li>
+            </if>
+            <li>浏览次数：{$ask.views}</li>
+            <li>提问时间：{$ask.post_time}</li>
+        </ul>
+        <p>{$ask.modify_note}</p>
+        <egt name="ask.is_anwser" value="1">
+        <div class="answer-edit" style="display: none;">
+            <h2>我来帮他解答</h2>
+            <textarea id="contents"></textarea>
+            <input type="hidden" name="qid" id="qid" value="{$ask.id}">
+            <p>
+                <span class="info">还可以输入<i>1500</i>个字</span><a href="javascript:;" id="addAskBtn" >提交</a>
+                <div id="popup-captcha"></div>
+            </p>
+        </div>
+        </egt>
+        </if>
+    </div>
+    <div class="ask-key-word">
+      <ul class="key-word">
+          <volist name="keywords" id="vo">
+              <li><a href="/zhishi/{$vo.id}/" target="_blank">{$vo.name}</a></li>
+          </volist>
+      </ul>
+    </div>
+    <present name="bestAnwser">
+    <div class="best-answer-box">
+        <div class="h1">精选答案</div>
+        <div class="tips"></div>
+        <div class="anwser-user-box">
+            <div class="user-head"><a href="{$bestAnwser.url}" target="_blank"><img src="{$bestAnwser.logo}"></a></div>
+            <p><a href="{$bestAnwser.url}" target="_blank">{$bestAnwser.name}</a></p>
+            <p><em>回答数：{$bestAnwser.ask_anwsers}</em><em>被采纳数：{$bestAnwser.ask_adopts}</em><i class="pull-right">{$bestAnwser.post_time}</i></p>
+        </div>
+        <p class="ask-one-p">{$bestAnwser.content}</p>
+        <p class="imgbox">
+        <volist name="bestAnwser['img']" id="vo">
+        <a href="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.path}" target="_blank" title="{$ask.title}">
+        <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.path}" alt="{$ask.title}" ></a>
+        </volist>
+        </p>
+        <p class="send-p">
+            <span onclick="showCommentBox('{$bestAnwser.name}',{$bestAnwser.id});" data-id="{$bestAnwser.id}"><i class="icon-comments-alt mr10"></i>回复
+                <if condition="$bestAnwser.comments NEQ '0'">（{$bestAnwser.comments}）</if></span>&nbsp;{$bestAnwser.is_agree}
+        </p>
+        <div class="resend" id="commentBox_{$bestAnwser.id}" style="display:none">
+            <textarea class="commentText" id="commentContent_{$bestAnwser.id}"></textarea>
+            <p><a href="javascript:;" id="reply_{$bestAnwser.id}">确认回复</a>
+            <div id="popup_captcha_{$bestAnwser.id}"></div></p>
+        </div>
+        <volist name="bestAnwserComments" id="v">
+        <dl class="de-mydairy-mes">
+            <dt><span class="user-head pull-left"><img src="{$v.logo}"></span>
+                <div class="diary-message">
+                <p><span class="blue mr10">
+                <if condition="$v.jc neq 'null' ">{$v.jc}<else />{$v.name}</if>
+                </span>{$v.post_time} </p><p class="gray">{$v.content}</p>
+                </div>
+            </dt>
+        </dl>
+        </volist>
+        </div>
+    </present>
+
+        <egt name="ask.anwserCount" value="1">
+        <div class="other-answer-box">
+            <div class="h1">已有回答<span>({$ask.anwsers}条)</span></div>
+            <ul class="other-answer-list">
+                <volist name="anwserList" id="v">
+                    <notempty name="v.content">
+                        <li>
+                            <div class="anwser-user-box">
+                            <div class="user-head"><a rel="nofollow" href="{$v.url}" target="_blank"><img src="{$v.logo}"></a></div>
+                                <p><a rel="nofollow" href="{$v.url}"  target="_blank">{$v.name}</a></p>
+<!--                                <p><em>回答数：{$v.ask_anwsers}</em><em>被采纳数：{$v.ask_adopts}</em><i class="pull-right">{$v.post_time}</i></p>-->
+                            </div>
+                            <p class="ask-one-p">{$v.content}</p>
+                            <p class="imgbox">
+                                <volist name="v[img]" id="vo">
+                                    <a href="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.path}" target="_blank" title="{$ask.title}">
+                                    <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.path}" alt="{$ask.title}" ></a>
+                                </volist>
+                            </p>
+                            <p class="send-p"><span onclick="showCommentBox('{$v.name}',{$v.id});"><i class="icon-comments-alt mr10"></i>回复<if condition="$v.comments NEQ '0'">（{$v.comments}）</if></span>&nbsp;
+                            {$v.is_agree}
+                            <span class="pull-right">{$v.adopt_btn}</span>
+                            </p>
+                            <div class="resend" id="commentBox_{$v.id}"  data-id="{$v.id}" style="display:none">
+                                <textarea class="commentText" id="commentContent_{$v.id}"></textarea>
+                                <p><a href="javascript:;" id="reply_{$v.id}">确认回复</a>
+                                <div id="popup_captcha_{$v.id}"></div>
+                                </p>
+                            </div>
+                            <volist name="v[comment_list]" id="vo">
+                            <dl class="de-mydairy-mes">
+                                <dt><span class="user-head pull-left"><img src="{$vo.logo}"></span>
+                                <div class="diary-message">
+                                <p><span class="blue mr10">
+                                    <if condition="$vo.jc neq 'null' ">{$vo.jc}<else />{$vo.name}</if>
+                                </span>{$vo.post_time}
+                                <!--<a class="pull-right" href="#">回复</a>--></p>
+                                <p class="gray">{$vo.content}</p>
+                                </div>
+                                </dt>
+                            </dl>
+                            </volist>
+                        </li>
+                    </notempty>
+                </volist>
+            </ul>
+        </div>
+        </egt>
+
+      <if condition="!empty($info['recommend_company_bottom'])">
+          <div class="company-recommend-left">
+              <p class="recommend-left-tit">答案不满意？问问下面的专业人士</p>
+              <div class="recommend-left-box">
+                  <ul>
+                      <volist name="info.recommend_company_bottom" id="vo">
+                          <li>
+                              <div class="recommend-left-top">
+                                  <div class="company-left-logo">
+                                      <img src="{$vo.logo}" />
+                                  </div>
+                                  <p  class="recommend-left-name">{$vo.jc|default=''}</p>
+                                  <p class="recommend-left-common">{$vo.city_name|default=''}{$vo.area_name|default=''}</p>
+                                  <p class="recommend-left-common">已有<span style="color: #D02825">{$vo.ping|default=0}</span>位业主点评过该公司</p>
+                              </div>
+                              <a href="{$SCHEME_HOST.scheme_full}{$vo.bm}.{$SCHEME_HOST.domain}/company_home/{$vo.id}/" class="zixun-left">向TA咨询</a>
+                          </li>
+                      </volist>
+                  </ul>
+              </div>
+
+          </div>
+      </if>
+
+        <div class="ask-tit mt50">相关问题</div>
+        <ul class="same-list">
+        <volist name="relatedAnwser" id="v">
+            <li>
+                <a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a>
+                <div class="pull-right">
+                    <b>已有 <em class="red">{$v.anwsers}</em> 个回答</b>
+                    <b class="ml20">{$v.post_time|timeFormat}</b>
+                </div>
+            </li>
+        </volist>
+        </ul>
+
+        <div class="content-list">
+            <ul class="label-list">
+                <volist name="tags" id="tag" key="k">
+                    <li>{$tag.name|mb_substr=###,0,6}</li>
+                </volist>
+            </ul>
+            <div class="label-list-content">
+                <volist name="tags" id="tag" key="k">
+                    <ul>
+                        <volist name="tag.child" id="v" key="k">
+                            <a href="{$v.url}" target="_blank">{$v.name|mb_substr=###,0,10}</a>
+                        </volist>
+                    </ul>
+                </volist>
+            </div>
+        </div>
+    </div>
+
+    <div class="rightsider">
+        <div class="company-recommend">
+            <if condition="!empty($info['recommend_company_right'])">
+                <p class="recommend-tit">擅长解决该问题的企业</p>
+                <volist name="info.recommend_company_right" id="vo">
+                    <div class="company-list">
+                        <div class="company-top">
+                            <div class="company-logo">
+                                <img src="{$vo.logo}" />
+                            </div>
+                            <p class="company-name">{$vo.jc|default=''}</p>
+                            <p class="company-location company-common">{$vo.city_name|default=''}{$vo.area_name|default=''}</p>
+                            <p class="total-num">已有<span style="color: #D02825">{$vo.ping|default=0}</span>位业主点评过该公司</p>
+                        </div>
+                        <a href="{$SCHEME_HOST.scheme_full}{$vo.bm}.{$SCHEME_HOST.domain}/company_home/{$vo.id}/" class="company-zixun">向TA咨询</a>
+                    </div>
+                </volist>
+            </if>
+        </div>
+        <div class="wenwen" style="display: none;">
+            <span class="h1">没有想要的回答？试试这里</span>
+            <form class="form-horizontal" action="/wenda/addquestion" method="post" id="quickAskFrom">
+                <textarea name="title" type="text" placeholder="快速提问，10分钟获取答案"></textarea>
+                <input type="hidden" name="quickask" value="id_{$ask.id}">
+                <p id="quickTextCount">还可以输入<i>30</i>字<a id="quickAsk" href="javascript:void(0)">确定</a></p>
+            </form>
+        </div>
+        <div class="mt20">
+        {$orderTmp}
+        </div>
+
+        <div class="ask_hot mt20">
+        <div class="ask_hot_tit"><span>热门问答</span></div>
+        <div class="ask_hot_list">
+            <ul>
+                <volist name="info.hotAsk" id="v">
+                <li><i class="circle_point"></i><a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a></li>
+                </volist>
+            </ul>
+        </div>
+        </div>
+        <div class="ask_hot mt20">
+            <div class="ask_hot_tit"><span>最新问答</span></div>
+            <div class="ask_hot_list">
+                <ul>
+                    <volist name="newestAnswerAsk" id="v">
+                        <li><i class="circle_point"></i><a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a></li>
+                    </volist>
+                </ul>
+            </div>
+        </div>
+        <div class="right-box mt20">
+            <div class="right-tit">大家都在问</div>
+            <ul class="wait-ask">
+            <volist name="anLeastOneAnswerAsk" id="v">
+                <li>
+                    <a href="/wenda/x{$v.id}.html" target="_blank">{$v.title}</a>
+                </li>
+            </volist>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="pt pt-down" id="tipbox">
+    <div class="cont" style="width: auto; height: auto;"></div>
+    <b class="out" style="bottom: -8px; left: 83.5px; top: auto; right: auto;"></b>
+    <b class="in" style="top: auto; left: 84.5px; bottom: -7px; right: auto;"></b>
+</div>
+<input id="safecode" type="hidden" value="{$safecode}" />
+<input id="safekey" type="hidden" value="{$safekey}" />
+{$freetel}
+<include file="Index:footer" />
+<include file="Common@lotteryDraw/index" />
+<include file="Common@Order/bottom_fadan" type="2" />
+<include file="Common@CooperationAd/index" />
+</body>
+</html>
+<script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    // 设计报价滚动到1450px 悬浮
+      $(window).scroll(function(event) {
+          if($(window).scrollTop() >= 1400){
+              $('.secbox_form').css({
+                  "width":"260px",
+                  "margin-top":"0",
+                  "position":"fixed",
+                  "top":"85px",
+                  "zIndex":2
+              });
+          }else{
+              $('.secbox_form').css({
+                  "margin-top":"15px",
+                  "position":"",
+                  "top":"",
+                  "zIndex":''
+              });
+          }
+      });
+var shen = null,
+shi = null;
+shen = citys["shen"];
+shi = citys["shi"];
+
+function showCommentBox(username,aid){
+    var commit = $("#commentBox_" + aid);
+    if (commit.css('display') == 'none'){
+        commit.show();
+        commit.find('.commentText').focus();
+    } else {
+        commit.hide();
+    }
+}
+
+$(".resend a").click(function () {
+    var aid = $(this).parents(".resend").attr("data-id");
+
+    if(isNaN(aid)){
+        alert('参数不正确');
+    }
+    var contents = $("#commentContent_" + aid).val();
+    if(contents == ""){
+        alert("说点什么吧？");
+        return false;
+    }
+    if(contents.length > 1500){
+        alert('内容超出限制！');
+        return false;
+    }
+
+    initG(aid,contents);
+    //
+    // var validate = captchaObj.getValidate();
+    // if (!validate) {
+    //     alert('请先完成验证！');
+    //     return;
+    // }
+
+    // $.ajax({
+    //     url: "/gtverify/verifylogin/", // 进行二次验证
+    //     type: "post",
+    //     dataType: "json",
+    //     data: {
+    //         // 二次验证所需的三个值
+    //         geetest_challenge: validate.geetest_challenge,
+    //         geetest_validate: validate.geetest_validate,
+    //         geetest_seccode: validate.geetest_seccode,
+    //     },
+    //     success: function (result) {
+    //         if (result.status == 1) {
+    //             submitComment(aid,contents);
+    //         }
+    //     }
+    // });
+});
+
+var initG = function(id,contents){
+    $.ajax({
+        url: '/initgeet/',
+        type: 'POST',
+        dataType: 'JSON',
+        data:{
+            scence:3
+        }
+    })
+    .done(function(data) {
+        initGeetest({
+            // 以下配置参数来自服务端 SDK
+            gt: data.data.gt,
+            challenge: data.data.challenge,
+            offline: !data.data.success,
+            new_captcha: true,
+            product: 'bind'
+        }, function (captchaObj) {
+            captchaObj.reset();
+            captchaObj.onReady(function(){
+                //验证码ready之后才能调用verify方法显示验证码
+                captchaObj.verify();
+            }).onSuccess(function(){
+                var validate = captchaObj.getValidate();
+                $.ajax({
+                    url: '/verifygeetest',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        geetest_challenge: validate.geetest_challenge,
+                        geetest_validate: validate.geetest_validate,
+                        geetest_seccode: validate.geetest_seccode,
+                        scence:3
+                    }
+                }).done(function(data) {
+                    if (data.status == 1) {
+                        $.ajax({
+                            url: '/wenda/addcomment/',
+                            type: 'POST',
+                            dataType: 'html',
+                            timeout:3000,
+                            data:{
+                                id:id,
+                                contents:contents
+                            },
+                            success:function(msg){
+                                if(msg == "true" ){
+                                    window.location.reload();
+                                }else{
+                                    if(msg == 'login'){
+                                        loginBox();
+                                    }else{
+                                        alert(msg);
+                                    }
+                                }
+                            },
+                            error:function() {
+                                alert("系统异常！");
+                            }
+                        });
+                    } else{
+                        alert('验证不通过！');
+                    }
+                });
+
+            }).onError(function(){
+                alert("发送失败,请稍后再试!")
+            })
+        })
+    });
+}
+
+function loginBox(){
+    $.ajax({
+        url: '/login/',
+        type: 'POST',
+        dataType: 'JSON',
+        data:{
+            ssid:"{$ssid}"
+        }
+    })
+    .done(function(data){
+        if(data.status == 1){
+            window.location.href="{$SCHEME_HOST.scheme_full}{:C('QZ_PASSPORT_ACCOUNT_DONAMES')}/login?redirect="+window.location.href;
+        }
+    }).fail(function(xhr) {
+        alert('操作失败,请稍后再试！');
+    });
+}
+
+$(document).ready(function(){
+
+    //提交
+    $("#quickAsk").click(function(){
+        <if condition="$ask.is_login eq 'needlogin' ">
+        window.location.href="{$SCHEME_HOST.scheme_full}{:C('QZ_PASSPORT_ACCOUNT_DONAMES')}/login?redirect="+window.location.href;
+            <else />
+            $('#quickAskFrom').submit();
+        </if> 
+    });
+
+    $("#contents").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length >1500){
+            var offset = length - 1500;
+            $(".answer-edit p span").html('<span style="color:red">您已经超出了 '+offset+" 字</span>");
+        }else{
+            $(".answer-edit p span i").html(1500 - length);
+        }
+    });
+
+<if condition="$ask.is_login eq 'needlogin' ">
+    $("#contents").click(function(){
+        loginBox();
+    });
+</if>
+
+    $("textarea[name=title]").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length >30){
+            var offset = 30 - length;
+            $("#quickTextCount i").html('<span style="color:red"> '+offset+' </span>');
+        }else{
+            $("#quickTextCount i").html(30 - length);
+        }
+    });
+    //赞同
+    $(".agree_act").click(function(){
+        var aid = $(this).attr('id');
+        if(aid == ""){
+            alert("系统异常！");
+            return false;
+        }
+        var new_agree = $(this).find('span').html();
+
+        if(new_agree == undefined){
+            return false;
+        }
+
+        var agreeBox = $(this);
+        $.ajax({
+            url: '/wenda/askaction/',
+            type: 'POST',
+            dataType: 'html',
+            timeout:3000,
+            data:{
+                id:aid,
+                act:'agree'
+            },
+            success:function(msg){
+                if(msg == "true" ){
+                    agreeBox.addClass('red');
+                    new_agree = parseInt(new_agree) + 1;
+                    agreeBox.html('<i class="icon-heart"></i> 已赞（' + new_agree  + '）</span>');
+                }else{
+                    if(msg == 'login'){
+                        loginBox();
+                    }else{
+                        alert(msg);
+                    }
+            }
+        },
+        error:function() {
+            alert("系统异常！");
+        }
+        })
+    });
+
+    //采纳
+    $(".adopt_act").click(function(){
+        var aid = $(this).attr('id');
+        if(aid == ""){
+            alert("系统异常！");
+            return false;
+        }
+        $.ajax({
+            url: '/wenda/askaction/',
+            type: 'POST',
+            dataType: 'html',
+            timeout:3000,
+            data:{
+                id:aid,
+                act:'adopt'
+            },
+            success:function(msg){
+                if(msg == "true" ){
+                    window.location.reload();
+                }else{
+                    if(msg == 'login'){
+                        //TODO
+                        loginBox();
+                    }else{
+                        alert(msg);
+                    }
+            }
+        },
+        error:function() {
+            alert("系统异常！");
+        }
+        })
+    });
+
+});
+
+$(function () {
+    $(".label-list li").eq(0).addClass("current-list");
+    $(".label-list-content ul").eq(0).addClass("item_active");
+    if($(".label-list li").length == 0){
+        $(".label-list").hide();
+    }
+    $(".label-list li").hover(function () {
+        var index = $(this).index();
+        $(this).addClass("current-list").siblings().removeClass("current-list");
+        if($(".label-list-content ul").length == 0){
+            $(".label-list-content").hide();
+        }else{
+            $(".label-list-content ul").eq(index).addClass("item_active").siblings().removeClass("item_active");
+        }
+    })
+})
+$(function () {
+    // 异业合作广告显示
+    $(document).on('click', function (event) {
+        var $target = $(event.target),
+            className = $target[0].className && $target[0].className.toLowerCase(),
+            id = $target[0].id && $target[0].id.toLowerCase(),
+            source = 23;
+        if(className == 'butt') {
+            $.ajax({
+                url: "/getPartnerad",
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    source: source,
+                }
+            }).done(function (res) {
+                if(res.error_code == 0) {
+                    $(".cooperation_box").find(".ad-area").html('<img src="'+res.data.pc_img+'">')
+                    $(".cooperation_box").find("#ad-link").attr('href', res.data.pc_url)
+                    $(".cooperation_box").find("#ad-link").on('click', function () {
+                        countAdPv(res.data.id)
+                    })
+                    $(".cooperation_ad_mask").fadeIn(0)
+                    $(".cooperation_box").fadeIn(0)
+                }
+            })
+        }
+    })
+})
+</script>
+<!--1353-->
+<script type="application/ld+json">
+    {
+        "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+        "@id": "{$baidu.url}",
+        "appid": "1575859058891466",
+        "title": "{$baidu.title}",
+        "pubDate": "{$baidu.addtime}",
+        "upDate": "{$baidu.optime}"
+    }
+</script>

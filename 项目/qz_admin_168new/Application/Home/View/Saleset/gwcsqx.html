@@ -1,0 +1,423 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>岗位城市权限 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+    <style type="text/css">
+        .sel-width {width:130px;}
+    </style>
+</block>
+<block name="content">
+    <div class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="overflow-x">
+                        <div class="overflow-box" style="width: 1350px;">
+                            <div class="box-header">
+                                <h3><i class="xs-icon gangwei-icon"></i> 岗位城市权限</h3>
+                                <form id="searchform" action="" method="get" class="form-horizontal">
+                                    <div class="from-list" id="searchBox">
+                                        <div class="from-item">
+                                            <span>城市：</span>
+                                            <select name="city" class="select2 select2-offscree sel-width" id="city">
+                                                <option value="">请选择</option>
+                                                <volist name="cityList" id="v">
+                                                    <option value="{$v.id}">{$v.city}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>部门：</span>
+                                            <select type="text" class="info-item" name="dept">
+                                                <option value="">请选择</option>
+                                                <option value="1">商务</option>
+                                                <option value="2">外销</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>拓师长：</span>
+                                            <select name="dev_division" class="managerList">
+                                                <option>请选择ss</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>拓团长：</span>
+                                            <select name="dev_regiment" class="managerList">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>城市经理：</span>
+                                            <select name="dev_manage" class="managerList">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>开站状态：</span>
+                                            <select type="text" name="open_status">
+                                                <option value="">请选择</option>
+                                                <option value="1">已开站</option>
+                                                <option value="2">未开站</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>城市级别：</span>
+                                            <select type="text" name="level">
+                                                <option value="">请选择</option>
+                                                <option value="1">地级市</option>
+                                                <option value="2">区</option>
+                                                <option value="3">县城</option>
+                                                <option value="4">县级市</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>军长：</span>
+                                            <select name="corps" class="managerList" data-id="4">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>品师长：</span>
+                                            <select name="brand_division" class="managerList">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>品团长：</span>
+                                            <select name="brand_regiment" class="managerList">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>品牌师：</span>
+                                            <select name="brand_manage" class="managerList">
+                                                <option>请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <input type="hidden" value="0" name="dl">
+                                            <button type="submit" class="search-btn xs-btn" style="margin: 0;margin-left: 118px;">查询</button>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="search">
+                                        <input type="hidden" value="0" name="dl">
+                                        <button type="submit" class="search-btn xs-btn pull-right">查询</button>
+                                    </div> -->
+                                </form>
+                                <div class="select-role-input" style="margin-top:20px;">显示：
+                                    品师长<input type="checkbox" value="品师长">
+                                    品团长<input type="checkbox" value="品团长">
+                                    品牌师<input type="checkbox" value="品牌师">
+                                    拓师长<input type="checkbox" value="拓师长">
+                                    拓团长<input type="checkbox" value="拓团长">
+                                    城市经理<input type="checkbox" value="城市经理">
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <div class="todo-item">
+                                    <div class="pull-right position-relative">
+                                        <button class="xs-btn hideLoading" id="exportExcel">导出</button>
+                                        <button class="xs-btn log-info">操作日志</button>
+                                        <i class="xs-icon zhushi-icon"></i>
+                                        <div class="zhushi-info">
+                                            <p>本页为权限设置的显示页面，可以查看所有人的管辖城市</p>
+                                            <p>本页数据以城市为唯一标识，其他数据均为城市附属信息；每页显示20条记录</p>
+                                            <p>1、上方区域显示的是筛选条件，当选择相应的筛选条件并点击<查询>按钮时，列表内显示相应的搜索结果信息。</p>
+                                            <p>2、此页面仅展示查询用，不可修改，展示的数据是销售系统-权限设置里的数据。</p>
+                                            <p>3、只有总裁、副总裁、司令、军长，助理可以访问。所有角色只能查看自己管辖的城市。</p>
+                                            <p>4，“助理”栏显示为空白，则对应的城市助理看不到，需在系统“权限设置”里给助理添加城市权限</p>
+                                            <p>5，本页的作用，以此检查权限设置等相关信息的准确性，以此来修改相关设置，正确的应是每格中全部有明确的文字或数值，比如“默认情况”不属于明确文字。</p>
+                                            <p>6，城市对应的各个岗位和目前实际一致，否则为错误</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-item-count">
+                                    <p>
+                                        <span class="count-list">共<i>{$info.pageCount}</i>条</span>
+                                        <span class="sel-count-list"></span>
+                                        <a href="javascript:;" class="xiugai">修改</a>
+                                        <a href="javascript:;" class="quxiao">取消</a>
+                                    </p>
+                                </div>
+                                <table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                                    <thead class="thead1" style="width: 1350px;">
+                                        <tr role="row">
+                                            <th></th>
+                                            <th title="城市">城市</th>
+                                            <th title="开站状态">开站状态</th>
+                                            <th title="城市级别">城市级别</th>
+                                            <th title="部门">部门 <a href="javascript:;"><i class="fa fa-long-arrow-down"></i><i class="fa fa-long-arrow-up"></i></a></th>
+                                            <th title="重点系数">重点系数</th>
+                                            <th title="军长">军长</th>
+                                            <th class="role-hide" title="拓师长">拓师长</th>
+                                            <th class="role-hide" title="拓团长">拓团长</th>
+                                            <th class="role-hide" title="城市经理">城市经理</th>
+                                            <th class="role-hide" title="品师长">品师长</th>
+                                            <th class="role-hide" title="品团长">品团长</th>
+                                            <th class="role-hide" title="品牌师">品牌师</th>
+                                            <th title="助理">助理</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="thead2" style="width: 1350px;">
+                                        <tr role="row">
+                                            <th></th>
+                                            <th title="城市">城市</th>
+                                            <th title="开站状态">开站状态</th>
+                                            <th title="城市级别">城市级别</th>
+                                            <th title="部门">部门 <a href="javascript:;"><i class="fa fa-long-arrow-down"></i><i class="fa fa-long-arrow-up"></i></a></th>
+                                            <th title="重点系数">重点系数</th>
+                                            <th title="军长">军长</th>
+                                            <th class="role-hide" title="拓师长">拓师长</th>
+                                            <th class="role-hide" title="拓团长">拓团长</th>
+                                            <th class="role-hide" title="城市经理">城市经理</th>
+                                            <th class="role-hide" title="品师长">品师长</th>
+                                            <th class="role-hide" title="品团长">品团长</th>
+                                            <th class="role-hide" title="品牌师">品牌师</th>
+                                            <th title="助理">助理</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <volist name="list" id="v">
+                                        <tr role="row" class="odd">
+                                            <td><p>{$v.id}</p></td>
+                                            <td><span class="city-text">{$v.city}</span>
+                                            </td>
+                                            <td>
+                                                <span class="zhan-text"><if condition="$v.open_status EQ '1' ">已开站<else />未开站</if></span>
+                                            </td>
+                                            <td><span class="attr-text">
+                                                <switch name="v.level" >
+                                                    <case value="1">地级市</case>
+                                                    <case value="2">区</case>
+                                                    <case value="3">县城</case>
+                                                    <case value="4">县级市</case>
+                                                    <default />-
+                                                </switch></span>
+                                            </td>
+                                            <td><span class="bumen-text"><if condition="$v.dept EQ '1' ">商务<else />外销</if></span>
+                                            </td>
+                                            <td><span class="num-text">{$v.ratio}</span></td>
+                                            <td><span class="junzhang-text">{$v.corps|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="tuoshizhang-text">{$v.dev_division|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="tuotuanzhang-text">{$v.dev_regiment|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="chengshijingli-text">{$v.dev_manage|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="pinshizhang-text">{$v.brand_division|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="pintuanzhang-text">{$v.brand_regiment|getSaleUserName}</span></td>
+                                            <td class="role-hide"><span class="pinpaishi-text">{$v.brand_manage|getSaleUserName}</span></td>
+                                            <td><span class="pinpaishi-text">{$v.assistant|getSaleUserName}</span></td>
+                                        </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                                <div class="city-list-pop">
+                                    <volist name="list" id="v">
+                                        <div>{$v.city}</div>
+                                    </volist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer text-center">{$page}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content section3">
+        <div class="pop">
+            <div class="pop-boxx">
+                <div class="boxx-header">批量修改<i class="fa fa-close pull-right"></i></div>
+                <div class="boxx-body text-center">
+                    <div class="ziduan">
+                        <span>将字段</span><input type="text" name="" value="重点系数" class="zi-name">
+                        <p>该字段必填，只可批量赋予新值</p>
+                    </div>
+                    <div class="sel-add-plus">
+                        <p>
+                            <label><input type="radio" name="" class="new-val"><span>新值</span></label>
+                            <label><input type="radio" name="" class="clear-val"><span>清空数据</span></label>
+                        </p>
+                    </div>
+                    <div class="ziduan-val">
+                        <span>修改为</span><input type="text" class="zi-val">
+                    </div>
+                </div>
+                <div class="boxx-footer text-center">
+                    <button class="xs-btn close-btn">取消</button>
+                    <button class="xs-btn sure-btn">确定</button>
+                </div>
+            </div>
+        </div>
+        <!--公用记录模态框-->
+        <style type="text/css">.width-800{width: 800px;}</style>
+        <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog width-800">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                        </button>
+                        <h4 class="modal-title">记录列表</h4>
+                    </div>
+                    <div class="modal-body common-model-content"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $(".select2").select2();
+            $("#city").select2("val","{$keyword.city}");
+            //填充帐号
+            $('#searchBox .managerList').html('<option value="">请选择</option><volist name="saleUsers" id="v"><option value="{$v.id}">{$v.user}</option></volist>');
+
+            {$info.selected}
+
+
+            $('#exportExcel').on('click', function(){
+                $('input[name="dl"]').val('1');
+                $('#searchform').submit();
+                setTimeout(hideProgress,1000);
+                $('input[name="dl"]').val('0');
+            });
+
+            // 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = null;
+            $(document).on('scroll',function(){
+                $('.city-list-pop').css({'top':378-$(this).scrollTop()});
+                if($(document).scrollTop() >= 321){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                if($(this).scrollLeft()>130){
+                    $('.city-list-pop').show();
+                }else{
+                    $('.city-list-pop').hide();
+                }
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+            });
+            // 岗位选择
+            var arr =[0,1,2,3,4,5],
+                allheight = 1350,
+                selectLen = 0;
+            $('.select-role-input input').each(function(index, el) { // 清空选择
+                $(this).removeAttr('show');
+                $(this).prop('checked',false);
+            });
+            $('.select-role-input input').on('click',function(){
+                if($(this).prop('checked')){
+                    $(this).attr('show','show');
+                    selectLen = $('.select-role-input input[show="show"]').length;
+                }else{
+                    $(this).removeAttr('show');
+                    selectLen = $('.select-role-input input[show="show"]').length;
+                }
+
+                $('#reset-table tbody tr').each(function(index, el) {
+                    for(var i = 0;i<arr.length;i++){
+                        $(el).find('td').eq(arr[i]+7).hide();
+                    }
+                });
+                for(var i = 0;i<arr.length;i++){
+                    $('#reset-table .thead1 tr th').eq(arr[i]+7).hide();
+                    $('#reset-table .thead2 tr th').eq(arr[i]+7).hide();
+                }
+
+                $('.overflow-box,#reset-table .thead1,#reset-table .thead2').width(1350);
+                $('.overflow-box,#reset-table .thead1,#reset-table .thead2').width(allheight + selectLen*130);
+
+                $('.select-role-input input[show="show"]').each(function(index, el) {
+                    if($(el).val() == '品师长'){
+                         autoSelect(10);
+                     }else if($(el).val() =='品团长'){
+                         autoSelect(11);
+                     }else if($(el).val() =='品牌师'){
+                         autoSelect(12);
+                     }else if($(el).val() =='拓师长'){
+                         autoSelect(7);
+                     }else if($(el).val() =='拓团长'){
+                         autoSelect(8);
+                     }else if($(el).val() =='城市经理'){
+                         autoSelect(9);
+                     }
+                });
+            });
+            function autoSelect(num){
+                $('#reset-table .thead1 tr th').eq(num).css('display','block');
+                $('#reset-table .thead2 tr th').eq(num).css('display','block');
+                $('#reset-table tbody tr').each(function(index, el) {
+                    $(el).find('td').eq(num).show();
+                });
+            }
+
+            //历史记录
+            /*S-最近操作记录*/
+            $('.log-info').unbind().bind('click',function(event) {
+                $.ajax({
+                    url: '/salesetting/gethistorylog/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:1
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    } else {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.info);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+
+        })
+
+
+    </script>
+</block>

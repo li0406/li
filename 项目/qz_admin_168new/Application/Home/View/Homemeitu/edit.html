@@ -1,0 +1,254 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>{$title}-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装修效果图管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homemeitu">装修效果图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <!-- <div class="box-header with-border">
+              <h3 class="box-title">Horizontal Form</h3>
+            </div> -->
+            <!-- S form -->
+            <form class="form-horizontal" id="form" method="post" action="">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">标题：</label>
+                        <div class="col-sm-5">
+                            <input type="text" name="search" id="search" >
+                            <input type="hidden" name="title" id="title" >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">链接：</label>
+                        <div class="col-sm-5">
+                            <input class="form-control" id="url" name="url" value="{$info.url}">
+                        </div>
+                    </div>
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">位置：</label>
+                            <div class="col-sm-1">
+                                <!-- <input class="form-control" id="sort" name="sort" value="{$info.sort}"> -->
+                                <select class="form-control" id="sort" name="sort">
+                                    <option value="1" >1</option>
+                                    <option value="2" >2</option>
+                                    <option value="3" >3</option>
+                                    <option value="4" >4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">上传图片：</label>
+                        <div class="col-sm-5">
+                            <input id="uploadPic" type="file" value="{$info.img_url}" multiple/>
+                            <input type="hidden" name="files" value="{$info.img_url}" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <div class="col-xs-4">
+                        <div class="alert alert-warning alert-dismissible fade in " role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            <strong>注意事项：</strong> 广告图片大小限制：请不要超出100K！
+                            <p><strong>尺寸：</strong>&nbsp;位置1：597*440&nbsp;&nbsp;&nbsp;&nbsp;位置2：341*215</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;位置3：341*215&nbsp;&nbsp;&nbsp;&nbsp;位置4：251*440</p>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <button type="submit" id="submit" class="btn btn-success button">保存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back()"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                    </div>
+
+                    <div class="alert alert-warning alert-dismissible fade in" role="alert" style="position:absolute; right:10px; top:60px;">
+                        <!-- <div class="" style="float:left; width:200px; height:166px; background:#dd4b39;">
+                            <p style="text-align: center;vertical-align:center;">位置1</p>
+                        </div>
+                        <div style="float:left; width:120px; height:88px; ">
+                            <div style="width:120px; height:83px; background:#f39c12;">
+                                <p>位置2</p>
+                            </div>
+                            <div style="width:120px; height:83px; background:#00c0ef;">
+                                <p>位置3</p>
+                            </div>
+                        </div>
+                        <div style="float:left; width:120px; height:165px; background:#00a65a;">
+                            <p>位置4</p>
+                        </div> -->
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <table class="location" border="1">
+                                <tr>
+                                    <th rowspan="2">位置1</th>
+                                    <th >位置2</th>
+                                    <th rowspan="2">位置4</th>
+                                </tr>
+                                <tr >
+                                    <th>位置3</th>
+                                </tr>
+                        </table>
+
+                    </div>
+                </div>
+              <!-- E form -->
+            </form>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+        //下拉反绑定
+        $("#sort").val("{$info.sort}");
+
+        $("#search").select2({
+            allowClear: true,
+            placeholder:"查询美图标题",//文本框的提示信息
+            minimumInputLength: 1,
+            maximumInputLength:10,
+            query: function(query) {
+                var result = null;
+                $.ajax({
+                    url: '/homemeitu/getmeitutitle',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        query: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text:data.data[i].title
+                                });
+                            }
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+            //选中操作
+            $("#search").change(function(event) {
+                var id = $("#search").select2("data").id;
+                document.getElementById("url").value = "meitu.{:C('QZ_YUMING')}/p"+ id +".html";
+            });
+            //select2 的反绑操作，需要select2的4.01的版本
+            if(('{$info.company_id}' != '') && ('{$info.title}' != '')){
+                $("#search").select2("data",{id:"{$info.company_id}",text:"{$info.title}"});
+            }
+
+            $("#uploadPic").fileinput({
+                    language: 'zh', //设置语言,
+                    uploadUrl:"/upload/uploadimg/",
+                    showCaption:false,
+                    browseClass:"btn blue",
+                    allowedFileExtensions : ['jpg','png','gif'],
+                    maxFileCount:1,
+                    uploadClass:"btn green",
+                    removeClass:"btn red",
+                    uploadAsync:true,
+                    dropZoneEnabled:false,
+                    maxFileSize:100,
+                    previewSettings:{
+                        image: {width: "auto", height: "100px"}
+                    },
+                    minImageWidth: null,
+                    minImageHeight: null,
+                    maxImageWidth: null,
+                    maxImageHeight: null,
+                    layoutTemplates:{
+                        actionDelete:"",
+                        actionUpload:""
+                    },
+                    uploadExtraData:{
+                        prefix:'qzbanner'
+                    },
+                    initialPreview:[ //预览图片的设置
+                            "<img src='//{:C('QINIU_DOMAIN')}/{$info.img_url}' class='file-preview-image' alt='{$info.title}' title='{$info.title}'>"
+                        ],
+                }).on('fileuploaded', function(event, data) {
+                    var _this = $(this);
+                    if(data.response.status == 1){
+                        var obj = data.response.data.file_data;
+                        //var val = $("input[name=files]").val();
+                        var val = data.response.data.name;
+                        $("input[name=files]").val(val);
+                    }else{
+                        /*
+                        _this.Alert({
+                            msg:data.response.info,
+                            level:2
+                        });
+                        */
+                    }
+                }).on("fileuploaderror",function(event, data){
+                    var _this = $(this);
+                    /*
+                     _this.Alert({
+                        msg:"附件上传失败,请联系技术部门！",
+                        level:2
+                    });
+                    */
+                     return false;
+                }).on("fileclear",function(){
+                    $("input[name=files]").val("");
+                });
+
+            $("#submit").click(function(event) {
+                if(trim($("input[name=search]").val()) === ''){
+                    $("input[name=search]").focus();
+                    $("input[name=search]").addClass('focus');
+                    alert("请填写标题~ ");
+                    return false;
+                }
+
+                var title = $("#search").select2("data").text;
+                document.getElementById("title").value = title;
+
+                if(trim($("input[name=url]").val()) === ''){
+                    $("input[name=url]").focus();
+                    $("input[name=url]").addClass('focus');
+                    alert("请填写链接~ ");
+                    return false;
+                }
+                if(trim($("input[name=sort]").val()) === ''){
+                    $("input[name=sort]").focus();
+                    $("input[name=sort]").addClass('focus');
+                    alert("请填写位置~ ");
+                    return false;
+                }
+                if(trim($("input[name=files]").val()) === ''){
+                    $("input[name=files]").focus();
+                    $("input[name=files]").addClass('focus');
+                    alert("请上传装修效果图~ ");
+                    return false;
+                }
+
+                $("#form").submit();
+            });
+        })
+    </script>
+</block>

@@ -1,0 +1,581 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员新签续费互转 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="overflow-x">
+                        <div class="overflow-box" style="width: 1580px;">
+                            <div class="box-header">
+                                <h3><i class="xs-icon gangwei-icon"></i> 会员新签续费互转</h3>
+                                <form id="searchform" action="" method="get" class="form-horizontal">
+                                    <div class="from-list" id="searchBox">
+                                        <div style="width: 1400px;height: 45px;overflow: hidden;">
+                                            <div class="from-item">
+                                                <span>城市：</span>
+                                                <select name="city">
+                                                <option value="">请选择</option>
+                                                <volist name="cityList" id="v">
+                                                <option value="{$v.id}">{$v.city}</option>
+                                                </volist>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>拓师长：</span>
+                                                <select name="dev_division" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>拓团长：</span>
+                                                <select name="dev_regiment" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>城市经理：</span>
+                                                <select name="dev_manage" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>会员查询：</span>
+                                                <input style="width: 130px;" name="user" value="" placeholder="通过ID或名称查询">
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 1400px;height: 45px;overflow: hidden;">
+                                            <div class="from-item">
+                                                <span>部门：</span>
+                                                <select type="text" class="info-item" name="dept">
+                                                    <option value="">请选择</option>
+                                                    <option value="1">商务</option>
+                                                    <option value="2">外销</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>品师长：</span>
+                                                <select name="brand_division" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>品团长：</span>
+                                                <select name="brand_regiment" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <span>品牌师：</span>
+                                                <select name="brand_manage" class="managerList">
+                                                    <option>请选择</option>
+                                                </select>
+                                            </div>
+                                            <div class="from-item">
+                                                <button type="submit" class="search-btn xs-btn pull-right" style="margin: 0;margin-left: 118px;">查询</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="select-role-input" style="margin-top:20px;margin-left: 25px;">显示：
+                                    品师长<input type="checkbox" value="品师长">
+                                    品团长<input type="checkbox" value="品团长">
+                                    品牌师<input type="checkbox" value="品牌师">
+                                    拓师长<input type="checkbox" value="拓师长">
+                                    拓团长<input type="checkbox" value="拓团长">
+                                    城市经理<input type="checkbox" value="城市经理">
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <div class="todo-item">
+                                    <button class="xs-btn add-new">新增</button>
+                                    <div class="pull-right position-relative">
+                                        <button class="xs-btn log-info">操作日志</button>
+                                        <i class="xs-icon zhushi-icon"></i>
+                                        <div class="zhushi-info">
+                                            <p>输入人注意事项：本页数据以城市为唯一标识，其他数据均为城市附属信息；每页显示20条记录</p>
+                                            <p>输入人注意事项：本页数据以会员ID为唯一标识，其他数据均为附属信息</p>
+                                            <p>此项设置的由来：因存在个性化需求的会员，比如某会员变会员ID等影响系统默认的逻辑判定新签或续费。为与员工考核计算一致，故添加此项设置。</p>
+                                            <p>在计算考核时，进行数据支持，调整最终的续费率等。</p>
+                                            <p>此页系数的数值为整数</p>
+                                            <p>1、上方区域显示的是筛选条件，当选择相应的筛选条件并点击<查询>按钮时，列表内显示相应的搜索结果信息。</p>
+                                            <p>2、管理员输入会员ID，系统默认显示关联的”会员名称、城市、部门、各岗位、系统默认新签续费、本次合同开始日、本次合同结束日“信息</p>
+                                            <p>管理员输入：手工调整新签续费、调整原因简述</p>
+                                            <p>记录表，不计入统计，“手工调整新签续费”不计入</p>
+                                            <p>新签：根据会员ID号取值，本次合同开始日与上次合作的本次合同结束日间隔天数，间隔天数＞180天，或无合作过的会员属于新签</p>
+                                            <p>续费：根据会员ID号取值，本次合同开始日与上次合作的本次合同结束日间隔天数，间隔天数≤180天的会员属于续费</p>
+                                            <p>3、管理员输入”手工调整新签续费、调整原因简述“</p>
+                                            <p>4、操作日志：操作信息痕迹化，确保所有修改信息能够查询到记录。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-item-count">
+                                    <p>
+                                        <span class="count-list">共<i>{$info.pageCount}</i>条</span>
+                                        <span class="sel-count-list"></span>
+                                        <a href="javascript:;" class="xiugai">修改</a>
+                                        <a href="javascript:;" class="quxiao">取消</a>
+                                    </p>
+                                </div>
+                                <table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                                    <thead class="thead1" style="width: 1580px;">
+                                        <tr role="row">
+                                            <th title="会员ID">会员ID</th>
+                                            <th title="会员名称">会员名称</th>
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th class="role-hide" title="品师长">品师长</th>
+                                            <th class="role-hide" title="品团长">品团长</th>
+                                            <th class="role-hide" title="品牌师">品牌师</th>
+                                            <th class="role-hide" title="拓师长">拓师长</th>
+                                            <th class="role-hide" title="拓团长">拓团长</th>
+                                            <th class="role-hide" title="城市经理">城市经理</th>
+                                            <th title="系统默认新签续费">系统默认新签续费</th>
+                                            <th title="手工调整新签续费">手工调整新签续费</th>
+                                            <th title="本次合同开始日">本次合同开始日</th>
+                                            <th title="本次合同结束日">本次合同结束日</th>
+                                            <th title="调整原因简述">调整原因简述</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="thead2" style="width: 1580px;">
+                                        <tr role="row">
+                                            <th title="会员ID">会员ID</th>
+                                            <th title="会员名称">会员名称</th>
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th class="role-hide" title="品师长">品师长</th>
+                                            <th class="role-hide" title="品团长">品团长</th>
+                                            <th class="role-hide" title="品牌师">品牌师</th>
+                                            <th class="role-hide" title="拓师长">拓师长</th>
+                                            <th class="role-hide" title="拓团长">拓团长</th>
+                                            <th class="role-hide" title="城市经理">城市经理</th>
+                                            <th title="系统默认新签续费">系统默认新签续费</th>
+                                            <th title="手工调整新签续费">手工调整新签续费</th>
+                                            <th title="本次合同开始日">本次合同开始日</th>
+                                            <th title="本次合同结束日">本次合同结束日</th>
+                                            <th title="调整原因简述">调整原因简述</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableList">
+                                        <tr role="row" class="new-list" id="addItem" style="display:none">
+                                            <td>
+                                                <div class="city-sel">
+                                                    <input type="text" name="companyid" class="info-item" id="companyid" autocomplete="off" value="">
+                                                </div>
+                                            </td>
+                                            <td><span></span></td>
+                                            <td><span></span></td>
+                                            <td><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td class="role-hide"><span></span></td>
+                                            <td><span></span></td>
+                                            <td>
+                                                <div class="pinshizhang-sel">
+                                                    <select class="info-item" name="xqxf">
+                                                        <option value="">请选择</option>
+                                                        <option value="1">续费</option>
+                                                        <option value="2">新签</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td><span></span></td>
+                                            <td><span></span></td>
+                                            <td><input type="text" class="info-item" name="remark"></td>
+                                            <td><span class="caozuo-text">{$info.username}</span></td>
+                                            <td class="revise-time">{$info.today}</td>
+                                            <td class="revise"><span><i class="fa fa-floppy-o"></i></span></td>
+                                        </tr>
+                                        <volist name="list" id="v">
+                                        <tr role="row" class="odd">
+                                            <td><span>{$v.manage_id}</span>
+                                                <div class="city-sel">
+                                                    <input type="text" name="companyid" class="info-item companyid" autocomplete="off" value="{$v.manage_id}">
+                                                </div>
+                                            </td>
+                                            <td><span class="city-text">{$v.jc}</span></td>
+                                            <td><span class="city-text">{$v.city}</span></td>
+                                            <td><span class="bumen-text">{$v.dept}</span></td>
+                                            <td class="role-hide"><span class="pinshizhang-text">{$v.brand_division}</span></td>
+                                            <td class="role-hide"><span class="pintuanzhang-text">{$v.brand_regiment}</span></td>
+                                            <td class="role-hide"><span class="pinpaishi-text">{$v.brand_manage}</span></td>
+                                            <td class="role-hide"><span class="tuoshizhang-text">{$v.dev_division}</span></td>
+                                            <td class="role-hide"><span class="tuotuanzhang-text">{$v.dev_regiment}</span></td>
+                                            <td class="role-hide"><span class="chengshijingli-text">{$v.dev_manage}</span></td>
+                                            <td><span>-</span></td>
+                                            <td><span><if condition="$v.point EQ '1' ">新签<else />续费</if></span>
+                                                <div class="pinshizhang-sel">
+                                                    <select class="info-item" name="xqxf">
+                                                        <option value="">请选择</option>
+                                                        <option value="1" <if condition="$v.point EQ '1' ">selected</if>>新签</option>
+                                                        <option value="2" <if condition="$v.point EQ '2' ">selected</if>>续费</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td><span>{$v.allstart}</span></td>
+                                            <td><span>{$v.allend}</span></td>
+                                            <td><span>{$v.remark}</span>
+                                            <div class="city-sel"><input type="text" class="info-item"  name="remark" value="{$v.remark}"></div>
+                                            </td>
+                                            <td><span>{$v.act_uid}</span></td>
+                                            <td class="revise-time">{$v.act_time|date="Y-m-d",###}</td>
+                                            <td class="revise"><span><i class="fa fa-pencil"></i></span><div><i class="fa fa-floppy-o"></i></div>
+                                            <input name="theid" value="{$v.sid}" type="hidden"></td>
+                                        </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                                <div class="city-list-pop" style="top: 413px">
+                                    <volist name="list" id="v">
+                                        <div>{$v.city}</div>
+                                    </volist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer text-center">{$page}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--公用记录模态框-->
+    <style type="text/css">.width-800{width: 800px;}table#reset-table thead tr th{line-height: 45px;}</style>
+    <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog width-800">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title">记录列表</h4>
+                </div>
+                <div class="modal-body common-model-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="/assets/common/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+
+            //填充帐号
+            $('#searchBox .managerList').html('<option value="">请选择</option><volist name="saleUsers" id="v"><option value="{$v.id}">{$v.name}</option></volist>');
+
+            {$info.searchSelect}
+
+            //会员信息自动提示
+            $('#companyid').autocomplete({
+                items:10,
+                source:function(query,process){
+                    var matchCount = this.options.items;//返回结果集最大数量
+                    $.ajax({
+                        url: '/saleset/getcompanybyuid',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            matchcount : matchCount,
+                            text: query
+                        },
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            return process(data.data);
+                        }else{
+                            return process(data.info);
+                        }
+                    }).fail(function(xhr){
+                        alert(xhr.responseText);
+                    });
+
+                },
+                formatItem:function(item){
+                    return item["jc"];
+                },
+                setValue:function(item){
+                    return {
+                        "data-value":JSON.stringify(item),
+                        "real-value":item["uid"]
+                    };
+                },
+                updater: function(item) {
+                    var item = JSON.parse(item);
+                    //console.log(item);
+                    $('#addItem').find('td').eq(1).find('span').html(item.jc);
+                    $('#addItem').find('td').eq(2).find('span').html(item.city);//城市
+                    $('#addItem').find('td').eq(3).find('span').html(item.dept);//部门
+                    $('#addItem').find('td').eq(4).find('span').html(item.brand_division);
+                    $('#addItem').find('td').eq(5).find('span').html(item.brand_regiment);
+                    $('#addItem').find('td').eq(6).find('span').html(item.brand_manage);
+                    $('#addItem').find('td').eq(7).find('span').html(item.dev_division);
+                    $('#addItem').find('td').eq(8).find('span').html(item.dev_regiment);
+                    $('#addItem').find('td').eq(9).find('span').html(item.dev_manage);
+                    $('#addItem').find('td').eq(10).find('span').html('新签续费');
+                    $('#addItem').find('td').eq(12).find('span').html(item.allstart);
+                    $('#addItem').find('td').eq(13).find('span').html(item.allend);
+                    return item.uid;
+                }
+            });
+
+            // 新增
+            $('.add-new').on('click', function(){
+                $('#addItem').show();
+                $('.add-new').attr('disabled',true).css('background','#ccc');
+            });
+
+            //修改
+            $('#tableList span .fa-pencil').on('click', function(){
+                $('.add-new').attr('disabled',true).css('background','#ccc');
+
+                var theTD = $(this).parent().parent().parent();
+
+                theTD.find('td').eq(0).find('span').hide().parent().find('div').show();
+                theTD.find('td').eq(11).find('span').hide().parent().find('div').show();
+                theTD.find('td').eq(14).find('span').hide().parent().find('div').show();
+                theTD.find('td').eq(17).find('span').hide().parent().find('div').show();
+
+                //会员信息自动提示
+                $('.companyid').autocomplete({
+                    items:10,
+                    source:function(query,process){
+                        var matchCount = this.options.items;//返回结果集最大数量
+                        $.ajax({
+                            url: '/saleset/getcompanybyuid',
+                            type: 'GET',
+                            dataType: 'JSON',
+                            data: {
+                                matchcount : matchCount,
+                                text: query
+                            },
+                        })
+                        .done(function(data) {
+                            if(data.status == 1){
+                                return process(data.data);
+                            }else{
+                                return process(data.info);
+                            }
+                        }).fail(function(xhr){
+                            alert(xhr.responseText);
+                        });
+
+                    },
+                    formatItem:function(item){
+                        return item["jc"];
+                    },
+                    setValue:function(item){
+                        return {
+                            "data-value":JSON.stringify(item),
+                            "real-value":item["uid"]
+                        };
+                    },
+                    updater: function(item) {
+                        var item = JSON.parse(item);
+                        theTD.find('td').eq(1).find('span').html(item.jc);
+                        theTD.find('td').eq(2).find('span').html(item.city);//城市
+                        theTD.find('td').eq(3).find('span').html(item.dept);//部门
+                        theTD.find('td').eq(4).find('span').html(item.brand_division);
+                        theTD.find('td').eq(5).find('span').html(item.brand_regiment);
+                        theTD.find('td').eq(6).find('span').html(item.brand_manage);
+                        theTD.find('td').eq(7).find('span').html(item.dev_division);
+                        theTD.find('td').eq(8).find('span').html(item.dev_regiment);
+                        theTD.find('td').eq(9).find('span').html(item.dev_manage);
+                        theTD.find('td').eq(10).find('span').html('新签-续费');
+                        theTD.find('td').eq(12).find('span').html(item.allstart);
+                        theTD.find('td').eq(13).find('span').html(item.allend);
+                        return item.uid;
+                    }
+                });
+            });
+
+
+            //新增保存
+            $('.fa-floppy-o').on('click', function(){
+
+                var theTD = $(this).parent().parent().parent();
+
+                var companyid = theTD.find('input[name=companyid]').val();
+                var xqxf = theTD.find('select[name=xqxf]').val();
+                var remark = theTD.find('input[name=remark]').val();
+                var id = theTD.find('input[name=theid]').val();
+
+                if(companyid == ''){
+                    alert('请填写公司ID！');
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/saleset/hyxqxfhzAct/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id == 'undefined' ? '0' : id,
+                        companyid:companyid,
+                        xqxf:xqxf,
+                        remark:remark
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('操作失败');
+                })
+            });
+
+            // 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = 0;
+            $(document).on('scroll',function(){
+                $('.city-list-pop').css({'top':413-$(this).scrollTop()});
+                if($(document).scrollTop() >= 390){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                if($(this).scrollLeft()>130){
+                    $('.city-list-pop').show();
+                }else{
+                    $('.city-list-pop').hide();
+                }
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+                $('.city-list-pop').css({'left':$('.sidebar').width()});
+            });
+
+            // 岗位选择
+            var arr =[0,1,2,3,4,5],
+                allheight = 1580,
+                selectLen = 0;
+            $('.select-role-input input').each(function(index, el) { // 清空选择
+                $(this).removeAttr('show');
+                $(this).prop('checked',false);
+            });
+            $('.select-role-input input').on('click',function(){
+                if($(this).prop('checked')){
+                    $(this).attr('show','show');
+                    selectLen = $('.select-role-input input[show="show"]').length;
+                }else{
+                    $(this).removeAttr('show');
+                    selectLen = $('.select-role-input input[show="show"]').length;
+                }
+
+                $('#reset-table tbody tr').each(function(index, el) {
+                    for(var i = 0;i<arr.length;i++){
+                        $(el).find('td').eq(arr[i]+4).hide();
+                    }
+                });
+                for(var i = 0;i<arr.length;i++){
+                    $('#reset-table .thead1 tr th').eq(arr[i]+4).hide();
+                    $('#reset-table .thead2 tr th').eq(arr[i]+4).hide();
+                }
+
+                $('.overflow-box,#reset-table .thead1,#reset-table .thead2').width(1580);
+                $('.overflow-box,#reset-table .thead1,#reset-table .thead2').width(allheight + selectLen*130);
+
+                $('.select-role-input input[show="show"]').each(function(index, el) {
+                    if($(el).val() == '品师长'){
+                         autoSelect(4);
+                     }else if($(el).val() =='品团长'){
+                         autoSelect(5);
+                     }else if($(el).val() =='品牌师'){
+                         autoSelect(6);
+                     }else if($(el).val() =='拓师长'){
+                         autoSelect(7);
+                     }else if($(el).val() =='拓团长'){
+                         autoSelect(8);
+                     }else if($(el).val() =='城市经理'){
+                         autoSelect(9);
+                     }
+                });
+            });
+            function autoSelect(num){
+                $('#reset-table .thead1 tr th').eq(num).css('display','block');
+                $('#reset-table .thead2 tr th').eq(num).css('display','block');
+                $('#reset-table tbody tr').each(function(index, el) {
+                    $(el).find('td').eq(num).show();
+                });
+            }
+
+            //历史记录
+            /*S-最近操作记录*/
+            $('.log-info').click(function(event) {
+                $.ajax({
+                    url: '/salesetting/gethistorylog/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:11
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    } else {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.info);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+        })
+    </script>
+</block>

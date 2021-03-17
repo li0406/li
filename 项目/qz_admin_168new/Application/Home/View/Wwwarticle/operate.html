@@ -1,0 +1,673 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网品牌榜编辑后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/js/plugins/jstree/themes/default/style.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/plugins/select2/css/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/wwwarticle.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>文章操作</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/article/">文章管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-default color-palette-box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-tag"></i> 文章操作</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div id="categorytree"></div>
+                    </div>
+                    <div id="categorydetails" class="col-md-9">
+                        <div class="nav-tabs-custom">
+                            <form id="form" action="javascript:void(0)" method="POST">
+                                <div class="tab-content">
+                                    <!-- 常规 -->
+                                    <div class="tab-pane active" id="tab_1">
+                                        <div class="box-body">
+                                            <div class="form-group">
+                                                <label>文章标题</label>
+                                                <div class="row">
+                                                    <div class="col-xs-8">
+                                                        <input type="text" class="form-control validate[required]" name="title" placeholder="文章标题" value="{$info.info.title}">
+                                                        <input type="hidden" class="form-control" name="id" value="{$info.info.id}">
+                                                        <input type="hidden" class="form-control" name="classid" value="{$info.info.classid}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>文章词条名</label>
+                                                <div class="row">
+                                                    <div class="col-xs-8">
+                                                        <input type="text" class="form-control validate[required]" name="item_name" placeholder="文章词条，不超过15个字" value="{$info.info.item_name}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>标签</label>
+                                                <div class="row">
+                                                    <div class="col-sm-7">
+                                                        <select name="tags" class="tags form-control" id="tags" multiple="">
+                                                        <notempty name="info.info.tagname">
+                                                            <volist name="info.info.tagname" id="vo">
+                                                                <option value="{$vo}" selected>{$vo}</option>
+                                                            </volist>
+                                                        </notempty>
+                                                        </select>
+                                                        <input name="tagnames" id="tagnames" type="hidden">
+                                                    </div>
+                                                    <div class="col-sm-1">
+                                                        <button type="button" class="add-tag btn btn-success"  data-toggle="modal" data-target="#tagModal">
+                                                            <i class="fa fa-plus-circle"></i> 新增标签
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>关键字</label>
+                                                <div class="row">
+                                                    <div class="col-xs-6">
+                                                    <input type="input" class="form-control validate[required]" name="keywords" placeholder="关键字" value="{$info.info.keywords}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>brandModel</label>
+                                                <div class="row">
+                                                    <div class="col-xs-6">
+                                                    <input type="input" class="form-control" name="brand_model" placeholder="硬件型号" value="{$info.info.brand_model}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>appVersion</label>
+                                                <div class="row">
+                                                    <div class="col-xs-6">
+                                                    <input type="input" class="form-control" name="app_version" placeholder="APP版本" value="{$info.info.app_version}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>systemVersion</label>
+                                                <div class="row">
+                                                    <div class="col-xs-6">
+                                                    <input type="input" class="form-control" name="system_version" placeholder="系统版本" value="{$info.info.system_version}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>是否推荐到列表页</label>
+                                                <select name="recommend" class="form-control" id="recommend" >
+                                                    <option value="0" selected>不推荐</option>
+                                                    <option value="1">推荐</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>是否推荐到首页或咨询页</label>
+                                                <select name="istop" class="form-control" id="istop" >
+                                                    <option data-cover-width="335" data-cover-height="243" value="0" selected>不推荐</option>
+                                                    <option data-cover-width="335" data-cover-height="243" value="1">推荐到首页</option>
+                                                    <option data-cover-width="660" data-cover-height="308" value="2">推荐到资讯页</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>封面图</label>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <input id="cover" type="file" multiple/>
+                                                        <input type="hidden" name="face" value="{$info.info.face}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-xs-10">
+                                                        <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                                            <strong>注意事项：</strong> <br>
+                                                            广告图片大小限制：请尽量不要超出500K！
+                                                            推荐到首页，封面图片尺寸为335px * 243px<br>
+                                                            推荐到装修资讯，封面图片尺寸为660px * 308px<br>
+                                                            “空间搭配、家居风水、装修风格”这三个分类的封面尺寸是：410x320px
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>文章简介（可不填写）</label>
+                                                <textarea name="article-intro" class="form-control">{$info.info.short_introduction}</textarea>
+                                            </div>
+                                            <div class="form-group dibu">
+                                                <label>文章详情</label>
+                                                <div id="editor" name="content"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-li-3">
+                                                    <label class="col-sm-12 text-left" style="margin:0 -15px 5px;">预发布日期：</label>
+                                                    <div class="col-sm-5">
+                                                        <div class="row">
+                                                            <if condition="isset($info['info'])  AND $info['info']['state'] EQ 2">
+                                                                <input type="text" class="form-control datepicker" name="preview-time"  disabled="disabled" />
+                                                            <else/>
+                                                                <input type="text" class="form-control datepicker" name="preview-time"  value="{$info.info.addtime|default=''|date='Y-m-d',###}"/>
+                                                            </if>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-li-3">
+                                                    <label class="col-sm-12 text-left" style="margin:5px -15px 5px;">是否推送原创：</label>
+                                                    <div class="col-sm-5">
+                                                        <div class="row">
+                                                            <select class="form-control" name="isoriginal" id="isoriginal">
+                                                                <option value="0" <if condition="$info['info']['isoriginal'] EQ 0">selected</if>>推送为非原创</option>
+                                                                <option value="1" <if condition="$info['info']['isoriginal'] EQ 1">selected</if>>推送为原创</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <p>原创推送剩余：{$all_num.original} | 主动推送剩余：{$all_num.normal}</p>
+                                                    </div>
+                                                </div> -->
+                                                <!-- <div class="col-li-3">
+                                                    <label class="col-sm-12 text-left" style="margin:5px -15px 5px;">是否推送到熊掌号：</label>
+                                                    <div class="col-sm-5">
+                                                        <div class="row">
+                                                            <select class="form-control" name="isxiongzhang" id="isoriginal">
+                                                                <option value="0" <if condition="$info['info']['isxiongzhang'] EQ 0">selected</if>>否</option>
+                                                                <option value="1" <if condition="$info['info']['isxiongzhang'] EQ 1">selected</if>>是</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-li-3">
+                                                    <label class="col-sm-12 text-left" style="margin:5px -15px 5px;">是否推送到科技问答：</label>
+                                                    <div class="col-sm-5">
+                                                        <div class="row">
+                                                            <select class="form-control" name="is_kejiwenda">
+                                                                <option value="2" <if condition="$info['info']['is_kejiwenda'] EQ 2">selected</if>>否</option>
+                                                                <option value="1" <if condition="$info['info']['is_kejiwenda'] EQ 1">selected</if>>是</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-li-3">
+                                                    <label class="col-sm-12 text-left" style="margin:5px -15px 5px;">是否推送到专业问答：</label>
+                                                    <div class="col-sm-5">
+                                                        <div class="row">
+                                                            <select class="form-control" name="is_wenda">
+                                                                <option value="2" <if condition="$info['info']['is_wenda'] EQ 2">selected</if>>否</option>
+                                                                <option value="1" <if condition="$info['info']['is_wenda'] EQ 1">selected</if>>是</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="box-footer">
+                                            <button type="button" class="btn btn-success submit-save" data-operate="true" data-direct-post="0">
+                                                <i class="fa fa-save"></i>&nbsp;保存
+                                            </button>
+                                            <if condition="true EQ check_menu_auth('/wwwarticle/directpost/')">
+                                                <button type="button" class="btn btn-warning submit-save" data-operate="true" data-direct-post="1">
+                                                    <i class="fa fa-eye"></i>&nbsp;直接发布
+                                                </button>
+                                            </if>
+                                            <button type="button" class="btn btn-default" onclick="history.back(-1)">
+                                                <i class="fa fa-mail-reply"></i>&nbsp;返回
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade tag-modal" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">标签操作</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal tag-form">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label>标签名</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="input" class="form-control validate[required] tag-name" placeholder="标签名">
+                                    </div>
+                                </div>
+                                <div class="error-info text-danger"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>是否推荐</label>
+                                <select class="form-control tag-recommend validate[required]">
+                                    <option value="0">不推荐</option>
+                                    <option value="1" selected>推荐</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-success tag-save-btn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--推荐列表模态框-->
+    <div class="modal fade" id="recommendModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title">
+                        列表页推荐位置已满请编辑
+                    </h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/jstree/jstree.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/wwwarticle/js/scrolltop.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".datepicker").datetimepicker({
+            format:"yyyy-mm-dd",
+            startView: 2,
+            minView: 2,
+            todayBtn:true,
+            autoclose:true
+        });
+
+        /*S-新增标签按钮*/
+        $('.tag-save-btn').click(function(event) {
+            var data = new Object();
+            data.name = $('.tag-form').find('.tag-name').val();
+            if (data.name == '') {
+                $('.tag-form').find('.error-info').text('请填写标签名字~');
+                return false;
+            };
+            data.istop = $('.tag-form').find('.tag-recommend').val();
+            $.ajax({
+                url: '/tags/operate/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    $('.tag-form').find('.tag-name').val('');
+                    $('.tag-form').find('.error-info').text('');
+                    $('.tag-modal').modal('hide');
+                }else{
+                    $('.tag-form').find('.error-info').text(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $('.tag-modal').modal('hide');
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        });
+        /*E-新增标签按钮*/
+
+        $('input[name=title]').blur(function(){
+            var title = $(this).val();
+            if(title != ''){
+                $.ajax({
+                    url: '/wwwarticle/verifytitle/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    global: false,
+                    data: {
+                        title:title
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $('input[name=title]').addClass('has-error');
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }else{
+                        $('input[name=title]').removeClass('has-error');
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            }
+        })
+
+        // 自定义参数调用
+        $('#form').validationEngine('attach', {
+          promptPosition: 'centerRight',
+          autoHidePrompt: true,
+          autoHideDelay: '2000',
+          scroll: true
+        });
+
+        $('#categorytree').jstree({
+            "core" : {
+                "animation" : false,
+                "multiple" : false,
+                "data" : {$info.categorytree}
+            }
+        }).bind('loaded.jstree', function(evt, data) {
+            $('#categorytree').jstree('open_all');
+            $('#categorytree').jstree('select_node', [{$info.info.classid}]);
+        });
+
+        $('#categorytree').on("changed.jstree", function (e, data) {
+            if (data.action == "select_node") {
+                if (data.node.children.length == 0) {
+                    if(data.selected.length > 0) {
+                        $('input[name=classid]').val(data.selected);
+                    }
+                } else {
+                    //jstree-clicked
+                    $(".jstree-clicked").removeClass('jstree-clicked');
+                    $('input[name=classid]').val("");
+
+                }
+            }
+        });
+
+        var istop = "{$info.info.istop}";
+        if(istop != ''){
+            $('#istop').val(istop);
+        }
+
+        var recommend = "{$info.info.recommend}";
+        if(recommend != ''){
+            $('#recommend').val(recommend);
+        }
+
+        var ue = UE.getEditor('editor', {
+            autoClearinitialContent: false,
+            serverUrl: '/ueditor/upload/?ext=s3.jpg',
+            toolbars: [
+                ['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain','|','justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+                    'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+                    'paragraph', 'fontfamily', 'fontsize', '|',
+                    'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts','|','imagecenter','simpleupload','insertimage','link','unlink','searchreplace'
+                ]
+            ],
+            maximumWords: 10000
+        });
+
+        ue.ready(function() {
+            //设置编辑器的内容
+            ue.setContent('{$info.info.content}');
+        });
+
+        $(".tags").select2({
+            language: "zh-CN",
+            tags: false,
+            multiple: true, //是否使用多个标签
+            ajax: {
+                url: "/tags/gettagsapi/",
+                dataType: 'json',
+                type: 'GET',
+                delay: 1000,
+                data: function (params) {
+                  return {
+                    key: params.term, //查询参数
+                  };
+                },
+                processResults: function (data, page) {
+                    var parsed = data.data;
+                    var arr = [];
+                    for(var x in parsed){
+                        arr.push(parsed[x]); //这个应该是个json对象
+                    }
+                    return {
+                        results: arr
+                    };
+                },
+                cache: true
+              },
+            escapeMarkup: function (markup) { return markup; },
+            /*最小需要输入多少个字符才进行查询，与之相关的小需要输入多少个字符才进行查询，与之相关的maximumSelectionLength表示最大输入限制*/
+            minimumInputLength: 1
+        });
+
+        $("#cover").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/uploadimg/",
+            showCaption:false,
+            browseClass:"btn btn-primary",
+            allowedFileExtensions : ['jpg','png','gif'],
+            maxFileCount:1,
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            uploadAsync:true,
+            dropZoneEnabled:false,
+            previewSettings:{
+                image: {width: "auto", height: "100px"}
+            },
+            uploadExtraData:{
+                prefix:'article'
+            },
+            initialPreview:[{$info.info.cover}],
+        }).on('fileuploaded', function(event, data) {
+            if(1 == data.response.status){
+                $('input[name="face"]').val(data.response.data.name);
+            }else{
+                var d = dialog({
+                    title: '消息',
+                    content: data.response.info,
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {
+                    }
+                });
+                d.show();
+                return false;
+            }
+        }).on("fileuploaderror",function(event, data){
+            var e = dialog({
+                title: '消息',
+                content: '文件上传失败,请检查文件格式，规格是否符合要求，或联系技术部门！',
+                okValue: '确 定',
+                quickClose: true,
+                ok: function () {}
+            });
+            e.show();
+            return false;
+        }).on("fileclear",function(){
+            $("input[name=face]").val("");
+            $(".img-upload .fileinput-upload-button").removeClass('disabled');
+        });
+
+        $('.submit-save').click(function(){
+            if(! $('#form').validationEngine('validate')){
+                return false;
+            }
+            var _this = $(this);
+            //判断点击的是保存按钮还是预发布按钮，点击预发布按钮则请求预发布地址
+            var url = ('1' == _this.attr('data-direct-post')) ? '/wwwarticle/directpost/' : '/wwwarticle/operate/';
+            var tags = $("#tags").select2("data");
+            var tagnames = '';
+            $.each(tags,function(n,value) {
+                tagnames = tagnames + value.text + ',';
+            });
+            $('#tagnames').val(tagnames);
+            var data = $('#form').serializeArray();
+            //验证是否选择文章分类
+            var cid = $('input[name=classid]').val();
+
+            if(cid == '' || cid == 0 || cid == 'undefined' || cid == undefined){
+                var e = dialog({
+                    title: '消息',
+                    content: '请选择父级菜单！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }
+
+            //验证是否上传封面
+            var face = $('input[name="face"]').val();
+            if(face == '' || typeof(face) == 'undefined'){
+                var e = dialog({
+                    title: '消息',
+                    content: '请上传封面图！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }
+
+            //验证是否填写文章详情
+            var content = ue.getContent();
+            if(content == '' || typeof(content) == 'undefined'){
+                var e = dialog({
+                    title: '消息',
+                    content: '请填写文章详情！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }
+
+            //防止重复操作，需要放到最后
+            var operate = _this.attr('data-operate');
+            if (operate == 'false') {
+                var e = dialog({
+                    title: '消息',
+                    content: '您的操作太过频繁，请稍后再试！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            } else {
+                _this.attr('data-operate','false');
+            }
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    window.location.href=document.referrer;
+                }else{
+                    _this.attr('data-operate','true');
+                    if (data.info == 'recommend') {
+                        $('#recommendModel .modal-body').html(data.data);
+                        $('#recommendModel').modal('show');
+                        $('#recommendModel .btn-remove-recommend').click(function(event) {
+                            var _obj = $(this);
+                            var id = _obj.parent().attr('data-id');
+                            var recommend = 0;
+                            $.ajax({
+                                url: '/wwwarticle/editrecommend/',
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data: {
+                                    id:id,
+                                    recommend:recommend
+                                }
+                            })
+                            .done(function(data) {
+                                if(data.status == '1'){
+                                    _obj.parent().parent().remove();
+                                }else{
+                                    alert(data.info);
+                                }
+                            })
+                            .fail(function(xhr) {
+                                alert('操作失败,请联系技术部门！');
+                            })
+                        });
+                    } else {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                }
+            })
+            .fail(function(xhr) {
+                _this.attr('data-operate','true');
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    </script>
+</block>

@@ -1,0 +1,204 @@
+<!--pages/livedetail/livedetail.wxml-->
+<scroll-view class="l-mian" scroll-top='{{topNum}}' scroll-y lower-threshold="100" bindscrolltolower="lower" bindscroll="scrollBig">
+	<view class="livedetail-top">
+		<text class="location">当前地址</text>
+		<text class="change" bindtap="orderShow">更换装修地址</text>
+	</view>
+	<view class="contain nobottom">
+		<view class='c-name'>
+			<image class='img' src='../../img/jianzhu.png'></image>
+			<view class='n-con'>{{info.xiaoqu ? info.xiaoqu: '--' }}</view>
+		</view>
+		<view class='c-one'>
+			<view class='c-line'>业主：
+				<text>{{info.yz_name}}</text>
+			</view>
+			<view class='c-line'>区域：
+				<text>{{info.area_name}}</text>
+			</view>
+		</view>
+		<view class='c-one'>
+			<view class='c-line'>户型：
+				<text>{{info.huxing_name ? info.huxing_name : '--' }}</text>
+			</view>
+			<view class='c-line'>面积：
+				<text>{{info.mianji ? info.mianji+'㎡' : '--' }} </text>
+			</view>
+		</view>
+		<view class='c-one'>
+			<view class='c-xia'>地址：
+				<text>{{info.dz ? info.dz : '--'}}</text>
+			</view>
+		</view>
+	</view>
+	<view class="livedetail-top">
+		<text class="location">装修公司</text>
+	</view>
+	<view class='contain detail'>
+		<image class='d-logo' src="{{info.company_logo ? info.company_logo : '../../img/comlogo.png'}}"></image>
+		<view class='d-xq'>
+			<view class='x-title'>{{info.company_qc}}</view>
+			<view class='x-des'>地址：{{info.company_dz}}</view>
+		</view>
+	</view>
+	<view class="livedetail-top" style="line-height:30rpx;">
+		<text class="location">装修现场</text>
+	</view>
+	<view class="contain sify {{scrollInfo>341 ? 'page-group-position' : ''}}" wx:if="{{stepLen>0}}">
+		<scroll-view class="scroll-view_H" scroll-x="true" bindscroll="scroll" style="width: 100%">
+			<view class="scroll-view-item_H {{step==''?'active':''}}" bindtap="chooseItem" data-cid="">全部</view>
+			<view class="scroll-view-item_H {{step==item.id?'active':''}}" wx:for="{{step_list}}" wx:key="*this" bindtap="chooseItem" data-step="{{item.id}}">{{item.name}}</view>
+		</scroll-view>
+	</view>
+	<view class='goods' wx:if="{{stepLen>0}}">
+		<view class='g-item' wx:for="{{stepList}}" wx:for-index="index" wx:key="*this" data-id="{{item.id}}">
+			<view class='g-top'>
+				<view class='t-left'>
+					<image src='{{item.company_logo}}'></image>
+					<view class='name'>{{item.company_jc}}</view>
+				</view>
+				<view class='t-right' data-id="{{item.id}}" wx:if="{{item.check_effect_list[0]}}">
+					<view class='xiao-face'>
+						<image wx:if="{{item.check_ret == 1}}" src='../../img/laugh.png'></image>
+						<image wx:if="{{item.check_ret == 2}}" src='../../img/smile.png'></image>
+						<image wx:if="{{item.check_ret == 3}}" src='../../img/sad.png'></image>
+					</view>
+					<view class='text'>{{item.check_ret_msg}}</view>
+					<!-- <view class='time'>{{item.created_date}}</view> -->
+				</view>
+			</view>
+			<view class='g-center'>【{{item.step_name}}】</view>
+			<view class='g-bottom'>
+				<view class='des'>
+					{{item.content}}
+				</view>
+				<view class='tu' wx:if="{{item.videoInfo ==1}}">
+					<image wx:for="{{item.media_list}}" wx:for-item="it" wx:key="*this" bindtap="tuClick" data-id="{{item.id}}" data-tid="{{it.id}}" mode="{{item.tuLen == 1 ? 'center' : 'aspectFill'}}" class="tu1 {{item.tuLen==1 ? '' : item.tuLen ==2 || item.tuLen == 4 ? 'tu2':'tu3'}}" src='{{it.url_full}}'></image>
+					<image class='tu3 clear'></image>
+				</view>
+				<view class='tu' wx:if="{{item.videoInfo ==2}}">
+					<video wx:for="{{item.media_list}}" wx:for-item="it" wx:key="*this" class="tu1" src='{{it.url_full}}'></video>
+				</view>
+
+				<view class='time-dianzan'>
+					<view class='time'>{{item.created_date}}</view>
+					<!-- 点赞 -->
+					<view class='dianzan'>
+						<view class='zan-num'>{{item.like_num}}</view>
+						<view class='zan'>
+							<image catchtap='onChangeTap' src="../../img/{{item.like_checked?'zan':'zan-ash'}}.png" data-index='{{index}}' data-id="{{item.id}}" data-live-num="{{item.like_num}}" data-isLike="{{item.like_checked}}"></image>
+						</view>
+					</view>
+				</view>
+				<!-- 我的印象 -->
+				<view class='yinxiang' wx:if="{{item.check_effect_list.length > 0 && !!item.check_effect_list[0]}}" bindtap='toAcceptance' data-id='{{item.id}}'>
+					<text class='me-yx'>我的印象:</text>
+					<view class='yx-box'>
+						<text class='yx-tag' wx:for="{{item.check_effect_list}}" wx:key="*this">{{item}}</text>
+					</view>
+				</view>
+				<!-- 评论 -->
+				<view wx:for="{{item.comment_list}}" class='comment' wx:key="*this">
+					<view class='me-comment'>
+						<text class='me'>我：</text>
+						<text class='neirong' bindtap='contentDel' data-id='{{item.id}}'  data-infoId='{{item.info_id}}' data-item="{{item}}" data-index="{{index}}">{{item.content}}</text>
+					</view>
+					<view class='me-comment' wx:for="{{item.reply_list}}" wx:key="*this">
+						<text class='shangjia'>商家回复：</text>
+						<text class='shangjia-huifu' >{{item.content}}</text>
+					</view>
+				</view>
+
+				<view class='yanshou-dianping'>
+					<view class='yanshou' bindtap='toAcceptance' data-id='{{item.id}}'>
+						<view class='laugh-face'>
+							<image src='../../img/smile.png'></image>
+						</view>
+						<view class='jieduan'>阶段验收</view>
+					</view>
+					<view class='dianping' bindtap='toComment' data-id="{{item.id}}">
+						<view class='laugh-face'>
+							<image src='../../img/dianping.png'></image>
+						</view>
+						<view class='jieduan'>施工点评</view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="btm-nomore" wx:if="{{nomore!=2}}">{{nomore==1?'':nomore==3?'没有更多记录了···':'请求中'}}</view>
+	</view>
+	<view class='nodata' wx:if="{{stepLen==0}}">
+		<image src='../../img/over.png'></image>
+		<view>暂无施工信息</view>
+	</view>
+</scroll-view>
+
+<view class="swiper-mask" wx:if="{{largeView}}" bindtap='getLargeImage'>
+	<view class="swiper-wrap" style="height:100%">
+		<swiper duration="500" interval="500" circular="true" current="{{currentIndex-1}}" bindchange="swiperChange" style="height:100%">
+			<block wx:for="{{swiperData}}" wx:for-index="key" wx:key="{{item.id}}">
+				<swiper-item item-id="{{item.id}}">
+					<view style="height:100%;position:relative;">
+						<image src="{{item.url_full}}" mode="widthFix" style="width:100%;position:absolute;left:0px;right:0px;top:0px;bottom:0px;margin:auto;"></image>
+					</view>
+				</swiper-item>
+			</block>
+		</swiper>
+	</view>
+	<view class="num-box">
+		{{currentIndex}}/{{swiperLen}}
+	</view>
+</view>
+<view class="live-tit" wx:if='{{isError}}'>{{errorTit}}</view>
+<!--更换地址弹窗-->
+<view class="change-address-mask" wx:if='{{isOrderShow}}'>
+	<view class="address-content">
+		<image class="closeBtn" src="../../img/close-btn.png" bindtap="closeOrder"></image>
+		<view class="address-tit">更换装修地址</view>
+		<view>输入装修的业主手机号</view>
+		<view>验证后即可查看装修现场</view>
+		<view class="address-order">
+			<input class="input_style" placeholder="业主手机号" bindinput="userTel" value="{{teleInfo}}" maxlength='11' type="number"></input>
+			<view class="input_style">
+				<input placeholder="短信验证码" bindinput="searchOrder" value="{{teleCode}}" type="number"></input>
+				<text bindtap="getCode" wx:if="{{!isTime}}">获取验证码</text>
+				<text wx:if="{{isTime}}">{{time}}s后重新发送</text>
+			</view>
+		</view>
+		<view class="change-btn" bindtap="liveSubmutBtn">确定</view>
+	</view>
+</view>
+<!-- 发布评论 -->
+<view class='pinglun' wx:if="{{isShow}}">
+	<form bindsubmit="bindFormSubmit">
+		<textarea placeholder="点评本次装修阶段施工质量、施工态度等" name="textarea" placeholder-class='placeholder' value="{{comment_content}}" />
+		<button form-type="submit" class='fb-btn'> 发布 </button>
+    	</form>
+	</view>
+
+<!-- 发布评论之后弹窗 -->
+<view class='mask' wx:if="{{isTanchuang == 1 ? true : false}}">
+    <view class='inner'>
+        <view class='inner-top' style=' background-image: url(../../img/hdtc.png);'>
+            <view class='hdjl'>
+                <image src='../../img/hdjl.png'></image>
+            </view>
+            <view class='hdjl-box'>
+                 <view class='hdjl-text'>
+                    您的点评将反馈给施工人员
+                </view>
+                <view class='hdjl-text'>
+                    并且能及时收到施工人员的回复
+                </view>
+            </view>
+        </view>
+        <view class='inner-ewm'>
+            <view class='ewm'>
+                <image src='{{wxqrcode_url}}'></image>
+            </view>
+            <view class='ewm-text'>长按识别上方二维码</view>
+            <view class='ewm-text'>关注公众号，即可互动交流</view>
+        </view>
+        <view class='close' bindtap='closeTanc'>x</view>
+    </view>
+</view>

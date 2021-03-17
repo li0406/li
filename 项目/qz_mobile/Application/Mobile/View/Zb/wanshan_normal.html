@@ -1,0 +1,171 @@
+<extend name="Common:basic"/>
+<block name="link">
+<link href="{$static_host}/assets/mobile/zb/css/m-hxsj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+    <div class="m-header-tit">完善信息</div>
+</block>
+<block name="content">
+    <article>
+        <ul class="m-bj-edit">
+            <li>
+                <span class="m-bj-title">感谢您的申请！</span>
+                <span class="m-bj-info"><em>本服务由齐装网及具有资质合作的装修公司提供</em><br/>
+                近期申请人数较多，完善以下信息，我们将优先为您服务！</span>
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list" type="number" name="mianji" placeholder="请填写房屋面积">
+                <span class="dw">㎡</span>
+            </li>
+            <li>
+                <div class="m-row" style="width: 100%;">
+                    <select name="start" class="m-row-int1 m-bj-edit-list m-bj-half">
+                        <option value="">请选择开工时间</option>
+                        <option value="1个月">1个月</option>
+                        <option value="2个月">2个月</option>
+                        <option value="3个月">3个月</option>
+                        <option value="3个月以上">3个月以上</option>
+                        <option value="拿房后开工">面议</option>
+                    </select>
+                </div>
+            </li>
+            <li>
+                <div class="m-row" style="width: 100%;">
+                    <select name="yusuan" class="m-row-int1 m-bj-edit-list m-bj-half">
+                        <option value="">请选择不包括家具、电器的预算</option>
+                        <volist name="info.yusuan" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                        </volist>
+                    </select>
+                </div>
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list" type="text" name="xiaoqu" placeholder="您的小区,以便准确匹配">
+            </li>
+        </ul>
+        <a class="m-b-btn save-submit">马上获取</a>
+        <div class="m-bj-description">
+            <i class="fa fa-exclamation"></i>
+            我们承诺：齐装网提供该项免费服务，绝不产生任何费用，为了您的利益以及我们的口碑，您的隐私将被严格保密。
+        </div>
+    </article>
+    <include file="Common/cooperationad" />
+</block>
+
+<block name="script">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".save-submit").click(function(event) {
+                var mianji = $(".m-bj-edit input[name=mianji]").val();
+                var xiaoqu = $(".m-bj-edit input[name=xiaoqu]").val();
+                var start = $(".m-bj-edit select[name=start]").val();
+                var yusuan = $(".m-bj-edit select[name=yusuan]").val();
+                 
+                if (!mianji) {
+                    alert('请输入您的房屋面积');
+                    $(".m-bj-edit input[name=mianji]").focus();
+                    return false;
+                } else {
+                        var reg = /^(-?\d+)(\.\d+)?$/;
+                        if(!reg.test(mianji)){
+                            $(".m-bj-edit input[name=mianji]").val("");
+                            alert('房屋面积必须为数字');
+                            $(".m-bj-edit input[name=mianji]").focus();
+                            return false;
+                        } else {
+                            if (mianji < 1 || mianji > 10000) {
+                                $(".m-bj-edit input[name=mianji]").val("");
+                                alert('房屋面积请输入1-10000之间的数字 ^_^!');
+                                $(".m-bj-edit input[name=mianji]").focus();
+                                return false;
+                            }
+                        }
+                }
+
+                if(!start){
+                    alert('请选择开工时间');
+                    return false;
+                }
+
+                if(!yusuan){
+                    alert('请选择预算');
+                    return false;
+                }
+
+                if(!xiaoqu){
+                    alert('为了更准确的为您匹配方案，请填写小区名');
+                    return false;
+                }
+                 
+                window.order({
+                    extra:{
+                        start:$("select[name=start]").val(),
+                        yusuan:$("select[name=yusuan]").val(),
+                        lx:$("select[name=lx]").val(),
+                        xiaoqu:$("input[name=xiaoqu]").val(),
+                        text:$("input[name=text]").val(),
+                        fangshi:$("select[name=fangshi]").val(),
+                        mianji:$("input[name=mianji]").val(),
+                        orderid:"{$order.id}",
+                        source: '314'
+                    },
+                    submitBtn:{
+                        className:$(this),
+                        type:'btn'
+                    },
+                    error:function(){
+                        alert("网络异常,请稍后再试！");
+                         
+                    },
+                    success:function(data, status, xhr){
+                         
+                        if (data.status == 1) {
+                            window.location.href = "{$redirect}";
+                        } else {
+                            alert(data.info);
+                        }
+                    },
+                    validate:function(item, value, method, info){
+                        return true;
+                    }
+                });
+            });
+        })
+
+    </script>
+    <script>
+        $(function () {
+            // 异业合作广告
+            var source = 26;
+            $.ajax({
+                url: "/getPartnerad",
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    source: source,
+                }
+            }).done(function (res) {
+                if(res.error_code == 0) {
+                    $(".cooperation_box").find(".ad-area").html('<img src="'+res.data.m_img+'">')
+                    $(".cooperation_box").find("#ad-link").attr('href', res.data.m_url)
+                    $(".cooperation_box").find("#ad-link").on('click', function () {
+                        countAdPv(res.data.id)
+                    })
+                    $(".cooperation_ad_mask").fadeIn(0)
+                    $(".cooperation_box").fadeIn(0)
+                    var topV = $(window).width() * 355 / 750;
+                    $(".cooperation_box").find(".link-box").css('top', topV)
+                }
+            })
+            $(".cooperation_box").find(".close").on("click", function () {
+                $(".cooperation_box").find("#ad-link").off('click')
+                $(".cooperation_ad_mask").fadeOut(0)
+                $(".cooperation_box").fadeOut(0)
+            })
+        })
+    </script>
+</block>

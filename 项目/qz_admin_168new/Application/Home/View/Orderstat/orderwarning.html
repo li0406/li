@@ -1,0 +1,367 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服发单每日预警 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/orderstat/css/orderwarning.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服发单每日预警</h1>
+    </section>
+    <section class="content clearfix">
+        <div class="tishi clearfix">
+            <switch name="info.speed_mark">
+            <case value="2">温馨提示：当前人均发单已达<span>{$info.avgCount|default=0}</span>单，预计全天新单量为<span>{$info.estimatedCount|default="0"}</span>单，已超过人力饱和，请及时调整发单速度！</case>
+            <case value="1"> 温馨提示：按照目前此速度，预计全天新订单量为<span>{$info.estimatedCount|default="0"}单</span>，距离人均新单{$info.order_avg|default=0}单的标准差距为<span>{$info.order_diff|default="0"}单</span>。新单冒出速度需调整为<span>{$info.after_order_speed|default="0"}/h</span>单才可完成目标。</case>
+            <default />
+            温馨提示：当前人均发单量为<span>{$info.avgCount|default=0}</span>单，目前发单速度趋于正常水平，按此速度，预计全天新单为<span>{$info.estimatedCount|default="0"}</span>单。
+            </switch>
+        </div>
+        <div class="warn-data col-xs-12 clearfix">
+                <div class="data-group col-xs-1 data-group-title">
+                    <span>预警数据</span>
+                </div>
+                <div class="other col-xs-8" id="other">
+                    <div class="data-group col-xs-2">
+                        <span class="span1">今日坐席数</span><span>{$info.kfCount|default=0}</span>
+                    </div>
+                    <div class="data-group col-xs-2">
+                        <span class="span1">派单新人数</span><span>{$info.kfNewCount|default=0}</span>
+                    </div>
+                    <div class="data-group col-xs-2">
+                        <span class="span1">今日已有新单</span><span>{$info.orderCount|default=0}</span>
+                    </div>
+                    <div class="data-group col-xs-2">
+                        <span class="span1">预计全天新单</span><span>{$info.estimatedCount|default="0"}</span>
+                    </div>
+                    <div class="data-group col-xs-2">
+                        <span class="span1">人均新单标准调整</span><input type="text" class="exception-item" name="order_avg" value="{$info.order_avg|default=0}">
+                    </div>
+                     <div class="data-group col-xs-2">
+                        <span class="span1">预警最小值</span><input type="text" class="exception-item" name="order_min" value="{$info.order_min|default=0}">
+                    </div>
+                     <div class="data-group col-xs-2">
+                        <span class="span1">预警最大值</span><input type="text" class="exception-item"  name="order_max" value="{$info.order_max|default=0}">
+                    </div>
+                </div>
+                <div class="other1 col-xs-3">
+                    <div class="data-group1" style="background: #f88a6f">
+                            <span class="span2">目前人均新单</span><span>{$info.avgCount|default=0}</span>
+                    </div>
+                    <div class="data-group1" style="background: #f7b547" >
+                            <span class="span2">预计全天人均新单</span><span>{$info.estimatedAvgCount|default=0}</span>
+                    </div>
+                </div>
+        </div>
+        <div class="fadan-tubiao col-xs-12 clearfix" id="canvas"></div>
+
+
+        <div class="shuju-biao  col-xs-12 clearfix">
+            <div class="shuju-box">
+                <div class="box-body act-box"  style="padding:0">
+                    <table class="col-xs-12 mytable">
+                        <thead>
+                        <tr class="biao-head">
+                            <th>时间段</th>
+                            <th>0：00-0：59</th>
+                            <th>1：00-1：59</th>
+                            <th>2：00-2：59</th>
+                            <th>3：00-3：59</th>
+                            <th>4：00-4：59</th>
+                            <th>5：00-5：59</th>
+                            <th>6：00-6：59</th>
+                            <th>7：00-7：59</th>
+                            <th>8：00-8：59</th>
+                            <th>9：00-9：59</th>
+                            <th>10：00-10：59</th>
+                            <th>11：00-11：59</th>
+                            <th>12：00-12：59</th>
+                            <th>13：00-13：59</th>
+                            <th>14：00-14：59</th>
+                            <th>15：00-15：59</th>
+                            <th>16：00-16：59</th>
+                            <th>17：00-17：59</th>
+                            <th>18：00-18：59</th>
+                            <th>19：00-19：59</th>
+                            <th>20：00-20：59</th>
+                            <th>21：00-21：59</th>
+                            <th>22：00-22：59</th>
+                            <th>23：00-23：59</th>
+                            <th style="width: 60px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="first">
+                                <td>近三月发单均值</td>
+                                <volist name="list.month_order" id="vo">
+                                <td>{$vo}</td>
+                                </volist>
+                                <td class="edit"><i class="fa fa-pencil"></i></td>
+                            </tr>
+                            <tr class="second">
+                                <td>今日发单量</td>
+                                <volist name="list.order_list" id="vo">
+                                <td>{$vo}</td>
+                                </volist>
+                                <td>--</td>
+                            </tr>
+                            <tr class="three">
+                                <td>今日预测</td>
+                                <volist name="list.forecast_order" id="vo">
+                                <switch name="vo.mark">
+                                <case value="1"><td class="up">{$vo.value}<i class="fa fa-long-arrow-down"></i></td></td></case>
+                                <case value="2"><td class="down">{$vo.value}<i class="fa fa-long-arrow-up"></i></case>
+                                <default/>
+                                <td>{$vo.value}</td>
+                                </switch>
+                                </volist>
+                                <td>--</td>
+                            </tr>
+                            <tr class="four">
+                                <td>近三月平均坐席分时段发单</td>
+                                <volist name="list.customer_history_order" id="vo">
+                                <td>{$vo}</td>
+                                </volist>
+                                <td class="edit"><i class="fa fa-pencil"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="parameter col-xs-12 clearfix">
+                <p class="canshu">参数公式</p>
+                <p>1、今日坐席数：当前日期的坐席数</p>
+                <p>2、今日已有新单=上一日17：30以后至当前时间段已有发单</p>
+                <p>3、目前人均新单=今日已有新单/今日坐席数</p>
+                <p>4、新单冒出速度=前2个小时段发单量的均值</p>
+                <p>5、预计全天新单=今日已有新单+当天剩余时段至17：30发单量估值</p>
+                <p>6、预计全天人均新单=预计全天新单/今日坐席数</p>
+                <p>7、当天同比历史均值=每个时段发单量/坐席数/近三个月平均坐席分时段发单</p>
+                <p>8、当天同比历史均值估值=近3个小时段当天同比历史均值的平均值</p>
+                <p>9、今日预测=近三个月平均坐席分时段发单*当前坐席数*当天同比历史均值估值</p>
+                <p>10、平均坐席分时段发单=当前时段发单量/当前坐席数</p>
+                <p>11、近三月发单均值=当前日期往前3个月的发单平均值</p>
+                <p>12、近三月平均坐席分时段发单=近三月发单均值/近三月平均坐席</p>
+                <p>13、平均坐席分时段发单=当前时段发单量/当前坐席数</p>
+                <p>14、调整后的全天新单=人均新单标准*今日坐席数</p>
+                <p>15、调整后的新单速度=（调整后的全天新单-已有新单）/目前至下班剩余时长+新单冒出速度</p>
+
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(function(){
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+    var option = {
+        title: {
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter:function(a){
+                var val = a[0].value;                ;
+                var title ="";
+                var time = a[0].axisValue;
+                switch(time){
+                    case "00":
+                    $title = "00:00 - 00:59";
+                    break;
+                    case "01":
+                    $title = "01:00 - 01:59"
+                    break;
+                    case "02":
+                    $title = "02:00 - 02:59"
+                    break;
+                    case "03":
+                    $title = "03:00 - 03:59"
+                    break;
+                    case "04":
+                    $title = "04:00 - 04:59"
+                    break;
+                    case "05":
+                    $title = "05:00 - 05:59"
+                    break;
+                    case "06":
+                    $title = "06:00 - 06:59"
+                    break;
+                    case "07":
+                    $title = "07:00 - 07:59"
+                    break;
+                    case "08":
+                    $title = "08:00 - 08:59"
+                    break;
+                    case "09":
+                    $title = "09:00 - 09:59"
+                    break;
+                    case "10":
+                    $title = "10:00 - 10:59"
+                    break;
+                    case "11":
+                    $title = "11:00 - 11:59"
+                    break;
+                    case "12":
+                    $title = "12:00 - 12:59"
+                    break;
+                    case "13":
+                    $title = "13:00 - 13:59"
+                    break;
+                    case "14":
+                    $title = "14:00 - 14:59"
+                    break;
+                    case "15":
+                    $title = "15:00 - 15:59"
+                    break;
+                    case "16":
+                    $title = "16:00 - 16:59"
+                    break;
+                    case "17":
+                    $title = "17:00 - 17:59"
+                    break;
+                    case "18":
+                    $title = "18:00 - 18:59"
+                    break;
+                    case "19":
+                    $title = "19:00 - 19:59"
+                    break;
+                    case "20":
+                    $title = "20:00 - 20:59"
+                    break;
+                    case "21":
+                    $title = "21:00 - 21:59"
+                    break;
+                    case "22":
+                    $title = "22:00 - 22:59"
+                    break;
+                    case "23":
+                    $title = "23:00 - 23:59"
+                    break;
+                }
+                var msg = $title +"<br/>"+ a[0].marker +" "+ a[0].seriesName+":"+val;
+                if (typeof a[1] !== "undefined") {
+                    val = a[1].value;
+                    msg += "<br/>"+ a[1].marker +" "+a[1].seriesName+":"+ val;
+                }
+                return msg;
+            }
+        },
+        legend: {
+            data:['今日发单量','近三月发单均值'],
+            x: 'left'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            axisLine: {onZero: false},
+            axisLabel:{interval:0},
+            data: {$list.time|json_encode}
+        },
+        yAxis: {
+            type: 'value',
+            splitNumber:3
+        },
+        series: [
+            {
+                name:'今日发单量',
+                type:'line',
+                data:{$list.order_count|json_encode}
+            },
+            {
+                name:'近三月发单均值',
+                type:'line',
+                data:{$list.avg_count|json_encode}
+            },
+
+        ]
+    };
+    myChart.setOption(option);
+
+    $('.edit').on('click','.fa-pencil',function(event) {
+        var parent = $(this).parents("tr");
+        var b = $(this).parent();
+        var a =b.siblings();
+        for(i=1;i<a.length;i++){
+                a[i].innerHTML="<input type='text' value='"+a[i].innerText+"'/>";
+        }
+        b[0].innerHTML="<input  type='button' class='baocun' data-parent='"+parent.attr("class")+"'  value='保存'/><input type='button' data-parent='"+parent.attr("class")+"' id='quxiao'  value='取消'/>";
+    });
+
+
+    //取消editTd编辑
+    $('.edit').on('click','#quxiao',function(){
+        var c = $(this).parent();
+        var d = c.siblings();
+        for(i=1;i<d.length;i++){
+            //表格对应值
+            d[i].innerHTML= d.find("input[type=text]").val();
+        }
+        c[0].innerHTML="<i class='fa fa-pencil'></i>";
+
+    });
+
+    //保存editTd编辑
+    $('.edit').on('click','.baocun',function(){
+        var parent = $(this).attr("data-parent");
+        var c = $(this).parent();
+        var d = c.siblings();
+        var data = new Array();
+        for(i=1;i<d.length;i++){
+            data.push(d.find("input[type=text]").val());
+            //表格对应值
+            d[i].innerHTML= d.find("input[type=text]").val();
+        }
+        c[0].innerHTML="<i class='fa fa-pencil'></i>";
+        $.ajax({
+            url: '/orderstat/editexception',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                data:data,
+                type:parent
+            }
+        })
+        .done(function(data) {
+            window.location.href = window.location.href;
+        });
+    });
+
+    $(".exception-item").on("keyup",function(event){
+         if (event.keyCode == "13") {
+    　　　　$.ajax({
+                url: '/orderstat/exceptionup/',
+                type: 'post',
+                dataType: 'JSON',
+                data: {
+                    name:$(this).attr("name"),
+                    value:$(this).val()
+                },
+                success:function(data){
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    } else {
+                        alert(data.info);
+                    }
+                }
+            });
+    　　}
+    });
+
+});
+
+
+</script>
+</block>

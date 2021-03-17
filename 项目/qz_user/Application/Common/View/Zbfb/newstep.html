@@ -1,0 +1,97 @@
+<div class="windowbg validate">
+    <div class="order-window">
+        <div class="tit">免费设计与报价</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info">
+            <h3><span class="f-red">4套</span>设计全面PK，让你的装修决不后悔</h3>
+            <div class="box-line edit-text">
+                <input type="text" name="name" style="width:100%" placeholder="请输入您的称呼">
+
+            </div>
+            <div class="box-line edit-text">
+                <input type="text" name="tel" style="width:100%" placeholder="请输入您的手机号">
+            </div>
+            <div class="box-line edit-text">
+                <select class="edit-city">
+                </select>
+            </div>
+            <button type="button">立即申请</button>
+            <p>今天已有<span class="f-red">{:releaseCount('fbrs')}</span>户业主成功免费申请！</p>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    App.citys.init(".windowbg .edit-city", null, shen, shi,"{$cityInfo.id}");
+    $(".windowbg .fa-remove").click(function(event) {
+        $(".windowbg").remove();
+    });
+    $(".windowbg button").click(function(event) {
+        var container = $(".windowbg");
+        $(".focus", container).removeClass('focus');
+        $(".height_auto", container).removeClass('height_auto');
+        $(".valdate-info", container).remove();
+
+        if (!App.validate.run($("input[name=name]", container).val())) {
+            $("input[name=name]", container).parent().addClass('height_auto');
+            $("input[name=name]", container).addClass('focus').focus();
+            var span = $("<i class='valdate-info'></i>");
+            span.html("您输入的姓名有误，请重新输入");
+            $("input[name=name]", container).parent().append(span);
+            return false;
+        }
+
+        if (!App.validate.run($("input[name=tel]", container).val(), "moblie")) {
+            $("input[name=tel]", container).parent().addClass('height_auto');
+            $("input[name=tel]", container).addClass('focus').focus();
+            var span = $("<i class='valdate-info'></i>");
+            span.html("请输入您的手机号");
+            $("input[name=tel]", container).parent().append(span);
+            return false;
+        }
+
+        if (!App.validate.run($(".edit-city", container).val())) {
+            $(".edit-city", container).parent().addClass('height_auto');
+            $(".edit-city", container).addClass('focus').focus();
+            var span = $("<i class='valdate-info'></i>");
+            span.html("请输入选择您的城市");
+            $(".edit-city", container).parent().append(span);
+            return false;
+        }
+
+
+        $.ajax({
+            url: '/fb_order/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                name:$("input[name=name]", container).val(),
+                tel:$("input[name=tel]", container).val(),
+                cs:$(".edit-city", container).val(),
+                source:"{$source}",
+                des:"{$select_desid}",
+                select_desid : "{$select_desid}",
+                select_comid : "{$select_comid}",
+                step:2
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                container.remove();
+                $("body").append(data.data.tmp);
+            } else {
+                $.pt({
+                    target: _this,
+                    content: data.info,
+                    width: 'auto'
+                });
+            }
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target: _this,
+                content: '发布失败,请刷新页面！',
+                width: 'auto'
+            });
+        });
+    });
+</script>

@@ -1,0 +1,119 @@
+<form class="secbox_form" onsubmit="return false;">
+    <div class="f_box validate">
+        <div class="f_list">
+            <div  class="f_item active">
+                <div class="f_t">
+                    免费设计与报价
+                </div>
+                <h3>4套方案全面PK  装修省35%</h3>
+                <div class="input radio-group">
+                    <input type="text" name="name" placeholder="请输入您的称呼"/>
+                </div>
+                <div class="input radio-group">
+                    <input type="text" name="tel" placeholder="请输入您的手机号"/>
+                </div>
+                <div class="input radio-group">
+                    <select id="f_cs" name="cs">
+                    </select>
+                </div>
+
+                <div class="input radio-group">
+                    <button class="f_next" tab-index="0" data-type="1"  type="button">立即申请
+                    </button>
+                </div>
+                <div class="f_footer">
+                已有 <em class="red">{:releaseCount("fbzrs")}</em> 位业主领取<a rel="nofollow" href="/zhaobiao/" class="pull-right" target="_blank">在线智能报价</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+var ip_cityid = '{$Think.cookie.iplookup}';
+var city_id = '{$theCityId}';
+(city_id == '') ? cityId = ip_cityid : cityId = city_id;
+if(cityId == ''){
+    getLocation();
+}else{
+    initCity(cityId);
+}
+function initCity(cityId){
+    App.citys.init("#f_sj_cs","#f_sj_qx",shen,shi,cityId);
+    App.citys.init("#f_bj_cs","#f_bj_qx",shen,shi,cityId);
+    App.citys.init("#f_cs","#f_qx",shen,shi,cityId);
+}
+    $(function(){
+
+        $(".f_next").click(function(event) {
+            var _this = $(this);
+            var container = $(".f_box");
+
+            $(".focus", container).removeClass('focus');
+            $(".height_auto", container).removeClass('height_auto');
+            $(".valdate-info", container).remove();
+
+            if (!App.validate.run($("input[name=name]", container).val())) {
+                $("input[name=name]", container).parent().addClass('height_auto');
+                $("input[name=name]", container).addClass('focus').focus();
+                var span = $("<i class='valdate-info'></i>");
+                span.html("您输入的姓名有误，请重新输入");
+                $("input[name=name]", container).parent().append(span);
+                return false;
+            }
+
+            if (!App.validate.run($("input[name=tel]", container).val(), "moblie")) {
+                $("input[name=tel]", container).parent().addClass('height_auto');
+                $("input[name=tel]", container).addClass('focus').focus();
+                var span = $("<i class='valdate-info'></i>");
+                span.html("请输入您的手机号");
+                $("input[name=tel]", container).parent().append(span);
+                return false;
+            }
+
+            /*
+            if (!App.validate.run($("#f_cs", container).val())) {
+                $("#f_cs", container).parent().addClass('height_auto');
+                $("#f_cs", container).addClass('focus').focus();
+                var span = $("<i class='valdate-info'></i>");
+                span.html("请输入选择您的城市");
+                $("#f_cs", container).parent().append(span);
+            }
+            */
+
+            var data = {
+                name:$("input[name=name]",container).val(),
+                tel:$("input[name=tel]",container).val(),
+                cs:$("select[name=cs]",container).val(),
+                source: '{$order_source}',
+                step:2
+            };
+
+            window.order({
+                extra:data,
+                error:function(){
+                    $("#f_cs", container).parent().addClass('height_auto');
+                    $("#f_cs", container).addClass('focus').focus();
+                    var span = $("<i class='valdate-info'></i>");
+                    span.html("发送失败,请稍后重试！");
+                    $("#f_cs", container).parent().append(span);
+                },
+                success:function(data, status, xhr){
+                    if (data.status == 1) {
+                        $("body").append(data.data.tmp);
+                    } else {
+                        $("#f_cs", container).parent().addClass('height_auto');
+                        $("#f_cs", container).addClass('focus').focus();
+                        var span = $("<i class='valdate-info'></i>");
+                        span.html(data.info);
+                        $("#f_cs", container).parent().append(span);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+    });
+</script>

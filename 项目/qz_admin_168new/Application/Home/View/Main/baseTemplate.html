@@ -1,0 +1,437 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <block name="title"><title>齐装网管理后台-控制台</title></block>
+    <link rel="stylesheet" href="/assets/common/css/bootstrap/css/bootstrap.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/AdminLTE.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/skins/_all-skins.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <if condition="$APP_ENV EQ 'prod'">
+        <script src="/assets/common/js/sentry/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
+        <script>Sentry.init({ dsn: 'https://856b9cc7cd2c4306b7f1d7a54bc1bc6a@sentry.qizuang.com/7' });</script>
+    </if>
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <block name="style"></block>
+</head>
+    <body id="switch-menu" class='<if condition="session('uc_userinfo.showmenu') !== false">hold-transition skin-blue sidebar-mini<else />skin-blue sidebar-mini sidebar-collapse</if>' >
+    <div class="wrapper">
+        <header class="main-header">
+            <a href="/" class="logo">
+                <span class="logo-mini">QZ</span>
+                <span class="logo-lg">齐装后台管理系统</span>
+            </a>
+            <nav class="navbar navbar-static-top" role="navigation">
+                <a href="javascript:void(0)" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only"></span>
+                </a>
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="/voip/checkClinkStatus" title="天润帐号检测" target="_blank">
+                                <i class="fa fa-wifi"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://bj.clink.cn" title="跳转至天润后台" target="_blank">
+                                <i class="fa fa-users"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{:C('UC_URL')}/loginout" title="退出"><i class="fa fa-power-off fa-lg"></i></a>
+                        </li>
+                        <li>
+                            <a id="msg_notice" href="/msgSystem/msglist" title="消息通知中心" data-num="0">
+                               <i class="iconfont tongz"></i>
+                            </a>
+                            <div class="message" id="msg_number" style="display: none;">0</div>
+                            <!--<div class="unread" id="msg_unread" style="display: none;">你有消息未读</div>
+                            <div class="meslist">
+                                <ul>
+                                </ul>
+                                <a href="/msgSystem/msglist" class="l-bottom">查看全部通知</a>
+                            </div> -->
+                        </li>
+                        <li>
+                            <a href="{:C('UC_URL')}/main" title="切换至用户中心">
+                                <i class="fa fa-exchange"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{:C('168_URL')}/wwgadmins/chklogin" target="_blank" title="切换老版后台(168)">
+                                <i class="fa fa-paper-plane"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="//{:C('QZ_YUMINGWWW')}" target="_blank" title="前台">
+                                <i class="fa fa-home fa-lg"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="control-sidebar"><i class="fa fa-magic"></i>&nbsp;换肤</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <block name="nav-left-menu">
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <a href="{:C('UC_URL')}/main/">
+                    <div class="user-panel">
+                        <div class="pull-left image">
+                            <img src="{$Think.session.uc_userinfo.logo|default='/assets/common/img/default_logo.gif'}" class="img-circle" alt="User Image">
+                        </div>
+                        <div class="pull-left info">
+                            <p>{:session('uc_userinfo.name')}</p>
+                            <i class="fa fa-circle text-success"></i>&nbsp;{:session('uc_userinfo.role_name')}
+                        </div>
+                    </div>
+                </a>
+                <ul class="sidebar-menu">
+
+                    <volist name="base_tree_menu" id="vo">
+                    <if condition="$vo['active'] EQ 1">
+                    <li class="treeview active" id="sidebar-li-1">
+                    <else/>
+                    <li class="treeview" id="sidebar-li-1">
+                    </if>
+                        <a href="javascript:void(0)">
+                            <i class="{$vo.icon|default='fa fa-home'}"></i>
+                            <span>{$vo.name}</span> <i class="fa fa-angle-left pull-right"></i>
+                        </a>
+                        <if condition="count($vo['child']) GT 0">
+                            <ul class="treeview-menu">
+                            <volist name="vo.child" id="v">
+                                <if condition="$v['active'] EQ 1">
+                                <li class="active" data-id="{$v.nodeid}">
+                                <else/>
+                                <li>
+                                </if>
+                                    <a href="{$v.link}" onclick="setCookie('QZ_ADMIN_NODE','{$v.nodeid}')">
+                                    <i class="{$v.icon|default='fa fa-circle-o'}"></i> {$v.name}
+                                    &nbsp;&nbsp;&nbsp;
+                                    <if condition="$v['auditCount']">
+                                        <span class="label label-warning">{$v.auditCount}</span>
+                                    </if>
+                                    </a>
+                                </li>
+                            </volist>
+                            </ul>
+                        </if>
+                    </li>
+                    </volist>
+                </ul>
+            </section>
+        </aside>
+        </block>
+        <div class="content-wrapper">
+            <block name="content"></block>
+        </div>
+
+        <!-- 消息提醒弹窗 -->
+        <div class="msg-tips" data-id="" style="display: none;">
+            <div class="close">×</div>
+            <div class="tips-title">订单提醒</div>
+            <div class="tips-info" data-link="">您有未读新单，请及时查看哦~</div>
+        </div>
+
+        <div class="mask-self">
+            <div class="loadingWrap" style="">
+                    <div class="loding-5">
+
+                    </div>
+                    <div class="loding-5-1">
+
+                    </div>
+                    <div class="loding-5-2">
+
+                    </div>
+                    <div class="loding-5-3">
+
+                    </div>
+            </div>
+        </div>
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane" id="control-sidebar-home-tab"></div>
+            </div>
+        </aside>
+        <div class="control-sidebar-bg"></div>
+    </div>
+    <script src="/assets/common/css/bootstrap/js/bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/app.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/global.js?v={:C('STATIC_VERSION')}"></script>
+    <!--[if lt IE 9]>
+    <script src="/assets/common/js/html5shiv/3.7.3/html5shiv.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/respond.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}"></script>
+    <![endif]-->
+    <script type="text/javascript">
+
+        var isLoading = true;
+        $(document).ajaxStart(function(params){
+            if (isLoading) {
+                $(".mask-self").show();
+            }
+        }).ajaxComplete(function(){
+            setTimeout(hideProgress,1000);
+            $(".mask-self").hide();
+        }).ajaxStop(function() {
+            $(".mask-self").hide();
+        });
+
+        //链接监控
+        $('[href]').on('click',function(event) {
+            if($(this).attr("target") != '_blank'){
+                if($(this).attr("href").substring(0,10) != 'javascript'){
+                    if($(this).attr("href").substring(0,1) != '#'){
+                        setTimeout(iProgress,300);
+                    }
+                }
+            }
+        });
+
+        //表单监控
+        $("form").on("submit",function(event){
+            setTimeout(iProgress,300);
+        });
+
+        //手工隐藏Loading
+        $('.hideLoading').on('click',function(event) {
+            setTimeout(hideProgress,500);
+        });
+
+        function iProgress(){
+            $(".mask-self").show();
+        }
+        function hideProgress(){
+            $(".mask-self").hide();
+        }
+
+        //监听全局键盘事件
+        $(document).ready(function(){
+            document.onkeydown = function(e) {
+                // 兼容FF和IE和Opera
+                var theEvent = e || window.event;
+                var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+                if (code == 13) {
+                    var target =$('.key-down-event').attr('data-triger');
+                    if (target != '') {
+                        $(target).trigger('click');
+                    };
+                }
+            }
+
+            /*左侧菜单切换保存到服务器*/
+            $('.sidebar-toggle').click(function(event) {
+                var showmenu = $('#switch-menu').hasClass('sidebar-collapse');
+                $.ajax({
+                    url: '/api/switchmenushow/',
+                    type: 'GET',
+                    async:false,
+                    dataType: 'JSON',
+                    data: {
+                        showmenu:showmenu
+                    }
+                });
+            });
+
+            /**
+             * 添加全局左键监听事件
+             */
+            $("body").on("mousedown",function(e){
+                if (e.which == 1) {
+                    var item = $(".treeview-menu li.active");
+                    setCookie("QZ_ADMIN_NODE",item.attr("data-id"));
+                }
+            });
+        })
+
+        function setCookie(name,value){
+            var expires = "; expires=Session";
+            document.cookie = name + "=" + encodeURIComponent(value) + expires + ";path=/;domain=.qizuang.com";
+        }
+
+        //消息推送事件
+        let val = $(".nav .message").text()
+        let tabInfo = 0
+        if(val>0){
+            $(".nav .unread").show()
+            $("#tabme").on('click',function (event) {
+                tabInfo = tabInfo + 1;
+                if (tabInfo % 2 != 0) {
+                    $(".nav .meslist").show()
+                } else {
+                    $(".nav .meslist").hide()
+                }
+            })
+        } else{
+            $(".nav .unread").hide()
+            $(".nav .meslist").hide()
+            $("#tabme").on('click',function (event) {
+                window.location.href="/msgSystem/msglist";
+                return false
+            })
+        }
+        $("#msg_notice").on('click',function (event) {
+            if ($(this).data("num") == "0") {
+                window.location.href = "/msgSystem/msglist";
+                return false;
+            }
+
+            tabInfo = tabInfo + 1;
+            if (tabInfo % 2 != 0) {
+                $(".nav .meslist").show()
+            } else {
+                $(".nav .meslist").hide()
+            }
+        });
+
+        // 获取未读消息
+        function getMsgRemind(){
+            isLoading = false;
+            $.get("/msgSystem/remind", {}, function(response){
+                isLoading = true;
+                if (response.status == 1) {
+                    $("#msg_notice").data("num", response["data"]["no_read_count"]);
+                    $("#msg_number").text(response["data"]["no_read_count"]);
+
+                    if (response["data"]["no_read_count"] > 0) {
+                        var list = response["data"]["no_read_list"];
+                        var ulHtml = "";
+                        for (var i in list) {
+                            ulHtml += '<li class="mes-item msg_link" data-link="'+list[i]["link_url"]+'"  data-id="'+list[i]["id"]+'">';
+                            ulHtml += list[i]["notice"] + '<i class="msg_link" data-link="'+list[i]["link_url"]+'">>></i>';
+                            ulHtml += '</li>';
+                        }
+
+                        $(".meslist").find("ul").html(ulHtml);
+                        $("#msg_unread,#msg_number").show();
+                    } else {
+                        $(".meslist").find("ul").html("");
+                        $("#msg_unread,#msg_number").hide();
+                    }
+                }
+            });
+        }
+        // 关闭消息提示
+        $('.msg-tips').on('click','.close',function(){
+            $('.msg-tips').hide();
+        });
+        $(function(){
+            setTimeout(function(){
+                getMsgRemind();
+            }, 1000);
+
+            try {
+                var url = "{$SCHEME_WEBSOCKET}{:C('WS_HOST')}/msg/system";
+                var ws  = new WebSocket(url, ["{$USER_TOKEN}", "{:C('SMS_APP_SLOT')}"]);
+
+                // ws连接成功
+                ws.onopen = function () {
+                    console.log(" 连接成功！");
+                };
+
+                // ws连接关闭
+                ws.onclose = function () {
+                    if (ws) {
+                        ws.close();
+                        ws = null;
+                    }
+                    console.log(" 连接关闭！");
+                };
+
+                // ws连接错误
+                ws.onerror = function () {
+                    if (ws) {
+                        ws.close();
+                        ws = null;
+                    }
+                    console.log(" 连接关闭！");
+                };
+
+                // ws数据返回处理
+                ws.onmessage = function (result) {
+                    var response = JSON.parse(result.data);
+                    if (response.error_code == 0) {
+                        getMsgRemind(); // 更新未读消息数量
+
+                        if (response["data"]["remind_type"] == "2") {
+                            getMsgInfo(response["data"]["info"]["send_group"]);
+                        }
+                    }
+                };
+
+                // 获取消息详细内容
+                function getMsgInfo(send_group){
+                    $.ajax({
+                        url: "/msgSystem/getMsgInfo",
+                        dataType: "json",
+                        type: "GET",
+                        global: false,
+                        data: {
+                            send_group: send_group
+                        },
+                        success: function(response, textStatus, xhr) {
+                            if (response.error_code == 0) {
+                                var info = response["data"]["info"];
+                                $tipElem = $(".msg-tips");
+                                $tipElem.data("id", info["id"]);
+                                $tipElem.find(".tips-title").html(info["title"]);
+                                $tipElem.find(".tips-info").html(info["notice"]);
+                                $tipElem.find(".tips-info").data("link", info["link_full"]);
+
+                                $tipElem.show();
+                                setTimeout(function(){
+                                    $tipElem.fadeOut(500);
+                                },3000);
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log(e.message);
+            }
+
+            // 消息关闭
+            $(".msg-tips").on("click", ".close", function(){
+                $(".msg-tips").hide();
+            });
+
+            // 消息跳转链接
+            $(".msg-tips").on("click", ".tips-info", function(){
+                var id = $(this).parent().data("id");
+                var link = $(this).data("link");
+
+                $.ajax({
+                    url: "/msgSystem/setread",
+                    dataType: "json",
+                    type: "POST",
+                    global: false,
+                    data: {id: id},
+                    success: function(response, textStatus, xhr) {
+                        if (response.status == 1) {
+                            if (link != "") {
+                                $(".msg-tips").hide();
+                                window.location.href = link;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <block name="script"></block>
+</body>
+</html>

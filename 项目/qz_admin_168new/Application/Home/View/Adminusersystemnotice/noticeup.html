@@ -1,0 +1,338 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>站内信管理 - 网站管理后台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/noticemessage.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+
+    <section class="content-header">
+        <h1 class="">站内信/公告操作</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="box-body">
+                <form id="myForm" class="form-horizontal box" onsubmit="return false">
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">标题:</label>
+                    <div class="col-sm-3">
+                        <input type="text" name="title" class="form-control" placeholder="标题" value="{$notice.title}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">发送类型:</label>
+                    <div class="col-sm-3">
+                        <select class="form-control" name="type">
+                            <volist name="sendType" id="vo">
+                                <if condition="$notice['type'] EQ $vo['value']">
+                                    <option value="{$vo.value}" selected="selected">{$vo.name}</option>
+                                <else/>
+                                    <option value="{$vo.value}">{$vo.name}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">用户类型:</label>
+                    <div class="col-sm-3">
+                        <select name="uid" class="form-control">
+                            <volist name="classtype" id="vo">
+                                <if condition="$notice['classid'] EQ $vo['value']">
+                                    <option value="{$vo.value}" selected="selected">{$vo.name}</option>
+                                    <else/>
+                                    <option value="{$vo.value}">{$vo.name}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 typegroup hide">
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="group" value="1" checked>
+                                全部
+                            </label>
+                            <label>
+                                <input type="radio" name="group" value="2">
+                                真会员
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">选择城市:</label>
+                    <div class="col-sm-11 tab-group">
+                        <div class="tab-text col-sm-3" style="width:26%">
+                        <input type="text" class="selectCity" readonly="true" value="请选择城市" />
+                        <span class="tab-arrow fa fa-sort-desc"></span>
+                        <button type="button" class="btn btn-sm btn-success">确定</button>
+                        </div>
+                        <div class="tab-block">
+                            <ul  class="list-inline tab-list">
+                            </ul>
+                            <div class="tab-tit">
+                                <b>热门城市</b>
+                            </div>
+                            <div class="tab-content">
+                                <volist name="hotCity" id="vo">
+                                <div class="checkbox pull-left">
+                                    <label title="{$vo.cname}">
+                                        <input name="hotcity" data-name="{$vo.cname}" type="checkbox" value="{$vo.cid}">&nbsp;&nbsp;{$vo.cname|mbstr=0,3,"utf-8",false}
+                                    </label>
+                                </div>
+                                </volist>
+                            </div>
+                            <div class="tab-tit">
+                                <b>全部省市</b>
+                            </div>
+                            <div class="tab-content">
+                                <volist name="cityList" id="vo">
+                                <div class="city">
+                                    <label title="{$vo.name}">
+                                        <i class="fa fa-plus-square"></i>&nbsp;&nbsp;
+                                        {$vo.name|mbstr=0,2,"utf-8",false}
+                                    </label>
+                                    <if condition="$vo['mark']">
+                                    <div class="city-list right ">
+                                    <else/>
+                                    <div class="city-list left">
+                                    </if>
+                                        <div class="list-all">
+                                            <label>
+                                                <input  type="checkbox" >&nbsp;&nbsp;全部
+                                            </label>
+                                        </div>
+                                        <volist name="vo.child" id="v">
+                                        <label>
+                                            <input name="city"  data-name="{$v.cname}" type="checkbox" value="{$v.cid}">&nbsp;&nbsp;{$v.cname}
+                                        </label>
+                                        </volist>
+                                    </div>
+                                </div>
+                                </volist>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">内容:</label>
+                    <script id="editor" name="content"  class="col-sm-11"  type="text/javascript">{$notice.text}
+                        </script>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-1 col-sm-offset-1" style="margin-top: 34px; margin-bottom: 30px;">
+                        <button id="btnAdd" type="button" class="btn btn-success btn-block">保存</button>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                        确定提交吗？提交后将无法修改！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">取消</button>
+                    <button id="btnSave" type="button" data-loading-text="正在保存..." class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    var ue = UE.getEditor('editor', {
+        autoClearinitialContent: false,
+        serverUrl: '/ueditor/upload/',
+        toolbars: [
+            ['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain','|','justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+                'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+                'paragraph', 'fontfamily', 'fontsize', '|',
+                'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts','|','simpleupload','insertimage'
+            ]
+        ],
+        maximumWords: 10000
+    });
+
+    $("#btnAdd").click(function(event) {
+        var _this = $(this);
+        var id = _this.attr("data-id");
+        $("#myModal").on('shown.bs.modal', function (e) {
+            $("#btnSave").attr("data-id",id);
+        }).modal({
+            backdrop:false
+        });
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var ids = new Array();
+        $("input[name=hotcity]:checked").each(function(){
+            ids.push($(this).val());
+        });
+
+        $("input[name=city]:checked").each(function(){
+            ids.push($(this).val());
+        });
+
+        _this.button('loading');
+
+        if (ids.length > 0) {
+            ids = JSON.stringify(ids);
+        };
+
+        $.ajax({
+            url: '/adminusersystemnotice/noticeup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                title: $("input[name=title]").val(),
+                type: $("select[name=type]").val(),
+                uid: $("select[name=uid]").val(),
+                ids: ids,
+                content:ue.getContent(),
+                group:$("input[name=group]:checked").val()
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                $(".btn-danger").attr("disabled","disabled");
+                $("#myModal .modal-body").html(' <div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" ></div></div><div class="text-center">发送中,请勿关闭页面！</div>');
+                var t = setInterval(function(){
+                    $.ajax({
+                        url: '/adminusersystemnotice/step/',
+                        type: 'get',
+                        dataType: 'JSON',
+                        data: {
+                            max: data.data
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 2) {
+                            clearInterval(t);
+                            _this.button('reset');
+                            window.location.href = "/adminusersystemnotice/";
+                        }else if (data.status == 1){
+                            $(".progress-bar").css("width",data.data+"%");
+                            _this.html("发送中 "+data.data+"%");
+                        };
+                    });
+                }, 1000);
+            }else{
+                _this.button('reset');
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        });
+    });
+
+    $(".selectCity").click(function(event) {
+        var _this = $(this);
+        var parent = _this.parents(".tab-group");
+        if (!parent.hasClass('active')) {
+            parent.addClass('active');
+            _this.addClass('fa-sort-asc');
+        } else {
+            parent.removeClass('active');
+            _this.removeClass('fa-sort-asc');
+        };
+    });
+
+    $("input[name=hotcity]").click(function(event) {
+        var _this = $(this);
+        var parent = _this.parents(".tab-group");
+        var ul = parent.find(".tab-list");
+        ul.html("");
+        $("input[name=hotcity]:checked").each(function(){
+            var index = $("input[name=hotcity]").index($(this));
+            var li = $('<li style="display:none"></li>');
+            var a = $("<a href='javascript:void(0)' data-index='"+index+"'>"+$(this).attr("data-name")+" <i class='fa fa-times'></i></a>");
+            li.append(a)
+            ul.append(li);
+            a.click(function(event) {
+                parent.find("input[name=hotcity]").eq(index).prop("checked",false);
+                li.remove();
+            });
+        });
+    });
+
+    $(".city > label").click(function(event) {
+        var _this = $(this);
+        var parent = _this.parents(".city");
+        $(".city.active").not(parent).removeClass('active').find(".fa-plus-square").removeClass('fa-minus-square');
+
+        if (parent.hasClass('active')) {
+            parent.removeClass('active');
+            parent.find(".fa-plus-square").removeClass('fa-minus-square');
+        } else {
+            parent.addClass('active');
+            parent.find(".fa-plus-square").addClass('fa-minus-square');
+        };
+    });
+
+    $(".list-all").click(function(event) {
+        var _this = $(this);
+        var all = _this.find("input[type=checkbox]");
+        var parent = _this.parents(".city-list");
+        if (!all.prop("checked")) {
+            parent.find("input[name=city]").prop("checked",false);
+        } else {
+            parent.find("input[name=city]").prop("checked",true);
+        };
+    });
+
+    $(".tab-group button").click(function(event) {
+        var _this = $(this);
+        var parent = _this.parents(".tab-group");
+
+        var str = "";
+        $("input[name=hotcity]:checked").each(function(){
+            str += $(this).attr("data-name")+"、";
+        });
+
+        $("input[name=city]:checked").each(function(){
+            str += $(this).attr("data-name")+"、";
+        });
+
+        if (str.length > 16) {
+            str = str.substr(0,16)+"...";
+        };
+
+        if(str == ""){
+            str = "请选择城市";
+        }
+        parent.find(".tab-text input[type=text]").val(str);
+        parent.removeClass('active');
+        parent.find(".active").removeClass('active');
+        parent.find(".fa-minus-square").removeClass('fa-minus-square');
+    });
+
+    $("select[name=uid]").change(function(event) {
+        if ($(this).val() == 3) {
+            $(".typegroup").removeClass('hide');
+        } else {
+            if ( !$(".typegroup").hasClass('hide')) {
+                $(".typegroup").addClass('hide');
+            }
+        }
+    });
+    </script>
+</block>

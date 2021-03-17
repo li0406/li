@@ -1,0 +1,147 @@
+<!--pages/consult/list.wxml-->
+<view class='top-header'>
+	<view class='header'>
+		<view class='h_time'>
+			<view class='h_title'>咨询日期</view>
+			<view class="seach-content">
+				<view class="input-span" data-time="{{date_begin}}">
+					<picker mode="date" value="{{date_begin}}" start="{{createTime}}" end="{{nowTime}}" data-time="date_begin" bindchange="dateChange">
+						<view class="picker">
+							{{date_begin?date_begin:"开始时间"}}
+						</view>
+					</picker>
+				</view>
+				<text class="em">至</text>
+				<view class="input-span" data-time="{{date_end}}">
+					<picker mode="date" value="{{date_end}}" start="{{date_begin||createTime}}" end="{{nowTime}}" data-time="date_end" bindchange="dateChange">
+						<view class="picker">
+							{{date_end?date_end:"结束时间"}}
+						</view>
+					</picker>
+				</view>
+			</view>
+		</view>
+		<view class='h_site' bindtap='toCity'>
+			<image src='../../img/dingwei.png'></image>
+			<view class='dingwei'>{{curCity}}</view>
+		</view>
+	</view>
+	<view class='search'>
+		<image src='../../img/search.png'></image>
+		<input placeholder='公司名称，联系方式' bindconfirm="searchWord" bindinput='watchPassWord' confirm-type="search" value="{{parms.keyword}}"></input>
+	</view>
+</view>
+
+<view class='tab-back'>
+	<view class='tab'>
+		<view class="flex1">
+			<picker class="flex_text" value="{{recordStatusIndex}}" data-selecthx="{{recordStatusList[recordStatusIndex].name}}" range="{{recordStatusList}}" range-key="{{'name'}}" bindchange="bindPickerChange_rs">
+				<view wx:if="{{recordStatusIndex == 0}}">合作状态</view>
+				<view wx:else> {{recordStatusList[recordStatusIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+		<view class="flex1 flex2">
+			<picker class="flex_text" value="{{cooperationTypeIndex}}" data-selecthx="{{cooperationTypeList[cooperationTypeIndex].name}}" range="{{cooperationTypeList}}" range-key="{{'name'}}" bindchange="bindPickerChange_ct">
+				<view wx:if="{{cooperationTypeIndex == 0}}">合作类型</view>
+				<view wx:else>{{cooperationTypeList[cooperationTypeIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+		<view class="flex1">
+			<picker class="flex_text" value="{{operateStatusIndex}}" data-selecthx="{{operateStatusList[operateStatusIndex].name}}" range="{{operateStatusList}}" range-key="{{'name'}}" bindchange="bindPickerChange_os">
+				<view wx:if="{{operateStatusIndex == 0}}">处理状态</view>
+				<view wx:else> {{operateStatusList[operateStatusIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+
+	</view>
+</view>
+
+<view class='con-scoll'>
+	<navigator url="{{item.url}}" hover-class='none' wx:for="{{list}}" wx:for-index='index' wx:key>
+		<view class='con'>
+			<view class='con-item name'>
+				<view class='item-x'>{{item.company_name}}</view>
+				<view class='{{item.operate_status == 1 ? "red" : "green"}}'>{{item.operate_status_name}}</view>
+			</view>
+			<view class='con-item'>
+				咨询日期：
+				<text>{{item.add_date}}</text>
+			</view>
+			<view class='con-item'>
+				IP地址：
+				<text>{{item.ip_address}}</text>
+			</view>
+			<view class='con-item'>
+				所属区域：
+				<text>{{item.city_area}}</text>
+			</view>
+			<view class='con-item'>
+				客户名称：
+				<text>{{item.linkman}}</text>
+			</view>
+			<view class='con-item'>
+				合作类型：
+				<text>{{item.cooperation_type_name}}</text>
+			</view>
+			<view class='con-item'>
+				合作状态：
+				<text>{{item.record_status_name}}</text>
+			</view>
+			<view class='con-item con-num'>
+				联系方式：
+				<text class="tel" data-tel="{{item.tel}}" catchtap='toTel'>{{item.tel}}</text>
+			</view>
+			<view class='con-item con-num'>
+				留言：
+				<text>{{item.remark ? item.remark : ''}}</text>
+			</view>
+			<block wx-if="{{item.operate_status == 2}}">
+				<view class='con-item'>
+					处理人：
+					<text>{{item.operator_name}}</text>
+				</view>
+				<view class='con-item'>
+					处理时间：
+					<text>{{item.operate_date}}</text>
+				</view>
+			</block>
+		</view>
+		<view class="con-btn clearfix">
+			<view class='deal btn' data-id='{{item.id}}' catchtap='toDeal' wx-if="{{item.operate_status == 1}}">
+				<text>处理</text>
+			</view>
+			<view class='add btn' data-id='{{item.id}}' catchtap='toAdd'>
+				<text>新增记录</text>
+			</view>
+			<view class='record btn' data-id='{{item.id}}' catchtap='toRecord'>
+				<text>历史记录</text>
+			</view>
+		</view>
+	</navigator>
+	<view class='page' wx:if='{{page}}'>
+		<view class="pre {{pageCurrent =='1'?'active':''}}" bindtap='prevBtn'>上一页</view>
+		<view class='total'>
+			<picker bindchange="toPage" value="" range="{{pageNumber}}">
+				<view class="picker">
+					<view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+				</view>
+			</picker>
+		</view>
+		<view class="next {{pageCurrent == pageTotalNumber?'active':''}}" bindtap='nextBtn'>下一页</view>
+	</view>
+	<!-- <view class='no-result' wx:if='{{noResult}}'>
+		<image src='../../img/no_result.png'></image>
+		<view>暂无搜索结果</view>
+	</view>
+	<view class='no-result' wx:if='{{noInternet}}'>
+		<image src='../../img/no_internet.png'></image>
+		<view>网络开了小差~请稍等</view>
+		<button bindtap='toCustom'>重新加载</button>
+	</view> -->
+	  <error-box noResult="{{noResult}}" noInternet="{{noInternet}}" url="../roundorder/roundorder" bindreload="onShow"></error-box>
+</view>

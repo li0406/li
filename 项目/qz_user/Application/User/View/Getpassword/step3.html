@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="keywords" content="密码找回">
+    <meta name="description" content="密码找回">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>密码找回-齐装网</title>
+    <include file="Index:resource" />
+    <link href="{$static_host}/assets/user/register/css/default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+
+<body>
+    <include file="Index:header" />
+    <div class="wrap">
+        <div class="loginlogo">
+           <a class="logo" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo-r.png"/></a>
+        </div>
+    </div>
+    <div class="wrap oflow">
+        <div class="helpstep">
+            <span class="active">确认账号</span>
+            <em class="active"></em>
+            <span class="active">安全验证</span>
+            <em class="active"></em>
+            <span class="active">重置密码</span>
+            <em></em>
+            <span>完成</span>
+        </div>
+        <div class="gpmain">
+            <p class="tit">请重新设定您的密码</p>
+            <p><i>新密码</i>
+                <input name="password" type="password" placeholder="新密码">
+            </p>
+            <p><i>确认密码</i>
+                <input name="confirmpwd" type="password" placeholder="确认密码">
+            </p>
+            <p style="margin-top:20px;"><i>验证码</i>
+                <input name="code" type="text" placeholder="验证码" style="width:80px; margin-right:10px;" />
+                <button type="button" class="btn" style="margin:0">确认</button>
+            </p>
+            <p style="padding-left:72px;">
+              收不到短信?<a href="javascript:void(0)" class="resetTel red">重新发送</a><span class="time">( 60 秒后重新发送 )</span>
+            </p>
+            <div class="tips"></div>
+        </div>
+
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  var time = 60;
+  var mode ="{$mode}";
+  $(function(){
+      interval();
+      $(".btn").click(function(event) {
+          var  reg=/^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/;
+          $(".tips").html("");
+          if($("input[name=password]").val() == ""){
+            $(".tips").html("请填写新的密码");
+            $("input[name=password]").focus();
+            return false;
+          }
+
+          if(!reg.test($("input[name=password]").val())){
+            $(".tips").html("请输入6-18位由数字、字母或特殊符号组成的密码!");
+            $("input[name=password]").focus();
+            return false;
+          }
+
+          if($("input[name=password]").val() != $("input[name=confirmpwd]").val()){
+            $(".tips").html("两次密码不匹配");
+            $("input[name=confirmpwd]").focus();
+            return false;
+          }
+
+          if($("input[name=code]").val() == ""){
+            $(".tips").html("请填写验证码");
+            $("input[name=code]").focus();
+            return false;
+          }
+
+          $.ajax({
+            url: '/getpassword/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                code:$("input[name=code]").val(),
+                token: "{$token}",
+                step:3,
+                password:$("input[name=password]").val(),
+                confirmpwd:$("input[name=confirmpwd]").val()
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href = "/getpassword/";
+              }else{
+                $(".tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+              $(".tips").html("发生错误,请稍后再试！");
+          });
+      });
+
+      $(".resetTel").click(function(event) {
+            if(time == 0){
+              time = 60;
+              interval();
+              if(mode == 1){
+                sendMail();
+              }else{
+                  $.ajax({
+                      url: '/gtverify/initgeet',
+                      type: 'POST',
+                      dataType: 'JSON',
+                      data:{
+                          scence:1
+                      }
+                  })
+                  .done(function(data) {
+                      initGeetest({
+                          // 以下配置参数来自服务端 SDK
+                          gt: data.data.gt,
+                          challenge: data.data.challenge,
+                          offline: !data.data.success,
+                          new_captcha: true,
+                          product: 'bind'
+                      }, function (captchaObj) {
+                          captchaObj.reset();
+                          captchaObj.onReady(function(){
+                              //验证码ready之后才能调用verify方法显示验证码
+                              captchaObj.verify();
+                          }).onSuccess(function(){
+                              var validate = captchaObj.getValidate();
+                              $.ajax({
+                                  url: '/gtverify/verifyGeetest',
+                                  type: 'POST',
+                                  dataType: 'json',
+                                  data: {
+                                      geetest_challenge: validate.geetest_challenge,
+                                      geetest_validate: validate.geetest_validate,
+                                      geetest_seccode: validate.geetest_seccode,
+                                      scence:1
+                                  }
+                              }).done(function(data) {
+                                  if (data.status == 1) {
+                                      $(".tips").html("");
+                                      $.ajax({
+                                          url: '/getpassword/',
+                                          type: 'POST',
+                                          dataType: 'JSON',
+                                          data: {
+                                              token: "{$token}",
+                                              step:3,
+                                              mode:2
+                                          }
+                                      })
+                                      .done(function(data) {
+                                          if(data.status == 0){
+                                              $(".tips").html(data.info);
+                                          }
+                                      })
+                                      .fail(function(xhr) {
+                                          $(".tips").html("发生错误,请稍后再试！");
+                                      });
+                                  }
+                              });
+                          }).onError(function(){
+                              alert("发送失败,请稍后再试!")
+                          })
+
+                      })
+                  });
+              }
+            }
+      });
+
+      function interval(){
+           $(".time").html("( "+time+" 秒后重新发送 )").show();
+           var t = setInterval(function(){
+                time--;
+                if(time == 0){
+                   clearInterval(t);
+                   $(".time").hide();
+                }
+                $(".time").html("( "+time+" 秒后重新发送 )");
+            },1000);
+      }
+
+      function sendMail(){
+          $(".tips").html("");
+          $.ajax({
+            url: '/getpassword/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                token: "{$token}",
+                step:3,
+                mode:2
+            }
+          })
+          .done(function(data) {
+              if(data.status == 0){
+                  $(".tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+              $(".tips").html("发生错误,请稍后再试！");
+          });
+      }
+  });
+</script>
+</html>

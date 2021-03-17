@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{$seo_info['title']} - 齐装网装修问答</title>
+    <meta name="keywords" content="{$seo_info['keywords']}" />
+    <meta name="description" content="{$seo_info['description']}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta name="mobile-agent" content="format=html5;url={$alternate}" />
+    <link rel="alternate" media="only screen and (max-width: 640px)" href="{$alternate}" >
+    <include file="Index:resource" />
+    <link href="{$SCHEME_HOST.scheme_host}{$uri}" rel="canonical" />
+    <meta name="applicable-device" content="pc">
+    <link rel="stylesheet" href="{$static_host}/assets/home/subject/css/subject.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <!-- 引用头部 -->
+    <include file="Index:header" />
+    <!-- 面包屑 -->
+    <div class="wrap mb10">
+        <div class="bread">
+            <a href="/">装修公司</a> &gt;
+            <a href="/wenda/">装修问答</a> &gt;
+            <a href="/wenda/zs/">知识问答</a> &gt;
+            {$thematic}
+        </div>
+        <include file="Common@Huangli/index"/>
+    </div>
+    
+    <!-- 主体 -->
+    <div class="wrap clearfix main">
+        <!-- 左侧文章 -->
+        <div class="main-left left ">
+            <h1>{$thematic}</h1>
+            <!-- 文章主体部分 -->
+            <div class="left-title">
+                <ul>
+	                <foreach name="list" item="vo">
+                    <li>
+                        <a href="{$vo.url}" target="_blank"><h2>{$vo.title}</h2></a>
+                        <p class="duan">
+                            <a target="_blank" href="{$vo.url}">{$vo.content}</a>
+                        </p>
+                        <div class="answer"><p>已有<span class="answerNum">{$vo.anwsers}</span>条回答<span class="answerTime">{$vo.created_at}</span></p></div>
+                    </li>
+	                </foreach>
+                </ul>
+            </div>
+            <!-- 分页器 -->
+            <div class="content pageContent mt40">
+                {$page}
+            </div>
+            <!-- tab栏 -->
+	        <div class="content-list">
+		        <ul class="label-list">
+			        <volist name="tags" id="tag" key="k">
+                        <li>{$tag.name|mb_substr=###,0,6}</li>
+			        </volist>
+		        </ul>
+		        <div class="label-list-content">
+			        <volist name="tags" id="tag" key="k">
+				        <ul>
+					        <volist name="tag.child" id="v" key="k">
+					            <a href="{$v.url}" target="_blank">{$v.name|mb_substr=###,0,10}</a>
+					        </volist>
+				        </ul>
+			        </volist>
+		        </div>
+	        </div>
+        </div>
+        <!-- 右侧调用以及相关文章 -->
+        <div class="main-right right">
+            <include file="Common@Order/orderTmp"/>
+	        <if condition="!empty($linkKeywords)">
+	            <div class="relted-know">
+	                <dl>
+	                    <dt class="know-title"><span>{$keyword|mb_substr=###,0,8}相关知识</span></dt>
+		                <foreach name="linkKeywords" item="vo">
+			                <dd><i class="circle_point"></i>
+				                <a href="/wenda/zs/{$vo.href}">{$vo.name|mb_substr=###,0,8}</a>
+			                </dd>
+		                </foreach>
+	                </dl>
+	            </div>
+	        </if>
+	        <if condition="!empty($lastKeywords)">
+            <div class="new-know">
+                <dl>
+                    <dt class="know-title"><span>{$keyword|mb_substr=###,0,8}最新知识</span></dt>
+	                <foreach name="lastKeywords" item="vo">
+		                <dd><i class="circle_point"></i>
+			                <a href="/wenda/zs/{$vo.href}">{$vo.name|mb_substr=###,0,8}</a>
+		                </dd>
+	                </foreach>
+                </dl>
+            </div>
+	        </if>
+        </div>
+    </div>
+    <include file="Common@Order/bottom_fadan" type="2"/>
+    <include file="Index:footer"/>
+    <script>
+        $(function () {
+            $(".label-list li").eq(0).addClass("current-list");
+            $(".label-list-content ul").eq(0).addClass("item_active");
+            if($(".label-list li").length == 0){
+                $(".label-list").hide();
+            }
+            $(".label-list li").hover(function () {
+                var index = $(this).index();
+                $(this).addClass("current-list").siblings().removeClass("current-list");
+                if($(".label-list-content ul").length == 0){
+                    $(".label-list-content").hide();
+                }else{
+                    $(".label-list-content ul").eq(index).addClass("item_active").siblings().removeClass("item_active");
+                }
+            })
+        })
+
+        var shen, shi;
+        shen = citys["shen"];
+        shi = citys["shi"];
+
+        initCity('{$theCityId}');
+        function initCity(cityId){
+            App.citys.init("#top_hl_cs","#top_hl_qx",shen,shi,cityId);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道查询(质检) - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/plugins/bootstrap/css/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/plugins/select2/css/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/qc/css/qcsrc.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <h4>渠道查询（质检）</h4>
+                    </div>
+                </div>
+                <form method="get" >
+                    <div class="box">
+                        <h4 class="condition_title">条件查询</h4>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <span>开始时间：</span>
+                                    <div class="inputwk">
+                                        <input class="datepicker datetime" type="text" name="start_time" placeholder="开始时间" value="{$info.start_time}" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束时间：</span>
+                                    <div class="inputwk">
+                                        <input class="datepicker  datetime" type="text" name="end_time" placeholder="结束时间" value="{$info.end_time}" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>渠道代号：</span>
+                                    <div class="inputwk">
+                                        <select name="alias" class="form-control">
+                                            <volist name="srcList" id="vo">
+                                                <option value="{$vo.id}">{$vo.text}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-1">
+                                    <span>&nbsp</span>
+                                    <button type="submit" class="btn btn-primary btn-block anniucx">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="box">
+                    <h4 class="condition_title">数据合计</h4>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <ul class="dataul">
+                                    <li><p>分单</p><p>{$sum.fen_order|default=0}</p></li>
+                                    <li><p>赠单</p><p>{$sum.zeng_order|default=0}</p></li>
+                                    <li ><p>无效单</p><p>{$sum.wuxiao_order|default=0}</p></li>
+                                    <li><p>已质检订单量</p><p>{$sum.zj_order|default=0}</p></li>
+                                    <li class="border_right"><p>质检比例</p><p><?php echo number_format($sum["zj_order_percent"] * 100, 4);?>%</p></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-info pull-right daochubb">
+                    导出报表
+                </button>
+
+
+                <table class="table table-hover table-bordered" id="tablelist">
+                    <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>渠道代号</th>
+                        <th>分单
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="1"></i>
+                                <i class="fa fa-caret-down" data-id="2"></i>
+                            </div>
+                        </th>
+                        <th>赠单
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="3"></i>
+                                <i class="fa fa-caret-down" data-id="4"></i>
+                            </div>
+                        </th>
+                        <th>无效单
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="5"></i>
+                                <i class="fa fa-caret-down" data-id="6"></i>
+                            </div>
+                        </th>
+                        <th>未质检分单量
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="7"></i>
+                                <i class="fa fa-caret-down" data-id="8"></i>
+                            </div>
+                        </th>
+                        <th>未质检赠单量
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="9"></i>
+                                <i class="fa fa-caret-down" data-id="10"></i>
+                            </div>
+                        </th>
+                        <th>未质检无效单量
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="11"></i>
+                                <i class="fa fa-caret-down" data-id="12"></i>
+                            </div>
+                        </th>
+                        <th>已质检订单量
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="13"></i>
+                                <i class="fa fa-caret-down" data-id="14"></i>
+                            </div>
+                        </th>
+                        <th>质检比例
+                            <div class="sort">
+                                <i class="fa fa-caret-up" data-id="15"></i>
+                                <i class="fa fa-caret-down" data-id="16"></i>
+                            </div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="list" id="vo">
+                        <tr>
+                            <td>{$listPageIndex + $key + 1}</td>
+                            <td>{$vo.alias}</td>
+                            <td>{$vo.fen_order}</td>
+                            <td>{$vo.zeng_order}</td>
+                            <td>{$vo.wuxiao_order}</td>
+                            <td>{$vo.no_zj_fen_order}</td>
+                            <td>{$vo.no_zj_zeng_order}</td>
+                            <td>{$vo.no_zj_wuxiao_order}</td>
+                            <td>{$vo.zj_order}</td>
+                            <td><?php echo number_format($vo["zj_order_percent"] * 100, 4);?>%</td>
+                        </tr>
+                    </volist>
+
+
+                    </tbody>
+                </table>
+
+                <nav class="dibufenye" aria-label="Page navigation">
+                    <ul class="pagination">
+                        {$page}
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/select2/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/select2/js/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            autoclose: true,
+            pickerPosition: "bottom-left",
+            todayBtn:1,
+            clearBtn:true,
+        });
+
+        $('.select2').select2({
+            // allowClear: true,
+            language: "zh-CN"
+        });
+
+        $("select[name=alias]").select2({
+            placeholder :'请选择',
+            ajax: {
+                url: "/ordersource/findsrcinfo/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.data
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 2,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+                return markup;
+            },
+            templateSelection: function(repo) {
+                return repo.text;
+            },
+            allowClear : true
+        });
+
+        function compareTime(beginTime,endTime){
+            var beginTimes = beginTime.substring(0,10).split('-');
+            var endTimes   =  endTime.substring(0,10).split('-');
+            beginTime = beginTimes[1]+'-'+beginTimes[2]+'-'+beginTimes[0]+' '+beginTime.substring(10,16);
+            endTime    = endTimes[1]+'-'+endTimes[2]+'-'+endTimes[0]+' '+endTime.substring(10,16);
+            var a =(Date.parse(endTime)-Date.parse(beginTime))/3600/1000;
+            if(a<0){
+                return 1;   //endTime小
+            }else if (a>0){
+                return 2;   //endTime大
+            }else if (a==0){
+                return 3;   //时间相等
+            }
+        }
+
+        //检测时间
+        function checkTime(){
+            var start_time = $("input[name=start_time]").val();
+            var end_time = $("input[name=end_time]").val();
+
+            //对比开始和结束时间
+            if(start_time != '' && end_time != ''){
+                var r = compareTime(start_time,end_time);
+                if(r == '1'){
+                    alert('结束时间不能早于开始时间！');
+                    $("input[name=end_time]").val('');
+                }
+            }
+        }
+
+        $(function(){
+            $('.fa').click(function(){
+                var that = $(this);
+                var alias = $("select[name=alias]").val();
+                if (alias == null){
+                    alias = "";
+                }
+                var type = that.attr('data-id');
+                var typeNow =  '{$Think.get.type|default=0}';
+                if(type == 1 || type == 2){
+                    if(typeNow == 1){
+                        type = 2;
+                    }else{
+                        type = 1;
+                    }
+                }
+                if(type == 3 || type == 4){
+                    if(typeNow == 3){
+                        type = 4;
+                    }else{
+                        type = 3;
+                    }
+                }
+                if(type == 5 || type == 6){
+                    if(typeNow == 5){
+                        type = 6;
+                    }else{
+                        type = 5;
+                    }
+                }
+                if(type == 7 || type == 8){
+                    if(typeNow == 7){
+                        type = 8;
+                    }else{
+                        type = 7;
+                    }
+                }
+                if(type == 9 || type == 10){
+                    if(typeNow == 9){
+                        type = 10;
+                    }else{
+                        type = 9;
+                    }
+                }
+                if(type == 11 || type == 12){
+                    if(typeNow == 11){
+                        type = 12;
+                    }else{
+                        type = 11;
+                    }
+                }
+                if(type == 13 || type == 14){
+                    if(typeNow == 13){
+                        type = 14;
+                    }else{
+                        type = 13;
+                    }
+                }
+                if(type == 15 || type == 16){
+                    if(typeNow == 15){
+                        type = 16;
+                    }else{
+                        type = 15;
+                    }
+                }
+                var start = $("input[name=start_time]").val();
+                var end = $("input[name=end_time]").val();
+                window.location.href = '/qc/getQcSrc/?alias='+alias+'&type='+type+'&start_time='+start+'&end_time='+end;
+            })
+
+            $('.daochubb').click(function(){
+                var alias = '{$Think.get.alias|default=0}';
+                var type = '{$Think.get.type|default=0}';
+                var start = $("input[name=start_time]").val();
+                var end = $("input[name=end_time]").val();
+                window.location.href = '/export/downLoadGetQcSrc/?alias='+alias+'&type='+type+'&start_time='+start+'&end_time='+end;
+            })
+
+            $(".datetime").change(function(){
+                checkTime();
+            });
+
+        })
+
+    </script>
+
+
+</block>

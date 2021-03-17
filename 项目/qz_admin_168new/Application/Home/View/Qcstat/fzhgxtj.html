@@ -1,0 +1,172 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分赠合规性汇总 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>分赠合规性汇总</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                开始时间：<input type="text" class="form-control start_time datetimepicker" placeholder="质检开始时间" value="{$Think.get.start_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                结束时间：<input type="text" class="form-control end_time datetimepicker" placeholder="质检结束时间" value="{$Think.get.end_time}">
+                            </div>
+                            <div class="col-xs-2">
+                                质检员：
+                                <select name="op_uid" class="form-control">
+                                    <option value="">全部</option>
+                                    <volist name="vars.user" id="vi">
+                                        <option value="{$vi.id}">{$vi.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="export" class="btn btn-block btn-success normal">
+                                    <i class="fa fa-search"></i>导出
+                                </button>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询结果</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form" class="table-wrap">
+                            <table id="table" class="table table-bordered table-hover dataTable no-footer">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>质检员</th>
+                                        <th>抽查天数</th>
+                                        <th>分单</th>
+                                        <th>赠单</th>
+                                        <th>合计</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <volist name="vars.info" id="vi">
+                                        <tr>
+                                            <td>{$i}</td>
+                                            <td>{$vi.op_name}</td>
+                                            <td>{:count($vi['op_date'])}</td>
+                                            <td>{$vi.fen|default=0}</td>
+                                            <td>{$vi.zeng|default=0}</td>
+                                            <td>{$vi.all|default=0}</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            // 时间选择
+            $(".datetimepicker").datetimepicker({
+                startView:2,
+                minView:'decade',
+                format:"yyyy-mm-dd",
+                autoclose:true,
+                pickerPosition: "bottom-left"
+            });
+
+            var op_uid = '{$Think.get.op_uid}';
+            if (op_uid != '') {
+                $('select[name=op_uid]').val(op_uid);
+            };
+            var conform_regulation = '{$Think.get.conform_regulation}';
+            if (conform_regulation != '') {
+                $('select[name=conform_regulation]').val(conform_regulation);
+            };
+
+            //搜索查找
+            $('#search').click(function(event) {
+                window.location.href = "/qcstat/fzhgxtj/?op_uid=" + $('select[name=op_uid]').val() + "&conform_regulation=" + $('.conform_regulation').val() + '&start_time=' + $('.start_time').val() + '&end_time=' + $('.end_time').val();
+            });
+
+            //导出功能
+            $("#export").click(function(event) {
+                var colums = [];
+                var data = [];
+                $(".table-wrap thead th").each(function() {
+                    var text = $(this).html().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    sub["fontColor"] = $(this).css("color");
+                    sub["bgColor"] = $(this).css("background-color");
+                    colums.push(sub);
+                });
+                data.push(colums);
+                $(".table-wrap tbody tr").each(function(i) {
+                    var tr = $(this);
+                    var sub = [];
+                    tr.find("td").each(function() {
+                        var text = $(this).text().trim();
+                        var _td = {
+                            text: text,
+                            fontColor: $(this).css("color"),
+                            bgColor: $(this).css("background-color")
+                        }
+                        sub.push(_td);
+                    });
+                    data.push(sub);
+                });
+                $(this).exportExcel({
+                    data: data,
+                    title: "分赠合规性汇总统计",
+                    url: "/export/download"
+                });
+            });
+
+            //表格排序
+            $('#table').DataTable({
+               paging:false,
+               searching:false,
+               language:{
+                    zeroRecords: "没有内容",
+                    info:""
+               }
+            });
+        })
+    </script>
+</block>

@@ -1,0 +1,96 @@
+<div class="znbjmain zxwz">
+    <h1>房屋装修信息</h1>
+    <ul>
+        <volist name="zxwz.item" id="vo">
+        <li mark="{$key}" id="{$vo.id}" data-order="{$vo.orders}" data-name="{$vo.name}">
+            <span style="display:block;width:80px;text-align:right;">{$vo.name}:</span>
+            <em>长</em>
+            <input  type="text" class="type" placeholder="长" style="width:60px;" name="{$vo.jc}_length">
+            <em>米</em>
+            <em>宽</em>
+            <input  type="text" class="type" placeholder="宽" style="width:60px;" name="{$vo.jc}_width">
+            <em>米</em>
+            <em>地面主材</em>
+            <select name="{$vo.jc}_dm">
+                <volist name="vo.dm" id="v">
+                    <option value="{$v.id}">{$v.name}</option>
+                </volist>
+            </select>
+            <em>墙面主材</em>
+            <select name="{$vo.jc}_qm">
+                <volist name="vo.qm" id="v">
+                    <option value="{$v.id}">{$v.name}</option>
+                </volist>
+            </select>
+            <em>顶面吊顶</em>
+            <select name="{$vo.jc}_wd">
+                <volist name="vo.wd" id="v">
+                    <option value="{$v.id}">{$v.name}</option>
+                </volist>
+            </select>
+        </li>
+        </volist>
+    </ul>
+    <button id="btnPrice" class="botton">获取报价</button>
+    <button id="btnReset" class="botton">重新获取</button>
+</div>
+<script type="text/javascript">
+    $("#btnReset").click(function(event) {
+        $(this).hide();
+        $("#btnPrice").css("display","block");
+        $(".zxwz").find("input,select").attr("disabled",false);
+        $(".detailsmain").remove();
+    });
+
+    $("#btnPrice").click(function(event) {
+        $(".zxwz").find("input,select").attr("disabled","disabled");
+        var _this = $(this);
+        _this.hide();
+        $("#btnReset").css("display","block");
+        var data = {
+            mianji:"{$zxwz.mianji}",
+            zxdc:"{$zxwz.zxdc}",
+            fengge:"{$zxwz.fengge}",
+            id:"{$zxwz.orderid}",
+            data:{}
+        }
+        $(".zxwz ul li").each(function(){
+            var mark = $(this).attr("mark");
+            var obj = {
+                width:App.validate.run($("input[name="+mark+"_width]").val(),"num")==true?$("input[name="+mark+"_width]").val():"",
+                length:App.validate.run($("input[name="+mark+"_length]").val(),"num")==true?$("input[name="+mark+"_length]").val():"",
+                dm:$("select[name="+mark+"_dm]").val(),
+                qm:$("select[name="+mark+"_qm]").val(),
+                wd:$("select[name="+mark+"_wd]").val(),
+                id: $(this).attr("id"),
+                orders:$(this).attr("data-order"),
+                name:$(this).attr("data-name")
+            }
+            data["data"][mark] = obj;
+        });
+        $.ajax({
+            url: '/getconstructionprice/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:data,
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                $(".wrap.mt20").append(data.data);
+            }else{
+                $.pt({
+                    target: _this,
+                    content: "获取报价失败,请稍后再试！",
+                    width: 'auto'
+                });
+            }
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target: _this,
+                content: "获取报价失败,请稍后再试！",
+                width: 'auto'
+            });
+        });
+    });
+</script>

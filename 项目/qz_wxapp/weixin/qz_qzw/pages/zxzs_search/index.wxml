@@ -1,0 +1,117 @@
+<!--index.wxml-->
+<!--搜索框  -->
+<view class='search sticky'>
+  <view class='input-container'>
+    <text class='iconfont icon-magnifier'></text>
+    <input type="text" bindinput="bindKeyInput" bindKeyInput="search" bindconfirm="search"  confirm-type="search" placeholder="搜索您想知道的内容" focus="focus" />
+  </view>
+  <view class='back'>
+     <text bindtap='back'>取消</text> 
+  </view>
+</view>
+
+<!--搜索项目选项卡  -->
+<view class='category-tab sticky1' wx:if="{{showTab}}">
+  <view class='article {{category?"active":""}}' bindtap='switchCategory'>攻略</view>
+  <view class='video {{!category?"active":""}}' bindtap='switchCategory'>视频</view>
+</view>
+
+<!--搜索结果列表  -->
+<view class='search-ret'>
+  <!--攻略列表  -->
+  <label class='article {{category?"":"dn"}}'>
+  <!--有搜索结果  -->
+  <scroll-view scroll-y wx:if="{{articleData}}" bindscrolltolower="loadMoreData" style='height:{{articleContainerHeight}}'>
+  <block wx:for="{{articleData}}" wx:key="item">
+    <view class='item' data-id="{{item.id}}" bindtap='toArticleDetail'>
+      <image src='{{item.face?imgUrl:""}}/{{item.face?item.face:"../../img/nopic.jpg"}}' class='thumb'></image>
+      <view class='main'>
+        <text class='desc'>{{item.title}}</text>
+        <view class='otherwise c999'>
+          <text class='iconfont icon-eye mr6'></text>
+          <text>{{item.pv}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{(index+1)%5==0}}" class='fadan' bindtap='openWin'>
+      <image src="../../img/fadan.jpg" mode='aspectFill'></image>
+    </view>
+  </block>
+  </scroll-view>
+  <view class='limit-line' wx:if="{{!articleHasData}}">
+    {{articleTips}}
+  </view>
+  <!--无搜索结果  -->
+  <view class='without-data' wx:if="{{!categoryArticleNoData}}" bindtap='toGetScheme'>
+    <view class='tips'>没找到相关结果，搜一下其他的吧</view>
+    <image src="../../img/cry.png" class='tips-img'></image>
+    <view class='gray-bar'></view>
+    <view class='get-scheme'>
+      <image src="../../img/free_get.jpg"></image>
+      <view class='num'>今日已有<text class='cf53'>{{lingNum}}</text>人领取</view>
+    </view>
+  </view>
+  </label>
+  <!-- 视频列表 -->
+  <label class='video {{!category?"":"dn"}}'>
+  <!--有搜索结果  -->
+  <scroll-view scroll-y wx:if="{{videoData}}" bindscrolltolower="loadMoreData" style='height:{{videoContainerHeight}};'>
+  <block wx:for="{{videoData}}" wx:key="item">
+    <view class='shipinwk' data-id="{{item.id}}" bindtap='toVideoDetail'>
+        <view class='shipzt'>
+           <image src='{{item.cover_img?imgUrl:""}}/{{item.cover_img}}'></image>
+           <view class='middlezj'>
+               <image src='../../img/playbig.png'></image>
+            </view>
+        </view>
+      <view class='shiptitle'>{{item.title}}</view>
+      <view class='bottomwk'>
+          <text class='left_time'>{{item.time}}</text>
+          <view class='right_waikz'>
+              <view class='lookyl'>
+                 <text class='iconfont icon-eye mr6'></text>{{item.pv}}
+              </view>
+              <!-- <view class='shoucdk'>
+                       <view class='shoucwk' wx:if="{{shoucpd==true}}" bindtap='shoucang'>
+                       <text class='iconfont icon-collect'></text>收藏
+                      </view> 
+                      <view class='delshoucwk' wx:elif="{{shoucpd==false}}" bindtap='shoucang'>
+                       <text class='iconfont icon-has-collect'></text>已收藏
+                      </view>
+              </view> -->
+          </view>
+      </view>
+    </view>
+    <view wx:if="{{(index+1)%4==0}}" class='fadan' bindtap='openWin'>
+      <image src="../../img/fadan.jpg" mode='aspectFill'></image>
+    </view>
+  </block>
+  </scroll-view>
+  <view class='limit-line' wx:if="{{!videoHasData}}">
+    {{videoTips}}
+  </view>
+  <!--无搜索结果  -->
+  <view class='without-data' wx:if="{{!categoryVideoNoData}}" bindtap='toGetScheme'>
+    <view class='tips'>没找到相关结果，搜一下其他的吧</view>
+    <image src="../../img/cry.png" class='tips-img'></image>
+    <view class='gray-bar'></view>
+    <view class='get-scheme'>
+      <image src="../../img/free_get.jpg"></image>
+      <view class='num'>今日已有<text class='cf53'>{{lingNum}}</text>人领取</view>
+    </view>
+  </view>
+  </label>
+</view>
+
+<!--找装修公司浮动图标  -->
+<view class='float-icon'>
+  <navigator url='../jsq/jsq'><image src='../../img/eight-second.png'></image></navigator>
+</view>
+
+<!--发单模板  -->
+<import src="../company_fadan/company_fadan.wxml"/>
+<template is="com_fadan" wx:if="{{fd.closed}}" data="{{fd}}"/>
+
+<!-- 授权弹窗集成 -->
+<import src="../shouquan/index.wxml"/>
+<template is="shouquan" wx:if="{{setMyNewSq}}"/>

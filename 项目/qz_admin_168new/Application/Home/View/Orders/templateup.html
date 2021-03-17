@@ -1,0 +1,180 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<style type="text/css">
+	#copy span{cursor: pointer; color: blue; text-decoration: underline;}
+</style>
+</block>
+<block name="content">
+<section class="content-header">
+    <h1>群公布模板</h1>
+    <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        <li><a href="/orders/template">群公布模板</a></li>
+    </ol>
+</section>
+<section class="content">
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box box-default" >
+			<div class="box-body">
+				<div class="col-sm-6">
+					<form id="myForm" class="form-horizontal">
+						<div class="form-group">
+						    <label  class="col-sm-2 control-label">模板名称</label>
+						    <div class="col-sm-10">
+						      <input type="text" class="form-control" name="title"  placeholder="模板名称" value="{$info.title}">
+						    </div>
+						</div>
+						<div class="form-group">
+						    <label  class="col-sm-2 control-label">编辑模版</label>
+						    <div class="col-sm-10">
+						    	<textarea type="text" class="form-control" name="content"  placeholder="编辑模版" style="height: 300px;">{$info.content}</textarea>
+						    </div>
+						</div>
+						<div class="form-group">
+						    <label  class="col-sm-2 control-label">应用城市</label>
+						    <div class="col-sm-10">
+						      	<select id="city" name="city[]" type="text" placeholder="选择城市" class="form-control" multiple="multiple">
+                                    <volist name="citys" id="vo">
+                                    	<if condition="in_array($vo['cid'],$info['city'])">
+                                    	<option value="{$vo.cid}" selected="selected">{$vo.cname}</option>
+                                        <else/>
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                    	</if>
+                                    </volist>
+                                </select>
+						    </div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-4 pull-right">
+								<button id="btnPreview" type="button" class="btn btn-primary">预览</button>
+								<button id="btnSave" type="button" class="btn btn-primary">保存</button>
+								<input type="hidden" name="id" value="{$info.id}" />
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-control" style="height: 396px;">
+						<strong class="text-center btn-block">已有变量选择</strong>
+						<p id="copy">
+							<span>{区县}</span>
+							<span>{小区}</span>
+							<span>{装修类型}</span>
+							<span>{公布会员}</span>
+							<span>{业主要求}</span>
+							<span>{联系人}</span>
+							<span>{联系方式}</span>
+							<span>{网址}</span>
+							<span>{QQ}</span>
+							<span>{城市}</span>
+							<span>{验证码}</span>
+						</p>
+						<p>注：点击变量添加入模板</p>
+						<strong class="text-center btn-block">说明</strong>
+						<p>
+							例子：<br/>
+							订单简介 ：  榆林   靖边县(<span class="red">{区县}</span>)   阳光家园(<span class="red">{小区}</span>)   家装(<span class="red">{装修类型}</span>) <br/>
+							公布会员 ： 高展装饰 (<span class="red">{公布会员}</span>)<br/>
+							业主要求 ：<br/>
+							1.已拿房，新房装修，面积119.2平<br/>
+							2.半全包对比，硬装预算7-8万<br/>
+							3.下周三后联系量房，满意就开工，现代简约风格<br/>
+							(<span class="red">{业主要求}</span>)<br/>
+							联系人 ：王鑫 (<span class="red">{联系人}</span>)<br/>
+							联系方式 ：152xxxxxxx(<span class="red">{联系方式}</span>)<br/>
+							QQ:12xxxxxxxxx(<span class="red">{QQ}</span>)<br/>
+							城市：榆林 (<span class="red">{城市}</span>)
+							验证码 : 1+2 (<span class="red">{验证码}</span>)
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	    	<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">预览</h4>
+		    </div>
+		    <div class="modal-body">
+
+		    </div>
+
+	    </div>
+	</div>
+</div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$("#city").select2({
+	placeholder: "不选默认为全部城市"
+});
+
+$("#btnSave").click(function(event) {
+	var data = $("#myForm").serializeArray();
+	$.ajax({
+		url: '/orders/templateup/',
+		type: 'POST',
+		dataType: 'JSON',
+		data: data
+	})
+	.done(function(data) {
+		if (data.code == 200) {
+			window.location.href = "/orders/template/";
+		} else {
+			alert(data.errmsg || data.info);
+		}
+	});
+});
+
+$("#btnPreview").click(function(event) {
+	var str = $("textarea[name=content]").val();
+	str = str.replace(/\n/gi,"<br/>");
+	str = str.replace(/{区县}/gi,"榆林   靖边县");
+	str = str.replace(/{小区}/gi,"阳光家园");
+	str = str.replace(/{装修类型}/gi,"家装");
+	str = str.replace(/{公布会员}/gi,"高展装饰");
+	str = str.replace(/{联系人}/gi,"高XX");
+	str = str.replace(/{业主要求}/gi,"1.已拿房，新房装修，面积119.2平<br/>2.半全包对比，硬装预算7-8万，<br/>3.下周三后联系量房，满意就开工，现代简约风格");
+	str = str.replace(/{联系方式}/gi,"152xxxxxxx");
+	str = str.replace(/{验证码}/gi,"1+2");
+	str = str.replace(/{网址}/gi,"http://sz.qizuaqng.com");
+	str = str.replace(/{QQ}/gi,"12xxxxxxxxx");
+	str = str.replace(/{城市}/gi,"榆林");
+	$("#myModal .modal-body").html(str);
+	$("#myModal").modal();
+});
+
+$("#copy span").click(function(event) {
+	var _this = $("textarea[name=content]");
+	var t = $("textarea[name=content]")[0];
+	var val = $(this).text();
+	if (document.selection) {
+        this.focus();
+        sel = document.selection.createRange();
+        sel.text = val;
+        this.focus();
+    } else if( t.selectionStart || t.selectionStart == '0' ) {
+    	var startPos = t.selectionStart;
+        var endPos = t.selectionEnd;
+        var scrollTop = t.scrollTop;
+        t.value = t.value.substring(0, startPos) + val + t.value.substring(endPos,t.value.length);
+        _this.focus();
+        t.selectionStart = startPos + val.length;
+        t.selectionEnd = startPos + val.length;
+        t.scrollTop = scrollTop;
+    } else {
+    	t.value += val;
+        t.focus();
+    }
+});
+</script>
+</block>

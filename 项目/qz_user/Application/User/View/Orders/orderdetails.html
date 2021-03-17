@@ -1,0 +1,306 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-order.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft" />
+    <include file="Orders:header" />
+    <div class="ht-main">
+        <div class="ht-line">
+            <em>订单详情</em>
+            <if condition="!empty($worksite_live_id)">
+                <a href="/worksiteLive/detail?id={$worksite_live_id}" target="_blank" class="zhibolink">
+                    <img src="/assets/user/home/img/zhibo.png" alt="">装修现场
+                </a>
+            <elseif condition="$order['qiandan_companyid'] == $info['user']['id']" />
+                <a href="javascript:void(0);" class="zhibolink" id="create_worksite">
+                    <img src="/assets/user/home/img/zhibo.png" alt="">开启装修现场
+                </a>
+            </if>
+        </div>
+            <table class="ht-order-table" cellpadding="0" cellspacing = "0">
+                <tr>
+                    <td class="ht-table-bg"><em>订单编号:</em></td>
+                    <td>{$order.id}</td>
+                    <td class="ht-table-bg"><em>发布时间:</em></td>
+                    <td>{$order.time|date="Y-m-d H:i:s",###}</td>
+                </tr>
+                 <tr>
+                    <td class="ht-table-bg"><em>装修类型:</em></td>
+                    <td>
+                        <if condition="$order['lx'] EQ 1">
+                            <em>家装</em>
+                        <elseif condition="$order['lx'] EQ 2"/>
+                            <em>公装</em>
+                        <else/>
+                            -
+                        </if>
+                    </td>
+                     <td class="ht-table-bg"><em>联系人:</em></td>
+                     <td>{$order.name}{$order.sex}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>联系电话:</em></td>
+                    <td>
+                        <if condition="$order['protect'] EQ 1">
+                            {$order.tel8} <span style="color: #55CF86"> (业主号码已保护)</span>
+                        <else/>
+                            {$order.tel8}
+                        </if>
+                    </td>
+                    <td class="ht-table-bg"><em>微信号:</em></td>
+                    <td>{$order.wx|default=''}<if condition="$order['is_wx'] eq 1">（<span class="red">要求微信联系</span>）</if></td>
+                </tr>
+                <if condition="!empty($order['other_contact']) || !empty($order['standby_user'])">
+                    <tr>
+                        <td class="ht-table-bg"><em>备用联系方式:</em></td>
+                        <td>{$order.other_contact}</td>
+                        <td class="ht-table-bg"><em>备用联系人:</em></td>
+                        <td>{$order.standby_user}</td>
+                    </tr>
+                </if>
+                <tr>
+                    <td class="ht-table-bg"><em>房屋面积:</em></td>
+                    <td>{$order.mianji}</td>
+                    <td class="ht-table-bg"><em>房屋户型:</em></td>
+                    <td>{$order.hxname}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>详细地址:</em></td>
+                    <td>{$order.dz}</td>
+                    <td class="ht-table-bg"><em>装修风格:</em></td>
+                    <td>{$order.fengge}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>预算:</em></td>
+                    <td>{$order.yusuan}</td>
+                    <td class="ht-table-bg"><em>是否拿钥匙:</em></td>
+                    <td>
+                        <if condition="$order['keys'] EQ 1">
+                            <em>是</em>
+                        <elseif condition="$order['keys'] EQ 3"/>
+                            <em>其它</em>
+                        <elseif condition="$order['keys'] EQ 2"/>
+                            <em>否</em>
+                        <else/>
+                            -
+                        </if>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>装修方式:</em></td>
+                    <td>{$order.fangshi}</td>
+                    <td class="ht-table-bg"><em>所在区域:</em></td>
+                    <td>{$order.qz_area}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>所在小区:</em></td>
+                    <td colspan="3">{$order.xiaoqu}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>开工时间:</em></td>
+                    <td>{$order.start}</td>
+                    <td class="ht-table-bg"><em>量房时间:</em></td>
+                    <td>{$order.lftime}</td>
+                    <td>{$order.lftime}</td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>装修要求:</em></td>
+                    <td colspan="3">
+                        <textarea class="yaoqiu" disabled>{$order.text}</textarea>
+                        <br>.................................................................................................................................................................................................
+                        <p>说明服务和保障： <br>①联系时要给业主名片并说明是齐装网推荐的，加深业主印象<br>②装企必须将此单更进的状态实时添加【小计】，客服【针对性】推荐及时记录小计的会员促进签单</p>
+                    </td>
+                </tr>
+                <if condition="array_key_exists('remark',$order)">
+                    <tr>
+                        <td class="ht-table-bg"><em>二次回访要求:</em></td>
+                        <td colspan="3">{$order['remark']|default=''}</td>
+                    </tr>
+                </if>
+                <tr>
+                    <td class="ht-table-bg"><em>选择公司:</em></td>
+                    <td colspan="3">
+                        <volist name="order.companys" id="vo">
+                            <img title="{$vo.jc}" src="{$vo.logo}" onerror="noImg(this)">
+                        </volist>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ht-table-bg"><em>签单公司:</em></td>
+                    <td colspan="3">
+                        <if condition="!empty($order['qiandan_company']) && $order['qiandan_status']==1">
+                            <img title="{$order['qiandan_company']['jc']}" src="{$order['qiandan_company']['logo']}" onerror="noImg(this)">
+                        <else/>
+                            -
+                        </if>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <script type="text/javascript">
+        // 无图片处理
+        function noImg(obj){
+            obj.src = "{:C('QZ_YUMING_SCHEME')}://{:C('QINIU_DOMAIN')}/Public/default/images/default_logo.png";
+        }
+        $(function(){
+            $('.icheck').iCheck({
+                checkboxClass: 'icheckbox_minimal-red',
+                radioClass: 'iradio_minimal-red',
+                increaseArea: ''
+            });
+            $('input[name=tel_status]').on("ifChecked",function(event){
+                var target = $(event.target);
+                target.attr("checked","checked");
+                if(target.val() == 1){
+                    $("select[name=tel_lf] option:first").prop("selected","selected");
+                    $("select[name=tel_lf]").hide();
+                    $(".ht-order-review li:not(:first):not(:last)").each(function(){
+                        var _this = $(this);
+                        _this.find("select option").first().prop("selected","selected");
+                        _this.hide();
+                    });
+
+                }else{
+                    $("select[name=tel_lf]").show();
+                }
+            });
+
+            $("select[name=tel_lf]").change(function(event) {
+                var _this = $(this);
+                var parent = _this.parent();
+                if(_this.val() != ""){
+                    parent.next().hide();
+                }else{
+                    parent.next().show();
+                }
+            });
+
+            $("select[name=lf_status]").change(function(event) {
+                var _this = $(this);
+                var parent = _this.parent();
+                if(_this.val() != ""){
+                    parent.next().hide();
+                }else{
+                    parent.next().show();
+                }
+            });
+
+            $("select[name=lf_step]").change(function(event) {
+                var _this = $(this);
+                var parent = _this.parent();
+                if(_this.val() != ""){
+                    parent.next().hide();
+                }else{
+                    parent.next().show();
+                }
+            });
+
+            $("select[name=bj_status]").change(function(event) {
+                var _this = $(this);
+                var parent = _this.parent();
+                if(_this.val() != ""){
+                    parent.next().hide();
+                }else{
+                    parent.next().show();
+                }
+            });
+
+            $("#btnSave").click(function(event) {
+                $(".err-tips").html("");
+                var _this = $(this);
+                var status = $("input[name=tel_status]:checked").val() == 1?$("input[name=tel_status]:checked").val():$("select[name=tel_lf]").val() == 2?$("select[name=tel_lf]").val():$("select[name=lf_status]").val() == 3?$("select[name=lf_status]").val():$("select[name=lf_step]").val() != ""?$("select[name=lf_step]").val():$("select[name=bj_status]").val() != ""?$("select[name=bj_status]").val():$("select[name=status]").val();
+                if(!App.validate.run($("textarea[name=remark]").val())){
+                    $("textarea[name=remark]").focus();
+                    $("textarea[name=remark]").parent().find(".err-tips").html("请填写回访的情况");
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/orderdetails/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: '{$order.id}',
+                        status:status,
+                        remark:$("textarea[name=remark]").val()
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href = window.location.href;
+                    }else{
+                        _this.parent().find(".err-tips").html(data.info);
+                    }
+                })
+                .fail(function() {
+                    _this.parent().find(".err-tips").html("发生了未知的错误,请刷新页面或重新登录");
+                });
+            });
+
+            $(".icon-trash").click(function(event) {
+                var _this = $(this);
+                var id = _this.attr("data-id");
+                if(confirm("确定删除该回访记录吗?")){
+                    $.ajax({
+                        url: '/delreview/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            window.location.href = window.location.href;
+                        }else{
+                            $.pt({
+                                target: _this,
+                                content:data.info,
+                                width: 'auto'
+                            });
+                        }
+                    })
+                    .fail(function() {
+                        $.pt({
+                            target: _this,
+                            content:"发生了未知的错误,请刷新页面或重新登录！",
+                            width: 'auto'
+                        });
+                    });
+                }
+            });
+
+            // 生成装修现场
+            $("#create_worksite").click(function(){
+                if(confirm("开启装修现场后，将生成施工订单，是否确认开启？") == true){
+                    $.post("/worksiteLive/created", {
+                        order_id: "{$order.id}"
+                    }, function(response){
+                        if (response["error_code"] == 0) {
+                            var live_id = response["data"]["live_id"];
+                            window.open("/worksiteLive/detail?id=" + live_id, "_blank");
+                        } else {
+                            alert(response.error_msg);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

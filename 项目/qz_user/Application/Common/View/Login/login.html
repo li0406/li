@@ -1,0 +1,127 @@
+<div class="win_box win_login">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content loginbox">
+        <div class="win_box_out">
+        </div>
+        <div class="win_box_in">
+            <div class="logintit">
+                <h1>登录</h1>
+                <a href="javascript:void(0)" title="关闭" class="log-close"></a>
+            </div>
+            <div class="loginput">
+                <input name="name" type="text" class="log" placeholder="手机/邮箱/帐号">
+                <div class="tips"></div>
+            </div>
+            <div class="loginput">
+                <input name="password" type="password" class="res" placeholder="密码">
+                <div class="tips"></div>
+            </div>
+            <div class="login-info">
+                <i><a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/getpassword/">忘记密码？</a></i>
+            </div>
+            <div class="btn">
+                <a class="logbtn" href="javascript:void(0)">登录</a>
+            </div>
+            <div class="loginput">
+                <a class="log-reg" href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/reg/" target="_blank">立即注册</a>
+            </div>
+            <div class="other">
+                <i>第三方帐号登录：</i>
+                <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromqq" id="qqLoginBtn" title="QQ登录" class="qqlogin" target="_blank"></a>
+                <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromsina" title="新浪微博登录" class="weibologin" target="_blank"></a>
+                <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromwechat" title="微信登录" class="tblogin" target="_blank"></a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $("body").keypress(function(event) {
+            if(event.key == "Escape"){
+                clearInterval(interval);
+                $(".win_login").remove();
+
+            }
+        });
+
+        $(".win_login .log-close").click(function(event) {
+             clearInterval(interval);
+            $(".win_login").remove();
+
+        });
+
+        $(".win_login .win_box_bg").click(function(event) {
+            clearInterval(interval);
+            $(".win_login").remove();
+
+        });
+
+        $(".win_login .logbtn").click(function(event) {
+            $(".win_login .tips").html("")
+            if($(".win_login input[name=name]").val() == ""){
+                $(".win_login input[name=name]").parent().find(".tips").html("请填写用户帐号！");
+                $(".win_login input[name=name]").focus();
+                return false;
+            }
+
+            if($(".win_login input[name=password]").val() == ""){
+                $(".win_login input[name=password]").parent().find(".tips").html("无效的用户密码！");
+                $(".win_login input[name=password]").focus();
+                return false;
+            }
+
+            $.ajax({
+                url: '/loginin/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name:$(".win_login input[name=name]").val(),
+                    password:$(".win_login input[name=password]").val(),
+                    safecode:"{$safecode}",
+                    safekey:"{$safekey}",
+                    ssid:"{$ssid}"
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    getAccount();
+                    window.location.href= window.location.href;
+                }else{
+                    $("input[name=password]").parent().find(".tips").html(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $("input[name=password]").parent().find(".tips").html("登录失败,请稍后再试！");
+            });
+        });
+    });
+
+    $(".other a").click(function(event) {
+            getAccount();
+    });
+
+    var interval = null;
+    function getAccount(){
+        interval = setInterval(function(){
+            $.ajax({
+                url: '/run/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    ssid:"{$ssid}"
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    clearInterval(interval);
+                    window.location.href = window.location.href;
+                }
+            })
+            .fail(function(xhr) {
+                clearInterval(interval);
+            });
+        },3000);
+    }
+
+</script>

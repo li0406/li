@@ -1,0 +1,277 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <present name="Think.get.id">
+        <title>编辑图片推荐</title>
+        <else/>
+        <title>新增图片推荐</title>
+    </present>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/css/newimgup.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/meitu/subwebtu">分站首页效果图推荐</a> >
+            <present name="Think.get.id">
+                编辑图片推荐
+                <else/>
+                新增图片推荐
+            </present>
+        </h1>
+    </section>
+    <section class="content-header">
+        <div class="col-sm-12  content">
+            <div class="col-sm-6">
+                <form class="form-horizontal" id="myform" action="javascript:void(0)" method="POST">
+                    <input type="hidden" name="id" value="{$info.id}">
+                    <div class="form-group">
+                        <label for="title" class="col-sm-2 control-label">标题 :</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="title" maxlength="10" id="title" value="{$info.title}" id="title" placeholder="请输入标题">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="url" class="col-sm-2 control-label">url :</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="url" id="url" value="{$info.url}" placeholder="请输入完整url">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="order" class="col-sm-2 control-label">位置 :</label>
+                        <div class="col-sm-10">
+                            <present name="Think.get.id">
+                                <input type="text" class="form-control" name="order" id="order" value="{$info.order}" readonly>
+                                <else/>
+                                <input type="text" class="form-control" name="order" id="order" value="{$count}" readonly>
+                            </present>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">图片 :</label>
+                        <div class="col-sm-10">
+                            <input id="img" type="file" class="form-control" />
+                            <input type="hidden" name="img" value="{$info.img}" />
+                        </div>
+                    </div>
+                    <div class="col-sm-offset-2 remark"></div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-2">
+                            <button type="button" class="btn btn-info" id="btn" style="width:100px">保存</button>
+                            <button type="button" class="btn btn-default cancel" style="width:100px;margin-left: 50px">返回</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var minImageWidth,minImageHeight,maxImageWidth,maxImageHeight,order;
+        $(document).ready(function () {
+            $('input').attr('autocomplete','off')
+
+            if("{$Think.get.id}" == null || "{$Think.get.id}" == ""){
+                order = "{$count}";
+            }else{
+                order = "{$info.order}";
+            }
+
+            switch(order)
+            {
+                case "1":
+                    minImageWidth = "354";
+                    minImageHeight = "354";
+                    maxImageWidth = "354";
+                    maxImageHeight = "354";
+                    break;
+                case "2":
+                    minImageWidth = "236";
+                    minImageHeight = "236";
+                    maxImageWidth = "236";
+                    maxImageHeight = "236";
+                    break;
+                case "3":
+                    minImageWidth = "354";
+                    minImageHeight = "354";
+                    maxImageWidth = "354";
+                    maxImageHeight = "354";
+                    break;
+                case "4":
+                    minImageWidth = "236";
+                    minImageHeight = "236";
+                    maxImageWidth = "236";
+                    maxImageHeight = "236";
+                    break;
+                case "5":
+                    minImageWidth = "236";
+                    minImageHeight = "317";
+                    maxImageWidth = "236";
+                    maxImageHeight = "317";
+                    break;
+                case "6":
+                    minImageWidth = "354";
+                    minImageHeight = "199";
+                    maxImageWidth = "354";
+                    maxImageHeight = "199";
+                    break;
+                case "7":
+                    minImageWidth = "236";
+                    minImageHeight = "317";
+                    maxImageWidth = "236";
+                    maxImageHeight = "317";
+                    break;
+                case "8":
+                    minImageWidth = "354";
+                    minImageHeight = "199";
+                    maxImageWidth = "354";
+                    maxImageHeight = "199";
+                    break;
+                default:
+                    break;
+            }
+            $(".remark").html("图片尺寸要求："+minImageWidth+"*"+minImageHeight+"像素");
+            $("#img").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl: "/upload/uploadimg/",
+                showCaption: false,
+                browseClass: "btn btn-primary",
+                allowedFileExtensions: ['jpg', 'png', 'gif'],
+                maxFileCount: 1,
+                uploadClass: "btn btn-info",
+                removeClass: "btn btn-danger",
+                uploadAsync: true,
+                dropZoneEnabled: false,
+                previewSettings: {
+                    image: {
+                        width: "auto",
+                        height: "200px"
+                    }
+                },
+                uploadExtraData: {
+                    prefix: 'subwebeffect'
+                },
+                minImageWidth: minImageWidth,
+                minImageHeight: minImageHeight,
+                maxImageWidth: maxImageWidth,
+                maxImageHeight: maxImageHeight,
+                initialPreview:'<notempty name="info.img"><img src="//{:C("QINIU_DOMAIN")}/{$info.img}" class="file-preview-image" style="max-width:500px"></notempty>',
+            }).on('fileuploaded', function (event, data) {
+                if (1 == data.response.status) {
+                    $('input[name=img]').val(data.response.data.name);
+                } else {
+                    alert(data.response.info);
+                    return false;
+                }
+            }).on("fileuploaderror", function (event, data) {
+                var _this = $(this);
+                _this.Alert({
+                    msg: "图片不符合要求!",
+                    level: 2
+                });
+                return false;
+            }).on("fileclear", function () {
+                $("input[name=img]").val("");
+            }).on("filebatchselected",function (event, data) {
+                let errLength = $(".file-error-message").children().length
+                if(errLength>0){
+                  $(".file-input .btn-info").addClass("disabled");
+                  $(".file-input .btn-file").css({"pointer-events":"auto"})
+                  $(".file-input .btn-file").removeClass("disabled");
+                } else {
+                  $(".file-input .btn-info").removeClass("disabled");
+                  $(".file-input .btn-file").css({"pointer-events":"none"})
+                  $(".file-input .btn-file").addClass("disabled");
+                }
+                $(".kv-file-remove").click(function (event) {
+                  $(".file-input .btn-file").css({"pointer-events":"auto"})
+                  $(".file-input .btn-file").removeClass("disabled");
+                })
+                  $(".file-input .fileinput-remove").click(function (event) {
+                    $(".file-input .btn-file").css({"pointer-events":"auto"})
+                    $(".file-input .btn-file").removeClass("disabled");
+                  })
+            });
+
+            $('#btn').on('click',function(){
+              if ($('input[name=title]').val().trim() == '') {
+                    $(this).Alert({
+                        msg: '请填写标题',
+                        level: 2
+                    })
+                    return false;
+                }
+              if ($('input[name=url]').val().trim() == '') {
+                  $(this).Alert({
+                      msg: '请填写url',
+                      level: 2
+                  })
+                  return false;
+              }
+              var reg = /^[1-8]$/;
+              if ($('input[name=order]').val() == "" || !reg.test($('input[name=order]').val())) {
+                  $(this).Alert({
+                      msg: '数字框必须填写数字，且为整数,范围1到8',
+                      level: 2
+                  })
+                  return false;
+              }
+
+              if($('input[name=img]').val() == '') {
+                  $(this).Alert({
+                      msg: '请上传图片',
+                      level: 2
+                  })
+                  return false;
+              }
+                var data = new Object();
+                data.id = "{$info.id}";
+                data.cs = "{$Think.get.cs}";
+                data.title = $('#title').val();
+                data.url = $('#url').val();
+                data.order = $('#order').val();
+                data.img = $('input[name=img]').val();
+                data.type = 1;
+                $.ajax({
+                    url: '/meitu/subwebeffectEdit/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                }).done(function(data) {
+                    if(data.status == '1'){
+                        $(this).Alert({
+                            msg: '保存成功',
+                            level: 1,
+                        })
+                        setTimeout(function(){
+                            location.href = "{$_SERVER['HTTP_REFERER']}"
+                        },1000)
+                    }else{
+                        $(this).Alert({
+                            msg: data.info,
+                            level: 2,
+                        })
+                    }
+                }).fail(function(xhr) {
+                    $(this).Alert({
+                        msg: '操作失败,请联系技术部门！',
+                        level: 2,
+                    })
+                })
+            })
+
+            $('button.cancel').on('click', function () {
+                location.href = "{$_SERVER['HTTP_REFERER']}"
+            })
+        });
+    </script>
+</block>

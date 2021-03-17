@@ -1,0 +1,152 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>广告位置管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/partner/css/ad.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/plugins/layer/theme/default/layer.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" style="margin-bottom: 0">
+                    <div class="box-body act-box" style="min-width:500px;padding: 0">
+                        <nav class="nav">
+                            <span>广告位置管理</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box" style="min-width:500px" id="box-head">
+                        <form action="" method="get" id="tiaojian">
+                            <div class="col-sm-2">
+                                <label for="">页面名称：</label>
+                                <input type="text" class="form-control" name="page_name" placeholder="页面名称" value="{$Think.get.page_name}">
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="">所属站点：</label>
+                                <select name="belong-site" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="1" <if condition="$Think.get.belong-site eq '1'">selected</if>>装修-PC端</option>
+                                    <option value="2" <if condition="$Think.get.belong-site eq '2'">selected</if>>装修-m端</option>
+                                    <option value="3" <if condition="$Think.get.belong-site eq '3'">selected</if>>家具-PC端</option>
+                                    <option value="4" <if condition="$Think.get.belong-site eq '4'">selected</if>>家具-m端</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="">是否启用：</label>
+                                <select name="enabled" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="0" <if condition="$Think.get.enabled eq '0'">selected</if>>否</option>
+                                    <option value="1" <if condition="$Think.get.enabled eq '1'">selected</if>>是</option>
+                                </select>
+                            </div>
+                            <div class="input-group" >
+                                <div class="input-group-btn" id="search">
+                                    <button type="submit" class="btn btn-success">查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box" id="hezuoshang">
+                    <nav class="nav">
+                        <span>广告位置管理</span>
+                        <a href="/partner/positioneditad" class="add-ad btn btn-success">新增广告位置</a>
+                    </nav>
+                    <table class="table table-bordered">
+                        <tbody >
+                        <tr>
+                            <th>序号</th>
+                            <th>标识代码</th>
+                            <th>页面名称</th>
+                            <th>页面链接</th>
+                            <th>所属站点</th>
+                            <th>是否启用</th>
+                            <th>操作</th>
+                        </tr>
+                        <volist name="list" id="vo" key="ko">
+                        <tr>
+                            <td>{$ko}</td>
+                            <td>{$vo.id|default=''}</td>
+                            <td>{$vo.name|default=''}</td>
+                            <td>{$vo.url|default=''}</td>
+                            <td>
+                                <switch name="vo.module">
+                                    <case value="1">装修-PC端</case>
+                                    <case value="2">装修-m端</case>
+                                    <case value="3">家具-PC端</case>
+                                    <case value="4">家具-m端</case>
+                                    <default />
+                                </switch>
+                            </td>
+                            <td><if condition="$vo.is_use eq 1">是<else/>否</if></td>
+                            <td><a href="/partner/positioneditad?id={$vo.id}">编辑</a> | <span class="del" data-id="{$vo.id}">删除</span></td>
+                        </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="box-footer clearfix">
+            {$page}
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+        })
+
+        $(function () {
+            /* 删除效果*/
+            $(document).on('click', ".del", function () {
+                var id = $(this).attr('data-id');
+                if(!id) {
+                    return
+                }
+                layer.confirm('确定删除吗？', {
+                    btn: ['删除','取消'] //按钮
+                }, function(){
+                    // 删除操作
+                    layer.msg('的确很重要', {icon: 1});
+                    $.ajax({
+                        url: '/partner/deleteLocation',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        }
+                    }).done(function(data) {
+                        if (data.status == 0) {
+                            layer.msg('删除成功');
+                            location.reload()
+                        }
+                    });
+                }, function(){
+                    // 取消操作
+                });
+            })
+        })
+    </script>
+</block>

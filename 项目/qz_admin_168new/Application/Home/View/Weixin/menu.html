@@ -1,0 +1,186 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/weixin/css/menu.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+ <section class="content-header">
+        <h1>微信菜单管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/specialarticle/">
+                            <div class="row">
+                                <div class="pull-right col-sm-1">
+                                    <a class="btn btn-block btn-info btn-operate">+新增</a>
+                                </div>
+                                <div class="col-sm-1 pull-right">
+                                    <a class="btn btn-block btn-info btn-publish">发布</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th class="text-left">菜单名称</th>
+                            <th>记录值</th>
+                            <th>添加时间</th>
+                            <th>操作</th>
+                        </tr>
+                        <volist name="vars.menu" id="vi">
+                            <tr class="zhucaidan">
+                                <th class="text-left">{$vi.info.name}</th>
+                                <th title='{:json_encode($vi['info'], JSON_UNESCAPED_UNICODE)}'>
+                                    {:mbstr(json_encode($vi['info'], JSON_UNESCAPED_UNICODE), 0, 100)}
+                                </th>
+                                <th>
+                                    {$vi.add_time}
+                                </th>
+                                <th data-id="{$vi.id}">
+                                   <span class="bianji btn-operate"></span>
+                                   <span class="shanchu btn-delete"></span>
+                                </th>
+                            </tr>
+                            <volist name="vi.children" id="vj">
+                                <tr class="zhicaidan">
+                                    <th class="zcd text-left"><span class="tab-sign"></span>{$vj.info.name}</th>
+                                    <th title='{:json_encode($vj['info'], JSON_UNESCAPED_UNICODE)}'>
+                                        {:mbstr(json_encode($vj['info'], JSON_UNESCAPED_UNICODE), 0, 100)}
+                                    </th>
+                                    <th>
+                                        {$vj.add_time}
+                                    </th>
+                                    <th data-id="{$vj.id}">
+                                       <span class="bianji btn-operate"></span>
+                                       <span class="shanchu btn-delete"></span>
+                                    </th>
+                                </tr>
+                            </volist>
+                        </volist>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content tanchaun">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">
+                                &times;
+                            </span>
+                        </button>
+                        <h4 class="modal-title">
+                            新增菜单
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            取消
+                        </button>
+                        <button type="button" class="btn btn-primary btn-save">
+                            保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+    $('.btn-operate').click(function(event) {
+        var id = $(this).parent().attr('data-id');
+        $.ajax({
+            url: '/weixin/operatemenu/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                id:id
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                if (id > 0) {
+                    $('#myModal .modal-title').text('编辑微信文章推荐');
+                } else {
+                    $('#myModal .modal-title').text('新增微信文章推荐');
+                }
+                $('#myModal .modal-body').html(data.data);
+                $('#myModal').modal('show');
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生网络错误！');
+        })
+    });
+
+    $('.btn-save').click(function(event) {
+        var data = $('#myModal').find(".operate-form").serialize();
+        $.ajax({
+            url: '/weixin/operatemenu/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                $('#myModal').modal('hide');
+                window.location.href = window.location.href;
+            } else {
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生网络错误！');
+        })
+    });
+
+    $('.btn-delete').click(function(event) {
+        var id = $(this).parent().attr('data-id');
+        if (confirm('确定删除该内容吗？')) {
+            $.ajax({
+                url: '/weixin/deletemenu/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id
+                }
+            })
+            .done(function(data) {
+                alert(data.info);
+                window.location.href = window.location.href;
+            })
+            .fail(function(xhr) {
+                alert('发生网络错误！');
+            })
+        };
+    });
+
+    $('.btn-publish').click(function(event) {
+        if (confirm('确定发布菜单吗？')) {
+            $.ajax({
+                url: '/weixin/publishmenu/',
+                type: 'POST',
+                dataType: 'JSON'
+            })
+            .done(function(data) {
+                alert(data.info);
+            })
+            .fail(function(xhr) {
+                alert('发生网络错误！');
+            })
+        };
+    });
+</script>
+</block>

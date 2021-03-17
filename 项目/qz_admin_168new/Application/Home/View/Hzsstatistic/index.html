@@ -1,0 +1,263 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道商数据统计 - 控制台</title>
+</block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/hzsstatistic/css/index.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css">
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>渠道商数据统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="myform" >
+                                <div class="col-xs-2">
+                                    <span>合作商名称：</span>
+                                    <select  name="name" class="form-control" style="margin-right: 0"></select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>开始日期：</span>
+                                    <input type="text" name="begin" class="form-control datepicker" autocomplete="off"
+                                           placeholder="请选择开始日期" value="{$input.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>结束日期：</span>
+                                    <input type="text" name="end" class="form-control datepicker" autocomplete="off"
+                                           placeholder="请选择结束日期" value="{$input.end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="button" id="btnAdd" class="btn  btn-primary pull-left">添加</button>
+                                    <button type="button" id="export" class="btn  btn-primary pull-left" style="margin-left: 10px;">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <table id="myTable" class="table table-hover dataTable">
+                            <thead>
+                            <tr>
+                                <th>申请人</th>
+                                <th>合作渠道</th>
+                                <th>上线时间</th>
+                                <th>合作时间</th>
+                                <th>计费方式</th>
+                                <th>结款方式</th>
+                                <th>发单</th>
+                                <th>实际分单</th>
+                                <th>量房量</th>
+                                <th>量房率</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td>合计：</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd',
+                closeBtn:true,
+            }).on("change", function () {
+                if (toTimeStamp($("input[name=begin]").val()) > toTimeStamp($("input[name=end]").val())) {
+                    msg("开始时间必须小于结束时间", function () {
+                        $("input[name=end]").val("");
+                    });
+                }
+            });
+        })
+
+        $("#btnAdd").click(function(){
+            $.ajax({
+                url: '/hzsstatistic/gethzsstatistic',
+                type: 'POST',
+                dataType: 'JSON',
+                data: $("#myform").serializeArray(),
+                })
+              .done(function(data) {
+                    if (data.error_code == 0) {
+                        var tmp = ' <tr>\n' +
+                            '<td>'+data.data.yy_name+'</td>\n' +
+                            '<td><a href="/hzsstatistic/company?companyid='+data.data.company_id+'&begin='+data.data.begin+'&end='+data.data.end+'" target="_blank">'+data.data.name+'</a></td>\n' +
+                            '<td>'+data.data.create_time+'</td>\n' +
+                            '<td>'+data.data.cooperate_time+'</td>\n' +
+                            '<td>'+data.data.cooperate_mode+'</td>\n' +
+                            '<td>'+data.data.pay_mode+'</td>\n' +
+                            '<td>'+data.data.count+'</td>\n' +
+                            '<td>'+data.data.real_fen+'</td>\n' +
+                            '<td>'+data.data.lf_count+'</td>\n' +
+                            '<td>'+data.data.lf_rate+'%</td>\n' +
+                            '<td><a class="del" href="javascript:void(0)">删除</a></td>\n' +
+                            '</tr>';
+                        $("#myTable tbody").append(tmp)
+                        summary();
+                    } else {
+                        msg(data.error_msg);
+                    }
+             });
+        });
+
+        function summary() {
+            var count = 0 , real_count = 0,lf_count = 0;
+            $("#myTable tbody tr").each(function(){
+                $(this).find("td").each(function(i){
+                    if (i == 6) {
+                        count = count + parseInt($(this).text());
+                    }
+
+                    if (i == 7) {
+                        real_count = real_count + parseInt($(this).text());
+                    }
+
+                    if (i == 8) {
+                        lf_count = lf_count + parseInt($(this).text());
+                    }
+                });
+            });
+
+            $("#myTable tfoot td").eq(6).text(count);
+            $("#myTable tfoot td").eq(7).text(real_count);
+            $("#myTable tfoot td").eq(8).text(lf_count);
+        }
+
+        $("body").on("click",".del",function(){
+            $(this).parents("tr").remove();
+            summary();
+        });
+
+        $("#export").click(function(event) {
+            var colums = [];
+            var data =[];
+            $('#myTable thead th:not(:last)').each(function(){
+                var sub =[];
+                sub["text"] = $(this).html().trim();
+                colums.push(sub);
+            });
+            data.push(colums);
+            $('#myTable  tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td:not(:last)").each(function(){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+
+            $(this).exportExcel({
+                data:data,
+                title:'渠道商数据统计',
+                url:'/export/download/',
+                show:false
+            });
+        });
+
+        $("select[name=name]").select2({
+            placeholder :'请选择',
+            ajax: {
+                url: "/partner/findhzslist/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.data
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 2,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.name;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.name + "</div>";
+                return markup;
+            },
+            templateSelection: function(repo) {
+                return repo.name;
+            },
+            allowClear : true
+        });
+
+
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

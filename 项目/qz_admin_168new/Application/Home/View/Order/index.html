@@ -1,0 +1,910 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .my-dialog div {font-size:12px;}
+        .my-dialog div.col-xs-12.no-padding {margin-top: 3px;}
+        .my-dialog input {height:20px;}
+        .my-dialog .bgcolor {background:#0019ff;color:#fff;width:70px;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单查询</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/order/">订单列表</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>订单查询：</div>
+                                        <input type="text" name="condition" class="form-control clear-target" placeholder="订单号、IP或电话、小区名称" value="{$Think.get.condition}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>发单时间-开始：</div>
+                                        <input type="text" name="time_start" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.time_start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>发单时间-结束：</div>
+                                        <input type="text" name="time_end" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.time_end}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>实际发单时间-开始：</div>
+                                        <input type="text" name="time_real_start" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.time_real_start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>实际发单时间-结束：</div>
+                                        <input type="text" name="time_real_end" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.time_real_end}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>所属区域：</div>
+                                        <select id="city" name="city" type="text" placeholder="选择城市" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <volist name="main.city" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 set-mt16">
+                                    <div class="col-xs-2">
+                                        <div>拿房时间-开始：</div>
+                                        <input type="text" name="nf_time_start" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.nf_time_start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>拿房时间-结束：</div>
+                                        <input type="text" name="nf_time_end" class="form-control datepicker clear-target" placeholder="选择日期" value="{$Think.get.nf_time_end}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单状态：</div>
+                                        <select name="status" class="form-control" type="text">
+                                            <volist name="main.status" id="vo">
+                                                <option value="{$key}">{$vo.text}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单备注：</div>
+                                        <select name="remarks" type="text" class="form-control">
+                                            <option value="全部">全部</option>
+                                            <volist name="main.remarks" id="vo">
+                                                <option value="{$vo}">{$vo}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>显号：</div>
+                                        <select name="displaynumber" type="text" class="form-control">
+                                            <option value="0">全部</option>
+                                            <option value="1">未申请</option>
+                                            <option value="2">待审核</option>
+                                            <option value="3">已审核通过</option>
+                                        </select>
+                                    </div>
+                                    <if condition="in_array(session('uc_userinfo.uid'),$showList)">
+                                    <div class="col-xs-2">
+                                        <div>订单类型:</div>
+                                        <select name="isactivity" class="form-control">
+                                            <option value="0">全部</option>
+                                            <option value="1">活动订单</option>
+                                            <option value="2">普通订单</option>
+                                        </select>
+                                    </div>
+                                    </if>
+                                </div>
+                                <div class="col-xs-12 set-mt16">
+                                    <button type="button" id="search" class="btn btn-success col-xs-1">搜索</button>
+                                    <button type="button" id="reset" class="btn btn-download col-xs-1">重置</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">订单列表</h3>
+                        <button type="button" class="log-info btn pull-right">最近操作记录</button>
+                    </div>
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                                <tr>
+                                    <th class="width-150">发布日期</th>
+                                    <th>订单备注</th>
+                                    <if condition="in_array(session('uc_userinfo.uid'),$showList)">
+                                    <th>订单类型</th>
+                                    </if>
+                                    <th>城市区县</th>
+                                    <th>完整度</th>
+                                    <th>面积㎡</th>
+                                    <th>手机号码</th>
+                                    <th>订单状态</th>
+                                    <th class="width-210">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.info.list" id="vo">
+                                    <tr data-id="{$vo.id}" class='<if condition="($vo.on == 4) && ($vo.order2com_allread == 0)">fuchsia</if>'>
+                                        <td>
+                                            {$vo.time|date='Y-m-d H:i',###}
+                                            <neq name="vo.from_old_orderid" value="">
+                                                <a href="javascript:void(0)" class="red" title="从赠送单({$vo.from_old_orderid})生成的新单">生</a>
+                                            </neq>
+                                        </td>
+                                        <td title="{$vo.remarks}">
+                                            <!--新单且不为空则可选择备注-->
+                                            <if condition="empty($vo['remarks']) && ($vo['on'] == 0) && ($vo['on_sub'] == 10)">
+                                                <select class="order-remarks-list width-180">
+                                                    <option value="">请选择</option>
+                                                    <option value="已开站无真会员">已开站无真会员</option>
+                                                    <option value="地级市50公里以外面积200平以下">地级市50公里以外面积200平以下</option>
+                                                </select>
+                                                <button class="order-remarks-btn width-60" type="button">保存</button>
+                                            <else />
+                                                {$vo.remarks}
+                                                <notempty name="vo.remark_time">
+                                                    <div class="red" title="最近修改订单备注时间">
+                                                        {$vo.remark_time}
+                                                    </div>
+                                                </notempty>
+                                            </if>
+                                        </td>
+                                        <if condition="in_array(session('uc_userinfo.uid'),$showList)">
+                                        <td>
+                                            <if condition="$vo['sourceMark'] EQ 1">
+                                                活动
+                                            <else/>
+                                                普通
+                                            </if>
+                                        </td>
+                                        </if>
+                                        <td>
+                                            {$vo.city}{$vo.area}
+                                            <eq name="vo.timef" value="">
+                                                <if condition="$vo['timex_ori'] gt 180">
+                                                    <div class="green" title="订单发布距现在已经有:{$vo.timex}">{$vo.timex}</div>
+                                                <else/>
+                                                    <div class="red" title="订单发布距现在已经有:{$vo.timex}">{$vo.timex}</div>
+                                                </if>
+                                            <else />
+                                                <div class="red" title="拨打及时度(订单发布时间 到 第一次拨打电话时间):{$vo.timef}">
+                                                  {$vo.timef}
+                                                </div>
+                                            </eq>
+                                        </td>
+                                        <td>{$vo.wzd|default=0}%</td>
+                                        <td>{$vo.mianji}</td>
+                                        <td>
+                                            {$vo.tel}&nbsp;
+                                            <!--显号审核，此处必须要用全等于-->
+                                            <if condition="$vo['openeye_st'] === '0'">
+                                                <a data-user="{$vo.openeye_reger}" data-reason="{$vo.openeye_sqly}" title="点击进入申请审核&#13;申请人：{$vo.openeye_reger}&#13;申请理由：{$vo.openeye_sqly}" class="apply-icon" href="javascript:void(0)">
+                                                    <span title="点击审核显号" class="fa fa-eye-slash text-primary"></span>
+                                                </a>
+                                            <elseif condition="$vo['openeye_st'] === '1'" />
+                                                <a href="javascript:void(0)">
+                                                    <span title="显号已审核" class="fa fa-eye text-gray"></span>
+                                                </a>
+                                            </if>
+                                            <notempty name="vo.phone_location">
+                                                {$vo.phone_location}
+                                            </notempty>
+                                            <!--号码其他状态-->
+                                            <gt name="vo.phone_repeat_count" value="1">
+                                                <a class="phone-repeat-order red" href="javascript:void(0)">
+                                                    重{$vo['phone_repeat_count'] -1}
+                                                </a>
+                                            </gt>
+                                            <eq name="vo.order_blacklist_status" value="1">
+                                                <a href="javascript:void(0)" class="red" title="本订单号码在黑名单当中">黑</a>
+                                            </eq>
+                                            <notempty name="vo.visitime">
+                                                <div class="red" title="下次联系时间">
+                                                    {$vo.visitime|strtotime|date='Y-m-d',###}
+                                                </div>
+                                            </notempty>
+                                        </td>
+                                        <!--不同状态不同颜色-->
+                                        <td style="
+                                            <switch name='vo.on'>
+                                                <case value='0'>color: #0f0</case>
+                                                <case value='2'>color: #f00</case>
+                                                <case value='3'>color: #00f</case>
+                                                <case value='4'>color: #f0f</case>
+                                                <case value='5'>color: #0ff</case>
+                                                <case value='8'>color: #0ff</case>
+                                                <case value='9'>color: #0ff</case>
+                                                <default /> color:#0f0
+                                            </switch>
+                                        ">
+                                            {:getOrderStatus($vo['on'], $vo['on_sub'], $vo['type_fw'])}
+                                            <eq name="vo.on" value="4">
+                                                <div class="red">
+                                                    <switch name="vo.type_zs_sub">
+                                                        <case value="1">距离远</case>
+                                                        <case value="2">价格低</case>
+                                                        <case value="3">时间长</case>
+                                                        <case value="4">城市未开</case>
+                                                        <default />
+                                                    </switch>
+                                                    <notempty name="vo.nf_time">
+                                                        <neq name="vo.nf_time" value="0000-00-00">
+                                                            <span title="拿房时间">{$vo.nf_time}</span>
+                                                        </neq>
+                                                    </notempty>
+                                                </div>
+                                            </eq>
+                                        </td>
+                                        <td data-id="{$vo.id}">
+                                            <gt name="vo.lasttime" value="0">
+                                                <a href="javascript:void(0)" title="编辑订单:{$vo.id}|上次修改:{$vo.lasttime|date='Y-m-d H:i',###}|实际发布时间:{$vo.time_real|date='Y-m-d H:i',###}" class="btn-order-edit">编辑</a>
+                                            <else />
+                                                <a href="javascript:void(0)" title="编辑订单:{$vo.id}|实际发布时间:{$vo.time_real|date='Y-m-d H:i',###}" class="btn-order-edit">编辑</a>
+                                            </gt>
+                                            <!--新单,次新单，扫单可进行转单-->
+                                            <eq name="main.auth.turnorder" value="1">
+                                                <if condition="$vo['on'] == 0">
+                                                    <a data-id="{$vo.id}" data-city="{$vo.city}" data-area="{$vo.area}" class="change-city" href="javascript:void(0)">转单</a>
+                                                </if>
+                                            </eq>
+                                            <eq name="main.auth.checkcall" value="1">
+                                                <gt name="vo.call_repeat_count" value="0">
+                                                    <a href="javascript:void(0)" title="点击查看" class="tel-history">
+                                                        呼叫记录({$vo.call_repeat_count|default=0})
+                                                    </a>
+                                                </gt>
+                                            </eq>
+                                            <div class="red" title="未审核 或 待定的单子(最长呼叫):{$vo.timel}">{$vo.timel}</div>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12">
+                        {$main.info.page}
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">帮助说明</h3>
+                    </div>
+                    <div class="box-body manunal-info">
+                        <blockquote>
+                            <p>已审核的单子有"粉红色底色"标识?：表示分配的装修公司,还有至少一个公司未读单子,可以点击"编辑"查看本订单具体还有哪个公司未读</p>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--公用记录模态框-->
+        <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                        </button>
+                        <h4 class="modal-title">记录列表</h4>
+                    </div>
+                    <div class="modal-body common-model-content"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--申请显号模态框-->
+        <div class="modal fade" id="apply" tabindex="-1" role="dialog" aria-labelledby="myModalLabe1l" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                        <h4>审核显号</h4>
+                    </div>
+                    <div class="modal-body" data-id="" style="height: auto;overflow: hidden;">
+                        <div class="form-group">
+                            <label>申请人</label>
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <input type="input" class="form-control" disabled="disabled" name="applyuser" value="张三">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>申请理由</label>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <textarea disabled="disabled" class="form-control" name="applyreason" value=""></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xs-8 modal-error-wrap"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary btn-ok">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--转单编辑模态框-->
+        <div class="modal fade" id="changecity" tabindex="-1" role="dialog" aria-labelledby="myModalLabe1l" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                        <h4>转单</h4>
+                    </div>
+                    <div class="modal-body" data-id="" style="height: auto;overflow: hidden;">
+                        <div class="form-group">
+                            <label>订单号</label>
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <input type="input" class="form-control" disabled="disabled" name="orderid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>当前城区</label>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <input type="input" class="form-control" disabled="disabled" name="cityarea">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>目标城区</label>
+                            <div class="row">
+                                <div class="col-xs-12 city-change-select">
+                                    <select class="province form-control select"></select>
+                                    <select class="city form-control select"></select>
+                                    <select class="area form-control select"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xs-8 modal-error-wrap"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary btn-city-change-ok">同意</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--编辑订单模态框-->
+        <div class="modal fade my-dialog" id="myModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-gray">
+                        <em class="close" aria-hidden="true" style="font-style: normal;">×
+                    </em>
+                        <span></span>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    $(document).ready(function() {
+        /*S-初始化插件*/
+        $('#city').select2();
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+        /*E-初始化插件*/
+        /*S-初始化筛选条件*/
+        $("select[name=city]").select2('val', '{$Think.get.city}' == '' ? 0 : '{$Think.get.city}');
+        $("select[name=status]").val('{$Think.get.status}' == '' ? 0 : '{$Think.get.status}');
+        $('select[name=remarks]').val('{$Think.get.remarks}' == '' ? '全部' : '{$Think.get.remarks}');
+        $('select[name=displaynumber]').val('{$Think.get.displaynumber}' == '' ? 0 : '{$Think.get.displaynumber}');
+         $('select[name=isactivity]').val('{$Think.get.isactivity}' == '' ? 0 : '{$Think.get.isactivity}');
+        /*E-初始化筛选条件*/
+
+        /*S-重置搜索条件*/
+        $('#reset').on('click', function() {
+            clearSearchCondition();
+            $('select[name=status]').removeAttr('disabled');
+        });
+        /*E-重置搜索条件*/
+        //保存备注信息
+        $('.order-remarks-btn').click(function(event) {
+            var id = $(this).parent().parent().attr('data-id');
+            var remarks = $(this).parent().find('.order-remarks-list').val();
+            $.ajax({
+                url: '/order/editorderremark/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id,
+                    remarks:remarks
+                }
+            })
+            .done(function(data) {
+                var e = dialog({
+                    title: '消息',
+                    content: data.info,
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '发生未知错误，请联系技术部门~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            })
+        });
+        /*S-申请显号*/
+        $('.apply-icon').click(function(event) {
+            var id = $(this).parent().parent().attr('data-id');
+            var applyuser = $(this).attr('data-user');
+            var applyreason = $(this).attr('data-reason');
+            if (id == '' || typeof(id) == 'undefined' || id == null) {
+                return false;
+            };
+            $('#apply .modal-body').attr('data-id', id);
+            $('#apply input[name=applyuser]').val(applyuser);
+            $('#apply textarea[name=applyreason]').val(applyreason);
+            $('#apply .modal-error-wrap').text('');
+            $('#apply').modal('show');
+        });
+        $('#apply .btn-ok').click(function(event) {
+            var id = $('#apply .modal-body').attr('data-id');
+            var data = new Object();
+            data.id = id;
+            $.ajax({
+                url: '/order/displaynumbercheck/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    $('tr[data-id=' + id + '] .apply-icon').find('span').removeClass('text-primary').addClass('text-gray');
+                    $('#apply').modal('hide');
+                } else {
+                    $('#apply .modal-error-wrap').text(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $('#apply .modal-error-wrap').text('操作失败,请联系技术部门！');
+            })
+        });
+        /*E-申请显号*/
+
+        /*S-手机号重复订单*/
+        $('.phone-repeat-order').click(function(event) {
+            var id = $(this).parent().parent().attr('data-id');
+            var _this = $(this);
+            $.ajax({
+                url: '/order/getrepeatorderlistbyphone/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    $('.common-model-content').empty();
+                    $('.common-model-content').html(data.data);
+                    $('.common-model').modal('show');
+                } else {
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '发生未知错误，请联系技术部门~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            })
+        });
+        /*E-手机号重复订单*/
+        /*S-IP重复订单*/
+        $('.ip-repeat-order').click(function(event) {
+            var id = $(this).parent().parent().attr('data-id');
+            var _this = $(this);
+            $.ajax({
+                url: '/order/getrepeatorderlistbyip/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    $('.common-model-content').empty();
+                    $('.common-model-content').html(data.data);
+                    $('.common-model').modal('show');
+                } else {
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '发生未知错误，请联系技术部门~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            })
+        });
+        /*E-IP重复订单*/
+        /*S-最近操作记录*/
+        $('.log-info').click(function(event) {
+            $.ajax({
+                url: '/order/getrecentoperatelog/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {}
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    $('.common-model-content').empty();
+                    $('.common-model-content').html(data.data);
+                    $('.common-model').modal('show');
+                } else {
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '发生未知错误，请联系技术部门~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            })
+        });
+        /*E-最近操作记录*/
+
+        /*S-搜索按钮*/
+        $('#search').on('click', function() {
+            var condition = $('input[name=condition]').val();
+            var time_start = $('input[name=time_start]').val();
+            var time_end = $('input[name=time_end]').val();
+            var time_real_start = $('input[name=time_real_start]').val();
+            var time_real_end = $('input[name=time_real_end]').val();
+            var city = $('select[name=city]').val();
+            var nf_time_start = $('input[name=nf_time_start]').val();
+            var nf_time_end = $('input[name=nf_time_end]').val();
+            var status = $('select[name=status]').val();
+            var remarks = $('select[name=remarks]').val();
+            var displaynumber = $('select[name=displaynumber]').val();
+            var isactivity = $('select[name=isactivity]').val();
+            if ($('select[name=isactivity]').length <= 0) {
+                isactivity = '';
+            }
+            //判断时间间隔
+            if ((time_end != '') && (time_start > time_end)) {
+                var e = dialog({
+                    title: '消息',
+                    content: '发单开始时间不能大于结束时间~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            };
+            if ((time_real_end != '') && (time_real_start > time_real_end)) {
+                var e = dialog({
+                    title: '消息',
+                    content: '真实发单开始时间不能大于结束时间~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            };
+            if ((nf_time_end != '') && (nf_time_start > nf_time_end)) {
+                var e = dialog({
+                    title: '消息',
+                    content: '拿房开始时间不能大于结束时间~',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function() {}
+                });
+                e.show();
+                return false;
+            };
+            window.location.href = '/order/?condition=' + condition + '&time_start=' + time_start + '&time_end=' + time_end + '&time_real_start=' + time_real_start + '&time_real_end=' + time_real_end + '&city=' + city + '&nf_time_start=' + nf_time_start + '&nf_time_end=' + nf_time_end + '&status=' + status + '&remarks=' + remarks + '&displaynumber=' + displaynumber+"&isactivity="+isactivity;
+        });
+        /*E-搜索按钮*/
+
+        /*S-清空筛选条件*/
+        function clearSearchCondition() {
+            $('.clear-target').val('');
+            $("select[name=city]").select2('val', '0');
+            $("select[name=status]").val('0');
+            $('select[name=remarks]').val('全部');
+            $('select[name=displaynumber]').val('0');
+            $('.ol-tab').removeClass('ol-tab-active');
+        }
+        /*E-清空筛选条件*/
+
+        $("body").on("click",".btn-order-edit",function(event) {
+            var id = $(this).parent().attr("data-id");
+            $.ajax({
+                url: '/order/operate/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    $("#myModel .modal-header span").html("  修改订单  " + data.info.id + " (上次修改  " + data.info.lasttime + "  )   |   实际发布时间:" + data.info.time_real + " |   订单发布完整度：" + data.info.wzd + " %");
+                    $("#myModel .modal-body").html(data.data);
+                    $("#myModel").modal({
+                        backdrop: false
+                    }).on("shown.bs.modal",function(){
+                        ZeroClipboard.destroy();
+                        var client = new ZeroClipboard( $("#copy") );
+                        client.on('copy', function (event) {
+                            var command_need=$("textarea[name=text]").val();//获取装修要求文本
+                            var pre_string = new ["【1.设计施工要求】：", "【2.材料要求】：", "【3.不含家具家电总预算】：","【4.对装修公司的要求】：","【5.量房注意事项】：","【6.工期】：","【2.不含家具家电总预算】：","【3.对装修公司的要求】：","【4.量房注意事项】："];
+                            for(var i=0;i<pre_string.length;i++) {
+                                command_need=command_need.replace(pre_string[i], "");//遍历替换前缀说明
+                            }
+                            //第一条的时候要加换行\r\n
+                            var copytxt = "【齐装网】" + $("[name=qx]").find("option:selected").text() + " "
+                                          + $("[name=xiaoqu]").val()  + " "
+                                          + $("[name=dz]").val() + " "
+                                          +"\r\n "+ command_need + " 业主:" +  $("[name=name]").val()
+                                          + $("[name=sex]").find("option:selected").text()
+                                          + " 手机上直接查看: " + $("input[name=dwz]").val();
+                            event.clipboardData.setData('text/plain', copytxt);
+                            alert("复制成功");
+                        });
+
+                        var company = new ZeroClipboard( $("#copy-company") );
+                        company.on('copy', function (event) {
+                            var copytxt = "";
+                            $(".fen-company").each(function(){
+                                copytxt += $(this).text()+" ";
+                            });
+                            event.clipboardData.setData('text/plain', copytxt);
+                            alert("复制成功");
+                        });
+                    });
+                } else {
+                    alert(data.info);
+                }
+            });
+        });
+
+        $("#myModel .modal-header em").click(function(event) {
+            if (confirm("确定关闭？")) {
+                $(".my-dialog").modal("hide");
+            }
+        });
+    });
+</script>
+<eq name="main.auth.turnorder" value="1">
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(document).ready(function() {
+            /*S-转单插件初始化*/
+            //城区数据获取，不点击按钮则不获取
+            var cityDate = false;
+            var cxSelectApi = $.cxSelect($('.city-change-select'), {
+                selects: ['province', 'city', 'area'],
+                jsonValue: 'id',
+                jsonName: 'text', // 数据标题字段名称
+                jsonSub: 'children', // 子集数据字段名称
+            });
+            $('.change-city').click(function(event) {
+                var id = $(this).attr('data-id');
+                var city = $(this).attr('data-city');
+                var area = $(this).attr('data-area');
+                $('#changecity').find('input[name=orderid]').val(id);
+                $('#changecity').find('input[name=cityarea]').val(city + '-' + area);
+                if (cityDate == false) {
+                    $.ajax({
+                        url: '/city/getcityforcxselect/',
+                        type: 'GET',
+                        dataType: 'JSON'
+                    })
+                    .done(function(data) {
+                        if (data.status == '1') {
+                            cityDate = data.data;
+                            cxSelectApi.setOptions({
+                                data: JSON.parse(cityDate)
+                            });
+                            $('#changecity').modal('show');
+                        } else {
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function() {}
+                            });
+                            e.show();
+                            return false;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '发生未知错误，请联系技术部门~',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function() {}
+                        });
+                        e.show();
+                        return false;
+                    })
+                } else {
+                    $('#changecity').modal('show');
+                }
+            });
+            //转单操作
+            $('.btn-city-change-ok').click(function(event) {
+                var orderid = $('#changecity').find('input[name=orderid]').val();
+                var province = parseInt($('#changecity .province').val());
+                var city = parseInt($('#changecity .city').val());
+                var area = parseInt($('#changecity .area').val());
+                if ((province > 0) && (city > 0) && (area > 0)) {
+                    var info = new Array();
+                    info.push(province);
+                    info.push(city);
+                    info.push(area);
+                    $.ajax({
+                        url: '/order/turnorder/',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                            city: info,
+                            id: orderid
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.code == 200) {
+                            $('#changecity .modal-error-wrap').text('转单成功');
+                            setTimeout(function() {
+                                window.location.href = window.location.href;
+                            }, 2);
+                        } else {
+                            $('#changecity .modal-error-wrap').text(data.errmsg);
+                        }
+                    });
+                } else {
+                    $('#changecity .modal-error-wrap').text('请选择城市/区县');
+                }
+            });
+            /*E-转单插件初始化*/
+        })
+    </script>
+</eq>
+<eq name="main.auth.checkcall" value="1">
+    <script>
+        $(document).ready(function(){
+            /*S-呼叫记录查看*/
+            $('.tel-history').click(function(event) {
+                var id = $(this).parent().parent().attr('data-id');
+                var _this = $(this);
+                $.ajax({
+                    url: '/voip/voiprecord/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                    } else {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function() {}
+                        });
+                        e.show();
+                        return false;
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+            /*E-呼叫记录查看*/
+        });
+    </script>
+</eq>
+</block>

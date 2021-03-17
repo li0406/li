@@ -1,0 +1,233 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道账户管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/accountlist.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>渠道账户管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <form method="get">
+                            <div class="col-xs-2">
+                                <span>账户名称：</span><br />
+                                <input type="text" name="account_name" class="form-control" placeholder="请输入账户名称"
+                                    value="{$input.account_name}">
+                            </div>
+                            <div class="col-xs-2">
+                                <span>开启状态：</span><br />
+                                <select id="enabled" class="form-control" name="enabled" type="text" >
+                                    <option value="">请选择</option>
+                                    <option value="1">开启</option>
+                                    <option value="2">关闭</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-1">
+                                <span>&nbsp;</span><br />
+                                <button type='submit' class="btn btn-success normal" style="width:auto">
+                                    <i class="fa fa-search"></i> 查询
+                                </button>
+                            </div>
+                            <div class="col-sm-1 pull-right text-center">
+                                <span>&nbsp;</span><br />
+                                <button type='button' class="btn btn-success add" style="width:auto">
+                                    <i class="fa fa-plus-circle"></i> 添加渠道账户
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <tbody>
+                            <tr style="font-size:14px;">
+                                <th>序号</th>
+                                <th>渠道账户名称</th>
+                                <th>渠道标识数</th>
+                                <th>添加人</th>
+                                <th>添加时间</th>
+                                <th>开启状态</th>
+                                <th>操作</th>
+                            </tr>
+                            <volist name="data.list" id="item">
+                                <tr>
+                                    <td>{$item.index}</td>
+                                    <td>{$item.account_name}</td>
+                                    <td>
+                                        <eq name="item.enabled" value="1">
+                                            <a href="/ordersource?account_id={$item.id}" target="_blank">
+                                                {$item.src_number|default="0"}
+                                            </a>
+                                        <else />
+                                            {$item.src_number|default="0"}
+                                        </eq>
+                                    </td>
+                                    <td>{$item.creator_name}</td>
+                                    <td>{$item.created_date}</td>
+                                    <td>{$item.enabled_name}</td>
+                                    <td>
+                                        <a class="green edit" href="javascript:void(0);"
+                                            data-id="{$item.id}" data-name="{$item.account_name}" data-enabled="{$item.enabled}"
+                                            >编辑</a>
+                                        <span>&nbsp;&nbsp;</span>
+                                        <a class="green related" href="javascript:void(0);"
+                                         data-id="{$item.id}" data-name="{$item.account_name}"
+                                            >匹配标识</a>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix page">
+                        <empty name="data.count">
+                            <span>暂无数据</span>
+                        <else />
+                            <ul class="pagination no-margin">{$data.pageshow}</ul>
+                        </empty>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="diaWindow">
+        <div class="dia-content">
+            <div class="top">
+                <span class="tt">添加渠道账户</span>
+                <span class="close-btn">×</span>
+            </div>
+            <div class="center">
+                <div>
+                    <label class="title"><span class="red">*</span>渠道账户名称</label>
+                    <input class="form-control new-name" name="account_name" placeholder="请输入账户名称" />
+                </div>
+                <div>
+                    <label class="title">开启状态：</label>
+                    <input type="radio" checked name="new_status" id="enabled_turn" value="1"><label for="enabled_turn"> 开启</label>
+                    &nbsp;&nbsp;
+                    <input type="radio" name="new_status" id="enabled_off" value="2"><label for="enabled_off"> 关闭</label>
+                </div>
+            </div>
+            <div class="bottom">
+                <input type="hidden" name="id" class="new-id" />
+                <button type="button" class="btn cancel-btn">取消</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button type="button" class="btn btn-primary save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="relatedModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title" style="text-align: center;">匹配标识</h4>
+                </div>
+                <div class="modal-body">
+                    <p>One fine body&hellip;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#enabled").val("{$input.enabled}");
+
+            // 新增
+            $(".add").click(function (){
+                $(".top .tt").html("新增渠道账户");
+
+                $(".new-id").val("");
+                $(".new-name").val("");
+                $("#enabled_turn").prop("checked", "checked");
+                $(".diaWindow").show();
+            });
+
+            // 编辑
+            $(".edit").click(function (){
+                $(".top .tt").html("编辑渠道账户");
+
+                $(this).data("id");
+                $(".new-id").val($(this).data("id"));
+                $(".new-name").val($(this).data("name"));
+
+                if ($(this).data("enabled") == "1") {
+                    $("#enabled_turn").prop("checked", "checked");
+                } else {
+                    $("#enabled_off").prop("checked", "checked");
+                }
+
+                $(".diaWindow").show();
+            });
+
+
+            // 关闭弹窗
+            $(".close-btn,.cancel-btn").click(function (){
+                $(".diaWindow").hide();
+            });
+
+            // 保存
+            $("body").on("click",".save",function (){
+                var enabled = $("input[name=new_status]:checked").val();
+                var account_name = $(".new-name").val();
+                var id = $(".new-id").val();
+
+                if (account_name == "") {
+                    alert("请先输入渠道账户名称");
+                    return false;
+                }
+
+                $.post("/ordersource/accountsave", {
+                    id: id,
+                    enabled: enabled,
+                    account_name: account_name
+                }, function(ret){
+                    if (ret["error_code"] == 0) {
+                        window.location.reload();
+                    } else {
+                        alert(ret["error_msg"]);
+                    }
+                });
+            });
+
+            // 匹配标识
+            $(".related").click(function(){
+                var account_id = $(this).data("id");
+                var account_name = $(this).data("name");
+
+                $.get("/ordersource/accountrelated", {
+                    account_id: account_id,
+                    account_name: account_name
+                }, function(ret){
+                    if (ret["error_code"] == 0) {
+                        $("#relatedModal").find(".modal-body").html(ret["data"]["template"]);
+                        $("#relatedModal").modal("show");
+                    } else {
+                        alert(ret["error_msg"]);
+                    }
+                });
+            });
+        });
+    </script>
+</block>

@@ -1,0 +1,408 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>美图专题管理 - 齐装管理后台 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/plugins/select2/css/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/meituzt/css/meituzt.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/plugins/bootstrap-switch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>美图专题管理</h1>
+    </section>
+    <section class="content">
+        <div class="box no-border">
+            <form id="editForm" action="" method="POST" onsubmit="return false">
+            <div class="box-body">
+
+                <div class="item">
+                    <div class="item-title">标题</div>
+                    <div class="item-body">
+                        <input type="text" name="title" class="form-control" value="{$info.title}"  maxlength="60"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <div class="item-title">专题描述</div>
+                    <div class="item-body">
+                       <textarea name="description" rows="3" class="form-control checkNumber"  maxlength="180">{$info.description}</textarea>
+                       <span></span>
+                    </div>
+                </div>
+
+                <!--关键字-->
+                <div class="item">
+                    <div class="item-title">关键字</div>
+                    <div class="item-body">
+                        <input name="keywords" id="keywords" type="input" class="form-control" value="{$info.keywords}" maxlength="30">
+                    </div>
+                </div>
+
+                <!--专题封面-->
+                <div class="item">
+                    <div class="form-group">
+                        <div class="item-title">专题封面</div>
+                        <div class="row item-body">
+                            <div class="col-xs-12">
+                                <input id="images" type="file" multiple/>
+                                <input type="hidden" name="thumb" id="thumb" value="{$info.thumb}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <if condition="3 EQ $info['status']" >
+                    <div class="time-wrap form-group show">
+                        <label>预发布日期(可不填写，若填写则在填写的日期当天优先发布)</label>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <gt name="info.time" value="0">
+                                    <input type="input" id="time" class="datetime form-control" name="time" placeholder="预发布日期" value="{$info.time|date='Y-m-d',###}">
+                                <else />
+                                    <input type="input" id="time" class="datetime form-control" name="time" placeholder="预发布日期" value="">
+                                </gt>
+                            </div>
+                        </div>
+                    </div>
+                </if>
+
+                <!--效果图集-->
+                <div class="item">
+                    <div class="item-title">
+                        <div class="row">
+                            <div class="col-xs-3">效果图集</div>
+                            <div class="col-xs-1">
+                                <button class="selection-btn" id="meituBox">选取</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="data-box">
+                                    <thead><th width="100">ID</th><th>标题</th></thead>
+                                    <tbody id="meituList">
+                                    <volist name="meituList" id="v">
+                                        <tr>
+                                            <td>{$v.id}</td>
+                                            <td><a target="_blank" href="http://meitu.{:C('QZ_YUMING')}/p{$vo.id}.html">{$v.title}</a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                    </tbody>
+                                </table>
+                                <br>
+                                <textarea name="meitu_desc" rows="3" class="form-control checkNumber" maxlength="180">{$info.meitu_desc}</textarea>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--业主案例-->
+                <div class="item">
+                    <div class="item-title">
+                        <div class="row">
+                            <div class="col-xs-3">业主案例</div>
+                            <div class="col-xs-1">
+                                <button class="selection-btn" id="caseBox">选取</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="data-box">
+                                    <thead><th width="100">ID</th><th>标题</th></thead>
+                                    <tbody id="caseList">
+                                        <volist name="caseList" id="v">
+                                            <tr>
+                                                <td>{$v.id}</td>
+                                                <td><a target="_blank"
+                                                       href="http://{$v.bm}.{:C('QZ_YUMING')}/caseinfo/{$v.id}.shtml">{$v.mianji}平米{$v.huxing}{$v.fengge}家装装修图片设计</a>
+                                                </td>
+                                            </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                                <br>
+                                <textarea name="case_desc" rows="3" class="form-control checkNumber" maxlength="180">{$info.case_desc}</textarea>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--文章攻略-->
+                <div class="item">
+                    <div class="item-title">
+                        <div class="row">
+                            <div class="col-xs-3">文章攻略</div>
+                            <div class="col-xs-1">
+                                <button class="selection-btn" id="articleBox">选取</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="data-box">
+                                    <thead><th width="100">ID</th><th>标题</th></thead>
+                                    <tbody id="articleList">
+                                    <volist name="articleList" id="v">
+                                        <tr>
+                                            <td>{$v.id}</td>
+                                            <td><a target="_blank"
+                                                   href="http://www.{:C('QZ_YUMING')}/gonglue/{$v.shortname}/{$v.id}.html">{$v.title}</a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                    </tbody>
+                                </table>
+                                <br>
+                                <textarea name="article_desc" rows="3" class="form-control checkNumber" maxlength="180">{$info.article_desc}</textarea>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <div class="item-body">
+                        <table class="set-box">
+                            <tr><td>设为首页推荐</td><td><input type="checkbox" class="checkbox" name="is_home" <if condition="$info.is_home EQ '2' ">checked</if> /></td></tr>
+                            <tr><td>设为精选内容</td><td><input type="checkbox" class="checkbox" name="is_choice" <if condition="$info.is_choice EQ '1' ">checked</if> /></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <button class="btn btn-success submit-save" id="btn-save" type="submit"><i class="fa fa-save"></i>&nbsp;保存</button>
+                <if condition="true EQ check_menu_auth('/meituzt/directpost/')">
+                    <if condition="3 EQ $info['status']" >
+                        <button class="btn btn-info submit-save" type="submit" data-directpost="1">
+                            直接发布
+                        </button>
+                    </if>
+                </if>
+                <button class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="zzc">
+            <div class="win-box">
+                <div class="win-head"><span class="pull-left win-title"></span></div>
+                <div class="win-body" style="overflow-y:hidden;">
+                    <iframe src="" width="100%" height="100%" id="selectBox" frameborder="0" scrolling="yes"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="module" name="module" value="">
+                    <button type="button" class="btn btn-default pull-left hideLoading" id="cancel">取消</button>
+                    <button type="button" class="btn btn-primary hideLoading" id="saveBtn">保存</button>
+              </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    Cookies.set('meituList',JSON.stringify([<volist name="meituList" id="v">"{$v.id}",</volist>]));
+    Cookies.set('caseList',JSON.stringify([<volist name="caseList" id="v">"{$v.id}",</volist>]));
+    Cookies.set('articleList',JSON.stringify([<volist name="articleList" id="v">"{$v.id}",</volist>]));
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $.fn.bootstrapSwitch.defaults.size = 'mini';
+    $.fn.bootstrapSwitch.defaults.onText = ' 是 ';
+    $.fn.bootstrapSwitch.defaults.offText = ' 否 ';
+    $(".checkbox").bootstrapSwitch();
+
+    $(".checkNumber").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length <= 180 && length > 1){
+            var offset = 180 - length;
+            $(this).parent().find('span').html('<i style="color:green">您还可以输入 '+ offset +" 字</i>");
+        }
+    });
+
+    //初始化时间选择插件
+    $(".datetime").datetimepicker({
+        format:"yyyy-mm-dd",
+        startView: 2,
+        minView: 2,
+        todayBtn:true,
+        autoclose:true
+    });
+
+    $('#meituBox').click(function(event){
+        $(".zzc").fadeIn();
+        $(".win-title").text('选取家居美图');
+        $('#module').val('meitu');
+        $("#selectBox",parent.document.body).attr("src","/meituzt/meituBox")
+    });
+
+    $('#caseBox').click(function(event){
+        $(".zzc").fadeIn();
+        $(".win-title").text('选取业主案例');
+        $('#module').val('case');
+        $("#selectBox",parent.document.body).attr("src","/meituzt/caseBox")
+    });
+
+    $('#articleBox').click(function(event){
+        $(".zzc").fadeIn();
+        $(".win-title").text('选取文章攻略');
+        $('#module').val('article');
+        $("#selectBox",parent.document.body).attr("src","/meituzt/articleBox")
+    });
+
+    //保存选择
+    $('#saveBtn').click(function(){
+        var module = $('#module').val();
+        $.ajax({
+            url: '/meituzt/getTitle',
+            type: 'GET',
+            dataType: 'JSON',
+            data:{
+                module:module
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                $('#'+module+'List').html('');
+                $.each(data.data, function(idx, obj) {
+                    $('#'+module+'List').append('<tr><td>'+ obj.id +'</td><td>' + obj.title + '</td></tr>');
+                });
+            }else{
+                alert('数据出错');
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败,网络错误！');
+        })
+        $(".zzc").fadeOut();
+    });
+
+    $('#cancel').click(function(){
+        var model = $('#module').val();
+        //点取消就将原来的cookie重新赋值
+        Cookies.set(model + 'List', Cookies.get('old' + model + 'List'));
+        $(".zzc").fadeOut();
+    });
+
+    //提交表单
+    $('.submit-save').click(function(event) {
+        var _this = $(this);
+
+        var url = '';
+        if ('1' == _this.attr('data-directpost')) {
+            url = '/meituzt/directpost/?type=add';
+        } else {
+            url = '/meituzt/add/';
+        }
+
+        if($('input[name=title]').val() == ''){
+            alert('请填写标题');
+            return false;
+        }
+
+        if($("input[name=title]").val().length > 60){
+            alert("标题请输入60以下字符");
+            return false;
+        }
+
+        if($('textarea[name=description]').val() == ''){
+            alert('请填写专题描述');
+            return false;
+        }
+
+        if($('input[name=keywords]').val() == ''){
+            alert('请填写关键字');
+            return false;
+        }
+
+        if($('textarea[name=meitu_desc]').val() == ''){
+            alert('请填写效果图描述');
+            return false;
+        }
+
+        if($('textarea[name=case_desc]').val() == ''){
+            alert('请填写案例描述');
+            return false;
+        }
+
+        if($('textarea[name=article_desc]').val() == ''){
+            alert('请填写文章描述');
+            return false;
+        }
+
+        $.ajax({
+            url: '/meituzt/edit?id={$info.id}',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $('#editForm').serialize()
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                window.location.href = "/meituzt";
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('操作失败,网络错误！');
+        })
+    });
+
+    $("#images").fileinput({
+        language: 'zh', //设置语言,
+        uploadUrl:"/upload/uploadimg/",
+        browseClass:"btn btn-primary",
+        allowedFileExtensions : ['jpg','png','gif'],
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        uploadAsync: true,
+        dropZoneEnabled:false,
+        overwriteInitial: true,
+        uploadExtraData: {
+            prefix:'meituzt',
+            chars:'true'
+        },
+        maxFileSize:1000000000,
+        previewSettings:{
+            image: {width: "323px", height: "164px"}
+        },
+        initialPreview:[
+            "<img src='//{:C('QINIU_DOMAIN')}/{$info.thumb}' class='file-preview-image' >"
+        ],
+    }).on("filebatchselected", function(event, files) {
+        $(this).fileinput("upload");
+    }).on('fileuploaded', function(event, data, id, index) {
+        if(1 == data.response.status){
+            $('#thumb').val(data.response.data.name);
+        }else{
+            alert(data.response.info);
+            return false;
+        }
+    }).on("fileuploaderror",function(event, data){
+        alert('文件上传失败,请检查文件格式，规格是否符合要求！')
+        return false;
+    }).on("fileclear",function(){
+        $("#thumb").val("");
+        $(".img-upload .fileinput-upload-button").removeClass('disabled');
+    });
+});
+</script>
+</block>

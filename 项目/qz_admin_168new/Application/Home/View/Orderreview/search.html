@@ -1,0 +1,421 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderreview/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服订单回访</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/orderreview/">客服订单回访</a></li>
+        </ol>
+    </section>
+    <section class="content-table">
+        <div class="content-table-sub">
+            <a href="/orderreview/index" class="">回访列表</a>
+            <a href="/orderreview/search?" class="content-table-second sub-tab-active">订单查询</a>
+        </div>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="/orderreview/search">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>订单查询：</div>
+                                        <input type="text" name="ordertel" class="form-control clear-target"
+                                               placeholder="订单号或电话" value="{$input.ordertel}">
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>装修公司：</div>
+                                        <input type="text" name="company" class="form-control clear-target"
+                                               placeholder="请输入装修公司ID或简称" value="{$input.company}">
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>会员类型：</div>
+                                        <select class="form-control" name="classid" id="">
+                                            <option value="">请选择</option>
+                                            <option value="6" {:($input["classid"] == 6 ? "selected" : "")} >签返</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>订单状态：</div>
+                                        <select class="form-control" name="type_fw" id="">
+                                            <option value="">请选择</option>
+                                            <option value="1" {:($input["type_fw"] == 1 ? "selected" : "")} >分单</option>
+                                            <option value="2" {:($input["type_fw"] == 2 ? "selected" : "")} >赠单</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>开始-结束时间：</div>
+                                        <input type="text" name="begin" class="form-control datepicker" autocomplete="off"
+                                               placeholder="请输入开始时间" value="{$input.begin}">
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>&nbsp;</div>
+                                        <input type="text" name="end" class="form-control datepicker" autocomplete="off"
+                                               placeholder="请输入结束时间" value="{$input.end}">
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <button type="submit" id="search" class="btn btn-primary col-xs-12">查询</button>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div>&nbsp;</div>
+                                        <button type="button" id="import" class="btn btn-success col-xs-12"
+                                            <if condition="$searchret == 0">disabled</if>
+                                        >批量导入订单</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>发布时间</th>
+                                <th>订单备注</th>
+                                <th>城市区县</th>
+                                <th>完整度</th>
+                                <th>面积m²</th>
+                                <th>手机号码</th>
+                                <th>订单状态</th>
+                                <th>订单归属人</th>
+                                <th>是否已在回访列表</th>
+                                <th class="width-210">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="data.list" id="info">
+                                <tr>
+                                    <td class="order-time"> {$info.time|date='Y-m-d H:i',###}</td>
+                                    <td class="order-remark-table">
+                                        <p class="order-status order-teble-item">{$info.remarks}</p>
+                                        <notempty name="info.remark_time">
+                                            <p class="order-time-remark order-teble-item">
+                                                {$info.remark_time}
+                                            </p>
+                                        </notempty>
+                                    </td>
+                                    <td>{$info.city}{$info.area}</td>
+                                    <td>{$info.wzd|default=0}%</td>
+                                    <td>{$info.mianji}</td>
+                                    <td>{$info.tel}</td>
+                                    <td class="review-order-status color-purple">
+                                        {:getOrderStatus($info['on'], $info['on_sub'], $info['type_fw'])}
+                                    </td>
+                                    <td> {$info.op_name}</td>
+                                    <td>
+                                        <if condition="$info.hasreview eq 0">
+                                            否
+                                        <else/>
+                                            是
+                                        </if>
+                                    </td>
+                                    <td class="operater-table">
+                                        <span class="operater-edit" data-id="{$info.id}">查看</span>
+                                        <span class="operater-change" data-id="{$info.id}"> 转入回访订单池 </span>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12">
+                        {$data.pageshow}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--回访订单-->
+        <div class="modal fade my-dialog-change"  role="dialog"
+             aria-labelledby="myModalLabel"
+             aria-hidden="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">新增回访</h4>
+                    </div>
+                    <div class="modal-body">
+                        <section class="content">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <form id="myForm"  class="form-horizontal">
+                                        <div class="form-group">
+                                            <label  class="col-sm-4 control-label"><span class="red">*</span>反馈人</label>
+                                            <div class="col-sm-4">
+                                                <input type="text" class="form-control" placeholder="反馈人" name="feedbacker">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label  class="col-sm-4 control-label">
+                                                <span class="red">*</span>要求回访的装修公司：
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <div class="checkbox">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label  class="col-sm-4 control-label">
+                                                <span class="red">*</span>回访阶段：
+                                            </label>
+                                            <div class="col-sm-4">
+                                                <select class="form-control" name="visit_step">
+                                                    <option value="">请选择</option>
+                                                    <option value="1">促量房</option>
+                                                    <option value="2">促到店</option>
+                                                    <option value="3">促签单</option>
+                                                    <option value="4">推荐服务</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label  class="col-sm-4 control-label"><span class="red">*</span>需要回访内容：</label>
+                                            <div class="col-sm-8">
+                                               <textarea class="form-control" style="height: 150px;" name="visit_need"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label  class="col-sm-4 control-label">装企反馈详情：</label>
+                                            <div class="col-sm-8">
+                                                <textarea class="form-control" style="height: 150px;" name="visit_user_need"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-12 text-center">
+                                                <button id="btnSaveNew" type="button" class="btn btn-primary">提交</button>
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                                <input type="hidden" name="id"/>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="mask"></div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--查看编辑框-->
+        <div class="modal fade my-dialog my-daylog-show in" id="operate" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel" aria-hidden="false" style="display: none;">
+            <div class="modal-dialog modal-lg" style="width: 1400px;">
+                <div class="modal-content">
+                    <div class="modal-header bg-gray">
+                        <em class="close" aria-hidden="true" style="font-style: normal;">×
+                        </em>
+                        <span></span>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            $('.datepicker').datetimepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: "month",
+                autoclose: true,
+                clearBtn: true,
+                format:'yyyy-mm-dd',
+                language: 'zh-CN'
+            }).on("change", function () {
+                var begin = $("input[name=begin]").val();
+                var end = $("input[name=end]");
+
+                var begintime = toTimeStamp(begin);
+                var endtime = toTimeStamp(end.val());
+
+                if (begintime > endtime) {
+                    msg("结束时间不得早于开始时间", function () {
+                        end.val('');
+                    });
+                } else if (endtime - begintime >= 86400000 * 90) {
+                    msg("查询天数不能大于90天", function () {
+                        end.val('');
+                    });
+                }
+            });
+
+            // 搜索
+            $("#search").click(function(){
+                var ordertel = $("input[name=ordertel]").val();
+                var company = $("input[name=company]").val();
+                var classid = $("select[name=classid]").val();
+                var type_fw = $("select[name=type_fw]").val();
+                var begin = $("input[name=begin]").val();
+                var end = $("input[name=end]").val();
+
+                if (ordertel == "" && company == "" && classid == "" && type_fw == "" && begin == "" && end == "") {
+                    return false;
+                }
+
+                if (begin != "" && end == "") {
+                    msg("请先选择结束时间");
+                    return false;
+                } else if (begin == "" && end != "") {
+                    msg("请先选择开始时间");
+                    return false;
+                }
+
+                if (ordertel == "") {
+                    // 选择装修公司、会员类型、订单状态，且未选择时间
+                    if ((company != "" || classid != "" || type_fw != "") && begin == "" && end == "") {
+                        msg("请选择查询时间段");
+                        return false;
+                    }
+
+                    // 只选择时间时，未选择装修公司、会员类型、订单状态
+                    if (company == "" && classid == "" && type_fw == "" && begin != "" && end != "") {
+                        msg("请选择装修公司/会员类型/订单状态");
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // 导入
+            $("#import").click(function(){
+                if ("{$searchret}" == "0") {
+                    msg("没有导入数据");
+                    return false;
+                }
+
+                $.ajax({
+                    url: '/orderreview/importall',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        ordertel: "{$input.ordertel}",
+                        company: "{$input.company}",
+                        classid: "{$input.classid}",
+                        type_fw: "{$input.type_fw}",
+                        begin: "{$input.begin}",
+                        end: "{$input.end}"
+                    }
+                }).done(function (res) {
+                    if (res.error_code == 0) {
+                        msg("导入成功", function(){
+                            window.location.reload();
+                        });
+                    } else {
+                        msg(res.error_msg);
+                    }
+                });
+            });
+
+            $(".operater-edit").on('click', function () {
+                var itemId = $(this).data('id');
+                $.ajax({
+                    url: '/orderreview/editDocking',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        id: itemId
+                    }
+                }).done(function (res) {
+                    var header =
+                        "  修改订单  " + res.info.id + " (上次修改  " + res.info.lasttime + "  )   |   订单归属人:" + res.info.op_name + "<input type='hidden' class='order_id' value=" + res.info.id + ">";
+                    $("#operate .modal-header span").html(header);
+                    $("#operate .modal-body").html(res.data);
+                    $('.my-daylog-show').fadeIn()
+                });
+            });
+
+            $(".operater-change").click(function () {
+                var itemId = $(this).data("id")
+                $.ajax({
+                    url: "/orderreview/showordercompany",
+                    type: "get",
+                    data: {
+                        orderno: itemId
+                    }
+                }).done(function (res) {
+                    if (res.error_code == 0) {
+                        var tmp = "";
+                        for(var i in res.data){
+                            tmp += "<label><input type='checkbox' name='company[]' value='"+res.data[i].comid+"'>"+res.data[i].jc+"</label>"
+                        }
+                        $('.my-dialog-change .checkbox').html(tmp);
+                        $("[name=id]").val(itemId);
+                        $('.my-dialog-change').modal()
+                    } else {
+                        msg(res.error_msg)
+                    }
+                })
+            });
+
+            $('.close').click(function () {
+                $('.my-daylog-show').fadeOut()
+            });
+
+            $("#btnSaveNew").click(function(){
+                var _this = $(this);
+                _this.attr("disabled","disabled");
+                $.ajax({
+                    url: '/orderreview/addvisit',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: $("#myForm").serializeArray(),
+                    })
+                .done(function(data) {
+                    if (data.error_code == 0) {
+                        msg("提交成功");
+                        window.location.href = window.location.href;
+                    } else {
+                        msg(data.error_msg);
+                    }
+                    _this.attr("disabled",false);
+                });
+            });
+        });
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+
+        function toTimeStamp(time) {
+            if (time) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                return new Date(date).getTime();
+            }
+        }
+    </script>
+</block>

@@ -1,0 +1,121 @@
+<div class="form-group return_{$index}">
+<form>
+    <div class="form-group ">
+        <label class="col-sm-2 control-label">{$order}&nbsp;&nbsp;转让:</label>
+        <div class="col-sm-2">
+            <input id="return_time_{$index}"  type="text" class="form-control datepicker" placeholder="转让开始时间" name="delay_time" value="{$info.delay_time}" autocomplete="off"  />
+        </div>
+        <label class="col-sm-2 control-label text-center" style="text-align: center;">转让公司:</label>
+        <div class="col-sm-2">
+            <select id="toCompany" class="form-control" name="to">
+            </select>
+        </div>
+        <if condition="!isset($read)">
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-success btn-sm">保存</button>
+            <button type="button" class="btn btn-danger  btn-sm">删除</button>
+        </div>
+        </if>
+    </div>
+</form>
+</div>
+<if condition="$read">
+<script type="text/javascript">
+$(".return_{$index} *").attr("disabled","disabled");
+</script>
+<else />
+<script type="text/javascript">
+$(".btn-danger").click(function(event) {
+    $(this).parents(".form-group").remove();
+});
+
+$(".return_{$index} #return_time_{$index}").datepicker({
+    format:"yyyy-mm-dd",
+    minViewMode:0,
+    autoclose:true
+});
+
+$("#toCompany").select2({
+    ajax: {
+        url: "/vip/findcomnapnyinfo/",
+        dataType: 'json',
+        type: "post",
+        data: function(params) {
+            return {
+                q: params.term // search term
+            };
+        },
+        processResults: function(data, params) {
+            return {
+                results: data.items
+            };
+        }
+    },
+    escapeMarkup: function(markup) {
+        return markup;
+    },
+    minimumInputLength: 3,
+    templateResult: function(repo) {
+        if (repo.loading) return repo.text;
+        var markup = "<div class='select2-result-repository clearfix'>" +
+            "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'>" + repo.id + " " + repo.jc + " (" + repo.cname + ")</div>";
+
+        return markup;
+    },
+    templateSelection: function(repo) {
+        return repo.jc;
+    }
+});
+
+$(".return_{$index} .btn-success").click(function(event) {
+    var data = $(".return_{$index} form").serializeArray();
+    var json = $("#search_company").select2("data");
+    if(json.length > 0){
+        if(typeof $("#search_company").select2("data") == "string"){
+            json = JSON.parse($("#search_company").select2("data"));
+        }
+        var company_id = json[0].id;
+        data.push({name:"company_id",value:company_id});
+        data.push({name:"company_name",value:json[0].jc});
+    };
+
+    json = $("#search_seller").select2("data");
+    if(json.length > 0){
+        if(typeof $("#search_seller").select2("data") == "string"){
+            json = JSON.parse($("#search_seller").select2("data"));
+        }
+        data.push({name:"saler_id",value:json[0].id});
+        data.push({name:"saler_name",value:json[0].text || json[0].name});
+    }
+
+    json = $("#toCompany").select2("data");
+    if(json.length > 0){
+        if(typeof $("#search_seller").select2("data") == "string"){
+            json = JSON.parse($("#toCompany").select2("data"));
+        }
+        data.push({name:"to_company_id",value:json[0].id});
+        data.push({name:"to_compnay_name",value:json[0].jc});
+    }
+    data.push({name:"parentid",value:$(this).parents(".panel-body").find("input[name=contract_id]").val()});
+
+    $.ajax({
+        url: '/vip/returnvip/',
+        type: 'POST',
+        dataType: 'json',
+        data: data
+    })
+    .done(function(data) {
+        if (data.code == 200) {
+            $(".return_{$index} button").remove();
+            $(".return_{$index} *").attr("disabled","disabled");
+            $(".return_{$index}").removeClass('return_{$index}');
+        } else {
+            alert(data.errmsg);
+        }
+    });
+});
+
+</script>
+</if>
+

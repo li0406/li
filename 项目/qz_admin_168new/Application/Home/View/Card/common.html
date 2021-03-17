@@ -1,0 +1,291 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>通用礼券管理</title>
+
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/card/css/common.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>通用礼券管理</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">条件查询</h3>
+            </div>
+            <div class="box-body bottom-border">
+                <form action="" method="get">
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <div class=" lh-34">名称：</div>
+                            <input type="text" name="name" class="form-control" placeholder="名称" value="{$Think.get.name}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">创建时间：</div>
+                            <input type="text" name="add_time" class="form-control datepicker range" placeholder="开始时间"
+                                value="{$Think.get.add_time}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">状态：</div>
+                            <select id="src" name="enable" type="text" class="form-control" tabindex="-1">
+                                <option value="0">请选择</option>
+                                <volist name="status" key="k" id="vo">
+                                    <option value="{$Think.lang.$key}">{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>&nbsp;</div>
+                            <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....."><i
+                                    class="fa fa-search"></i>查询</button>
+                        </div>
+                    </div>
+                </form>
+                <br>
+            </div>
+            <div class="box-header">
+                <button class="btn btn-success normal add-gift" data-toggle="modal">
+                    <i class="fa fa-plus-circle"></i>新增通用礼券
+                </button>
+            </div>
+        </div>
+        <div class="box stat-by">
+            <div class="box-body " style="padding:0px;">
+                <div class="table-responsive table-wrap-list">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <th>序号</th>
+                            <th>礼券名称</th>
+                            <th>立减金额</th>
+                            <th>创建时间</th>
+                            <th>状态</th>
+                            <th>在用商家</th>
+                            <th>业主领用</th>
+                            <th>操作</th>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$key+1}</td>
+                                    <td>{$vo.name}</td>
+                                    <td>
+                                        <if condition="$vo['money1'] EQ 0">
+                                            立减{$vo.money2|intval}
+                                            <else/>
+                                            满{$vo.money1|intval}减{$vo.money2|intval}
+                                        </if>
+                                    </td>
+                                    <td>{$vo.add_time|date='Y-m-d',###}</td>
+                                    <td>
+                                        <if condition="($vo['enable'] EQ 1) OR ($vo['enable'] EQ 2 AND $vo['disable_time'] GT time())">
+                                            <span style="color:green">启用</span>
+                                            <else/>
+                                            <span style="color:red">禁用</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <a href="/card/seller/?name={$vo.name}">{$vo.com_count}</a>
+                                    </td>
+                                    <td>
+                                        <a href="/card/user/?name={$vo.name}">{$vo.user_count}</a>
+                                    </td>
+                                    <td>
+                                        <if condition="($vo['enable'] EQ 1) OR ($vo['enable'] EQ 2 AND $vo['disable_time'] GT time())">
+                                            <a class="edit" target="_blank" href="/card/receive/?id={$vo.id}">领用</a>
+                                            <else/>
+                                            <a class="edit" style="color:#ccc" href="javascript:;">领用</a>
+                                        </if>
+                                        <a class="details" target="_blank" href="/card/editcommon/?id={$vo.id}">编辑</a>
+                                        <if condition="($vo['enable'] EQ 1)">
+                                                <a style="color:red" class="enableButton"  data-id="{$vo.id}" href="javascript:void(0)">禁用</a>
+                                            <elseif condition="$vo['enable'] EQ 2 AND $vo['disable_time'] GT time()"/>
+                                                <a  style="color:#ccc" href="javascript:void(0)">禁用</a>
+                                            <else/>
+                                             <a style="color:green" class="disableButton" id="disable" data-id="{$vo.id}"  href="javascript:void(0)">启用</a>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 弹框 -->
+    <div class="modal fade " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p style="text-align:center">确认禁用该礼券吗？</p>
+                    <p style="text-align:center">请提前告知在使用的商家！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btn1">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " id="timetogal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">设置时间</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">禁用时间:</label>
+                        <input type="text" name="disabletime" class="form-control datepicker disable" value="">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="disablecancel" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" id="diableconfirm" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade " id="openModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p style="text-align:center">确认启用该礼券吗？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btn2">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input').attr('autocomplete','off')
+            $('select[name=enable]').val('{$Think.get.enable}' == '' ? 0 : '{$Think.get.enable}');
+            $(".datepicker.range").daterangepicker({
+                "timePicker": true,
+                "timePicker24Hour": true,
+                "linkedCalendars": false,
+                "autoUpdateInput": false,
+                "locale": {
+                    format: 'YYYY-MM-DD',
+                    separator: ' ~ ',
+                    applyLabel: "应用",
+                    cancelLabel: "取消",
+                    resetLabel: "重置",
+                    "daysOfWeek": ["日", "一", "二", "三", "四", "五", "六"],
+                    "monthNames": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                }
+            }, function(start, end, label) {
+                beginTimeStore = start;
+                endTimeStore = end;
+                if(!this.startDate){
+                    this.element.val('');
+                }else{
+                    this.element.val(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
+                }
+            });
+            $(".datepicker.disable").datetimepicker({
+                format: "yyyy-mm-dd hh:ii:ss",
+                autoclose: true,
+                minView: 0,
+                minuteStep:1
+            })
+
+            $('.add-gift').on('click', function () {
+                window.open('/card/editcommon/')
+            })
+            $('#btn1').on('click', function () {
+                $('#timetogal').modal('show')
+                $('#myModal').modal('hide')
+            })
+            $('#disablecancel').on('click', function () {
+                $('input[name=disabletime]').val('')
+            })
+            $('#diableconfirm').on('click', function () {
+                if($('input[name=disabletime]').val() == '') {
+                    alert('请输入禁用时间')
+                    return
+                }
+                $('#timetogal').modal('hide')
+                //禁用
+                $("#diableconfirm").attr("disabled", "disabled");
+                changeStatus($(this).data('id'),2);
+            })
+
+            //启用确认框
+            $('.disableButton').on('click', function () {
+                $('#btn2').data('id',$(this).data('id'));
+                $("#openModal").modal('show')
+            })
+
+            //禁用确认框
+            $('.enableButton').on('click', function () {
+                $('#diableconfirm').data('id',$(this).data('id'));
+                $("#myModal").modal('show')
+            })
+
+
+
+            $('#btn2').on('click',function() {
+                $('#openModal').modal('hide');
+                $("#btn2").attr("disabled", "disabled");
+                changeStatus($(this).data('id'),1);
+            })
+            // 启用/禁用
+            function changeStatus(cardid,status){
+                $.ajax({
+                    url: '/card/forbidden/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {cardid:cardid,qiyong:status,fb_time:$('input[name=disabletime]').val()}
+                })
+                        .done(function(data) {
+                            if(data.status == 0){
+                                window.location.href='/card/common/';
+                            }else{
+                                $("#btn2").removeAttr("disabled");
+                                $("#diableconfirm").removeAttr("disabled");
+                                alert(data.info);
+                                return false;
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+            }
+
+        });
+    </script>
+</block>

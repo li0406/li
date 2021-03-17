@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>创建活动</title>
+<include file="Index:resource" />
+<include file="Home:resource" />
+<script type="text/javascript" src="/assets/user/event/js/jquery.smint.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/laydate.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+
+<!--[if IE 7]>
+<link rel="stylesheet" href="css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+<![endif]-->
+<link rel="stylesheet" href="{$static_host}/assets/user/event/css/ht-event.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <ul class="ht-nav-tit">
+            <li class="active"><a href="/oneselfevent/">优惠活动</a></li>
+        </ul>
+        <div class="ht-main">
+            <dl class="sale-change">
+                <dt>
+                    <span>活动标题：</span>
+                    <input name="title" type="text" value="{$info.event.title}">
+                    <div><em class="red err-tips"></em></div>
+                </dt>
+                <dt><span>活动日期：</span>
+                    <i id="ht-sale-date">
+                        <input id="start" class="laydate-icon" placeholder="请选择活动开始时间" value="{$info.event.start}">
+                    		到
+                        <input id="end" class="laydate-icon"  placeholder="请选择活动结束时间" value="{$info.event.end}">
+                    </i>
+                    <div><em class="red err-tips"></em></div>
+        	     </dt>
+              <dd>
+                  <span>活动详情：</span>
+                  <script id="editor" type="text/plain">{$info.event.text}</script>
+                  <div><em class="red err-tips"></em></div>
+              </dd>
+            </dl>
+
+            <div class="ht-yes">
+                <a href="javascript:void(0)"><i class="icon-ok mr10"></i>确认发布</a>
+                <em class="red err-tips"></em>
+                <input name="id" type="hidden" value="{$info.event.id}" />
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+/*    !function(){
+        laydate({elem: '#ht-sale-date'});//绑定元素
+    }();*/
+
+    //日期范围限制
+    var start = {
+        elem: '#start',
+        format: 'YYYY-MM-DD',
+        min: laydate.now(), //设定最小日期为当前日期
+        max: '2099-06-16', //最大日期
+        istime: true,
+        istoday: false,
+        choose: function(datas){
+            end.min = datas; //开始日选好后，重置结束日的最小日期
+            end.start = datas //将结束日的初始值设定为开始日
+        }
+    };
+
+    var end = {
+        elem: '#end',
+        format: 'YYYY-MM-DD',
+        min: laydate.now(),
+        max: '2099-06-16',
+        istime: true,
+        istoday: false,
+        choose: function(datas){
+            start.max = datas; //结束日选好后，充值开始日的最大日期
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    var ue = UE.getEditor('editor');
+    ue.addListener("ready", function () {
+        // editor准备好之后才可以使用
+
+    });
+
+    //标题失去焦点提示
+    $("input[name=title]").click(function(event) {
+        $("input[name=title]").parent().find(".err-tips").html("");
+        $("input[name=title]").removeClass('focus');
+    });
+    $("input[name=title]").blur(function(event) {
+        if(!App.validate.run($("input[name=title]").val())){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("请填写活动标题");
+            return false;
+        }
+        if($("input[name=title]").val().length > 20){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("标题限20字");
+            return false;
+        }
+    });
+
+    //优惠日期--活动开始时间
+    $("#start").click(function(event) {
+        $("#start").parent().parent().find(".err-tips").html("");
+        $("#start").removeClass('focus');
+    });
+
+
+    //优惠日期--活动结束时间
+    $("#end").click(function(event) {
+        $("#end").parent().parent().find(".err-tips").html("");
+        $("#end").removeClass('focus');
+    });
+
+    //按钮
+    $(".ht-yes a").click(function(event) {
+        $(".err-tips").html("");
+        $(".focus").removeClass('focus');
+        var _this = $(this);
+
+        if(!App.validate.run($("input[name=title]").val())){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("请填写活动标题");
+            return false;
+        }
+        else if($("input[name=title]").val().length > 20){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("标题限20字");
+            return false;
+        }
+        else if(!App.validate.run($("#start").val())){
+            $("#start").focus();
+            $("#start").addClass('focus');
+            $("#start").parent().parent().find(".err-tips").html("请选择活动开始时间");
+            return false;
+        }
+        else if(!App.validate.run($("#end").val())){
+            $("#end").focus();
+            $("#end").addClass('focus');
+            $("#end").parent().parent().find(".err-tips").html("请选择活动结束时间");
+            return false;
+        }
+        else if($('#start').val() == $('#end').val()){
+            $("#end").focus();
+            $("#end").addClass('focus');
+            $("#start").parent().parent().find(".err-tips").html("结束时间不可等于开始时间");
+            return false;
+        }
+
+        var content = ue.getContent();
+        if(!App.validate.run(content)){
+            $("#editor").parent().find(".err-tips").html("活动详情不能为空");
+            return false;
+        }
+
+        $.ajax({
+              url: '/oneselfevent/eventup/',
+              type: 'POST',
+              dataType: 'JSON',
+              data: {
+                  title: $("input[name=title]").val(),
+                  start:$("#start").val(),
+                  end:$("#end").val(),
+                  content:content,
+                  id:$("input[name=id]").val(),
+              },
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                    modal("提交成功，请耐心等待...","",function(){
+                        window.location.href="/oneselfevent/";
+                    });
+              }else{
+                  //_this.parent().find(".err-tips").html(data.info);
+              }
+          })
+          .fail(function() {
+               _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+          });
+
+    });
+
+</script>
+</html>

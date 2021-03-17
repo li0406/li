@@ -1,0 +1,528 @@
+<extend name="Main:baseTemplate" />
+<block name="title"><title>会员分单明细</title></block>
+<block name="style">
+  <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" href="/assets/home/orders/css/orderfp.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>会员分单明细</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" id="search-box">
+                                <div class="col-xs-10">
+                                    <div class="col-xs-2">
+                                        <div>开始时间：</div>
+                                        <input type="text" name="start" class="form-control datepicker clear-target" autocomplete="off" placeholder="请选择开始时间" value="{$_GET['start']|default=date('Y-m-01')}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>结束时间：</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target" autocomplete="off" placeholder="请选择结束时间" value="{$_GET['end']|default=date('Y-m-d')}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>装修公司：</div>
+                                        <input type="text" name="comid" class="form-control" placeholder="请输入装修公司ID" value="{$_GET['comid']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单号：</div>
+                                        <input type="text" name="orderid" class="form-control" placeholder="请输入订单号" value="{$_GET['orderid']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单状态：</div>
+                                        <select name="fz_type" class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="1" {$_GET['fz_type'] == 1 ? 'selected': ''}>分单</option>
+                                            <option value="2" {$_GET['fz_type'] == 2 ? 'selected': ''}>赠单</option>
+                                            <option value="3" {$_GET['fz_type'] == 3 ? 'selected': ''}>分单（抢）</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>小区名称：</div>
+                                        <input type="text" name="xq" class="form-control" placeholder="请输入小区" value="{$_GET['xq']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>装修类型：</div>
+                                        <select name="lx" class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="1" {$_GET['lx'] == 1 ? 'selected': ''}>家装</option>
+                                            <option value="2" {$_GET['lx'] == 2 ? 'selected': ''}>公装</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>装修方式：</div>
+                                        <select name="fs" class="form-control">
+                                            <option value="">全部</option>
+                                            <volist name="fangshi" id="vo">
+                                            <if condition="!in_array($vo['id'],[31,32])"><option value="{$vo['id']}" {$_GET['fs'] == $vo['id'] ? 'selected': ''}>{$vo.name}</option></if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市：</div>
+                                        <select name="cs" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}" {$_GET['cs'] == $vo['cid'] ? 'selected': ''}>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>量房状态：</div>
+                                        <select name="lf_status" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <option value="2" {$_GET['lf_status'] == 2 ? 'selected': ''}>已量房</option>
+                                            <option value="1" {$_GET['lf_status'] == 1 ? 'selected': ''}>未量房</option>
+                                            <option value="3" {$_GET['lf_status'] == 3 ? 'selected': ''}>未知</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>客服人员：</div>
+                                        <select name="kefu_id" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <volist name="operaters" id="vo">
+                                                <option value="{$vo.id}" {$_GET['kefu_id'] == $vo['id'] ? 'selected': ''}>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2" style="margin-top:18px;">
+                                        <input type="hidden" name="order_lftime" value="" />
+                                        <button type="button" id="search" class="btn research-btn">查询</button>
+                                        <button type="button" id="export" class="btn daochu-btn">导出</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div style="text-align: right;padding-right: 20px;">
+                    排序：<input type="checkbox" id="order_lftime" value="1" {$order_lftime == 1 ? 'checked': ''} /> 第一次量房时间
+                </div>
+                <div class="box" style="padding-top: 20px;padding-bottom: 20px;">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>小区名称</th>
+                                <th>城市</th>
+                                <th>区域</th>
+                                <th>预算</th>
+                                <th>面积</th>
+                                <th>装修类型</th>
+                                <th>装修方式</th>
+                                <th>分单时间</th>
+                                <th>量房状态</th>
+                                <th>量房时间</th>
+                                <th>装修公司</th>
+                                <th>分/赠单</th>
+                                <th>签单时间</th>
+                                <th>签单金额（万）</th>
+                                <th>是否量房</th>
+                                <th>订单归属人</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.order}</td>
+                                <td>{$vo.xiaoqu}</td>
+                                <td>{$vo.cname}</td>
+                                <td>{$vo.qz_area}</td>
+                                <td>{$vo.yusuan}</td>
+                                <td>{$vo.mianji}</td>
+                                <td>{$vo['lx'] == 1 ? '家装' :($vo['lx']  == 2 ? '公装' : '')}</td>
+                                <td>{$vo['fangshi']}</td>
+                                <td>{$vo.addtime|date="Y-m-d",###}</td>
+                                <td>
+                                    <if condition="$vo['liangfang_status'] eq 0">
+                                        未知
+                                    <elseif condition="$vo['liangfang_status'] eq 1"/>
+                                        未量房
+                                    <elseif condition="$vo['liangfang_status'] eq 2"/>
+                                        已量房
+                                    <else/>
+                                        未知
+                                    </if>
+                                </td>
+                                <td>
+                                    <empty name="vo.lf_time">
+                                        --
+                                    <else />
+                                        {:date("Y-m-d", $vo['lf_time'])}
+                                    </empty>
+                                </td>
+                                <td>{$vo.jc}</td>
+                                <td>
+                                    <if condition="$vo['type_fw'] eq 1 && $vo['allot_source'] neq 3">
+                                    分单
+                                    <elseif condition="$vo['type_fw'] eq 1 && $vo['allot_source'] eq 3"/>
+                                    分单（抢）
+                                    <elseif condition="$vo['type_fw'] eq 2"/>
+                                    赠单
+                                    <else/>
+                                    - </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['qiandan_addtime'] neq '' && $vo['qiandan_addtime'] neq null && $vo['qiandan_companyid'] eq $vo['comid']">
+                                    {$vo.qiandan_addtime|date="Y-m-d",###}
+                                    <else/>
+                                        —
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['qiandan_jine'] neq '' && $vo['qiandan_jine'] neq null && $vo['qiandan_companyid'] eq $vo['comid']">
+                                    {$vo.qiandan_jine}
+                                    <else/>
+                                        —
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['liangfang_status'] eq 2">
+                                        是
+                                    <else />
+                                        否
+                                    </if>
+                                </td>
+                                <td>{$vo.op_name}</td>
+                                <td><span class="com_order_detail" data-orderid="{$vo.order}">查看详情</span></td>
+                            </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--查看详细弹窗-->
+    <div class="cover">
+        <div class="com_order_modal">
+            <div class="com_order_modal_top">
+                订单编号：
+                <kk class="showorderid"></kk>
+                <span class="boxclose">×</span>
+            </div>
+            <div class="com_order_modal_center">
+                <div class="col-xs-12" style="margin-top:20px;">
+                    <div class="col-xs-6">
+                        <label>发布时间：</label>
+                        <span class="showtimereal"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>区域：</label>
+                        <span class="showzxqy"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>业主：</label>
+                        <span class="showyezhu"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>联系电话：</label>
+                        <span class="showtel"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>小区名称：</label>
+                        <span class="showxiaoqu"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>装修方式：</label>
+                        <span class="showzxfs"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>面积(㎡)：</label>
+                        <span class="showmianji"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>房屋户型：</label>
+                        <span class="showhuxing"></span>
+                    </div>
+                </div>
+
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>装修类型：</label>
+                        <span class="showzxlx"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>装修预算：</label>
+                        <span class="showyusuan"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>分配上限：</label>
+                        <span class="max-alloc"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>已抢公司：</label>
+                        <span class="rob-com"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-12">
+                        <label>已分公司：</label>
+                        <span class="fenpeicompany"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-12">
+                        <label>量房公司：</label>
+                        <span class="liangfangcompany"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label>签约公司：</label>
+                        <span class="showqianyuecompany"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label>签约金额：</label>
+                        <span class="showqianyuejine"></span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-12">
+                        <label class="fl">装修要求：</label>
+                        <textarea class="showorderbeizhu" readonly="false;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            $('select[name=cs]').select2();
+            $('select[name=kefu_id]').select2();
+
+            $('.datepicker').datepicker({
+                autoclose: true,
+                todayBtn: 'linked',
+                format: 'yyyy-mm-dd'
+            });
+
+            $("body").on("click", ".research-btn", function () {
+//                var startime = $("input[name=start]").val();
+//                var endtime = $("input[name=end]").val();
+//                var arr1 = startime.split('-');
+//                var arr2 = endtime.split('-');
+//                arr1[1] = parseInt(arr1[1]);
+//                arr1[2] = parseInt(arr1[2]);
+//                arr2[1] = parseInt(arr2[1]);
+//                arr2[2] = parseInt(arr2[2]);
+//                var flag = true;
+//                if (!endtime && startime) {
+//                    msg("请选择结束时间");
+//                    return false;
+//                } else if (endtime && !startime) {
+//                    msg("请选择开始时间");
+//                    return false;
+//                } else if (toTimeStamp(startime) > toTimeStamp(endtime)) {
+//                    msg("结束时间不能小于开始时间");
+//                    return false;
+//                }
+//
+//                if (arr1[0] == arr2[0]) {  //同年
+//                    if (arr2[1] - arr1[1] > 3) {
+//                        flag = false;
+//                    } else if (arr2[1] - arr1[1] == 3 && arr2[2] > arr1[2]) {
+//                        flag = false;
+//                    }
+//                } else {
+//                    if (arr2[0] - arr1[0] > 1) {
+//                        flag = false;
+//                    } else if (arr2[0] - arr1[0] == 1) {
+//                        if (arr1[1] < 10) { //开始年的月份小于10时，不需要跨年
+//                            flag = false;
+//                        } else if (arr1[1] + 12 - arr2[1] < 12) { //月相隔大于3个月
+//                            flag = false;
+//                        } else if (arr1[1] + 12 - arr2[1] == 12 && arr2[2] > arr1[2]) { //月相隔3个月，比较日&&结束日期的日大于开始日期的日
+//                            flag = false;
+//                        }
+//                    }
+//                }
+//                if (!flag) {
+//                    msg("时间间隔不能超过一年！");
+//                    return false;
+//                }
+//                return true;
+
+                var start = $("input[name=start]").val();
+                var end = $("input[name=end]").val();
+                var cs = $("select[name=cs]").val();
+                var comid = $("input[name=comid]").val();
+                var xq = $("input[name=xq]").val();
+                var kefu_id = $("select[name=kefu_id]").val();
+                var starthm = new Date(start.replace(/-/g,"/")).getTime();
+                var endhm = new Date(end.replace(/-/g,"/")).getTime();
+
+                if((endhm-starthm) > (1000*3600*24*366)){
+                    msg('时间间隔不能超过一年');
+                    return false;
+                }
+
+                // //必须与其他项（城市、装修公司、小区名称、客服人员），其中的一项进行组合查询)
+                // var validateCs = (cs == undefined || cs == 0 || cs == '');
+                // var validateComid = (comid == undefined || comid == 0 || comid == '');
+                // var calidateXq = (xq == undefined || xq == 0 || xq == '');
+                // var calidateKefu = (kefu_id == undefined || kefu_id == 0 || kefu_id == '');
+
+                // if(validateCs && validateComid && calidateXq && calidateKefu){
+                //     msg('请先选择城市或装修公司或小区或客服人员再进行查询')
+                //     return false;
+                // }
+
+                // 量房时间排序是否选中
+                var checked = $("#order_lftime").prop("checked");
+                if (checked =="checked" || checked == true) {
+                    $("input[name=order_lftime]").val("1");
+                } else {
+                    $("input[name=order_lftime]").val("0");
+                }
+
+                window.location.href = '/orders/com_order?' + $("#search-box").serialize();
+            });
+
+            $(".com_order_detail").click(function () {
+                var orderid = $(this).data('orderid');
+                $.ajax({
+                    url: '/orders/orderinfojd/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        orderid: orderid
+                    }
+                }).done(function (data) {
+                    if (data.error_code == 1) {
+                        var leixing = '';
+                        var leixings = '';
+                        $(".cover").show();
+                        $("body").css({"overflow": "hidden", "height": "100%"});
+
+                        if (data.data.orderinfo.lx == 1) {
+                            leixing = '家装';
+                        } else if (data.data.orderinfo.lx == 2) {
+                            leixing = '公装';
+                        } else {
+                            leixing = '-';
+                        }
+
+                        if (data.data.orderinfo.lxs == 1) {
+                            leixings = '新房装修';
+                        } else if (data.data.orderinfo.lxs == 2) {
+                            leixings = '旧房装修';
+                        } else if (data.data.orderinfo.lxs == 3) {
+                            leixings = '旧房改造';
+                        } else {
+                            leixings = '-';
+                        }
+                        $('.showorderid').text(data.data.orderinfo.id);   //订单id
+                        $('.showtimereal').text(data.data.orderinfo.time_real);   //发布时间
+                        $('.showyezhu').text(data.data.orderinfo.yzname + data.data.orderinfo.sex);   //业主姓名
+                        $('.showtel').text(data.data.orderinfo.tel);   //订单手机号码
+
+                        $('.showzxlx').text(leixing);   //装修类型
+                        $('.showzxfs').text(data.data.orderinfo.fangshi);   //装修方式
+                        $('.showhuxing').text(data.data.orderinfo.huxing);   //装修户型
+                        $('.showzxqy').text(data.data.orderinfo.cname + data.data.orderinfo.qz_area);   //装修区域
+                        $('.showxiaoqu').text(data.data.orderinfo.xiaoqu);   //小区名称
+                        $('.showmianji').text(data.data.orderinfo.mianji + '㎡');   //面积
+                        $('.showyusuan').text(data.data.orderinfo.ys);   //预算
+                        $('.showorderbeizhu').text(data.data.orderinfo.text);   //订单备注
+                        $('.max-alloc').text(data.data.orderinfo.allot_num);    //分配上限
+                        if (data.data.orderinfo.fdname) {
+                            $('.showfdname').text(data.data.orderinfo.fdname);   //分单人
+                        }
+                        if (data.data.orderinfo.qiandancom) {
+                            $('.showqianyuecompany').text(data.data.orderinfo.qiandancom);   //签约公司
+                        }
+                        if (data.data.orderinfo.qiandan_jine) {
+                            $('.showqianyuejine').text(data.data.orderinfo.qiandan_jine + '万');   //签约金额
+                        }
+
+                        //分配装修公司
+                        var alcom = [];
+                        $.each(data.data.comlist, function (index, item) {
+                            alcom.push(this.jc)
+                        });
+                        alcomstr = alcom.join(',');
+                        $(".fenpeicompany").text(alcomstr);
+                        //已抢公司
+                        var robcom = [];
+                        $.each(data.data.robcoms, function (index, item) {
+                            robcom.push(this.jc)
+                        });
+                        robcomstr = robcom.join(',');
+                        $(".rob-com").text(robcom);
+                        //量房公司
+                        var lfcom = [];
+                        $.each(data.data.lfcom, function (index, item) {
+                            lfcom.push(this.jc)
+                        });
+                        lfcom = lfcom.join(',');
+                        $(".liangfangcompany").text(lfcom);
+                    }
+                }).fail(function () {
+                    msg('查询失败,请联系技术部门！');
+                });
+            });
+            $(".com_order_modal_top .boxclose").click(function () {
+                $(".cover").hide();
+                $(".com_order_modal_center span").html("");
+                $("body").css({"overflow": "inherit", "height": "100%"})
+            });
+
+            $('#export').on('click', function () {
+                // 量房时间排序是否选中
+                var checked = $("#order_lftime").prop("checked");
+                if (checked =="checked" || checked == true) {
+                    $("input[name=order_lftime]").val("1");
+                } else {
+                    $("input[name=order_lftime]").val("0");
+                }
+
+                var seri = $('#search-box').serialize();
+                window.location.href = '/orders/exportordermingxi/?'+seri;
+            });
+        });
+        function toTimeStamp(time) {
+            if (time) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                return new Date(date).getTime();
+            }
+        }
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 1300},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

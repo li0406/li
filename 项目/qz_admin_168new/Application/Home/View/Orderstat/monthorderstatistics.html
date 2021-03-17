@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服月度分单率-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服月度分单率</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/orderstat/monthorderstatistics/">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    客服:<br/>
+                                    <select name="name"  class="col-sm-12" placeholder="客服">
+                                        <volist name="kfList" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    客服组:<br/><input type="text" name="group" class="form-control"  placeholder="客服组" value="{$group}">
+                                </div>
+                                <div class="col-xs-2">
+                                    城市:<br/>
+                                    <select name="city"  class="col-sm-12" placeholder="城市">
+                                        <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    开始日期:<br/><input type="text" name="begin" class="form-control datepicker"  placeholder="日期" value="{$begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    结束日期:<br/><input type="text" name="end" class="form-control datepicker"  placeholder="日期" value="{$end}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="col-xs-1 pull-right">
+                                    <br/>
+                                     <button type="button" id="export" class="btn btn-info"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#home" role="tab" data-toggle="tab">客服明细</a></li>
+                        <li role="presentation"><a href="#profile" role="tab" data-toggle="tab">客服汇总</a></li>
+                        <li role="presentation"><a href="#messages" role="tab" data-toggle="tab">团队汇总</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            {$tmp}
+                        </div>
+                        <div role="tabpanel" class="tab-pane col-sm-12" id="profile">
+                            {$summary}
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="messages">
+                            {$grouplist}
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>累计分单量（分+赠/10系数后）：城市系数分单率*累计发单量</p>
+                        <p>分担率:分/累计发单量</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("select[name=name]").select2({
+        allowClear: true,
+        placeholder: "选择客服"
+    });
+    $("select[name=name]").select2("val","{$kf}");
+
+    $("select[name=city]").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("select[name=city]").select2("val","{$cs}");
+
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+
+        minViewMode:0,
+        autoclose:true,
+        todaybtn:true
+    });
+
+    $('#myTable1').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+       "bSort":true
+    });
+
+    $('#myTable2').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+       sWidth:"100%",
+       scrollY:"600px",
+       "bSort":false
+    });
+
+
+    $("#export").click(function(event) {
+        var colums = [];
+        var data = [];
+        var tag = $(".tab-content .active a").attr("href");
+
+        $(".tab-content .active #myTable th").each(function() {
+            var text = $(this).text().trim();
+            var sub = [];
+            sub["text"] = text;
+            sub["fontColor"] = $(this).css("color");
+            sub["bgColor"] = $(this).css("background-color");
+            colums.push(sub);
+        });
+        data.push(colums);
+
+        $(".tab-content .active tbody tr").each(function(i) {
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function() {
+                var text = $(this).text().trim();
+
+                var _td = {
+                    text: text,
+                    fontColor: $(this).css("color"),
+                    bgColor: $(this).css("background-color")
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data: data,
+            title: "月度分单率统计",
+            url: "/export/download",
+            show:true
+        });
+    });
+</script>
+</block>

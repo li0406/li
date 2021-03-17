@@ -1,0 +1,129 @@
+<link rel="stylesheet" href="/assets/common/css/bootstrap/css/bootstrap.min.css?v=">
+<style>
+    #form {  margin: 35px 15px;  }
+    span.mustWrite {  color: red;  font-weight: bold;  }
+    .btn-box {  text-align: center  }
+</style>
+<div class="col-xs-12">
+    <form class="form-horizontal modal-form" id="form">
+        <div class="form-group"><label for="name" class="col-sm-2 control-label"><span class="mustWrite">* </span>考核人员姓名：</label>
+            <div class="col-sm-9">
+                <input type="hidden" id="id" name="id" value="{$data.relation_id}">
+                <input type="hidden" id="assess_admin_id" name="assess_admin_id" value="{$data.admin_id}">
+                <input type="text" id="name" name="name" class="form-control" disabled value="{$data.user}">
+            </div>
+        </div>
+        <if condition="$is_transfer eq 1">
+            <div class="form-group"><label for="dimission_user_id" class="col-sm-2 control-label">
+                被转移人员:</label>
+                <div class="col-sm-9">
+                    <select type="text" id="dimission_user_id" name="dimission_user_id" class="form-control">
+                        <option value="">请选择</option>
+                        <volist name="dimission" id="vo">
+                            <option value="{$vo.id}">{$vo.user}</option>
+                        </volist>
+                    </select>
+                </div>
+            </div>
+        </if>
+        <div class="form-group"><label for="team_admin_id" class="col-sm-2 control-label"><span
+                class="mustWrite">* </span>所在团:</label>
+            <div class="col-sm-9">
+                <select type="text" id="team_admin_id" name="team_admin_id" class="form-control">
+                    <option value="">请选择</option>
+                    <volist name="team" id="vo">
+                    <option value="{$vo.id}" {$data["team_admin_id"]==$vo["id"]?"selected":""}>{$vo.user}</option>
+                    </volist>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label for="group_id" class="col-sm-2 control-label"><span class="mustWrite">* </span>所在组:</label>
+            <div class="col-sm-9">
+                <select type="text" id="group_id" name="group_id" class="form-control">
+                    <option value="">请选择</option>
+                    <volist name="group" id="vo">
+                    <option value="{$vo.id}" {$data["group_id"]==$vo["id"]?"selected":""}>{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="btn-box"><input type="button" class="btn btn-primary" id="submitBtn" value="确定"></div>
+        </div>
+    </form>
+</div>
+
+<script src="/assets/common/js/jquery.min.js?v="></script>
+<script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function () {
+        $('#submitBtn').click(function () {
+            var selfObj = $(this);
+            var data = {};
+            $.each($('#form').serializeArray(), function (key, val) {
+                data[val.name] = val.value;
+            });
+            if (!data.assess_admin_id){
+                layer.msg('请选择考核人员');
+                return false;
+            }
+            if (!data.group_id || !data.team_admin_id){
+                layer.msg('请选择团/组');
+                return false;
+            }
+            selfObj.attr('disabled', 'disabled');
+            $.ajax({
+                url: "/newmedia/adduser",
+                type: 'post',
+                dataType: 'json',
+                data: data,
+                success: function (res) {
+                    layer.msg(res.error_msg, {time: 1000}, function () {
+                        selfObj.removeAttr('disabled');
+                        if (res.error_code == 0) {
+                            parent.location.reload();
+                        }
+                    });
+                },
+                error: function () {
+                    layer.msg('服务器异常', {time: 1000});
+                    selfObj.removeAttr('disabled');
+                }
+            });
+        });
+    });
+
+    $(function () {
+        // 用户组下拉框
+        function setSelectGroup(team_id, first){
+            $.post("/newmedia/team_group", {
+                team_id: team_id
+            }, function(resp){
+                if (resp.status == 1) {
+                    var list = resp.info;
+                    var optionHtml = '<option value="">请选择</option>';
+                    for (var i in list) {
+                        optionHtml += '<option value="'+list[i]["id"]+'">'+list[i]["name"]+'</option>';
+                    }
+
+                    $("#group_id").html(optionHtml);
+
+                    if (first == true) {
+                        $("#group_id").val("{$group_id}");
+                    }
+                }
+            });
+        }
+
+        // 选择团事件
+        $("#team_admin_id").on("change", function(){
+            var team_id = $(this).val();
+            setSelectGroup(team_id, false);
+        });
+
+        if ("{$team_id}" != "") {
+            setSelectGroup("{$team_id}", true);
+            $("#team_admin_id").val("{$team_id}");
+        }
+    })
+</script>

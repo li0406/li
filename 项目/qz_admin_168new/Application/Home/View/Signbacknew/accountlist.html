@@ -1,0 +1,409 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>签单返点会员管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/signbacknew/css/accountlist.css?v={:C('STATIC_VERSION')}">
+    <style type="text/css">
+        .layui-layer-shade{
+            z-index: 10000!important;
+        }
+        .layui-layer-dialog{
+            z-index: 10000!important;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">新会员充值</h3>
+                    </div>
+                    <form id="searchForm" class="form-horizontal" action="?" method="get">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    公司名称:
+                                    <br/>
+                                    <input type="text" class="form-control" id="jc" placeholder="请输入公司名称" name="jc"
+                                           value="{$input.jc}">
+                                </div>
+
+                                <div class="col-sm-2">
+                                    会员ID:
+                                    <br/>
+                                    <input type="text" class="form-control" id="user_id" placeholder="请输入会员ID" name="user_id"
+                                           value="{$input.user_id}">
+                                </div>
+
+                                <div class="col-sm-2">
+                                    所属城市:
+                                    <br/>
+                                    <select id="city" name="city" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    会员状态:
+                                    <br/>
+                                    <select class="form-control" name="on_status">
+                                        <option value="">请选择</option>
+                                        <option value="2">有效会员</option>
+                                        <option value="-1">过期会员</option>
+                                        <option value="-4">暂停会员</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    合同开始时间:
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control datepicker" id="begin"
+                                                   autocomplete="off" placeholder="请选择查询开始时间" name="begin" value="{$input.begin}">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" class="form-control datepicker" id="end"
+                                                   autocomplete="off" placeholder="请选择查询结束时间" name="end" value="{$input.end}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    余额查询:
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control" placeholder="最大金额" name="amount_max"
+                                                   value="{$input.amount_max}">
+                                        </div>
+                                        <div class="col-sm-1 liner">一</div>
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control" placeholder="最小金额" name="amount_min"
+                                                   value="{$input.amount_min}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    合作模式:
+                                    <br/>
+                                    <select id="mode" name="mode" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="2">新签返</option>
+                                        <option value="4">新签返标杆会员</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-1 text-center">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary">
+                                        <i class="fa fa-search"></i> 查询
+                                    </button>
+                                    <input name="column" type="hidden" value="{$Think.get.column}"/>
+                                    <input name="sort"  type="hidden" value="{$Think.get.sort}"/>
+                                </div>
+
+                                <div class="col-sm-1 text-center">
+                                    <br/>
+                                    <button id="btnReset" type="button" class="btn btn-warning"><i class="fa fa-refresh"></i> 重置</button>
+                                </div>
+
+                                <div class="col-sm-1 text-center">
+                                    <br/>
+                                    <button id="btnExport" type="button" class="btn">
+                                        <i class="fa fa-external-link"></i> 导出
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="col-xs-2">
+                            <div class="well " style="font-size: 14px;">
+                                <p >轮单总金额&nbsp;(元)<br/></b></p>
+                                <p style="font-size: 20px;">{$info.all_trade_money|default=0}</p>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <div class="well " style="font-size: 14px;">
+                                <p >轮单余额&nbsp;(元)<br/></b></p>
+                                <p style="font-size: 20px;">{$info.all_account_amount|default=0}</p>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <div class="well " style="font-size: 14px;">
+                                <p >当前剩余补轮次数&nbsp;(次)<br/></b></p>
+                                <p style="font-size: 20px;">{$info.all_round_order|default=0}</p>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <div class="well " style="font-size: 14px;">
+                                <p >保证金&nbsp;(元)<br/></p>
+                                <p style="font-size: 20px;"><strong>{$info.deposit_amount|default=0}</strong></p>
+                            </div>
+                        </div>
+
+                        <table class="table table-striped table-bordered table-hover text-center">
+                            <tr>
+                                <th>序号</th>
+                                <th>会员ID</th>
+                                <th>会员名称</th>
+                                <th class="">合作模式</th>
+                                <th class="">会员状态</th>
+                                <th class="">城市</th>
+                                <th class="">轮单总金额</th>
+                                <th class="">轮单余额&nbsp;&nbsp;
+                                    <if condition="$_GET['column'] eq 'round_money' AND $_GET['sort'] EQ desc">
+                                        <i class="fa fa-sort-desc" data-key="round_money" data-value="asc"></i>
+                                    <elseif condition="$_GET['column'] eq 'round_money' AND $_GET['sort'] EQ asc"/>
+                                        <i class="fa fa-sort-asc" data-key="round_money" data-value=""></i>
+                                    <else/>
+                                        <i class="fa fa-sort" data-key="round_money" data-value="desc"></i>
+                                    </if>
+
+                                </th>
+                                <th class="">剩余补轮次数&nbsp;&nbsp;
+                                    <if condition="$_GET['column'] eq 'round_count' AND $_GET['sort'] EQ desc">
+                                        <i class="fa fa-sort-desc" data-key="round_count" data-value="asc"></i>
+                                    <elseif condition="$_GET['column'] eq 'round_count' AND $_GET['sort'] EQ asc"/>
+                                        <i class="fa fa-sort-asc" data-key="round_count" data-value=""></i>
+                                    <else/>
+                                        <i class="fa fa-sort" data-key="round_count" data-value="desc"></i>
+                                    </if>
+                                </th>
+                                <th class="">上次加款时间</th>
+                                <th class="">负责人</th>
+                                <th class="">保证金&nbsp;&nbsp;
+                                    <if condition="$_GET['column'] eq 'deposit_money' AND $_GET['sort'] EQ desc">
+                                        <i class="fa fa-sort-desc" data-key="deposit_money" data-value="asc"></i>
+                                    <elseif condition="$_GET['column'] eq 'deposit_money' AND $_GET['sort'] EQ asc"/>
+                                        <i class="fa fa-sort-asc" data-key="deposit_money" data-value=""></i>
+                                    <else/>
+                                        <i class="fa fa-sort" data-key="deposit_money" data-value="desc"></i>
+                                    </if>
+                                </th>
+                                <th class="">返点比例&nbsp;&nbsp;
+                                    <if condition="$_GET['column'] eq 'back_ratio' AND $_GET['sort'] EQ desc">
+                                        <i class="fa fa-sort-desc" data-key="back_ratio" data-value="asc"></i>
+                                    <elseif condition="$_GET['column'] eq 'back_ratio' AND $_GET['sort'] EQ asc"/>
+                                        <i class="fa fa-sort-asc" data-key="back_ratio" data-value=""></i>
+                                    <else/>
+                                        <i class="fa fa-sort" data-key="back_ratio" data-value="desc"></i>
+                                    </if>
+                                </th>
+                                <th class="">合同开始时间&nbsp;&nbsp;
+                                    <if condition="$_GET['column'] eq 'account_start' AND $_GET['sort'] EQ desc">
+                                        <i class="fa fa-sort-desc" data-key="account_start" data-value="asc"></i>
+                                    <elseif condition="$_GET['column'] eq 'account_start' AND $_GET['sort'] EQ asc"/>
+                                        <i class="fa fa-sort-asc" data-key="account_start" data-value=""></i>
+                                    <else/>
+                                        <i class="fa fa-sort" data-key="account_start" data-value="desc" ></i>
+                                    </if>
+
+                                </th>
+                                <th class="">操作</th>
+                            </tr>
+                            <volist name="data.list" id="vo">
+                                <tr>
+                                    <td>{$vo.index}</td>
+                                    <td>{$vo.id}</td>
+                                    <td>{$vo.jc}</td>
+                                    <td>{$vo.cooperate_mode}</td>
+                                    <td>
+                                        <switch name="vo.on">
+                                            <case value="2">有效会员</case>
+                                            <case value="-1">过期会员</case>
+                                            <case value="-4">暂停会员</case>
+                                            <case value="0">注册会员</case>
+                                            <default /> -
+                                        </switch>
+                                    </td>
+                                    <td>{$vo.city_name}</td>
+                                    <td>￥{$vo.order_amount}</td>
+                                    <td>￥{$vo.account_amount}</td>
+                                    <td>{$vo.round_order_number}</td>
+                                    <td>{$vo.last_recharge_date|default='-'}</td>
+                                    <td>{$vo.saler|default='-'}</td>
+                                    <td>￥{$vo.deposit_money}</td>
+                                    <td>{$vo.back_ratio}%</td>
+                                    <td>{$vo.start}</td>
+                                    <td data-id="{$vo.id}">
+                                        <a href="/signbacknew/round_order_list?user_id={$vo.id}">查看</a>
+                                        <notempty name="prower.account_operator">
+                                            <a href="javascript:void(0)" style="color:#009900;" data-type="1" class="btn_account">加款</a>
+                                            <a href="javascript:void(0)" style="color:#F76828;" data-type="2" class="btn_account">扣款</a>
+                                        </notempty>
+                                        <a href="javascript:void(0)" class="showlog" data-id="{$vo.id}">日志</a>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </table>
+                        <div>{$data.page}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="myModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        <h4 class="modal-title">操作日志</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accountModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        <h4 class="modal-title">加款/扣款</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <!-- <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("select[name=on_status]").val("{$Think.get.on_status|default=''}");
+        $("#mode").val("{$Think.get.mode}");
+
+        $(".datepicker").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "选择城市",
+            language: "zh-CN"
+        });
+        $("#city").select2("val", "{$input.city}");
+        $('#city').trigger('change');
+
+        $("#btnReset").click(function () {
+            $("#city").select2("val", "");
+            $("#searchForm :input").val("");
+            $("#searchForm :select").val("");
+        });
+
+        $(".showlog").click(function (event) {
+            $.ajax({
+                url: '/signbacknew/account_log',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                   user_id: $(this).attr("data-id")
+                }
+            })
+            .done(function (response) {
+                $("#myModal .modal-body").html(response["data"]["template"]);
+                $("#myModal").modal();
+            });
+        });
+
+        // 查询
+        $("#btnSearch").click(function(){
+            var begin = $("#searchForm input[name=begin]").val();
+            var end = $("#searchForm input[name=end]").val();
+            if (begin != "" && end != "" && begin > end) {
+                alert("结束时间不能小于开始时间");
+                return false;
+            }
+
+            return true;
+        });
+
+        // 导出
+        $("#btnExport").click(function(){
+            var data = {
+                city: $("#city").select2("val"),
+                jc: $("#searchForm input[name=jc]").val(),
+                user_id: $("#searchForm input[name=user_id]").val(),
+                begin: $("#searchForm input[name=begin]").val(),
+                end: $("#searchForm input[name=end]").val(),
+                on_status: $("#searchForm select[name=on_status]").val(),
+                amount_max: $("#searchForm input[name=amount_max]").val(),
+                amount_min: $("#searchForm input[name=amount_min]").val(),
+            };
+
+            var uri = urlencode(data);
+            window.location.href = "/signbacknew/account_export?" + uri;
+        });
+
+        // 加款扣款弹窗数据请求
+        $(".box").on("click", ".btn_account", function(){
+            var user_id = $(this).parent().data("id");
+            var type = $(this).data("type");
+
+            $.ajax({
+                url: '/signbacknew/get_account_temp',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    user_id: user_id,
+                    operation_type: type
+                }
+            })
+            .done(function (response) {
+                if (response.error_code == 0) {
+                    $("#accountModal .modal-title").html(type == 1 ? "加款" : "扣款");
+                    $("#accountModal .modal-body").html(response["data"]["template"]);
+                    $("#accountModal").modal();
+                }
+            });
+        });
+
+        $("[class *= 'fa-sort']").click(function(){
+            $("input[name=column]").val($(this).attr("data-key"))
+            $("input[name=sort]").val($(this).attr("data-value"))
+            $("#btnSearch").attr("data-index",1).trigger("click");
+        });
+
+        $("#btnSearch").click(function(){
+            if ($("#btnSearch").attr("data-index") == 1) {
+                $("#btnSearch").attr("data-index",2)
+            } else {
+                $("input[name=column]").val("")
+                $("input[name=sort]").val("")
+            }
+
+        });
+    </script>
+</block>

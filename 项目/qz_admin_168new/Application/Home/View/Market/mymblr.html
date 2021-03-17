@@ -1,0 +1,163 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>每月目标录入</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/market/mymblr.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header">
+    <h1>
+    <small class="ftjz">推广部每月目标录入</small>
+    </h1>
+</section>
+<section class="content">
+    <div class="box">
+        <div class="box-header">
+            <div class="col-xs-6 no-padding">
+                <span class="pull-left lh-34">时间选择：</span>
+                <div class="col-xs-4">
+                    <select class="form-control year-option">
+                        <volist name="main.option" id="vi">
+                            <option value="{$vi}">{$vi}年月目标</option>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    <button id="search" data-triger="#search" class="form-control btn btn-primary">查询</button>
+                </div>
+            </div>
+            <div class="from-item pull-right">
+                <button type="button" class="btn btn-primary daoru btn-sm" data-toggle="modal" data-target="#myModal">
+                    录入月目标
+                </button>
+            </div>
+        </div>
+        <!-- Modal 弹窗 -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content kuanzi">
+                    <h4>录入目标</h4>
+    <div class="form-group wrapgroup">
+         <label class="col-sm-2 control-label youj">选择录入月份:</label>
+         <div class="col-sm-10 srkuangz">
+         <input type="text" class="form-control datepicker" name="month" value="{:date('Y-m')}">
+         </div>
+  </div>
+  <div class="form-group">
+         <label class="col-sm-2 control-label shipinmbz">视频组分单量月目标值:<span class="yansets">*</span></label>
+         <div class="col-sm-10 srkuangz2">
+         <input type="text" class="form-control" name="shipin" placeholder="请输入分单量目标值">
+         </div>
+  </div>
+    <div class="form-group">
+         <label class="col-sm-2 control-label shipinmbz">自媒体组分单量月目标值:<span class="yansets">*</span></label>
+         <div class="col-sm-10 srkuangz2">
+         <input type="text" class="form-control" name="zimeiti" placeholder="请输入分单量目标值">
+         </div>
+  </div>
+  <div class="aniu">
+    <div class="col-xs-2 aniu_qxcc">
+                    <button type="button" class="btn btn-primary btn-save">保存</button>
+                </div>
+    <div class="col-xs-2 aniu_qxcc">
+                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+
+  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="box-header">
+            <h4 class="dqcnmb"><small>数据列表</small></h4>
+        </div>
+        <div class="box-body">
+            <table id="" class="table table-bordered table-hover dataTable no-footer" role="grid">
+                <thead>
+                    <tr role="row">
+
+                        <th class="" tabindex="0">时间</th>
+                        <th class="" tabindex="0">视频组分单量月目标</th>
+                        <th class="" tabindex="0">自媒体组组分单量月目标</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="main.info" id="vi">
+                        <tr role="row" class="odd">
+                            <td>
+                                <span>{$vi.plan_month}</span>
+                            </td>
+                            <td>
+                                <span>{$vi.shipinzu_shiji_fendan}</span>
+                            </td>
+                            <td>
+                                <span>{$vi.zimeitizu_shiji_fendan}</span>
+                            </td>
+                        </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+        <div class="box-footer no-border">
+            <h6 class="box-title pull-right foot">上次录入时间  {$main.last.add_time|default="无"}</h6>
+        </div>
+    </div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function(){
+
+        //初始化
+        $('.year-option').val('{$main.year}');
+
+        $(".datepicker").datetimepicker({
+            startView:3,
+            minView:'decade',
+            format:"yyyy-mm",
+            autoclose:true,
+            pickerPosition: "bottom-left"
+        });
+
+        $('.btn-save').click(function(event) {
+            var data = {
+                month:$('input[name=month]').val(),
+                shipin:$('input[name=shipin]').val(),
+                zimeiti:$('input[name=shipin]').val()
+            };
+            if (data.month == '') {
+                alert('请选择正确的月份！');
+                return false;
+            };
+            $.ajax({
+                url: '/market/mymblr/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    alert('操作成功');
+                    window.location.href = window.location.href;
+                }else{
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请联系技术部门！');
+            })
+        });
+
+        //搜索按钮
+        $('#search').click(function(event) {
+            window.location.href = '/market/mymblr/?year=' + $('.year-option').val();
+        });
+    })
+</script>
+</block>

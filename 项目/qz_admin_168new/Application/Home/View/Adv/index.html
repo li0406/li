@@ -1,0 +1,322 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网website管理后台-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/css/zoom.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">广告辅助管理
+            <a href="/advbigbanner/" class="fa fa-reply reply" title="返回列表"></a>
+        </h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                          <form class="form-horizontal" method="GET" action="/adv/">
+                            <div class="col-xs-2">
+                                <select id="search" name="cs" type="text" placeholder="所属城市" >
+                                    <option value="">全部城市</option>
+                                    <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <input type="text" name="query" class="form-control"  placeholder="公司名称/ID" value="{$query}">
+                            </div>
+                            <div class="col-xs-1">
+                              <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>查询</button>
+                            </div>
+                          </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                           <th class="col-sm-1">ID</th>
+                           <th class="col-sm-3">公司名称</th>
+                           <th class="col-sm-1">所属城市</th>
+                           <th class="col-sm-1">广告位置</th>
+                           <th class="col-sm-1">设计需求</th>
+                           <th class="col-sm-1">联系人</th>
+                           <th class="col-sm-1">联系电话</th>
+                           <th class="col-sm-1">设计师</th>
+                           <th class="col-sm-1">状态</th>
+                           <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="list.list" id="vo">
+                        <tr>
+                           <td class="col-sm-1">{$vo.company_id}</td>
+                           <td class="col-sm-3">{$vo.company_name}</td>
+                           <td class="col-sm-1">{$vo.cname}</td>
+                           <td class="col-sm-1">
+                                <switch name="vo.module">
+                                    <case value="home_advbanner">轮播广告</case>
+                                    <case value="home_bigbanner_a">通栏A</case>
+                                    <case value="home_bigbanner_b">通栏B</case>
+                                </switch>
+                           </td>
+                           <td class="col-sm-1">
+                                <button type="button" class="btn btn-default btn-sm" data-id="{$vo.id}">需求</button>
+                           </td>
+                           <td class="col-sm-1">{$vo.contacts}</td>
+                           <td class="col-sm-1">{$vo.tel}</td>
+                           <td class="col-sm-1">{$vo.op_uname}</td>
+                           <td class="col-sm-1">
+                                <switch name="vo.status">
+                                    <case value="0">申请中</case>
+                                    <case value="1">设计中</case>
+                                    <case value="2">设计完成</case>
+                                    <case value="3">取消辅助</case>
+                                    <case value="4">不采纳设计</case>
+                                </switch>
+                           </td>
+                           <td class="col-sm-1">
+                                <switch name="vo.status">
+                                    <case value="0">
+                                    <a data-id="{$vo.id}" class="fa fa-unlock" title="未接单"></a>
+                                    </case>
+                                    <case value="1">
+                                        <if condition="$vo['url'] NEQ ''">
+                                        <ul class="gallery pull-right" style="padding:0; margin-right:15px">
+                                            <li>
+                                                <a class="fa fa-photo" href="http://{:OP('QINIU_DOMAIN')}/{$vo.url}" title="预览"><img src="//{:OP('QINIU_DOMAIN')}/{$vo.url}" style="display:none;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            </li>
+                                        </ul>
+                                        </if>
+                                        <a data-id="{$vo.id}" data-module="{$vo.module}" class="fa fa-upload" title="上传"></a>
+                                    </case>
+                                    <case value="2">
+                                        <if condition="$vo['url'] NEQ ''">
+                                        <ul class="gallery pull-right" style="padding:0; margin-right:15px">
+                                            <li>
+                                                <a class="fa fa-photo" href="http://{:OP('QINIU_DOMAIN')}/{$vo.url}" title="预览"><img src="//{:OP('QINIU_DOMAIN')}/{$vo.url}" style="display:none;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            </li>
+                                        </ul>
+                                        </if>
+                                        <a data-id="{$vo.id}" data-module="{$vo.module}" class="fa fa-upload" title="上传"></a>
+                                    </case>
+                                    <case value="4">
+                                        <if condition="$vo['url'] NEQ ''">
+                                        <ul class="gallery pull-right" style="padding:0; margin-right:15px">
+                                            <li>
+                                                <a class="fa fa-photo" href="http://{:OP('QINIU_DOMAIN')}/{$vo.url}" title="预览"><img src="//{:OP('QINIU_DOMAIN')}/{$vo.url}" style="display:none;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            </li>
+                                        </ul>
+                                        </if>
+                                    </case>
+                                </switch>
+                           </td>
+                        </tr>
+                        </volist>
+                    </table>
+                    {$list.page}
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">设计需求</h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSave" type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="myModal2" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">上传图片</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="fileinput" type="file" class="form-control" />
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCancel" type="button" class="btn btn-danger" data-dismiss="modal">取消</button>
+                    <button id="btnUpload" type="button" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/zoom.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#search").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+
+    $("#search").select2("val","{$cs}");
+
+    $(".btn-default").click(function(event) {
+        var _this = $(this);
+        $.ajax({
+            url: '/adv/information/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: _this.attr("data-id")
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("#myModal .modal-body").html(data.data);
+                $("#myModal").modal();
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+
+    $(".fa-unlock").click(function(event) {
+        var _this = $(this);
+        $.ajax({
+            url: '/adv/accept/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: { id: _this.attr("data-id")}
+        })
+        .done(function(data) {
+             if (data.status == 1) {
+                window.location.href = window.location.href;
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+
+    $(".fa-upload").click(function(event) {
+        var _this = $(this);
+        var module = _this.attr("data-module");
+        var prefix = "";
+        var width,height;
+        switch(module) {
+            case "home_advbanner":
+            prefix = "qzbanner";
+            width = 800;
+            height = 360;
+            break;
+            case "home_bigbanner_a":
+            case "home_bigbanner_b":
+            prefix = "bigbanner";
+            width = 1210;
+            height = 110;
+            break;
+        }
+
+        $("#fileinput").fileinput("destroy");
+        $("#btnUpload").data("id",_this.attr("data-id"));
+        $("#myModal2").off("show.bs.modal").on("show.bs.modal",function(){
+            $("#btnUpload").data("img","");
+            $("#fileinput").fileinput({
+                  language: 'zh', //设置语言,
+                  uploadUrl:"/upload/uploadImg",
+                  showCaption:false,
+                  browseClass:"btn btn-primary",
+                  allowedFileExtensions : ['jpg','png','gif'],
+                  maxFileCount:1,
+                  uploadClass:"btn btn-info",
+                  removeClass:"btn btn-danger",
+                  uploadAsync:true,
+                  dropZoneEnabled:false,
+                  previewSettings:{
+                      image: {width: "1210px", height: "110px"}
+                  },
+                  layoutTemplates:{
+                      actionDelete:"",
+                      actionUpload:""
+                  },
+                  uploadExtraData:function(){
+                        return {
+                            "prefix":prefix
+                        }
+                  },
+                  maxImageWidth:width,
+                  maxImageHeight:height,
+                  minImageWidth:width,
+                  minImageHeight:height
+            }).on('fileuploaded', function(event, data) {
+                if(data.response.status == 1){
+                    var obj = data.response.data;
+                    $("#btnUpload").data("img",obj.name);
+                    $("#btnUpload").data("value",data.response.info);
+                }else{
+                     _this.Alert({
+                          msg:data.response.info,
+                          level:2
+                    });
+                }
+            }).on("fileuploaderror",function(event, data){
+                _this.Alert({
+                      msg:"上传失败,请联系技术部门！",
+                      level:2
+                });
+                return false;
+            });
+        }).modal();
+    });
+
+    $("body").on("click","#btnUpload",function(event) {
+        var _this = $(this);
+        var img = _this.data("img");
+
+        if (img !== "") {
+            $.ajax({
+                url: '/adv/upload/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                   id:_this.data("id"),
+                   img:_this.data("img"),
+                   "value":_this.data("value")
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                };
+            })
+            .fail(function() {
+                _this.Alert({
+                      msg:"保存失败,请联系技术部门！",
+                      level:2
+                });
+            });
+        };
+    });
+</script>
+</block>

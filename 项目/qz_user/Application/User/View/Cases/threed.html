@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/ht-photo.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/cases/css/three.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Cases:header" />
+        <div class="ht-main">
+            <table class="ht-team-design" border="0" cellpadding="0" cellspacing="0">
+                <tr class="team-title">
+                    <td>标题名称</td>
+                    <td>装修风格</td>
+                    <td>房屋面积</td>
+                    <td>设计师</td>
+                    <td>状态</td>
+                    <td>发布时间</td>
+                    <td>操作</td>
+                    <td>原因</td>
+                </tr>
+                <volist name="list" id="vo">
+                    <tr class="team-hang">
+                        <td class="biaoti" title="{$vo.title}">{$vo.title}</td>
+                        <td>{$vo.fg}</td>
+                        <td>{$vo.mianji}m²</td>
+                        <td>{$vo.dname}</td>
+                        <td>
+                            <if condition="$vo['status'] EQ 1">
+                                未审核
+                            <elseif condition="$vo['status'] EQ 2"/>
+                                <span class="redcolor">已通过</span>
+                            <elseif condition="$vo['status'] EQ 3"/>
+                                <span class="redcolor">未通过</span>
+                            <else />
+                                <span>申诉中</span>
+                            </if>
+                        </td>
+                        <td>{$vo.time|date="Y-m-d",###}</td>
+                        <td>
+                            <a href="{:C('QZ_YUMING_SCHEME')}://{$info.user.bm}.{:C('QZ_YUMING')}/3d-case{$vo.id}.html" target="_blank">查看</a>
+                            <a class="shanchudel" href="javascript:void(0)" data-id="{$vo.id}">删除</a></td>
+                        <td class="remark" title="{$vo.reasoncn}">{$vo.reasoncn}</td>
+                        <!-- <td><?php echo  mb_substr($vo['reasoncn'],0,7,'UTF-8');  ?></td> -->
+                    </tr>
+                </volist>
+            </table>
+            {$page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(".shanchudel").click(function(event) {
+        if(confirm("确定删除吗?")){
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/deletecase/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = window.location.href;
+                }else{
+                    $.pt({
+                        target: _this,
+                        content:data.info,
+                        width: 'auto'
+                   });
+                }
+            })
+            .fail(function(xhr) {
+               $.pt({
+                target: _this,
+                content:"发生了未知的错误,请刷新重试！",
+                width: 'auto'
+               });
+            });
+        }
+    });
+
+    $(".reset").click(function(event) {
+        if(confirm("确定恢复吗?")){
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/resetcase/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href = window.location.href;
+                }else{
+                    $.pt({
+                        target: _this,
+                        content:data.info,
+                        width: 'auto'
+                   });
+                }
+            })
+            .fail(function(xhr) {
+               $.pt({
+                target: _this,
+                content:"发生了未知的错误,请刷新重试！",
+                width: 'auto'
+               });
+            });
+        }
+    });
+</script>
+</html>

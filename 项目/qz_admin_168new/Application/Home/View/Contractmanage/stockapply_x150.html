@@ -1,0 +1,184 @@
+<!--入库申请-->
+<link href="/assets/common/js/plugins/jspage/css/myPage.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/home/hetong/css/alert_info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<script  type="text/javascript" src="/assets/home/hetong/js/alert_info.js?v={:C('STATIC_VERSION')}"></script>
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">
+            入库申请
+        </span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line">
+        </span>
+    </div>
+    <div class="step1 step-container kucunshenqwk">
+        <div class="daoruhetongwk">
+            <div class="daoruhtbh01 stock-apply-ht">
+                <span class="bianhaotx" style="color:red;">重要提示：输入格式为7位有效数字</span>
+            </div>
+            <div class="daoruhtbh01 stock-apply-ht">
+                <span class="bianhaotx">导入合同编号：</span>
+                <input name="start" type="text" value="">
+                <span>一</span>
+                <input name="end" class="shuruput" type="text" value="">
+                <button data-type="ht" data-category="1" class="button stock-apply-submit">提交</button>
+            </div>
+            <div class="daoruhtbh01 stock-apply-pj">
+                <span class="bianhaotx">导入票据编号：</span>
+                <input name="start" type="text" value="">
+                <span>一</span>
+                <input name="end" class="shuruput" type="text" value="">
+                <button data-type="pj" data-category="0" class="button stock-apply-submit">提交</button>
+            </div>
+        </div>
+        <div class="shenqjlbg">
+            <span class="chakanmore button no_out pull-right">
+                点击更多
+            </span>
+            <div class="shenqjltitle">
+                申请记录
+            </div>
+            <div class="shenqingshujv">
+                <table class="table biankuz" id="tablelist">
+                    <thead>
+                        <tr>
+                            <th class="text-align-left">
+                                申请编号
+                            </th>
+                            <th>
+                                申请人
+                            </th>
+                            <th>
+                                申请结果
+                            </th>
+                            <th>
+                                申请时间
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="stock-apply-record-wrap">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="yinyingz"></div>
+<div class="dabiaoge">
+<!--     -->
+    <div class="biaogekz">
+
+
+        <div class="record_head">
+            <span class="two text-align-left" style="padding-left: 8px;">申请编号</span>
+            <span class="three">申请人</span>
+            <span class="four">申请结果</span>
+            <span class="five">申请时间</span>
+        </div>
+        <div class="record_body">
+            <table class="table biankuz2">
+                <tbody class="stock-apply-record-modal">
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align: center;display: none;">
+            <ul class="pagination" id="pagination"></ul>
+            <input type="hidden" id="PageCount" runat="server" value="0" />
+            <input type="hidden" id="PageSize" runat="server" value="8" />
+            <input type="hidden" id="countindex" runat="server" value="10"/>
+            <!--设置最多显示的页码数 可以手动设置 默认为7-->
+            <input type="hidden" id="visiblePages" runat="server" value="15" />
+        </div>
+    </div>
+    <div class="guanbidiv">
+        <button class="guanbianniu button">
+            关闭
+        </button>
+    </div>
+</div>
+<script>
+    $(function(){
+        /*S-申请记录初始化*/
+        $.ajax({
+            url: '/contractmanage/stockapplyrecord/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                limit:3
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                $(".stock-apply-record-wrap").html(data.data.html);
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert('网络错误，请稍后重试')
+        });
+        /*E-申请记录初始化*/
+
+        /*S-申请记录弹窗*/
+        $('.kucunshenqwk .shenqjlbg .chakanmore').click(function() {
+            $.ajax({
+                url: '/contractmanage/stockapplyrecord/',
+                type: 'GET',
+                dataType: 'JSON',
+                async: false,
+                data: {
+                    limit:100
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    if (data.data.count > 0) {
+                        $(".stock-apply-record-modal").html(data.data.html);
+                    } else {
+                        alert_info_x150("申请记录为空");
+                    }
+                }else{
+                    alert_info_x150("data.info");
+                }
+            })
+            .fail(function(xhr) {
+                alert_info_x150("网络错误，请稍后重试");
+            });
+            $('.yinyingz').show();
+            $('.dabiaoge').show();
+        });
+        $('.dabiaoge .guanbidiv .guanbianniu').click(function() {
+            $('.yinyingz').hide();
+            $('.dabiaoge').hide();
+        });
+        /*E-申请记录弹窗*/
+
+        /*S-入库申请操作*/
+        $('.stock-apply-submit').click(function(event) {
+            var _this = $(this);
+            $.ajax({
+                url: '/contractmanage/stockapply/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    category:_this.attr('data-category'),
+                    start:$('.stock-apply-' + _this.attr('data-type') + ' input[name=start]').val(),
+                    end:$('.stock-apply-' + _this.attr('data-type') + ' input[name=end]').val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    alert_info_x150(data.info);
+                }else{
+                    alert_info_x150(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert_info_x150("网络错误，请稍后重试");
+            });
+        });
+        /*E-入库申请操作*/
+    })
+</script>

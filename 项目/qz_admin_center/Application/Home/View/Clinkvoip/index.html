@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="zh-CN" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="zh-CN" class="ie9"> <![endif]-->
+<!--[if !IE]><![endif]-->
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>基本资料-用户中心</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="/assets/common/css/bootstrap.min.new.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/bootstrap-responsive.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-metro.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/css/main.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+</head>
+<body>
+<include file="Main:header" />
+<div class="container mt10 inner-box basic-box">
+    <div class="row">
+        <include file="Main:navleft" />
+        <div class="col-sm-9 basic-right">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="basic-setting-title">
+                        <h3>网络电话(VOIP电话)绑定</h3>
+                    </div>
+                    <form class="form-horizontal basic-form mt10 hmin600">
+                        <div class="form-group">
+                            <label  class="col-sm-3 control-label visible-ie8 visible-ie9">电话呼叫系统提供商:</label>
+                            <div class="col-sm-5 input-icon">
+                                <input type="hidden" class="form-control required" placeholder="" value="{$userInfo.TelCenter_Channel}"
+                                       name="TelCenter_Channel">
+                                <input type="text" class="form-control required" placeholder="" value="天润"
+                                       name="TelCenter_Channel_name" disabled="disabled">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label  class="col-sm-3 control-label visible-ie8 visible-ie9">坐席号(工号):</label>
+                            <div class="col-sm-5">
+                                <if condition="!empty($userInfo['user']['voipaccount'])">
+                                    <input type="text" class="form-control" placeholder="例如8002" value="{$userInfo.user.voipaccount}" readonly="readonly" name="voip_number">
+                                <else/>
+                                    <input type="text" class="form-control" placeholder="例如8002" value="{$userInfo.user.voipaccount}" name="voip_number">
+                                </if>
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <if condition="empty($userInfo['user']['voipaccount'])">
+                                <div class="col-sm-2 col-sm-offset-4">
+                                    <button id="btnSave" type="button"  class="btn btn-block blue"><i class="icon-headphones"></i> 绑  定</button>
+                                </div>
+                            <else/>
+                                <div class="col-sm-2 col-sm-offset-4">
+                                    <button id="btnUnbind" type="button" class="btn btn-block blue"><i class="icon-unlock"></i> 解  绑</button>
+                                </div>
+                            </if>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8 col-sm-offset-2 alert alert-info text-center hide">
+                                <button class="close" data-dismiss="alert"></button>
+                                <span></span>
+                            </div>
+                            <div class="col-sm-8 col-sm-offset-2 alert alert-danger text-center hide">
+                                <button class="close" data-dismiss="alert"></button>
+                                <span></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="/assets/common/js/jquery-migrate-1.2.1.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#btnSave").click(function (){
+            $.ajax({
+                url: '/clinkvoip/up',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {voip: $("input[name=voip_number]").val()},
+                })
+            .done(function(data) {
+                  if (data.error_code == 0) {
+                      $(".alert-danger").addClass('hide');
+                      $(".alert-info").removeClass('hide').find("span").html(data.error_msg);
+                      window.location.reload();
+                  } else {
+                      $(".alert-info").addClass('hide');
+                      $(".alert-danger").removeClass('hide').find("span").html(data.error_msg);
+                  }
+            });
+        });
+
+        $("#btnUnbind").click(function (){
+            $.ajax({
+                url: '/clinkvoip/unbind',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {voip: $("input[name=voip_number]").val()},
+            })
+            .done(function(data) {
+                if (data.error_code == 0) {
+                    $(".alert-danger").addClass('hide');
+                    $(".alert-info").removeClass('hide').find("span").html(data.error_msg);
+                    window.location.reload();
+                } else {
+                    $(".alert-info").addClass('hide');
+                    $(".alert-danger").removeClass('hide').find("span").html(data.error_msg);
+                }
+            });
+        });
+    });
+</script>
+</html>

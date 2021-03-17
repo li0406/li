@@ -1,0 +1,224 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网用户角色管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/css/addmanagecity.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/hotcity/css/jquery.dad.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>增加管理城市</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/system/addmanagecity/">增加管理城市</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                  <div class="box-body">
+                    <div class="row jq22" style="margin-bottom: 18px;">
+                        <volist name="hotcitys" id="v">
+                            <div class="col-xs-1">
+                                <button type="button" class="btn btn-block btn-primary normal ordercity" data-cid="{$v.cid}" style="background-color: #258e40;">{$v.cname}</button>
+                            </div>
+                        </volist>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-1">
+                            <button type="button" id="getorder" class="btn btn-block btn-primary normal">
+                                排序
+                            </button>
+                        </div>
+                        <div class="col-xs-1">
+                            <button type="button" id="save" class="btn btn-block btn-info normal">
+                                保存
+                            </button>
+                        </div>
+                        <div class="col-xs-1" style="float: right;">
+                            <a href="http://www.qizuang.com/city/" target="_blank">预览</a>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-sm-12 form-horizontal">
+                                <div class="col-sm-4 role-setting-content">
+                                    <div  class="col-sm-6 h4 mgb-10px">城市列表</div>
+                                    <div  class="col-sm-6 h4 mgb-10px">已选城市</div>
+                                    <div class="col-sm-12">
+                                        <div class="ms-container citys-container">
+                                            <select id='citys' multiple='multiple'>
+                                                <volist name="info" id="vo">
+                                                    <option value='{$vo.cid}' class="citynum">{$vo.cname}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" id="btnsave" class="btn btn-block btn-info normal" style="margin:15px 30px;">
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/home/hotcity/js/jquery.dad.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+
+    //拖动排序
+    $("#getorder").on('click',function(){
+        $('.jq22').dad();
+    });
+    //保存序号
+    $("#save").click(function(event) {
+        var arr = [];
+        $('.ordercity').each(function(){
+            arr.push($(this).attr("data-cid"));
+        });
+        var str = arr.join();
+        $.ajax({
+            url: '/city/hotCityWriteIn/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                city:str
+            }
+        })
+        .done(function(data) {
+            alert(data.info);
+            window.location.reload();
+        })
+        .fail(function(xhr) {
+            alert(xhr.info);
+            window.location.reload();
+        });
+    });
+
+    /*城市列表*/
+    $('#citys').multiSelect({
+        selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+        selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+        afterInit: function(ms){
+            var that = this,
+            $selectableSearch = that.$selectableUl.prev(),
+            $selectionSearch = that.$selectionUl.prev(),
+            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+            that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+            .on('keydown', function(e){
+                if (e.which === 40){
+                    that.$selectableUl.focus();
+                    return false;
+                }
+            });
+
+            that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+            .on('keydown', function(e){
+                if (e.which == 40){
+                    that.$selectionUl.focus();
+                    return false;
+                }
+            });
+
+            if({$show|json_encode} != null){
+                var showarr = {$show|json_encode};
+                for (var i = showarr.length; i--; i>0) {
+                    //show[i]+'selectable' display:none     show[i]+'selection' display:block
+                    var sel = '#'+showarr[i]+'-selectable';
+                    //alert(sel);
+                    $(sel).css('display','none');
+                    var seled = '#'+showarr[i]+'-selection';
+                    $(seled).attr('style','');
+                    $(seled).click('click',function(){
+                        $(this).css('display','none');//右边隐藏，并且取消选中
+                        var con = $(this).text();
+                        $('.citynum').each(function(){
+                            if(con == $(this).text()){
+                                $(this).attr('selected',false);
+                            }
+                        });
+                        $(sel).css('display','block');//左边显示
+                    });
+                }
+            }
+            if({$show|json_encode} != null){
+                var checkedhot = {$hotids|json_encode};
+                for (var i = checkedhot.length; i--; i>0) {
+                    $('.citynum').each(function(){
+                        if($(this).val() == checkedhot[i]){
+                            $(this).attr('selected',true);
+                        }
+                    });
+                }
+            }
+        },
+        afterSelect: function(){
+            this.qs1.cache();
+            this.qs2.cache();
+        },
+        afterDeselect: function(){
+            this.qs1.cache();
+            this.qs2.cache();
+        }
+    });
+
+    /*保存按钮*/
+    $("#btnsave").click(function(event) {
+        var data    = new Object();
+        data.city   = $('#citys').val();
+        if(data.city == null){
+            alert('请选择城市');
+            return false;
+        }
+        var str     = data.city.join();
+
+        var ids     = [];
+        $('.cityend').each(function(){
+            if($(this).css("display") != 'none'){
+                ids.push($(this).attr("id"));
+            }
+        });
+        var idstr = ids.join();
+        $.ajax({
+            url: '/city/hotCityWriteIn/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                city:str,
+                idstr:idstr
+            }
+        })
+        .done(function(data) {
+            alert(data.info);
+            window.location.reload();
+        })
+        .fail(function(xhr) {
+            alert(xhr.info);
+            window.location.reload();
+        });
+    });
+})
+</script>
+</block>

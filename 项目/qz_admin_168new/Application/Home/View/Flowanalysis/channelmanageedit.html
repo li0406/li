@@ -1,0 +1,82 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/flowanalysis/channelmanage/">频道管理</a> <i class="fa fa-angle-right"></i> 频道编辑</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left h5">频&nbsp;&nbsp;道&nbsp;ID：&nbsp;&nbsp;&nbsp;<span class="channel-id" data-id="{$channel.id}">&nbsp;&nbsp;{$channel.code}</span></div>
+                    </div>
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left h5"><span style="color:red;">*</span>频道名称：</div>
+                        <div class="col-xs-4">
+                            <input type="text" name="name" id="name" class="form-control flat" value="{$channel.name}">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left h5"><span style="color:red;">*</span>频道URL：</div>
+                        <div class="col-xs-4">
+                            <input type="text" name="url" id="url" class="form-control flat" value="{$channel.url}">
+                            <div class="col-xs-12 no-padding h5">
+                                <div class="col-xs-2 no-padding"><div class="btn btn-info editNow">确认</div></div>
+                                <div class="btn btn-default notEdit">取消</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $('.notEdit').on('click',function(){
+            window.location.href = '/flowanalysis/channelmanage/';
+        });
+
+        $(".editNow").on('click',function(){
+            var name = $('#name').val();
+            var url = $('#url').val();
+            var id = $('.channel-id').attr('data-id');
+            if(name == ''){
+                alert('请输入频道名称！');
+                return false;
+            }
+            if(url == ''){
+                alert('请输入正确的URL！');
+                return false;
+            }
+            //ajax写入数据
+            $.ajax({
+                url: '/flowanalysis/channelmanageedit/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name:name,
+                    url:url,
+                    id:id
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    alert(data.info);
+                    window.location.href = '/flowanalysis/channelmanage/';
+                }else{
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败');
+            })
+        });
+    </script>
+</block>

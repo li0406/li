@@ -1,0 +1,206 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分站文章-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link href="/assets/home/aminsubarticle/css/index.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分站文章管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/adminsubarticle/">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    城市:<br/>
+                                    <select name="city"  class="col-sm-12">
+                                        <option value="0">请选择</option>
+                                        <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    状态:<br/>
+                                    <select name="state" class="form-control" >
+                                        <option value="0">请选择</option>
+                                        <option value="1">未发布</option>
+                                        <option value="2">已发布</option>
+                                        <option value="3">待发布</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    标题:<br/>
+                                    <input type="text" name="title" class="form-control" placeholder="搜索标题" value="{$Think.get.title}" />
+                                </div>
+                                <div class="col-xs-2">
+                                    文章ID:<br/>
+                                    <input type="text" name="id" class="form-control" placeholder="文章ID" value="{$Think.get.id}" />
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="col-xs-1 pull-right">
+                                  <br/>
+                                  <a href="/adminsubarticle/articleup/" class="pull-right"><button class="btn btn-block btn-success normal" type='button' style="width:auto"><i class="fa fa-plus-circle"></i>新增文章</button></a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th class="text-align-left">标题</th>
+                                    <th>城市</th>
+                                    <th>分类</th>
+                                    <th class="text-align-left">标签</th>
+                                    <th>发布时间</th>
+                                    <th>创建时间</th>
+                                    <th>作者</th>
+                                    <th>IP浏览量</th>
+                                    <th>状态</th>
+                                    <th class="text-align-left">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.id}</td>
+                                        <td class="text-align-left">
+                                            <if condition="$vo['state'] EQ 2">
+                                                <a href="http://{$vo.bm}.qizuang.com/zxinfo/{$vo.id}.html" target="_blank">{$vo.title}</a>
+                                            <else/>
+                                                {$vo.title}
+                                            </if>
+                                        </td>
+                                        <td>{$vo.cname}</td>
+                                        <td>{$vo.typename}</td>
+                                        <td class="text-align-left">{$vo.tagname}</td>
+                                        <td>{$vo.addtime|date="Y-m-d H:i:s",###}</td>
+                                        <td>{$vo.createtime|date="Y-m-d H:i:s",###}</td>
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.realview}</td>
+                                        <td>
+                                            <switch name="vo.state">
+                                                <case value="-1"><span class="text-red">已删除</span></case>
+                                                <case value="1"><span class="text-yellow">未发布</span></case>
+                                                <case value="2"><span>已发布</span></case>
+                                                <case value="3"><span class="text-aqua">待发布</span></case>
+                                            </switch>
+                                        </td>
+                                        <td class="text-align-left">
+                                            <a title="编辑" class="fa fa-pencil" href="/adminsubarticle/articleup?id={$vo.id}"></a>
+                                            <switch name="vo.state">
+                                                <case value="1">
+                                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="2" class="submit-state fa fa-eye-slash" title="发布"></a>
+                                                </case>
+                                                <case value="2">
+                                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="submit-state fa fa-eye" title="撤销发布"></a>
+                                                </case>
+                                                <case value="3">
+                                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="2" class="submit-state fa fa-eye-slash" title="发布"></a>
+                                                </case>
+                                            </switch>
+                                            <eq name="vo.istop" value="1">
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" data-value="0" class="fa fa-toggle-on" title="取消推荐至装修资讯页"></a>
+                                            <else/>
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="fa fa-toggle-off " title="推荐至装修资讯页"></a>
+                                            </eq>
+
+                                            <eq name="vo.is_to_subcompany" value="1">
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" data-value="0" data-url="2" class="fa fa-toggle-on" title="取消推荐至装修公司页"></a>
+                                                <else/>
+                                                <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" data-url="2" class="fa fa-toggle-off " title="推荐至装修公司页"></a>
+                                            </eq>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("select[name=city]").select2({
+        allowClear: true
+    });
+    $("select[name=city]").select2("val","{$Think.get.city|default=0}");
+    $("select[name=state]").val('{$Think.get.state|default=0}');
+
+    $("a[class*='fa-toggle']").click(function(event) {
+        var id = $(this).attr("data-id");
+        var val = $(this).attr("data-value");
+        var urlstata = $(this).attr("data-url");
+        var url = '';
+        if(urlstata == 2){
+            url = '/adminsubarticle/recommendtosubarticle' ;
+        } else {
+            url = '/adminsubarticle/recommendarticle';
+        }
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: id,
+                val:val
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = window.location.href;
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function() {
+            alert('操作失败，网络连接错误，请稍后再试~');
+        });
+    });
+
+    $(".submit-state").click(function(event) {
+        var id = $(this).attr("data-id");
+        var val = $(this).attr("data-value");
+        $.ajax({
+            url: '/adminsubarticle/setstate',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: id,
+                val:val
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = window.location.href;
+            }else{
+                alert(data.info);
+            }
+        })
+        .fail(function() {
+            alert('操作失败，网络连接错误，请稍后再试~');
+        });
+    });
+
+</script>
+</block>

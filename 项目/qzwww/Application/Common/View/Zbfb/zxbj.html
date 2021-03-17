@@ -1,0 +1,265 @@
+<link href="{$static_host}/assets/common/css/nextStep.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<div class="win_box zxfb">
+    <div class="win_box_bg" id="iewin_box_bg">
+    </div>
+    <div class="win_box_content zxbj_content" style="height:630px">
+        <div class="form-horizontal">
+            <div class="win_box_list" style="overflow:visible !important">
+                <form id="bj-form">
+                <div class="step1" >
+                    <div class="line liney">
+                        <div class="steptop">
+                            <div class="shutdown step_close"></div>
+                        </div>
+                    </div>
+                    <div class="step_form bjbox">
+                       <div class="line liney">
+                           <div class="zxhqq">装修该花多少钱？<span>8</span>秒获取报价清单</div>
+                           <div class="zxhqq2">今日已有<span>3692</span>位业主获取</div>
+                       </div>
+                      <div class="line liney">
+                            <div class="col-2 label">房屋面积：</div>
+                            <div class="col-5">
+                                <input type="text" name="bj-mianji" class="mipt win-box-bj-mianji" placeholder="请填写房屋面积" value="" />
+                            </div>
+                        </div>
+                        <div class="line liney">
+                            <div class="col-2 label">所在城市：</div>
+                            <div>
+                                <select id="bj-cs" class="citybox"></select>
+                                <select id="bj-qy" class="citybox"></select>
+                            </div>
+                        </div>
+                        <div class="line liney">
+                            <div class="col-2 label">您的称呼：</div>
+                            <div class="col-5">
+                                <input type="text" name="bj-name" class="ipt" placeholder="请输入您的称呼" value="" />
+                            </div>
+                        </div>
+
+                        <div class="line liney">
+                            <div class="col-2 label">手机号码：</div>
+                            <div class="col-5">
+                                <input type="text" name="bj-tel" class="ipt" placeholder="请输入您的手机号" value="" maxlength="11" />
+                                <input type="hidden" name="bj-fb_type" value="baojia">
+                            </div>
+                        </div>
+                        <div class="line liney" style="margin:0px; padding-bottom: 0px">
+                            <div class="col-2 label">&nbsp;</div>
+                            <div class="col-5">
+                                <!--S-免责声明-->
+                                <include file="Common@Order/disclamer"/>
+                                <!--E-免责声明-->
+                            </div>
+                        </div>
+                        <div class="line liney msgbox" style="margin:0px; display:none">
+                            <div class="col-2 label"></div>
+                            <div class="col-7 win_box_err"></div>
+                        </div>
+
+
+                        <div class="line liney">
+                            <div class="col-2 label"></div>
+                            <div class="col-5">
+                                <a id="getBaojia" class="button" href="javascript:void(0)">免费申请</a>
+                            </div>
+                        </div>
+                        <div class="line liney">
+                            <div class="zxhqq3"><span>*</span>您的隐私将被严格保密，该服务不产生任何费用。若发现收费行<br/>为请举报<span>{:OP('QZ_CONTACT_TEL400')}</span></div>
+                        </div>
+
+                    </div>
+                    <input name="bj-id" type="hidden" value=""/>
+                    <input name="bj-safecode" type="hidden" value="{$safecode}"/>
+                    <input name="bj-safekey" type="hidden" value="{$safekey}"/>
+                    <input name="bj-ssid" type="hidden" value="{$ssid}"/>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+var ip_cityid = '{$Think.cookie.iplookup}';
+var city_id = '{$theCityId}';
+
+(city_id == '') ? cityId = ip_cityid : cityId = city_id;
+if(cityId == ''){
+    getLocation();
+}else{
+    initCity(cityId);
+}
+
+function initCity(cityId){
+    App.citys.init("#bj-cs","#bj-qy",shen,shi,cityId);
+}
+
+$(function(){
+
+    $(".win_box_bg").click(function(event) {
+        close();
+        return false;
+    });
+
+    $(".step_close").click(function(event) {
+        close();
+        return false;
+    });
+
+    $(".btnClose").click(function(event) {
+        close();
+        return false;
+    });
+
+    $("#getBaojia").click(function(event) {
+        $(".msgbox").show();
+        $(".win_box_err").html("");
+
+         if ($("input[name=bj-mianji]").val() == "") {
+            $("input[name=bj-mianji]").addClass('win_box_focus');
+            $("input[name=bj-mianji]").focus();
+            $(".win_box_err").html("请填写房屋面积噢 ^_^!");
+            return false;
+        }else if($("input[name=bj-mianji]").val()>10000){
+            $("input[name=bj-mianji]").addClass('win_box_focus');
+            $("input[name=bj-mianji]").focus();
+            $(".win_box_err").html("房屋面积请输入1-10000之间的数字 ^_^!");
+            return false;
+        }
+
+        var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+        if (!re.test($("input[name=bj-mianji]").val())) {
+            $("input[name=bj-mianji]").addClass('win_box_focus');
+            $("input[name=bj-mianji]").focus();
+            $(".win_box_err").html("亲,面积只能填写纯数字 ^_^!");
+            return false;
+        }
+        $("input[name=bj-mianji]").removeClass('win_box_focus');
+
+        if ($("#bj-cs").val() == '') {
+            $(".win_box_err").html("您还没有选择所在城市噢 ^_^!");
+            $("#bj-cs").addClass('win_box_focus').focus();
+            return false;
+        }
+        $("#bj-cs").removeClass('win_box_focus');
+
+        if ($("#bj-qy").val() == '') {
+            $(".win_box_err").html("您还没有选择所在区域噢 ^_^!");
+            $("#bj-qy").addClass('win_box_focus').focus();
+            return false;
+        }
+        $("#bj-qy").removeClass('win_box_focus');
+
+
+        var name = $("input[name=bj-name]").val();
+        if (name == "") {
+            $("input[name=bj-name]").addClass('win_box_focus');
+            $("input[name=bj-name]").focus();
+            $(".win_box_err").html("亲,您还没有填写称呼呢!");
+            return false;
+        } else {
+            var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+            if (!$("input[name=bj-name]").val().match(reg)) {
+                $("input[name=bj-name]").addClass('win_box_focus').focus();
+                $(".win_box_err").html("请输入正确的名称，只支持中文和英文");
+                return false;
+            }
+        }
+        $("input[name=bj-name]").removeClass('win_box_focus');
+
+        var tel = $("input[name=bj-tel]").val();
+        if (tel == "" || tel.length == 0) {
+            $("input[name=bj-tel]").addClass('win_box_focus');
+            $("input[name=bj-tel]").focus();
+            $(".win_box_err").html("亲,您还没有填写手机号码!");
+            return false;
+        } else {
+            var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+            if (!$("input[name=bj-tel]").val().match(reg)) {
+                $("input[name=bj-tel]").addClass('win_box_focus').focus();
+                $(".win_box_err").html("请填写正确的手机号码 ^_^!");
+                return false;
+            }
+        }
+        $("input[name=bj-tel]").removeClass('win_box_focus');
+
+        if(!checkDisclamer(".zxbj_content")){
+            return false;
+        }
+
+        $(".msgbox").hide();
+        var data ={
+            name:$("input[name=bj-name]").val(),
+            tel:tel,
+            fb_type:$("input[name=bj-fb_type]").val(),
+            cs:$("#bj-cs").val(),
+            qx:$("#bj-qy").val(),
+            mianji:$("input[name=bj-mianji]").val(),
+            source: "{$source}" || 30,
+            tpl:'miniStep',
+            step:2
+        };
+        window.order({
+            extra:data,
+            error:function(){
+                $(".win_box_err").html("网络发生错误,请稍后重试！");
+            },
+            success:function(data, status, xhr){
+                if (data.status == 1) {
+
+                    close();
+                    setTimeout(function(){
+
+                      $("body").append(data.data.tmp);
+                      $(".windowbg").fadeIn(400);
+
+                    },400)
+
+                }else{
+                    $(".win_box_err").html(data.info);
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+        //防止表单提交 给一个fasle
+        return false;
+    });
+
+    $(".step_next").click(function(event) {
+        win_next();
+        return false;
+    });
+
+    $(".btnBack").click(function(event) {
+        win_prv();
+        return false;
+    });
+
+    function close() {
+        $.ajax({
+            url: "/setwindowswitch/",
+            type: 'POST',
+            dataType : "json"
+        });
+        if(navigator.appName == "Microsoft Internet Explorer"){
+            $(".zxfb").remove();
+            $("#s-zxzb").show();
+        }else{
+            $(".zxbj_content").addClass('smaller');
+            $(".zxfb").fadeOut(500,function(){
+                $(".zxfb").remove();
+            });
+            $("#s-zxzb").show();
+        }
+        $(".win_box_list").animate({
+            left: 0
+        }, 400);
+        return false;
+    }
+
+});
+</script>

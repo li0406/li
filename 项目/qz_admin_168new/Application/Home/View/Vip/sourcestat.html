@@ -1,0 +1,202 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>装修合作来源统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装修合作来源统计</h1>
+        <!--<ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/orders/">装修合作来源统计</a></li>
+        </ol>-->
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form id="searchForm" action="/vip/sourcestat" class="form-horizontal" action="" method="get">
+                                <div class="col-xs-2">
+                                    城市:
+                                    <br/>
+                                    <select id="city" name="city" class="form-control">
+                                        <option value="">-请选择-</option>
+                                        <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    标记代号:
+                                    <br/>
+                                    <input type="text" class="form-control" id="remark" placeholder="" name="src"
+                                           autocomplete="off" value="{$Think.get.src}">
+                                </div>
+                                <div class="col-xs-2">
+                                    标记来源组:
+                                    <br/>
+                                    <select id="group" name="group" class="form-control group">
+                                        <option value="">-请选择-</option>
+                                        <volist name="groups" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    咨询时间-开始:
+                                    <br/>
+                                    <input type="text" class="form-control datepicker start-time" id="begin"
+                                           autocomplete="off"
+                                           placeholder="请选择查询开始时间" name="begin" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    咨询时间-结束:
+                                    <input type="text" class="form-control datepicker end-time" id="end"
+                                           autocomplete="off"
+                                           placeholder="请选择查询结束时间" name="end" value="{$Think.get.end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div class="col-sm-3 text-center">
+                                        <br/>
+                                        <button id="btnSearch" type="submit" class="btn btn-primary searchBtn">
+                                            查询
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <br/>
+                                        <button id="export" type="button" class="btn btn-success" style="color: #fff;">导出</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <td>咨询时间</td>
+                                <td>标记代码</td>
+                                <td>标记来源组</td>
+                                <td>标记名称</td>
+                                <td>城市</td>
+                                <td>公司名称</td>
+                                <td>姓名</td>
+                                <td>联系方式</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list.list" id="vo">
+                            <tr>
+                                <td>{$vo.add_time|date="Y-m-d",###}</td>
+                                <td>{$vo.src|default='-'}</td>
+                                <td>{$vo.group_name|default='-'}</td>
+                                <td>{$vo.source_name|default='-'}</td>
+                                <td>{$vo.cname}/{$vo.qz_area}</td>
+                                <td>{$vo.name|default='-'}</td>
+                                <td>{$vo.linkman}</td>
+                                <td>{$vo.tel|formatTel}</td>
+                            </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                    <div class="col-xs-12">
+                        {$main.info.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript"
+            src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js"></script>
+    <script type="text/javascript">
+        $(".datepicker").datepicker({
+            todayHighlight: 1,
+            format: 'yyyy-mm-dd',
+            todayBtn: true,
+            minView: 'month',
+            autoclose: true
+        }).on('change', function () {
+            var $inputBegin = $('.start-time').val(),
+                $inputEnd = $('.end-time').val();
+            var flag = diffDate($inputBegin, $inputEnd);
+            if (!flag) {
+                msg("开始时间不能大于结束时间", function () {
+                    $('.end-time').val('');
+                });
+            }
+        });
+        ;
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "选择城市",
+            language: "zh-CN"
+        });
+        $("#city").select2().val("{$Think.get.city}");
+        $('#city').trigger('change');
+
+        $("#group").select2({
+            allowClear: true,
+            placeholder: "请选择",
+            language: "zh-CN"
+        });
+        $("#group").select2().val("{$Think.get.group}");
+        $('#group').trigger('change');
+
+        $("#export").click(function(){
+            window.location.href = "/export/sourcestat?city={$Thin.get.city}&src={$Think.get.src}&group={$Think.get.group}&begin={$Think.get.begin}&end={$Think.get.end}";
+
+        });
+        $('.searchBtn').on('click',function (e) {
+            e.preventDefault();
+            var begin_time = $('.start-time').val();
+            var end_time = $('.end-time').val();
+            if(begin_time&&!end_time){
+                alert('请选择咨询结束时间')
+                return false
+            }
+            if(!begin_time&&end_time){
+                alert('请选择咨询开始时间')
+                return false
+            }
+
+            $('#searchForm').submit();
+        })
+
+        function diffDate(startDate, endDate) {
+            var sDate = new Date(startDate),
+                eDate = new Date(endDate);
+            if (sDate > eDate) {
+                return false
+            } else {
+                return true
+            }
+        }
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 1300,},
+                fn || function () {
+                }
+            )
+        }
+
+    </script>
+</block>

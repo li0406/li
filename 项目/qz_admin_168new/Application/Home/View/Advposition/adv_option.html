@@ -1,0 +1,271 @@
+<!--投放广告-->
+
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/home/adposition/css/adposlist.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .reset-width {
+            width: 11%;
+        }
+
+        .time-input {
+            margin-top: 17px;
+        }
+
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <a href="/advposition/adv_option/" class="btn btn-success">投放广告</a>
+        <a href="/advposition/position/" class="btn btn-default">广告位管理</a>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/advposition/adv_option/">投放广告</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" onsubmit="return check();" >
+                                <div class="col-xs-12">
+                                    <div class="col-xs-1  reset-width">
+                                        <div>广告</div>
+                                        <input type="text" name="condition" class="form-control clear-target"
+                                               placeholder=" 广告名称/广告位id" value="{$param.condition}" style="width: 150px;">
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <div>平台</div>
+                                        <select name="platform_id" class="select_platform form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="platform_list" id="item">
+                                                <option value="{$item.id}"
+                                                <eq name="param.platform_id" value="$item['id']">selected</eq>
+                                                >{$item.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <div>模块</div>
+                                        <select name="module_id" class="select_module form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="module_list" id="item">
+                                                <option value="{$item.id}"
+                                                <eq name="param.module_id" value="$item['id']">selected</eq>
+                                                >{$item.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <div>页面</div>
+                                        <select name="page_id" class="select_page form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="page_list" id="item">
+                                                <option value="{$item.id}"
+                                                <eq name="param.page_id" value="$item['id']">selected</eq>
+                                                >{$item.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <div>投放时间</div>
+                                        <input type="text" name="start" class="form-control datepicker start_time" autocomplete="off"
+                                               placeholder="开始时间" value="{$param.start}">
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <input type="text" name="end" class="form-control datepicker time-input end_time" autocomplete="off"
+                                               placeholder="结束时间" value="{$param.end}">
+                                    </div>
+                                    <div class="col-xs-1  reset-width">
+                                        <div>当前状态</div>
+                                        <select name="status" class="platform form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1"
+                                            <eq name="param.status" value="1">selected</eq>
+                                            >有效(生效中)</option>
+                                            <option value="2"
+                                            <eq name="param.status" value="2">selected</eq>
+                                            >过期</option>
+                                            <option value="3"
+                                            <eq name="param.status" value="3">selected</eq>
+                                            >有效(未生效)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1  reset-width pt17">
+                                        <button type="submit" class="btn btn-success col-xs-5 mr10">搜索</button>
+                                        <button type="button" class="btn resetbtn  col-xs-5">重置
+                                        </button>
+                                    </div>
+                                    <div class="col-xs-1 reset-width pt17">
+                                        <button type="button" class="btn btn-success col-xs-8"
+                                                onclick="window.location='/advposition/add_adv'">添加广告
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body" id="data_list">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>广告位id</th>
+                                <th>广告名称</th>
+                                <th>投放时间</th>
+                                <th>投放天数</th>
+                                <th>剩余天数</th>
+                                <th>状态</th>
+                                <th class="width-210">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="item">
+                                <tr>
+                                    <td><php>echo (($_GET['p']?:1)-1)* 20 + $key+1</php></td>
+                                    <td class="order-time">{:sprintf("%06d", $item["location_id"])}</td>
+                                    <td class="order-remark-table">
+                                        <a href="/advposition/adv_detail?id={$item.id}">{$item.name}</a>
+                                    </td>
+                                    <td>{$item.start_time|date="Y/m/d",###} ~ {$item.end_time|date="Y/m/d",###}</td>
+                                    <td>{$item.all_day}</td>
+                                    <td>{$item.surplus_day}</td>
+                                    <td>{$item.status_name}</td>
+                                    <td class="operater-table">
+                                        <a href="/advposition/adv_detail?id={$item.id}">
+                                            <span title="查看" class="fa fa-eye"></span>
+                                        </a>
+                                        <a href="/advposition/add_adv?id={$item.id}">
+                                            <span title="编辑" class="fa fa-pencil"></span>
+                                        </a>
+                                        <a href="javascript:void(0);" class="btn_del" data-id="{$item.id}">
+                                            <span title="删除" class="fa fa-trash"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        function check() {
+            var start_time = $('.start_time').val();
+            var end_time = $('.end_time').val();
+            if (start_time && end_time && start_time > end_time) {
+                alert('开始时间不可大于结束时间')
+                window.location.reload()
+                return false
+            } else {
+                return true
+            }
+        }
+
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+
+        $('.resetbtn').on('click', function () {
+            $('.clear-target').val('')
+            $("select,input").each(function (i, n) {
+                $(this).val('')
+            });
+        })
+
+        $(function () {
+            // 删除
+            $("#data_list").on("click", ".btn_del", function () {
+                var id = $(this).data("id");
+                if (confirm("确认删除此条广告")) {
+                    $.ajax({
+                        url: '/advposition/del_adv/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                window.location.href = window.location.href;
+                            } else {
+                                alert(data.info);
+                            }
+                        });
+                }
+            });
+
+            // 获取平台-模块-页面-位置联动数据
+            function getPositionOptionChildren(id, callback) {
+                var html = '<option value="">请选择</option>';
+
+                if (id == "") {
+                    callback(html);
+                    return;
+                }
+
+                // 数据请求
+                $.get("/advposition/get_adv_position_option", {id: id}, function (result) {
+                    if (result.status == 1) {
+                        var list = result.data;
+                        for (var i in list) {
+                            html += '<option value="' + list[i]["id"] + '">' + list[i]["name"] + '</option>';
+                        }
+
+                        callback(html);
+                    }
+                });
+            }
+
+            // 平台选择
+            $(".select_platform").on("change", function () {
+                var id = $(this).val();
+                getPositionOptionChildren(id, function (optionHtml) {
+                    $(".select_module").html(optionHtml);
+
+                    var html = '<option value="">请选择</option>';
+                    $(".select_page").html(html);
+                    $(".select_position").html(html);
+                });
+            });
+
+            // 模块选择
+            $(".select_module").on("change", function () {
+                var id = $(this).val();
+                getPositionOptionChildren(id, function (optionHtml) {
+                    $(".select_page").html(optionHtml);
+
+                    var html = '<option value="">请选择</option>';
+                    $(".select_position").html(html);
+                });
+            });
+
+            // 页面选择
+            $(".select_page").on("change", function () {
+                var id = $(this).val();
+                getPositionOptionChildren(id, function (optionHtml) {
+                    $(".select_position").html(optionHtml);
+                });
+            });
+
+        });
+    </script>
+</block>

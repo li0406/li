@@ -1,0 +1,70 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$static_host}/assets/mobile/video/css/gl-base.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/zixun/css/gl-article-tagend.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="content">
+<article>
+    <div class="gl-atl">
+        <div class="atl-tit"><h1>{$info.info.title}</h1></div>
+        <div class="atl-bread">
+            <div class="atl-bd"><a href="/gonglue/">装修攻略</a> &gt; {$info.info.classname}</div>
+            <div class="atl-time">{$info.info.time|date="Y-m-d",###}</div>
+        </div>
+        <div class="img-wrap">{$info.info.content}</div>
+        <div class="assist likeaction">
+            <i class="fa fa-thumbs-up"></i>
+            <span>{$info.info.likes}</span>
+        </div>
+    </div>
+    <div class="atl-list">
+        <div class="atl-list-other">
+            <i></i>
+            <span>推荐文章</span>
+        </div>
+        <ul>
+            <volist name="info.recommend" id="vo">
+                <li>
+                    <a href="/zhuanti/{$vo.shortname}/{$vo.id}.html">
+                        <i class="fa fa-file-text"></i>{$vo.title|mbstr=0,15}
+                    </a>
+                </li>
+            </volist>
+        </ul>
+    </div>
+    <div class="call-tel">
+        装修咨询热线：
+        <a href="tel:{:OP('QZ_CONTACT_TELNUM400')}"><i class="fa fa-phone"></i>{:OP('QZ_CONTACT_TEL400')}</a>
+    </div>
+</article>
+<include file="Common:float-sj" />
+</block>
+<block name="script">
+<script type="text/javascript" src="{$cityfile}"></script>
+<script>
+    window.onload = function(){
+        fulnav();//头部导航弹出
+        gotop({});//返回顶部
+        $(".likeaction").click(function(event) {
+            $(this).unbind("click");
+            $(this).find('span').text({$info.info.likes}+1);
+            $.ajax({
+                url: '/zhuanti/likeaction',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    id:{$info.info.id}
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    _this.addClass('active').unbind("click");
+                    var i = _this.find("em").text();
+                    i = parseInt(i)+1;
+                    _this.find("em").html(i);
+                }
+            });
+        });
+    }
+</script>
+</block>

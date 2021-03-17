@@ -1,0 +1,176 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>修改分类 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <nav class="navbar navbar-default" style="margin-bottom:0px;">
+        <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="/adminask">问答管理</a></div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/adminask"><i class="fa fa-home"></i> 首页</a></li>
+                    <li class="active"><a href="/adminask/category"><i class="fa fa-sitemap"></i> 分类</a></li>
+                    <li><a href="/adminask/question"><i class="fa fa-align-justify"></i> 问题</a></li>
+                    <li><a href="/adminask/anwsers"><i class="fa fa-lightbulb-o"></i> 答案</a></li>
+                    <li><a href="/adminask/comment"><i class="fa fa-comment"></i> 评论</a></li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="nav-tabs-custom">
+                    <form id="form1" action="" method="POST">
+                        <div class="box-body" style="max-width:800px">
+
+
+                            <input type="hidden" name="id" value="{$category.cid}" />
+
+                            <div class="form-group">
+                                <label for="category_id">上级分类</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <select name="cid" id="category_id" class="form-control">
+                                        <option value="0">一级分类</option>
+                                        <volist name="categoryList"  id="vo">
+                                            <if condition="$vo['cid'] EQ $category['pid']">
+                                            <option value="{$vo.cid}" selected="selected" >{$vo.name}</option>
+                                            <else/>
+                                            <option value="{$vo.cid}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>&nbsp;&nbsp;&nbsp;一级分类不能修改为二级分类
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>分类名：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <input name="name" type="text" placeholder="分类名" value="{$category.name}" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>排序：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <input name="order_id" type="text"  value="{$category.order_id}" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>标题：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <input name="title" type="text" value="{$category.title}" placeholder="分类的Title描述，最多不超过80个字符" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>关键字：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    <input name="keywords" type="text" value="{$category.keywords}" placeholder="keywords，HTML head meta 信息" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>描述：</label>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <textarea name="description" placeholder="描述"  style="height:50px;resize:none;" class="form-control">{$category.description}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+                            <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;{$category.btn}</button>
+                            <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+<script src="/assets/common/js/global.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+$(function() {
+    $("#area_id").change(function(){
+        $("#city_box").load("/adminask/getcitybyajax/id/"+$("#area_id").val());
+    });
+
+    $("#category_id").change(function(){
+        if ($("#sub_category").css('display') == 'none'){
+            $("#sub_category").show();
+        }
+        var cid = $("#category_id").val();
+        if(cid !== '0'){
+            $("#sub_category").load("/adminask/getcategorybyajax/id/" + cid);
+        }else{
+            $("#sub_category").empty();
+        }
+    });
+
+    $("#submit").click(function(event){
+        if($('[name=name]').val() === ''){
+            $("input[name=name]").focus();
+            $("input[name=name]").addClass('focus');
+            alert("请填写分类名称");
+            return false;
+        }
+        if($('[name=title]').val() === ''){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            alert("请填写标题");
+            return false;
+        }
+        if($("input[name=contents]").val() === ''){
+            $("input[name=contents]").focus();
+            $("input[name=contents]").addClass('focus');
+            alert("请填写内容");
+            return false;
+        }
+        $("#form1").submit();
+    });
+
+    $("#title").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length > 50){
+            var offset = length - 50;
+            $("#titleCount").html('<i style="color:red">您已经超出了 '+offset+" 字</i>");
+        }else{
+            $("#titleCount em").html(50 - length);
+        }
+    });
+
+    $("#content").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length > 1500){
+            var offset = length - 1500;
+            $("#contentCount").html('<i class="red">您已经超出了 '+offset+" 字</i>");
+        }else{
+            $("#contentCount em").html(1500 - length);
+        }
+    });
+});
+</script>
+</block>

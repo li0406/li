@@ -1,0 +1,194 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <div class="col-xs-4" id="articleclass">
+                选择分类：
+                <div class="cx-select-wrap">
+                    <select class="cx-select form-control" name="location">
+                        <option value="0">请选择</option>
+                        <volist name="info.attribute.location" id="vo">
+                            <eq name="vo.id" value="$Think.get.location">
+                                <option selected value="{$vo.id}">{$vo.name}</option>
+                            <else />
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </eq>
+                        </volist>
+                    </select>
+                    <select class="cx-select fengge mg form-control" name="fengge">
+                        <option value="0">请选择</option>
+                        <volist name="info.attribute.fengge" id="vo">
+                            <eq name="vo.id" value="$Think.get.fengge">
+                                <option selected value="{$vo.id}">{$vo.name}</option>
+                            <else />
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </eq>
+                        </volist>
+                    </select>
+                    <select class="cx-select huxing mg form-control" name="huxing">
+                        <option value="0">请选择</option>
+                        <volist name="info.attribute.huxing" id="vo">
+                            <eq name="vo.id" value="$Think.get.huxing">
+                                <option selected value="{$vo.id}">{$vo.name}</option>
+                            <else />
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </eq>
+                        </volist>
+                    </select>
+                    <select class="cx-select color mg form-control">
+                        <option value="0">请选择</option>
+                        <volist name="info.attribute.color" id="vo">
+                            <eq name="vo.id" value="$Think.get.color">
+                                <option selected value="{$vo.id}">{$vo.name}</option>
+                            <else />
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </eq>
+                        </volist>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-1">
+                状态：
+                <select name="state" id="state" class="form-control">
+                    <option value="0">请选择</option>
+                    <option value="1">正常</option>
+                    <option value="2">预发布</option>
+                    <option value="3">未审核</option>
+                </select>
+            </div>
+            <div class="col-xs-2">
+                标题或ID：<input type="text" id="keyword" class="form-control keyword" placeholder="标题或ID" value="{$Think.get.keyword}">
+            </div>
+            <div class="col-xs-1">
+                选取状态：
+                <select name="is_choice" id="is_choice" class="form-control">
+                    <option value="0">请选择</option>
+                    <option value="1">已选取</option>
+                    <option value="2">未选取</option>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                <br/>
+                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                    <i class="fa fa-search"></i>查询
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-hover dataList">
+            <thead>
+                <th>ID</th>
+                <th>标题</th>
+                <th>关键字</th>
+                <th>标签</th>
+                <th>操作人</th>
+                <th>发布时间</th>
+                <th>操作</th>
+            </thead>
+            <tbody>
+                <volist name="info.list" id="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>
+                            <a href="http://meitu.{:C('QZ_YUMING')}/p{$vo.id}.html" target="_blank" img-src="{$vo.img_path}">
+                                {$vo.title|mbstr=0,20}
+                            </a>
+                        </td>
+                        <td>{$vo.keyword|mbstr=0,20}</td>
+                        <td>{$vo.tagname|mbstr=0,20}</td>
+                        <td>{$vo.uname}</td>
+                        <td>{$vo.time|date='Y-m-d H:i:s',###}</td>
+                        <td><span class="fa {$vo.toggleIcon} choice" data-id="{$vo.id}"></span></td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+    </div>
+    <div class="box-footer no-border fenye">
+        <div class="col-xs-12">{$info.page}</div>
+    </div>
+</div>
+
+<div class="imgPreviewBox" id="imgbox">
+    <img src="" id="Preview">
+</div>
+
+
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#state').val('{$Think.get.state|default=0}');
+    $('#is_choice').val('{$Think.get.is_choice|default=0}');
+    $('#keyword').val('{$Think.get.keyword}');
+
+    var module = '{$Think.get.module}';
+    if(module == 'location'){
+        $('select[name="location"]').attr('disabled',true);
+    }
+    if(module == 'fengge'){
+        $('select[name="fengge"]').attr('disabled',true);
+    }
+    if(module == 'huxing'){
+        $('select[name="huxing"]').attr('disabled',true);
+    }
+
+    $('.dataList a').hover(function(){
+        var imgUrl = "https://staticqn.qizuang.com/" + $(this).attr('img-src') + '-s3.jpg';
+        $("#Preview").attr("src",imgUrl);
+        $('#imgbox').show();
+    },function(){
+        $('#imgbox').hide();
+    });
+
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('{$info.module}');
+
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 8){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,9);
+            }
+            Cookies.set('{$info.module}',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('{$info.module}',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+        console.log(Cookies.get('{$info.module}'));
+    });
+
+    $('#search').click(function(){
+        var location = $('select[name=location]').val();
+        var fengge = $('.fengge').val();
+        var huxing = $('.huxing').val();
+        var color = $('.color').val();
+        var keyword = $('.keyword').val();
+        var state = $('#state').val();
+        var is_choice = $('#is_choice').val();
+        if(!keyword){
+            keyword = '';
+        }
+        window.location.href = '/meituhome/meitubox/?module={$Think.get.module}&location='+location+'&fengge='+fengge+'&huxing='+huxing+'&color='+color+'&keyword='+keyword+'&state='+state+'&is_choice='+is_choice;
+    })
+})
+</script>
+</block>

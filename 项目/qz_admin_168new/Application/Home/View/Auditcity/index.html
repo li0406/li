@@ -1,0 +1,99 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+  <style>
+    .fd_city>span::after{ content:'、'; }
+    .fd_city>span:last-child::after{ content:''; }
+    #tablelist td, #tablelist th{ vertical-align: middle; }
+  </style>
+</block>
+<block name="content">
+  <section class="content-header">
+    <h1>分单城市设置</h1>
+  </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-body table-responsive no-padding">
+            <table class="table table-hover table-bordered" id="tablelist">
+              <thead>
+              <tr>
+                <th class="width-150">账号</th>
+                <th>角色</th>
+                <th>是否在职</th>
+                <th>是否启用</th>
+                <th style="width: 800px">分单城市</th>
+                <th class="width-210">操作</th>
+              </tr>
+              </thead>
+              <tbody>
+              <volist name="list" id="v">
+              <tr>
+                <td data-id="{$v.id}">{$v.name}</td>
+                <td>{$role[$v['uid']]}</td>
+                <td>{$v['state']==1?'在职':'离职'}</td>
+                <td style="font-size: 12px">{$v['stat']==1?'启用':'禁用'}</td>
+                <td class="fd_city"><volist name="v.audit_city" id="city"><span>{$city.cname}</span></volist></td>
+                <td>
+                  <a href="/auditcity/detail?id={$v.id}">编辑</a>
+                  <span class="clear_city" data-id="{$v.id}" style="color: #3c8dbc; cursor: pointer;">删除</span>
+                </td>
+              </tr>
+              </volist>
+              </tbody>
+            </table>
+            {$page}
+          </div>
+          <div class="col-xs-12">
+            {$main.info.page}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</block>
+<block name="script">
+  <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/jscookie/js/jscookie-1.0.2.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script>
+    $(function () {
+        // 删除分单城市
+        $(document).on('click', '.clear_city', function (evt) {
+            var id = $(this).attr('data-id');
+            if (!confirm('确认删除当前账号的分单城市吗？')) {
+                return ;
+            }
+            if (!id) {
+                alert('数据异常，请刷新重试！');
+                return ;
+            }
+            $.ajax({
+                url: '/auditcity/clear',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    admin_id: id
+                }
+            }).done(function (data) {
+                if(data.error_code == 1) {
+                    alert(data.error_msg);
+                } else {
+                    alert('删除成功');
+                }
+                window.location.reload();
+            }).fail(function () {
+                alert('删除失败，请稍后再试');
+                window.location.reload();
+            });
+        })
+    })
+  </script>
+</block>

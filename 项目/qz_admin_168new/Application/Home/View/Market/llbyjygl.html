@@ -1,0 +1,230 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>流量部业绩 - 月概览</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/market/sc-ygl.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header with-border no-padding lh-55">
+                <h3 class="box-title pull-left col-xs-2 lh-55 sctab-tit">流量部业绩</h3>
+                <div class="col-xs-1 text-center bg-info no-padding"><a href="/market/llbyjygl/">月概览</a></div>
+                <div class="col-xs-1 text-center no-padding"><a href="/market/llbyjcngl/">财年概览</a></div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">条件查询</h3>
+            </div>
+            <div class="box-body">
+                <span class="pull-left lh-34">选择查询月截止时间：</span>
+                <div class="col-xs-2">
+                    <input type="text" name="condition" class="form-control  datepicker btn-flat" value="{$main['condition']}">
+                </div>
+                <div class="search btn btn-info"><i class="fa fa-search"></i>&nbsp;查询</div>
+            </div>
+        </div>
+        <div class="box no-border">
+            <div class="box-body no-padding">
+                <div class="col-xs-2 text-center sc-border-8">
+                    <div class="h5">自然流量(UV)</div>
+                    <div class="h2">{$main.current.zrll.total.uv}</div>
+                </div>
+                <div class="col-xs-2 text-center sc-border-8">
+                    <div class="h5">发单量</div>
+                    <div class="h2">{$main.current.zrll.order_count}</div>
+                </div>
+                <div class="col-xs-2 text-center sc-border-8">
+                    <div class="h5">分单量</div>
+                    <div class="h2">{$main.current.zrll.order_fen_count}</div>
+                </div>
+                <div class="col-xs-2 text-center sc-border-8">
+                    <div class="h5">分单率</div>
+                    <div class="h2">
+                        {:number_format(($main['current'][zrll]['order_fen_count'] / $main['current']['zrll']['order_count'] * 100) , 2)}%
+                    </div>
+                </div>
+                <div class="col-xs-2 text-center sc-border-8">
+                    <div class="h5">实际分单量</div>
+                    <div class="h2">{$main.current.zrll.real_fen_count}</div>
+                </div>
+                <div class="col-xs-2 text-center">
+                    <div class="h5">实际分单率</div>
+                    <div class="h2">
+                        {:number_format(($main['current'][zrll]['real_fen_count'] / $main['current']['zrll']['order_count'] * 100) , 2)}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box no-border">
+            <div class="box-header">
+                <div class="pull-left sc-width-160">
+                    <h5 class="sc-font-bold">自然流量(UV)走势</h5>
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <div class="col-xs-12 canvas-height-300" id="canvas1"></div>
+            </div>
+        </div>
+        <div class="box no-border">
+            <div class="box-header">
+                <h5 class="sc-font-bold">自然流量(UV)</h5>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>业绩项</th>
+                                <th>上月完成量</th>
+                                <th>当月目标</th>
+                                <th>当月目标完成量</th>
+                                <th>当月目标完成进度</th>
+                                <th>时间进度</th>
+                                <th>进度差</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">自然流量(UV)</th>
+                                <td>{$main.last.zrll.total.uv}</td>
+                                <td>{$main.plan.current.ziran_liuliang}</td>
+                                <td>{$main.current.zrll.total.uv}</td>
+                                <td>
+                                    {:number_format(($main['current'][zrll]['total']['uv'] / $main['plan']['current']['ziran_liuliang'] * 100) , 2)}%
+                                </td>
+                                <td>
+                                    {:number_format((date('d') / date('t') * 100) , 2)}%
+                                </td>
+                                <td>
+                                    {:number_format((($main['current'][zrll]['total']['uv'] / $main['plan']['current']['ziran_liuliang'] * 100) - (date('d') / date('t') * 100)) , 2)}%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="box no-border">
+            <div class="box-header">
+                <h5 class="sc-font-bold">免费实际分单量</h5>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>业绩项</th>
+                                <th>上月完成量</th>
+                                <th>当月目标</th>
+                                <th>当月目标完成量</th>
+                                <th>当月目标完成进度</th>
+                                <th>时间进度</th>
+                                <th>进度差</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">免费实际分单量</th>
+                                <td>{$main.last.mffd.real_fen_count}</td>
+                                <td>{$main.plan.current.liuliangbu_mianfei_shiji_fendan}</td>
+                                <td>{$main.current.mffd.real_fen_count}</td>
+                                <td>
+                                    {:number_format(($main['current'][mffd]['real_fen_count'] / $main['plan']['current']['liuliangbu_mianfei_shiji_fendan'] * 100) , 2)}%
+                                </td>
+                                <td>
+                                    {:number_format((date('d') / date('t') * 100) , 2)}%
+                                </td>
+                                <td>
+                                    {:number_format((($main['current'][mffd]['real_fen_count'] / $main['plan']['current']['liuliangbu_mianfei_shiji_fendan'] * 100) - (date('d') / date('t') * 100)) , 2)}%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+
+            var dom = document.getElementById('canvas1');
+            var myChart = echarts.init(dom);
+            var option1 = {
+                tooltip : {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : false,
+                        data : {$main.echart.xAxis}
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                series : [
+                    {
+                        name:'流量部免费',
+                        type:'line',
+                        stack: '总量',
+                        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                        areaStyle: {normal: {}},
+                        data:{$main.echart.series},
+                        itemStyle: {
+                            normal: {
+                                color: "#ffa685",  // 会设置点和线的颜色，所以需要下面定制 line
+                            }
+                        },
+                    }
+                ]
+            };
+            myChart.setOption(option1, true);
+
+            // 页面尺寸改变时canvas重新渲染
+            $(window).on('resize',function(){
+                var myChart = echarts.init(dom);
+                myChart.setOption(option1, true);
+            });
+            // 时间选择
+            $(".datepicker").datetimepicker({
+                startView:3,
+                minView:'decade',
+                format:"yyyy-mm",
+                autoclose:true,
+                pickerPosition: "bottom-left"
+            });
+
+            //查询
+            $('.search').click(function(event) {
+                window.location.href = '/market/llbyjygl/?condition=' + $('input[name=condition]').val();
+            });
+        });
+    </script>
+</block>

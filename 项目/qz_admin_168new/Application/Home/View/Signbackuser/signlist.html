@@ -1,0 +1,334 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .signbackedit_nav { padding: 20px; margin-bottom: 20px;}
+        .signbackedit_nav li { font-size: 18px; float: left; padding: 0 15px; line-height: 2;}
+        .signbackedit_nav li a { color: inherit;}
+        .signbackedit_nav li.active {border-bottom: 1px solid #FF0000; color: #FF0000;}
+
+        .box-body ol.switch_label { padding: 20px; margin-bottom: 20px; }
+        .box-body ol.switch_label li { font-size: 16px; float: left; padding: 0 15px; line-height: 2; }
+        .box-body ol.switch_label li a { color: inherit;}
+        .box-body ol.switch_label li.active {color: #FF0000;}
+
+        .layout_operator {display: none;}
+        .layout_operator .layout_bg {position: fixed; top:0;right:0;bottom:0;left:0;background:#000;z-index: 1100;opacity: 0.6;}
+        .layout_operator .layout_body {position: fixed;top: 120px; width: 400px; left: calc(50% - 200px); z-index: 1200;background: #FFF;}
+        .layout_operator .layout_title {text-align: center; font-size: 18px; padding: 10px; position: relative;}
+        .layout_operator .layout_close {font-size: 30px; position: absolute; right: 10px; top: 8px;cursor: pointer;}
+        .layout_operator .layout_content {padding: 10px; min-height: 120px;}
+        .layout_operator .layout_content .btn_box {text-align: center; margin-top: 15px;}
+        .layout_operator .layout_content p label {text-align: right; font-weight: normal; width: 140px;}
+
+        .layout_operator#layoutLog .layout_body {width: 500px;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box-header with-border">
+                <h3 class="box-title">签返会员管理/编辑会员</h3>
+            </div>
+            
+            <!-- 会员信息部分 -->
+            <include file="accountedit" />
+
+            <div class="box">
+                <ul class="signbackedit_nav">
+                    <li class="active">签单记录</li>
+                    <li><a href="/signbackuser/usercontract?company_id={$company_id}">会员时间</a></li>
+                    <li><a href="/signbackuser/packageinfo?company_id={$company_id}">订单数量</a></li>
+                    <li><a href="/signbackuser/packagelist?company_id={$company_id}">保证金</a></li>
+                </ul>
+
+                <div class="box-body">
+                    <ol class="switch_label">
+                        <li <if condition="$back_status eq 2">class="active"</if>>
+                            <a href="/signbackuser/signlist?company_id={$company_id}">本次签单记录</a>
+                        </li>
+                        <li <if condition="$back_status eq 3">class="active"</if>>
+                            <a href="/signbackuser/signlist?company_id={$company_id}&back_status=3">历史签单记录</a>
+                        </li>
+                    </ol>
+
+                    <p style="padding: 10px 30px;">
+                        签单{$data["total"]["count"]|default="0"}次，共计签单金额{$data["total"]["qiandan_jine"]}，实缴金额{$data["total"]["back_pay_money"]}
+                    </p>
+                    
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th width="210">订单编号</th>
+                            <th>申请签单时间</th>
+                            <th>城市/区县</th>
+                            <th>订单类型</th>
+                            <th>签单面积</th>
+                            <th>签单金额</th>
+                            <th>返点</th>
+                            <th>应缴金额</th>
+                            <th>实缴金额</th>
+                            <th>缴纳状态</th>
+                            <th class="width-210">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="data.list" id="item">
+                            <tr>
+                                <td class="item_orderid">{$item.order_id}</td>
+                                <td>{:date("Y-m-d",$item["qiandan_addtime"])}</td>
+                                <td>{$item.city_name} - {$item.area_name}</td>
+                                <td>
+                                    <switch name="item.type_fw">
+                                        <case value="1" break="1">分单</case>
+                                        <case value="2" break="1">赠单</case>
+                                    </switch>
+                                </td>
+                                <td>{$item.qiandan_mianji}㎡</td>
+                                <td class="item_qiandan_jine">{:intval($item["qiandan_jine"] * 10000)}</td>
+                                <td class="item_back_ratio">{$item.back_ratio}%</td>
+                                <td class="item_back_total_money">{:floatval($item["back_total_money"])}</td>
+                                <td class="item_back_pay_money">{:floatval($item["back_pay_money"])}</td>
+                                <td>
+                                    <switch name="item.back_status">
+                                        <case value="1" break="1">未返点</case>
+                                        <case value="2" break="1">已返点</case>
+                                    </switch>
+                                </td>
+                                <td class="operater-table" data-id="{$item.id}">
+                                    <a href="javascript:void(0);" class="btn_receive">收款</a>
+                                    <a href="javascript:void(0);" class="btn_check">审核</a>
+                                    <a href="javascript:void(0);" class="btn_log">日志</a>
+                                </td>
+                            </tr>
+                        </volist>
+
+                        <eq name="data.total.count" value="0">
+                            <tr>
+                                <td colspan="20" align="center">暂无数据</td>
+                            </tr>
+                        </eq>
+                        </tbody>
+                    </table>
+                    <div>{$data.page}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout_operator" id="layoutReceive">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">收款</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content">
+                <p>
+                    <label for="">订单编号：</label>
+                    <span class="orderid"></span>
+                </p>
+                <p>
+                    <label for="">签单金额：</label>
+                    <span class="qiandan_jine"></span>
+                </p>
+                <p>
+                    <label for="">返点：</label>
+                    <span class="back_ratio"></span>
+                </p>
+                <p>
+                    <label for="">应缴金额：</label>
+                    <span class="back_total"></span>
+                </p>
+                <p>
+                    <label for="">实缴金额：</label>
+                    <input type="number" name="pay_money" class="pay_money" />
+                </p>
+                
+                <div class="btn_box">
+                    <input type="hidden" name="id" class="id" />
+                    <button type="button" class="btn btn-primary btn_save">保存</button>
+                    <button type="button" class="btn btn_cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_operator" id="layoutCheck">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">审核</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content">
+                <p>
+                    <label for="">订单编号：</label>
+                    <span class="orderid"></span>
+                </p>
+                <p>
+                    <label for="">签单金额：</label>
+                    <span class="qiandan_jine"></span>
+                </p>
+                <p>
+                    <label for="">返点：</label>
+                    <span class="back_ratio"></span>
+                </p>
+                <p>
+                    <label for="">应缴金额：</label>
+                    <span class="back_total"></span>
+                </p>
+                <p>
+                    <label for="">实缴金额：</label>
+                    <span class="pay_money"></span>
+                </p>
+                
+                <div class="btn_box">
+                    <input type="hidden" name="id" class="id" />
+                    <button type="button" class="btn btn-primary" data-status="1">审核通过</button>
+                    <button type="button" class="btn" data-status="2">审核不通过</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_operator" id="layoutLog">
+        <div class="layout_bg"></div>
+        <div class="layout_body">
+            <div class="layout_title">
+                <span class="layout_title_text">日志</span>
+                <span class="layout_close">×</span>
+            </div>
+            <div class="layout_content"></div>
+        </div>
+    </div>
+</block>
+
+<block name="script">
+    <script type="text/javascript">
+        $(function() {
+            $(".layout_operator").on("click", ".layout_close", function(){
+                $(".layout_operator").fadeOut(200);
+            });
+
+            // 收款
+            $("#tablelist").on("click", ".btn_receive", function(){
+                var id = $(this).parent().data("id");
+                var trElement = $(this).parents("tr");
+
+                var orderid = trElement.find(".item_orderid").html();
+                var qiandan_jine = trElement.find(".item_qiandan_jine").html();
+                var back_ratio = trElement.find(".item_back_ratio").html();
+                var back_total = trElement.find(".item_back_total_money").html();
+                var pay_money = trElement.find(".item_back_pay_money").html();
+
+                var layoutElement = $("#layoutReceive");
+                layoutElement.find(".id").val(id);
+                layoutElement.find(".orderid").html(orderid);
+                layoutElement.find(".qiandan_jine").html(qiandan_jine);
+                layoutElement.find(".back_ratio").html(back_ratio);
+                layoutElement.find(".back_total").html(back_total);
+                layoutElement.find(".pay_money").val(pay_money);
+                layoutElement.fadeIn(200);
+            });
+
+            // 
+            $("#layoutReceive").on("click", ".btn_cancel", function(){
+                $("#layoutReceive").fadeOut(200);
+            });
+
+            $("#layoutReceive").on("click", ".btn_save", function(){
+                var layoutElement = $("#layoutReceive");
+                var id = layoutElement.find(".id").val();
+                var pay_money = layoutElement.find(".pay_money").val();
+
+                if (pay_money == "" || pay_money == "0") {
+                    alert("请先输入实缴金额");
+                    return false;
+                }
+
+                // 收款
+                $.post("/signbackuser/signreceivemonmey", {
+                    id: id,
+                    pay_money: pay_money
+                }, function(response){
+                    if (response.code == 200) {
+                        alert("收款成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.errmsg);
+                    }
+                });
+            });
+
+
+            // 审核
+            $("#tablelist").on("click", ".btn_check", function(){
+                var id = $(this).parent().data("id");
+                var trElement = $(this).parents("tr");
+
+                var orderid = trElement.find(".item_orderid").html();
+                var qiandan_jine = trElement.find(".item_qiandan_jine").html();
+                var back_ratio = trElement.find(".item_back_ratio").html();
+                var back_total = trElement.find(".item_back_total_money").html();
+                var pay_money = trElement.find(".item_back_pay_money").html();
+
+                var layoutElement = $("#layoutCheck");
+                layoutElement.find(".id").val(id);
+                layoutElement.find(".orderid").html(orderid);
+                layoutElement.find(".qiandan_jine").html(qiandan_jine);
+                layoutElement.find(".back_ratio").html(back_ratio);
+                layoutElement.find(".back_total").html(back_total);
+                layoutElement.find(".pay_money").html(pay_money);
+                layoutElement.fadeIn(200);
+            });
+
+            // 
+            $("#layoutCheck").on("click", ".btn_cancel", function(){
+                $("#layoutReceive").fadeOut(200);
+            });
+
+            // 
+            $("#layoutCheck").on("click", ".btn", function(){
+                var layoutElement = $("#layoutCheck");
+                var id = layoutElement.find(".id").val();
+                var exam_status = $(this).data("status");
+
+                // 审核
+                $.post("/signbackuser/signordercheck", {
+                    id: id,
+                    exam_status: exam_status
+                }, function(response){
+                    if (response.code == 200) {
+                        alert("审核成功");
+                        window.location.reload();
+                    } else {
+                        alert(response.errmsg);
+                    }
+                });
+            });
+
+            // 日志
+            $("#tablelist").on("click", ".btn_log", function(){
+                var id = $(this).parent().data("id");
+
+                $.get("/signbackuser/signorderlog", {
+                    id: id
+                }, function(response){
+                    if (response.code == 200) {
+                        $("#layoutLog").find(".layout_content").html(response["temp"]);
+                        $("#layoutLog").fadeIn(200);
+                    } else {
+                        alert(response.errmsg);
+                    }
+                });
+            });
+        });
+    </script>
+</block>
+

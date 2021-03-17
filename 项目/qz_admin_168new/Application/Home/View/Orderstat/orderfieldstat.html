@@ -1,0 +1,166 @@
+<extend name="Main:baseTemplate" />
+<block name="title"> <title>订单字段修改情况统计</title></block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/orderstat/css/orderField.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/ ?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+</block>
+<block name="content">
+        <section class="content-header">
+           <h4>订单字段修改情况统计</h4>
+           <div class="row">
+                  <div class="col-xs-12">
+                  <div class="box">
+                       <div class="box-body">
+                              <form action="/orderstat/orderfieldstat">
+                                  <div class="row">
+                                      <div class="col-xs-2">
+                                       <p>查询时间-开始</p>
+                                       <input type="text" class="datepicker form-control" name="begin" autocomplete="off" value="{$Think.get.begin}" placeholder="请选择">
+                                      </div>
+                                      <div class="col-xs-2">
+                                            <p>查询时间-结束</p>
+                                            <input type="text" class="datepicker form-control" name="end" autocomplete="off" value="{$Think.get.end}" placeholder="请选择">
+                                      </div>
+                                      <div class="col-xs-2">
+                                            <p>城市</p>
+                                            <select class="select2 select2-offscree form-control" name="city">
+                                                <option value="">请选择</option>
+                                                <volist name="info.city" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                                </volist>
+                                            </select>
+                                      </div>
+                                      <div class="col-xs-2">
+                                            <p>订单状态</p>
+                                            <select class="form-control" name="state">
+                                                <option value="">全部</option>
+                                                <option value="4">有效单</option>
+                                            </select>
+                                      </div>
+                                      <div class="col-xs-2">
+                                            <p>&nbsp;</p>
+                                            <button id="btnSearch" type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;查询</button>
+                                            <div id="btnExport" class="btn btn-success btn-sm btn-flat">&nbsp;导出EXCEL</div>
+                                         </div>
+                                  </div>
+                              </form>
+                          </div>
+                  </div>
+                  <div class="box">
+                        <div class="box-body">
+                            <h4>订单字段修改情况统计（订单总数：<span class="red">{$info.all_count|default=0}</span>）</h4>
+                                <table id="myTable" class="table table-hover table-bordered" id="tablelist">
+                                    <thead>
+                                        <tr>
+                                            <th>订单字段</th>
+                                            <th>自填数量</th>
+                                            <th>自填率</th>
+                                            <th>修改数量</th>
+                                            <th>修改率</th>
+                                            <th>代填数量</th>
+                                            <th>代填率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <volist name="info.list" id="vo">
+                                            <tr>
+                                                <td>{$vo.name}</td>
+                                                <td>{$vo.before_count}</td>
+                                                <td>{$vo.before_rate}%</td>
+                                                <td>{$vo.update_count}</td>
+                                                <td>{$vo.update_rate}%</td>
+                                                <td>{$vo.after_count}</td>
+                                                <td>{$vo.after_rate}%</td>
+                                            </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                          </div>
+                          <div class="explainsm">
+                              <div>说明：</div>
+                              <div class="tousuojin">自填率=自填数量/订单总数；</div>
+                              <div class="tousuojin">修改率=修改数量/自填数量；</div>
+                              <div class="tousuojin">代填率=代填数量/订单总数；</div>
+                          </div>
+                  </div>
+               </div>
+           </div>
+
+        </section>
+    </block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $('select[name=city]').select2();
+    $('select[name=city]').val("{$Think.get.city}").trigger('change');
+    $('select[name=state]').val("{$Think.get.state}").trigger('change');
+    $('.datepicker').datetimepicker({
+        startView:2,
+        minView:'decade',
+        format:"yyyy-mm-dd",
+        autoclose:true,
+        pickerPosition: "bottom-left",
+        todayBtn:1,
+        clearBtn:true,
+        }).on("change",function(){
+            if(toTimeStamp($("input[name=begin]").val())>toTimeStamp($("input[name=end]").val())){
+                alert("生成订单时间结束时间不能小于生成订单时间开始时间")
+                $("input[name=end]").val("");
+            }
+    });
+
+    // 日期转化成时间戳
+    function toTimeStamp(time){
+        if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+        }
+    };
+
+    $("#btnExport").click(function(event) {
+        var colums = [];
+        var data =[];
+        var headTr = [];
+        var head = $("#myTable").find("thead");
+
+        head.find("tr").find("th").each(function(i){
+            var th = [];
+            th["text"] = $(this).text().trim();
+            headTr.push(th);
+        });
+
+        data.push(headTr);
+
+        $('#myTable tbody tr').each(function(i){
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function(){
+                var _td = {
+                    text:$(this).text().trim()
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data:data,
+            title:'订单字段修改情况统计',
+            url:'/export/download/',
+            show:false
+        });
+    });
+
+    </script>
+</block>

@@ -1,0 +1,378 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>登录-齐装网</title>
+    <include file="Index:resource"/>
+    <link href="/assets/common/css/font/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="{$static_host}/assets/user/index/css/default_g1101120180822.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+<include file="Index:header"/>
+<div class="wrap">
+    <div class="loginlogo">
+        <a class="logo" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo-r.png"
+                                                                 alt="齐装网"/></a>
+    </div>
+</div>
+<style>
+    .tab-nav {
+        margin-bottom: 15px;
+    }
+</style>
+<div class="loginbg">
+    <div class="wrap">
+        <div class="loginbgby">
+            <img src="{$static_host}/assets/common/img/0918105202.jpg" width="540" height="340" alt="登录齐装网">
+            <div class="zhezhao"></div>
+        </div>
+        <div class="loginbox">
+            <div class="tab" id="tab">
+                <div class="tab-nav j-tab-nav">
+                    <a href="javascript:void(0);" class="current">帐号登录</a>
+                    <a href="javascript:void(0);">验证码登录</a>
+                </div>
+                <div class="tab-con">
+                    <div class="j-tab-con">
+                        <div class="tab-con-item reg-user" style="display:block;">
+                            <div class="loginput">
+                                <input name="name" type="text" class="log" placeholder="用户名" value="">
+                                <div class="tips nametishi"></div>
+                            </div>
+                            <div class="loginput">
+                                <input name="password" type="password" class="res" placeholder="密码" value="">
+                                <div class="tips times-tip password—tip"></div>
+                            </div>
+                            <div class="control-group verity" style="display: none">
+                                {$verify}
+                            </div>
+                            <p class="yzm-tips"><i class="fa fa-check-square"></i>验证码已发送手机，有效时间为30分钟，请及时查收</p>
+                            <div class="logintit">
+                                <i>还没有齐装帐号？<a href="https://cp.qizuang.com/register" target="_blank">点击注册»</a></i>
+                            </div>
+                            <div class="login-info">
+                                <i><a href="https://cp.qizuang.com/changepassword" target="_blank">忘记密码？</a></i>
+                            </div>
+                            <div class="btn">
+                                <button class="logbtn" id="login_show_login">登录</button>
+                                <input type="hidden" id="but_style" value="1">
+                            </div>
+                        </div>
+                        <div class="tab-con-item  reg-company">
+                            <div class="loginput">
+                                <input name="yonghuming" type="text" class="yonghuming" maxlength="11"  placeholder="手机号码" value="">
+                                <div class="tishi usertishi"></div>
+                            </div>
+                            <div class="loginput">
+                                <input name="yanzhengma" type="text" class="yanzhengma" placeholder="验证码" value="">
+                                <button  id="popup-captcha" type="button"  class="getyanzcode">获取验证码</button>
+                                <div class="tishi yzmtishi"></div>
+
+                            </div>
+                            <div class="logintit">
+                                <i>还没有齐装帐号？<a href="https://cp.qizuang.com/register" target="_blank">点击注册»</a></i>
+                            </div>
+                            <div class="login-info">
+                                <i><a href="https://cp.qizuang.com/changepassword" target="_blank">忘记密码？</a></i>
+                            </div>
+                            <div class="btnwaik">
+                                <button class="loginniu">登录</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="newtips">尊敬的会员您好,您当前使用的登录功能即将关闭,我们计划将在11月20关闭该功能,请使用新后台进行登录。<div class="tonewlogin point jumptonewlogin">前往新后台登录>></div></div></div></div>
+        </div>
+    </div>
+    <div class="newfixed">
+        <div class="tips-dialog">
+            <div class="tips-title mb20">登陆失败</div>
+            <div class="tips-content mb20">当前登陆窗口已无法登录该账号,请转至新的登录入口进行账号登录！</div>
+            <div class="tips-btn mb20 point jumptonewlogin">转至新登陆入口</div>
+        </div>
+    </div>
+</div>
+<include file="Index:footer"/>
+
+
+<div class="tips-mask">
+    <div class="tips-container">
+        <div class="tips-header"><i class="fa fa-close"></i></div>
+        <p>为了您的账号安全,请每隔30天修改一次密码</p>
+        <div class="btn-box">
+            <span href="" class="btn-item btn-danger"><a href="/getpassword/">立即修改</a></span>
+            <span href="" class="btn-item btn-default" id="ignore">忽略</span>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    $(function () {
+        $(".jumptonewlogin").on('click', function (){
+            window.location.href='https://cp.qizuang.com'
+        });
+        $("#tab").rTabs({
+            bind: 'click',
+            animation: 'fadein',
+            auto: false
+        });
+
+        // //倒计时
+        var flag = true;
+        var t3 = null;
+        function countDown(obj, num) {
+            if (num > 0) {
+                obj.text(num + " 秒后重新发送");
+                num--;
+                t3 = setTimeout(function (obj, num) {
+                    countDown(obj, num);
+                }, 1000, obj, num);
+            } else {
+                clearTimeout(t3)
+                obj.text("发送验证码");
+                flag = true;
+            }
+        }
+
+        //登录按钮
+        $("#login_show_login").on('click', function () {
+            var name = $.trim($("input[name=name]").val()),
+                password = $.trim($("input[name=password]").val()),
+                reg=/^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/
+            if (name == "") {
+                $('.tips').html("");
+                $('.nametishi').html("请输入您的用户名");
+                return false;
+            }
+            if (password == "") {
+                $('.tips').html("");
+                $('.password—tip').html("请输入密码");
+                return false;
+            } else {
+                $('.tips').html("");
+            }
+            if(!reg.test(password)){
+                $('.tips').html("");
+                $('.password—tip').html("请输入6-18位由数字、字母或特殊符号组成的密码!");
+                return false;
+            }
+            initG_noraml(name,password)
+        });
+
+        $('.loginbox .loginput .getyanzcode').click(function (event) {
+            var name = $.trim($("input[name=yonghuming]").val());
+            $('.tishi').html("");
+            if (name == "") {
+                $('.tishi').html("");
+                $('.loginbox .usertishi').html("请填写登录手机/安全手机");
+                return false;
+            }
+            if(!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(name))){
+                $('.tishi').html("");
+                $('.loginbox .usertishi').html("手机号格式不正确");
+                return false;
+            }
+            initG(name);
+        });
+
+        function yanzhenglogin() {
+            var yonghumingval = $.trim($("input[name=yonghuming]").val()),
+                yanzhengmaval = $.trim($("input[name=yanzhengma]").val());
+            if (yonghumingval == "") {
+                $('.tishi').html("");
+                $('.loginbox .usertishi').html("请填写登录手机/安全手机");
+                return false;
+            }
+            if (yanzhengmaval == "") {
+                $('.tishi').html("");
+                $('.loginbox .yzmtishi').html("请输入验证码");
+                return false;
+            } else {
+                $('.tishi').html("");
+            }
+
+            $.ajax({
+                url: "/login/",
+                type: "post",
+                dataType: "json",
+                data: {tel: yonghumingval, code: yanzhengmaval},
+                success: function (data) {
+                    if (data.status == 1) {
+                        //新签返会员跳转
+                        if (data.data && data.data.module == 2) {
+                            window.location.href = "{:C('QZ_YUMING_SCHEME')}://{:C('CP_HOST')}" + "/home?token=" + data.data.token;
+                            return;
+                        } else {
+                            $('.tishi').html("");
+                            window.location.href = "/home/";
+                        }
+                    } else if (data.status == 0) {
+                        $('.tishi').html("");
+                        $('.loginbox .yzmtishi').html(data.info);
+                    }else if (data.status == 1000100) {
+                        $('.newfixed').show()
+                    }
+                },
+                error: function (xhr) {
+                    alert("登录失败,请稍后再试！")
+                }
+            })
+        }
+
+
+        $('.btnwaik .loginniu').click(function (event) {
+            yanzhenglogin();
+        });
+
+        //监听按键
+        $(document).on("keyup", function (event) {
+            if (event.keyCode == 13 && $('.reg-user').css("display") == "block") {
+                logindl();
+            } else if (event.keyCode == 13 && $('.reg-company').css("display") == "block") {
+                yanzhenglogin();
+            }
+        })
+
+        var initG = function(tel){
+            $.ajax({
+                url: '/gtverify/initgeet',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    scence:1
+                }
+            })
+            .done(function(data) {
+                initGeetest({
+                    // 以下配置参数来自服务端 SDK
+                    gt: data.data.gt,
+                    challenge: data.data.challenge,
+                    offline: !data.data.success,
+                    new_captcha: true,
+                    product: 'bind'
+                }, function (captchaObj) {
+                    captchaObj.reset();
+                    captchaObj.onReady(function(){
+                        //验证码ready之后才能调用verify方法显示验证码
+                        captchaObj.verify();
+                    }).onSuccess(function(){
+                        var validate = captchaObj.getValidate();
+                        $.ajax({
+                            url: '/gtverify/verifygeetest',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                geetest_challenge: validate.geetest_challenge,
+                                geetest_validate: validate.geetest_validate,
+                                geetest_seccode: validate.geetest_seccode,
+                                scence:1
+                            }
+                        }).done(function(data) {
+                            if (data.status == 1) {
+                                $.ajax({
+                                    url: "/login_sendsms/",
+                                    type: "post",
+                                    dataType: "json",
+                                    data: {tel: tel},
+                                    success: function (data) {
+                                        if (data.status == 1) {
+                                            $('.tishi').html("");
+                                            countDown($('.loginbox .loginput .getyanzcode'), 60);
+                                        } else if (data.status == 0) {
+                                            $('.tishi').html("");
+                                            $('.yzmtishi').html(data.info);
+                                        }
+                                    },
+                                    error: function (xhr) {
+                                        alert("发送失败,请稍后再试!")
+                                        flag=true;
+                                    }
+                                })
+                            }
+                        });
+
+                    }).onError(function(){
+                        alert("发送失败,请稍后再试!")
+                    })
+                })
+            });
+        }
+
+        var initG_noraml = function(name,password){
+            $.ajax({
+                url: '/gtverify/initgeet',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    scence:1
+                }
+            })
+                .done(function(data) {
+                    initGeetest({
+                        // 以下配置参数来自服务端 SDK
+                        gt: data.data.gt,
+                        challenge: data.data.challenge,
+                        offline: !data.data.success,
+                        new_captcha: true,
+                        product: 'bind'
+                    }, function (captchaObj) {
+                        captchaObj.reset();
+                        captchaObj.onReady(function(){
+                            //验证码ready之后才能调用verify方法显示验证码
+                            captchaObj.verify();
+                        }).onSuccess(function(){
+                            var validate = captchaObj.getValidate();
+                            $.ajax({
+                                url: '/gtverify/verifygeetest',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    geetest_challenge: validate.geetest_challenge,
+                                    geetest_validate: validate.geetest_validate,
+                                    geetest_seccode: validate.geetest_seccode,
+                                    scence:1
+                                }
+                            }).done(function(data) {
+                                if (data.status == 1) {
+                                    $.ajax({
+                                        url: " /login/",
+                                        type: "post",
+                                        dataType: "json",
+                                        data: {name: name, password: password},
+                                        success: function (data) {
+                                            if (data.status == 1) {
+                                                //新签返会员跳转
+                                                if (data.data && data.data.module == 2) {
+                                                    window.location.href = "{:C('QZ_YUMING_SCHEME')}://{:C('CP_HOST')}" + "/home?token=" + data.data.token;
+                                                } else {
+                                                     window.location.href = "/home/";
+                                                }
+                                            } else if (data.status == 0) {
+                                                $('.tips').html("");
+                                                $('.password—tip').html(data.info);
+                                            } else if (data.status == 1000100) {
+                                                $('.newfixed').show()
+                                            }
+                                        },
+                                        error: function (xhr) {
+                                            alert("登录失败,请稍后再试！")
+                                        }
+                                    })
+                                }
+                            });
+
+                        }).onError(function(){
+                            alert("发送失败,请稍后再试!")
+                        })
+                    })
+                });
+        }
+    })
+</script>
+</html>

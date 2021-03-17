@@ -1,0 +1,158 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>管理重点城市-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/ordersrank/css/ordersrank.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>管理重点城市</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="col-xs-3 no-padding">
+                            <h5>选择角色：</h5>
+                            <div class="col-xs-7 no-padding " >
+                                <select class="form-control " id="select-role" name="role">
+                                    <option selected style="color: #00b6ff" >{$rolename}</option>
+                                    <option value="0" >营销副总</option>
+                                    <option value="59">外销经理</option>
+                                    <option value="39">商务经理</option>
+                                    <option value="68">运营总监</option>
+                                    <option value="75">推广主管</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <h5>设置查看城市：</h5>
+                            <label class="h5 all-select-zhiwei"><input type="checkbox" name=""><span>全选</span></label>
+                            <div class="zhiwei-list mt20 hasborder pl20">
+                                <div><label manager="1"><input type="checkbox" name=""><span>外销</span></label></div>
+                                <div><label manager="0"><input type="checkbox" name=""><span>商务</span></label></div>
+                                <div><label manager="2"><input type="checkbox" name=""><span>商务外销</span></label></div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 no-padding pull-right">
+                            <label class="h5 all-select"><input type="checkbox" name=""><span>全选</span></label>
+                            <div class="col-xs-3 pull-right no-padding"><input id="search-city" class="form-control" type="text" name="" placeholder="例：苏州"></div><h5 class="pull-right">快速搜索：</h5>
+                            <form action="/ordersrank/addrolequyu" method="post">
+
+                                <div class="city-list hasborder col-xs-12 mt20">
+                                    <volist name = 'citys' id = 'v'>
+                                        <in name="v.id" value="$quyus">
+                                            <label manager = {$v.manager}><input type="checkbox" name="quyu_id[]" value ={$v.id} checked="checked"><span>{$v.cname}</span></label>
+                                            <else/>
+                                            <label manager = {$v.manager}><input type="checkbox" name="quyu_id[]" value ={$v.id}><span>{$v.cname}</span></label>
+                                            </li>
+                                        </in>
+                                    </volist>
+                                    <input hidden value={$role} name="role_id">
+                                </div>
+                                <div class="col-xs-12 no-padding mt20">
+                                    <div class="btn btn-default ml10 pull-right">取消</div>
+                                    <input class="btn btn-info" type="submit">
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(document).ready(function($) {
+            $('#select-role').change(function(){
+                var role = $(this).val()
+                console.log(role);
+                location.href ='/ordersrank/pjddphqxsz?role='+role;
+            })
+
+            function allselsect(a,b){
+                // 全选
+                a.on('click',function(){
+                    if($(this).find('input').is(":checked")){
+                        b.find('input').prop('checked',true)
+                    }else{
+                        b.find('input').prop('checked',false);
+                    }
+                });
+                // 单选
+                b.on('click',' label',function(){
+                    if($(this).find('input').is(":checked")){
+                        $(this).attr('gou',1);
+                        if(b.find('label').length == b.find('label[gou=1]').length){
+                            a.find('input').prop('checked',true)
+                        }
+                    }else{
+                        $(this).removeAttr('gou');
+                        a.find('input').prop('checked',false)
+                    }
+                });
+            }
+            // 全选
+            allselsect($('.all-select'),$('.city-list'));
+            allselsect($('.all-select-zhiwei'),$('.zhiwei-list'));
+
+            // 快速搜索
+            $('#search-city').on('keyup',function(){
+                var bool=true;
+                var searchVal = $(this).val();
+
+                $('.city-list label span').each(function(index, el) {
+                    if(searchVal == $(el).text()){
+                        $(el).parent().siblings().hide();
+                        bool=false;
+                        return false;
+                    }else{
+                        bool=true;
+                    }
+                });
+
+                if(bool){
+                    $('.city-list label').show();
+                }
+            });
+            //   外销/商务/商务外销
+            var arr = [];
+            $('.zhiwei-list input').click(function(){
+                if($(this).is(':checked')){
+                    arr.push($(this).parent().attr('manager'));
+                    $('.city-list label').hide();
+                    for(var i =0;i<arr.length;i++){
+                        $('.city-list label').each(function(index,el){
+                            var manager =  $(el).attr('manager');
+                            console.log(arr[i])
+                            if(arr[i] == manager){
+                                $('.city-list label[manager='+manager+']').show()
+                            }
+                        })
+                    }
+                }else{
+                    for(var i = 0;i<arr.length;i++) {
+                        if (arr[i] == $(this).parent().attr('manager')) {
+                            arr.splice(i, 1);
+                            break;
+                        }
+                    }
+                    $('.city-list label').hide();
+                    for(var i =0;i<arr.length;i++){
+                        $('.city-list label').each(function(index,el){
+                            var manager =  $(el).attr('manager');
+                            console.log(arr[i])
+                            if(arr[i] == manager){
+                                $('.city-list label[manager='+manager+']').show()
+                            }
+                        })
+                    }
+                }
+            });
+        });
+    </script>
+</block>

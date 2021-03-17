@@ -1,0 +1,152 @@
+<extend name="Common:basic"/>
+<block name="link">
+ <link href="{$static_host}/assets/mobile/zb/css/m-zxbj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="{$static_host}/assets/mobile/zb/css/m-hxsj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+<a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+<div class="m-header-tit">在线报名</div>
+</block>
+<block name="content">
+<article>
+    <div class="m-t1">&nbsp;</div>
+    <ul class="m-bj-edit">
+        <input type="hidden" name="tel" value="{$info.tel}" >
+        <input type="hidden" name="name" value="{$info.name}">
+        <li><input class="m-row-int1 m-bj-edit-list" type="number" name="mianji" placeholder="请填写房屋面积"><span class="dw">㎡</span></li>
+        <li>
+            <div class="m-row" style="width: 100%;">
+                <select name="start" class="m-row-int1 m-bj-edit-list m-bj-half">
+                    <option value="">请选择开工时间</option>
+                    <option value="1个月">1个月</option>
+                    <option value="2个月">2个月</option>
+                    <option value="3个月">3个月</option>
+                    <option value="3个月以上">3个月以上</option>
+                    <option value="拿房后开工">面议</option>
+                </select>
+            </div>
+        </li>
+          <li>
+            <div class="m-row" style="width: 100%;">
+                <select name="yusuan" class="m-row-int1 m-bj-edit-list m-bj-half">
+                    <option value="">请选择不包括家具、电器的预算</option>
+                    <volist name="info.yusuan" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+        </li>
+        <li id="area">
+            <div class="m-row">
+                <select name="cs" class="province m-row-int2 m-bj-edit-list" ></select>
+            </div>
+            <div class="m-row m-bj-edit-right">
+                <select name="qx" class="city m-row-int2 m-bj-edit-list" ></select>
+            </div>
+        </li>
+        <li><input class="m-row-int1 m-bj-edit-list" type="text" name="xiaoqu" placeholder="您的小区，以便准确匹配"></li>
+    </ul>
+    <a class="m-b-btn save-submit">参加</a>
+</article>
+</block>
+<block name="script">
+<script type="text/javascript" src="{$cityfile}"></script>
+<script type="text/javascript">
+$(function(){
+
+    var shen  = null,shi = null, cid = null;
+        shen      = citys["shen"];
+        shi       = citys["shi"];
+
+    App.citys.init("select[name=cs]","select[name=qx]",shen,shi,'{$cityInfo.id}',"",true);
+
+    //报名
+    $(".save-submit").click(function(event) {
+        var _this = $(this);
+
+        var tel = $(".m-bj-edit input[name=tel]");
+        var name = $('.m-bj-edit input[name="name"]');
+        var xiaoqu = $(".m-bj-edit input[name=xiaoqu]").val();
+        var mianji = $(".m-bj-edit input[name=mianji]").val();
+        var yusuan = $(".m-bj-edit select[name=yusuan]").val();
+        var cs = $("#area select[name=cs]").val();
+        var qx = $("#area select[name=qx]").val();
+        var start = $(".m-bj-edit select[name=start]").val();
+         
+        
+        if (!App.validate.run(name.val())) {
+            alert('请输入您的称呼');
+            return false;
+        }
+
+        if (!App.validate.run(tel.val(),"moblie")) {
+            alert('请输入正确的手机号码');
+            return false;
+        }
+
+        if(!mianji){
+            alert('请输入您的房屋面积');
+            return false;
+        }
+        var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+        if (!re.test(mianji)){
+            $(".m-bj-edit input[name=mianji]").focus();
+            alert('请输入正确的面积')
+            return false;
+        }
+        if(!start){
+            alert('请选择开工时间');
+            return false;
+        }
+        if(!yusuan){
+            alert('请选择预算');
+            return false;
+        }
+
+        if('' == cs){
+            alert('请选择您所在的城市')
+            return false;
+        }
+        if (xiaoqu == "") {
+            $(".m-bj-edit input[name=xiaoqu]").focus();
+            alert('为了更准确的为您匹配方案，请填写小区名')
+            return false;
+        };
+         
+        window.order({
+            extra:{
+                tel: tel.val(),
+                name: name.val() + '[老客户]',
+                xiaoqu: xiaoqu,
+                mianji: mianji,
+                cs:cs,
+                qx:qx,
+                yusuan:$("select[name=yusuan]").val(),
+                start:$("select[name=start]").val(),
+                source: '404',
+                step:2
+            },
+            submitBtn:{
+                className:$(this),
+                type:'btn'
+            },
+            error:function(){
+                alert('发生了未知的错误,请刷新页面');
+                 
+            },
+            success:function(data, status, xhr){
+                 
+                if (data.status == 1) {
+                    window.location.href = "/zt/baomingok";
+                }else{
+                    alert(data.info);
+                }
+            },
+            validate:function(item, value, method, info){
+                return true;
+            }
+        });
+    });
+});
+</script>
+</block>

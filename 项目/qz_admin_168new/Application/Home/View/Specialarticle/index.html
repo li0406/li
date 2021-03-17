@@ -1,0 +1,111 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>装修攻略-专题-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装修攻略-专题</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/specialarticle/">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    专题标题:<input type="text" name="title" class="form-control"  placeholder="标题" value="{$title}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="pull-right col-sm-1">
+                                <br/>
+                                    <a  href="/specialarticle/specialup/" class="btn btn-block btn-info">新增专题</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th >专题标题</th>
+                            <th class="col-sm-1">专题分类</th>
+                            <th class="col-sm-2">操作时间</th>
+                            <th class="col-sm-2">状态</th>
+                            <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="list" id="vo">
+                        <tr>
+                            <th >{$vo.title}</th>
+                            <th class="col-sm-1">{$vo.classname}</th>
+                            <th class="col-sm-2">{$vo.time|date="Y-m-d H:i:s",###}</th>
+                            <th class="col-sm-1">
+                                <if condition="$vo['isdelete'] EQ 1">
+                                    显示
+                                <else/>
+                                    隐藏
+                                </if>
+                            </th>
+                            <th class="col-sm-1">
+                                <a href="/specialarticle/specialup?id={$vo.id}" class="fa fa-pencil" title="编辑"></a>
+                                <eq name="vo.isdelete" value="1">
+                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="0" class="fa fa-toggle-on" title="隐藏"></a>
+                                <else/>
+                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="fa fa-toggle-off " title="显示"></a>
+                                </eq>
+                            </th>
+                        </tr>
+                        </volist>
+                    </table>
+                    {$page}
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$("a[class*='fa-toggle']").click(function(event) {
+    var id = $(this).attr("data-id");
+    var val = $(this).attr("data-value");
+    $.ajax({
+        url: '/specialarticle/delspecialmodule',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {id: id,val:val}
+    })
+    .done(function(data) {
+        if (data.status == 1) {
+             window.location.href = window.location.href;
+        }else{
+             _this.Alert({
+                msg:data.info,
+                level:2
+            });
+        }
+    })
+    .fail(function() {
+        _this.Alert({
+            msg:"操作失败,请联系技术部门！",
+            level:2
+        });
+    });
+});
+</script>
+</block>

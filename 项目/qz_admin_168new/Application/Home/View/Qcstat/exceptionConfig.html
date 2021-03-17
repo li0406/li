@@ -1,0 +1,334 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+	 <link rel="stylesheet" href="/assets/home/qcstat/css/setorder.css?v={:C('STATIC_VERSION')}">
+     <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="title">
+    <title>异常订单预警设置</title>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+       	    <div class="col-xs-12">
+           	   	<div class="heat_nav">
+                      <ul class="navli">
+                        <li class="first_ms">异常订单预警设置</li>
+           	   	</div>
+                <div class="qiehuannav">
+                     <ul class="qiehuanul">
+                       <li class="activenav">城市异常设置</li>
+                       <li>分单率异常设置</li>
+                       <li class="lastli">其他设置</li>
+                     </ul>
+                </div>
+                <div class="box contentzs xianshi">
+                    <div class="wainavdh ">
+                        <div class="defalutdd">
+                          <span>默认订单增长率：</span>
+                          <input type="text" name="city_default" placeholder="默认订单增长率" value="{$city_default|default='100'}%">
+                          <button id="btnSave"  type="button" class="btn savebc">保存</button>
+                        </div>
+                        <div class="cityleft">
+                                <form method="get" action="/qcstat/exceptionconfig">
+                                <span>城市：</span>
+                                <select id="city" name="city" >
+                                    <option value="">请选择</option>
+                                    <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                                <input type="hidden" name="tab" value="1" />
+                        </div>
+                    </div>
+                    <table id="cityTable" class="toptable ">
+                        <volist name="list" id="vo">
+                        <tr>
+                            <volist name="vo" id="v">
+                            <td>
+                                <div>
+                                   <p>{$v.char_name}</p>
+                                </div>
+                                <if condition="$v['mark'] EQ 1">
+                                <input id="{$v.cid}" class="setinput cityInput" type="text" data-id="{$v.cid}" value="{$v.rate|default=100}%">
+                                <else/>
+                                <input id="{$v.cid}" class="setinput " type="text" data-id="{$v.cid}" value="{$v.rate}%">
+                                </if>
+                            </td>
+                            </volist>
+                         </tr>
+                        </volist>
+                       </table>
+                </div>
+                <div class="box contentzs">
+                    <div class="wainavdh">
+                        <div class="defalutdd">
+                            <span>付费默认分单率：</span>
+                            <input id="paydefault" type="text" value="{$srcInfo.paydefault|default=100}%">
+                        </div>
+                        <div class="defalutdd freefendan">
+                            <span>免费默认分单率：</span>
+                            <input id="freedefault" type="text" value="{$srcInfo.freedefault|default=100}%">
+                            <button id="btnSrcSave" type="button" class="btn savebc">保存</button>
+                        </div>
+                        <div class="cityleft">
+                            <form method="get" action="/qcstat/exceptionconfig">
+                            <span>渠道名称：</span>
+                            <select id="src" name="src">
+                                <volist name="src" id="vo">
+                                    <option value="{$vo.id}">{$vo.text}</option>
+                                </volist>
+                            </select>
+                            <button type="submit" class="btn searchcx">查询</button>
+                            <input type="hidden" name="tab" value="2" />
+                            </form>
+                        </div>
+                    </div>
+                    <table id="srcTable" class="tabletwo">
+                        <thead>
+                            <tr>
+                                <th>渠道代号</th>
+                                <th>所属部门</th>
+                                <th>是否付费</th>
+                                <th>分单率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="srcInfo.list" id="vo">
+                            <tr>
+                                <td>{$vo.alias}</td>
+                                <td>{$vo.dept_name}</td>
+                                <td>
+                                    <if condition="$vo['charge'] EQ 2"> 是 <else/> 否 </if>
+                                </td>
+                                <td>
+                                    <input type="text" class="{$vo.mark}" data-name="{$vo.name}" data-charge="{$vo.charge}" data-id="{$vo.src}"  value="{$vo.rate}%" >
+                                </td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    {$srcInfo.page}
+                </div>
+                <div class="box contentzs">
+                    <form id="otherForm">
+                        <div class="frame">
+                            <div class="itemguding"><span class="must-write">*</span> 手机号归属地与发单地不符：≧</div>
+                            <input type="text" name="ipTelLocation" placeholder="请输入大于零整数数字（必填）" value="{$other.ipTelLocation|default=''}"  class="form-control">/天
+                        </div>
+                        <div class="textdoman02">
+                            <div class="spandoman">邮箱提醒设置：</div>
+                            <textarea class="form-control fontdoman" name="email" placeholder="一行一个邮箱(非必填)">{$other.email}</textarea>
+                        </div>
+                        <button id="btnOtherSave" type="button" class="btn fontbt">保存</button>
+                    </form>
+                    <div><span class="must-write">*</span> 为必填项</div>
+              </div>
+       	   </div>
+       </div>
+    </section>
+
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var url = "/qcstat/exceptionconfig";
+        $(".qiehuanul li").removeClass("activenav").eq({$Think.get.tab|default='1'}-1).addClass('activenav');
+        $(".contentzs").removeClass("xianshi").eq({$Think.get.tab|default='1'}-1).addClass('xianshi');
+        $('.qiehuanul').on('click','li',function(){
+            var index=$(this).index();
+            switch(index){
+                default:
+                    url += "?tab=1"
+                break;
+                case 1:
+                    url += "?tab=2"
+                break;
+                case 2:
+                    url += "?tab=3"
+                break;
+            }
+            window.location.href = url;
+        });
+
+        $(function(){
+            $('#city').select2().on('select2:select', function (e) {
+                var id = e.params.data.id;
+                $(".active-tab").removeClass('active-tab');
+                if (typeof id  !== "undefined") {
+                    $("#"+id).parents("td").addClass('active-tab');
+                    $("#"+id).focus();
+                }
+            });
+
+            $("#src").select2({
+                placeholder :'请选择',
+                ajax: {
+                    url: "/ordersource/findsrcinfo/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.data
+                        };
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                minimumInputLength: 2,
+                templateResult: function(repo) {
+                    if (repo.loading) return repo.text;
+                    var markup = "<div class='select2-result-repository clearfix'>" +
+                        "<div class='select2-result-repository__meta'>" +
+                        "<div class='select2-result-repository__title'>" + repo.text + "(" + repo.id + ")</div>";
+                    return markup;
+                },
+                templateSelection: function(repo) {
+                    return repo.text;
+                },
+                allowClear : true
+            });
+
+            $("#btnSave").click(function(event) {
+                var data = new Array();
+                data.push({name:"default",value:$("input[name=city_default]").val()});
+                $("#cityTable tr td").each(function(){
+                    var input = $(this).find("input");
+                    data.push({name:input.attr("data-id"),value:input.val()});
+                });
+
+                $.ajax({
+                    url: '/qcstat/cityexceptionup/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: data
+                })
+                .done(function(data) {
+                    alert(data.info);
+                    if (data.status == 1) {
+                        var url = window.location.href;
+                        if (url.indexOf("tab") > 0) {
+                            url = url.replace(/[\&]?tab=\d+\&?/g,"");
+                            if (url.indexOf("p=") > 0) {
+                               url = url.replace(/[\&]?p=\d+\&?/g,"");
+                            }
+                        }
+                        if (url.indexOf("?") == -1) {
+                            url += "?";
+                        }
+                        window.location.href =  url+"tab=1";
+                    }
+                });
+            });
+
+            $('input[name=city_default]').on('input propertychange', function() {
+                var rate = $(this).val();
+                rate = rate.replace("%","");
+                var reg = /\d+(\.\d{1,2})?/;
+                var bool = reg.test(rate);
+                if (bool) {
+                    if (rate == "") {
+                        rate = 0;
+                        $(this).val(0+"%");
+                    }
+                    $(".cityInput").val(parseFloat(rate) +"%");
+                }
+            });
+
+            $('#paydefault').on('input propertychange', function() {
+                var rate = $(this).val();
+                rate = rate.replace("%","");
+                var reg = /\d+(\.\d{1,2})?/;
+                var bool = reg.test(rate)
+                if (bool) {
+                   if (rate == "") {
+                        rate = 0;
+                        $(this).val(0+"%");
+                    }
+                    $(".paydefault").val(parseFloat(rate) +"%");
+                }
+            });
+
+            $('#freedefault').on('input propertychange', function() {
+                var rate = $(this).val();
+                 rate = rate.replace("%","");
+                var reg = /\d+(\.\d{1,2})?/;
+                var bool = reg.test(rate)
+                if (bool) {
+                   if (rate == "") {
+                        rate = 0;
+                        $(this).val(0+"%");
+                    }
+                    $(".freedefault").val(parseFloat(rate) +"%");
+                }
+            });
+
+            $("#btnSrcSave").click(function(event) {
+                var data = new Array();
+                data.push({name:"free_default",value:$("#freedefault").val()});
+                data.push({name:"pay_default",value:$("#paydefault").val()});
+
+                $("#srcTable input").each(function(i){
+                    var input = $(this);
+                    data.push({name:input.attr("data-id"),value:input.val()});
+                    data.push({name:input.attr("data-id")+"_charge",value:input.attr("data-charge")});
+                    data.push({name:input.attr("data-id")+"_name",value:input.attr("data-name")});
+                });
+
+                $.ajax({
+                    url: '/qcstat/srcexceptionup/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: data
+                })
+                .done(function(data) {
+                    alert(data.info);
+                    if (data.status == 1) {
+                        window.location.href = '/qcstat/exceptionconfig?tab=2';
+                    }
+                });
+
+            });
+
+            $("#btnOtherSave").click(function(event) {
+                var query = {};
+                $.each($("#otherForm").serializeArray(), function(key, val) {
+                    query[val.name] = val.value;
+                });
+                if (query.ipTelLocation === ''|| query.ipTelLocation === undefined || parseInt(query.ipTelLocation,10) <= 0 || isNaN(parseInt(query.ipTelLocation,10))){
+                    alert('设置项（手机号归属地与发单地不符）未填写或填写错误！');
+                    return;
+                }
+                $.ajax({
+                    url: '/qcstat/otherexceptionup/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:query
+                })
+                .done(function(data) {
+                    alert(data.info);
+                    if (data.status == 1) {
+                        var url = window.location.href;
+                        if (url.indexOf("tab") > 0) {
+                            url = url.replace(/[\&]?tab=\d+\&?/g,"");
+                            if (url.indexOf("p=") > 0) {
+                                url += "&";
+                            }
+                        }
+                        if (url.indexOf("?") == -1) {
+                            url += "?";
+                        }
+                        window.location.href = url+"tab=2";
+                    }
+                });
+
+            });
+       });
+   </script>
+</block>

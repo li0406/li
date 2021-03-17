@@ -1,0 +1,148 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>案例管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>案例管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homecase">首页案例管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                    <form id="searchform" action="" method="get">
+                        <div class="col-sm-2"  style="margin-top:10px">
+                            <select name="city_id" class="select2">
+                                <option value="">请选择城市</option>
+                                <!--<option value="0">Q全站</option>-->
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-3" style="margin-top:10px">
+                            <div class="input-group" >
+                                <input type="text" name="keyword" class="form-control pull-right" placeholder="装修公司名称/代码" value="{$Think.get.keyword}">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>&nbsp;筛选</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 pull-right" style="margin-top:10px">
+                            <a href="/homecase/add" class="pull-right"><button type='button' class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i>新增案例</button></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">案例列表</h3>
+                    <div class="box-tools"></div>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <th width="60">#</th>
+                                <th style="text-align:left;">标题</th>
+                                <th width="180">公司</th>
+                                <th width="80">所属城市</th>
+                                <th width="50">排序</th>
+                                <th width="120">开始时间</th>
+                                <th width="110">结束时间</th>
+                                <th width="80">剩余天数</th>
+                                <th width="50">状态</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            <volist name="list" id="v">
+                                <tr>
+                                    <td>{$v.id}</td>
+                                    <td style="text-align:left;font-size:15px">
+                                        <a href="/homecase/edit?id={$v.id}" title="{$v.title}">{$v.title}</a>
+                                    </td>
+                                    <td >{$v.company_name}</td>
+                                    <td >{$v.city_name}<if condition="$v.city_id EQ '0' ">全站</if></td>
+                                    <td>{$v.sort}</td>
+                                    <td>{$v.start_time|date="Y-m-d",###}</td>
+                                    <td>{$v.end_time|date="Y-m-d",###}</td>
+                                    <td>{$v.date}</td>
+                                    <td>
+                                        <if condition="$v.status EQ '0' "><span class="badge bg-gray">停用</span></if>
+                                    </td>
+                                    <td>
+                                        <span title="预览" class="fa fa-photo" data-img="{$v.img_url}"></span>
+                                        <span title="编辑" class="fa fa-pencil" data-id="{$v.id}"></span>
+                                        <if condition="$v.status EQ '0' ">
+                                            <span title="启用" class="fa fa-toggle-off status" data-id="{$v.id}"></span>
+                                        <else />
+                                            <span title="停用" class="fa fa-toggle-on status" data-id="{$v.id}"></span>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer clearfix">
+                    <ul class="pagination no-margin pull-right">{$page}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="padding:11%;">
+        <div class="modal-dialog " style="width:1235px;height:425px">
+            <div class="modal-content">
+                <div class="modal-body"><img src="" id="Preview" width="1205" height="405"></div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".select2").select2();
+        $(".select2").select2("val", '{$Think.get.city_id}');
+        $(".orderby").select2({
+            minimumResultsForSearch: Infinity
+        });
+
+
+        $('.fa-pencil').click(function(){
+            location.href="/homecase/edit?id=" + $(this).attr('data-id');
+        });
+
+        $('.fa-photo').click(function(){
+            var imgUrl = "//{:C('QINIU_DOMAIN')}/" + $(this).attr('data-img');
+            $('#myModal').modal('show');
+            $("#Preview").attr("src",imgUrl);
+        });
+
+        $('.status').click(function(){
+            if(confirm("您确定要停用/启用吗？")){
+                var id = $(this).attr('data-id');
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                location.href="/homecase/status?id="+id;
+            }
+        });
+    </script>
+</block>

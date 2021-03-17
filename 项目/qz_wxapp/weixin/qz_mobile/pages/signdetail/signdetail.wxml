@@ -1,0 +1,188 @@
+<!--pages/signdetail/signdetail.wxml-->
+
+<view class='contain'>
+  <view class='info'>
+    <view class='in-title'>
+      <view class='tl'>
+        <text>{{detail.qiandan_company_qc}}</text>
+        <text wx:if="{{detail.report_count}}" class="red" bindtap="getFdList" data-id="{{detail.id}}">返点记录（{{ detail.report_count }}）</text>
+      </view>
+    </view>
+    <view class='in-title in-top'>
+      <view class='tr'>
+        申请签单备注：
+      </view>
+    </view>
+    <textarea class='in-input' disabled placeholder='' bindinput='desc' value="{{detail.qiandan_info}}"></textarea>
+
+    <view class='fen-con'>
+      <view class='fen-title'>分配公司：</view>
+      <view wx:for="{{detail.companys}}" wx:for-index='index' wx:key>
+        <view class='fen-comp'>{{item.qc}}</view>
+      </view>
+    </view>
+  </view>
+  <view class='message'>
+    <view class="m-title">订单信息</view>
+  </view>
+  <view class='con'>
+    <view class='con-item'>
+      订单状态:
+      <text class='con-color'>{{detail.type_fw =='1'?'分单':'赠单'}}</text>
+    </view>
+    <view class='con-item'>
+      城市:
+      <text>{{detail.cs}}-{{detail.area}}</text>
+    </view>
+    <view class='con-item'>
+      签单金额:
+      <text class='con-color'>{{detail.qiandan_jine}}万</text>
+    </view>
+    <view class='con-item'>
+      面积:
+      <text class='con-color'> {{detail.mianji}}m²</text>
+    </view>
+    <view class='con-item'>
+      小区:
+      <text>{{detail.xiaoqu}}</text>
+    </view>
+    <view class='con-item'>
+      业主:
+      <text>{{detail.name}}</text>
+    </view>
+    <view class='con-item line'>
+      装修要求:
+    </view>
+    <text class='liner'>
+      {{str}}
+    </text>
+    <view class='con-item'>
+      户型结构:
+      <text>{{detail.huxing}}</text>
+    </view>
+    <view class='con-item'>
+      装修风格:
+      <text>{{detail.fengge}}</text>
+    </view>
+    <view class='con-item'>
+      装修类型:
+      <text wx:if="{{detail.lx == 1}}">家装
+        </text>
+      <text wx:elif="{{detail.lx == 2}}">公装
+        </text>
+      <text wx:else>---- </text>
+    </view>
+    <view class='con-item'>
+      装修预算:
+      <text>{{detail.yusuan}}</text>
+    </view>
+  </view>
+</view>
+<view class='tab' wx:if="{{status==1}}">
+  <view class='tl'>
+    <view class='tl-z'>
+      状态：
+      <text wx:if="{{status == 0}}">请审核
+        </text>
+      <text wx:elif="{{status == 1}}">已签单
+        </text>
+      <text wx:elif="{{status == 2}}">继续跟进
+        </text>
+      <text wx:else="{{status == null}}">无签单
+        </text>
+    </view>
+    <view class='tl-t' wx:if="{{qiantime}}">
+      审核时间：
+      <text>{{qiantime}}</text>
+    </view>
+  </view>
+  <view class='tr' bindtap='canel'>
+    取消
+  </view>
+</view>
+<view class='tab' wx:if="{{status!=1}}">
+  <view class='tl'>
+    <view class='tl-z'>
+      状态：
+      <text wx:if="{{status == 0}}">请审核
+        </text>
+      <text wx:elif="{{status == 1}}">已签单
+        </text>
+      <text wx:elif="{{status == 2}}">继续跟进
+        </text>
+      <text wx:else="{{status == null}}">无签单
+        </text>
+    </view>
+    <view class='tl-t' wx:if="{{qiantime}}">
+      审核时间：
+      <text>{{qiantime}}</text>
+    </view>
+  </view>
+  <view class='tr' bindtap='showPopup'>
+    审核
+  </view>
+</view>
+
+<view class='shade' hidden='{{popup}}' bindtap='hidePopup'></view>
+<view class='shade_box popup' hidden='{{popup}}'>
+  <view class='p-title'>审核详情</view>
+  <view class='p-status'>
+    状态：
+    <text wx:if="{{status == 0}}">请审核
+        </text>
+    <text wx:elif="{{status == 1}}">已签单
+        </text>
+    <text wx:elif="{{status == 2}}">继续跟进
+        </text>
+    <text wx:else="{{status == null}}">无签单
+        </text>
+  </view>
+  <view class='p-status p-company'>
+    公司:
+    <text class='qc'>{{detail.qiandan_company_qc}}</text>
+  </view>
+
+  <radio-group class="p-group" bindchange="signStatus">
+    <label>
+      <radio value="1">通过</radio>
+    </label>
+
+    <label>
+      <radio value="2">继续跟进</radio>
+
+    </label>
+
+  </radio-group>
+
+
+  <view class='p-info'>
+    <view class='msg left' bindtap='hidePopup'>关闭</view>
+    <view class='msg' bindtap='report'>提交</view>
+  </view>
+</view>
+
+<view class='shade' hidden='{{popup2}}' bindtap='hidePopup2'></view>
+<view class='shade_box popup popup2' hidden='{{popup2}}'>
+  <view class='p-title'>返点记录</view>
+  <view class="pic" catchtap='hidePopup2'><image src='../../img/error.png'></image></view>
+  <scroll-view class="popup2-scroll" scroll-y="true">
+    <view class='p-status fd-list' wx:for="{{fdList}}">
+      <view>
+        <text class="name">汇款时间：</text>
+        <text class="item">{{item.payment_date}}</text>
+        <text class="check" catchtap='check'  data-id='{{item.id}}'>查看</text>
+      </view>
+      <view>
+        <text class="name">返点金额：</text>
+        <text class="item">{{item.back_money}}</text>
+        <text class="name ml20">报备人：</text>
+        <text class="item">{{item.creator_name}}</text>
+      </view>
+      <view>
+        <text class="name">公司名称：</text>
+        <text class="item">{{item.company_name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+</view>

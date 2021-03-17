@@ -1,0 +1,182 @@
+<!--pages/invoiceReporting/details.wxml-->
+<view class="add-invoice-reporting">
+	<view class="top-tip">
+		<view class="top-tip-l" wx:if="{{!topIsOpen}}">
+			<text>填写规则：开票金额要核对清楚，不得超出实际收款金额</text>
+		</view>
+		<view class="top-tip-r" wx:if="{{!topIsOpen}}">
+			<text class="top-tip-r-green" bindtap="topOpen">展开</text>
+		</view>
+		<view class="top-tip-text" wx:if="{{topIsOpen}}">
+			<text>填写规则：开票金额要核对清楚，不得超出实际收款金额；开票类型和开票公司要选择清楚，有不明处可向财务咨询；是否到账根据实际是否收款选择，若收款后开票选是，若未收款提前开票选否；金额以人民币为单位。</text>
+			<text class="btnClose" bindtap="topClose">收起</text>
+		</view>
+	</view>
+	<view class="info">
+		<view class="li">
+			<text class="title">开票状态</text>
+			<view class="right">
+				<text style="color: {{data.status==5?'#FF5353':(data.status==4?'#378000':(data.status==3?'#5DBB16':(data.status==2?'#FFB018':'')))}}">{{data.status_name}}</text>
+			</view>
+		</view>
+	</view>
+	<view class="add-btn">
+		<view class="top-add-list">
+			<view class="list" wx:for="{{paymentDetails}}" wx:if="{{index < 3 || more}}">
+				<view class="li">
+					<text class="title">公司名称：</text>
+					<text class="company-name">{{item.company_name}}</text>
+					<image wx:if="{{item.has_invoice == 1 || item.warning_info}}" class="ml-10" src="../../img/no-pass.png" bindtap="tipReport" data-id="{{item.id}}" data-info="{{item.warning_info}}" data-status="{{item.exam_status}}"></image>
+				</view>
+				<view class="li">
+					<view class="w50">
+						<text class="title">收款金额：</text>
+						<text class="">{{item.payment_total_money}}</text>
+					</view>
+					<view class="w50">
+						<text class="title">报备人：</text>
+						<text class="">{{item.creator_name}}</text>
+					</view>
+				</view>
+				<view class="li">
+					<text class="title">汇款时间：</text>
+					<text class="">{{item.payment_date}}</text>
+				</view>
+				<view class="li">
+					<text class="title">状态：</text>
+					<text class="{{item.exam_status == 3 || item.exam_status == 5 || item.exam_status == 30 ? '' : 'red'}}">{{item.exam_status_name}}</text>
+				</view>
+				<view class="li" wx:if="{{item.warning_info}}">
+					<text class="red">{{item.warning_info}}</text>
+				</view>
+			</view>
+		</view>
+		<button class="one-btn" bindtap="moreBtn" wx:if="{{paymentDetails.length > 3}}">{{moreText}}</button>
+	</view>
+	<view class="info">
+		<view class="li">
+			<text class="title">开票类型</text>
+			<view class="right">
+				<text>{{data.type_name}}</text>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">开票公司</text>
+			<view class="right">
+				<text>{{data.billing_company_name}}</text>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">是否到账</text>
+			<view class="right">
+				<text>{{data.is_in_account_name}}</text>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">开票金额</text>
+			<view class="right">
+				<text>{{data.invoice_price}}</text>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="li">
+			<text class="title">发票抬头</text>
+			<view class="right">
+				<text>{{data.invoice_title}}</text>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">纳税人识别号</text>
+			<view class="right">
+				<text>{{data.taxpayer_identification_number}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.company_address || data.company_phone}}">
+			<text class="title">地址及电话</text>
+			<view class="right">
+				<text>{{data.company_address}} {{data.company_phone}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.company_bank || data.company_bank_account }}">
+			<text class="title">开户行及账号</text>
+			<view class="right">
+				<text>{{data.company_bank}} {{ data.company_bank_account }}</text>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="li" wx:if="{{data.apply_email}}">
+			<text class="title">申请人邮箱</text>
+			<view class="right">
+				<text>{{data.apply_email}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.receiver_name}}">
+			<text class="title">收件人姓名</text>
+			<view class="right">
+				<text>{{data.receiver_name}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.receiver_phone}}">
+			<text class="title">收件人电话</text>
+			<view class="right">
+				<text>{{data.receiver_phone}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.receiver_address}}">
+			<text class="title">收件人地址</text>
+			<view class="right">
+				<text>{{data.receiver_address}}</text>
+			</view>
+		</view>
+	</view>
+	<view class="info" wx:if="{{xbbPics.length > 0}}">
+		<view class="info-tip">
+			<text class="title">小报备截图</text>
+		</view>
+		<view class="info-up">
+			<view class='uploader-list' wx:for="{{xbbPics}}" wx:key="item.length">
+				<image src='{{item}}' class="item" data-index="{{index}}" data-item="xbbPics" mode="scaleToFill" bindtap='previewImg' />
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="info-tip">
+			<text class="title">回传合同和营业执照：</text>
+		</view>
+		<view class="info-up">
+			<view class='uploader-list' wx:for="{{htPics}}" wx:key="index">
+				<image src='{{item}}' class="item" data-index="{{index}}" data-item="htPics" mode="scaleToFill" bindtap='previewImg' />
+			</view>
+		</view>
+	</view>
+	<view class="info"  wx:if="{{data.other_remarks || smPics.length > 0}}">
+		<view class="info-tip">
+			<text class="title">其他说明：</text>
+		</view>
+		<view class="info-up" wx:if="{{smPics.length > 0}}">
+			<view class='uploader-list' wx:for="{{smPics}}" wx:key="index">
+				<image src='{{item}}' class="item" data-index="{{index}}" data-item="smPics" mode="scaleToFill" bindtap='previewImg' />
+			</view>
+		</view>
+		<view class="info-mark" wx:if="{{data.other_remarks}}">
+			{{data.other_remarks}}
+		</view>
+	</view>
+	<view class="info">
+		<view class="li" wx:if="{{data.invoice_report_username}}">
+			<text class="title">报备人</text>
+			<view class="right">
+				<text>{{data.invoice_report_username}}</text>
+			</view>
+		</view>
+		<view class="li" wx:if="{{data.top_team_name}}">
+			<text class="title">所属部门</text>
+			<view class="right">
+				<text>{{data.top_team_name}}</text>
+			</view>
+		</view>
+	</view>
+	<check-log list="{{checkLog}}" isSmall="{{true}}"></check-log>
+</view>

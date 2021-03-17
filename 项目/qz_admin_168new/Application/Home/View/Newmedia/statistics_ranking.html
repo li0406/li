@@ -1,0 +1,103 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新媒体业绩统计 - 业绩排行榜</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/ordersrcstats/jiaju-transfor.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新媒体业绩统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-body">
+                    <div class="tab-box">
+                        <a href="/newmedia/statistics_group" >按组统计</a>
+                        <a href="/newmedia/statistics_user" >按人统计</a>
+                        <a href="javascript:;" class="active">业绩排行榜</a>
+                    </div>
+                    <div class="box box-body no-border">
+                        <div class="row">
+                            <form action="/newmedia/statistics_ranking" id="search_form">
+                                <div class="col-xs-2">
+                                    <div>选择月份：</div>
+                                    <input class="form-control datepicker fix-readonly" readonly type="text" name="month"
+                                    autocomplete="off" value="{$month}"/>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>&nbsp;</div>
+                                    <div class="clearfix">
+                                        <button type="submit" class="btn btn-primary normal">查询</button>
+                                        <button type="button" class="btn btn-default export">导出</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <table class="table table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th style="width: 25%;">序号</th>
+                            <th style="width: 25%">姓名</th>
+                            <th style="width: 25%">业绩</th>
+                            <th style="width: 25%">月份</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {~$k=1}
+                        <volist name="list" id="vo">
+                            <tr class="one-leveltop1" data-id="{$vo.id}">
+                                <td>{$k}</td>
+                                <td>{$vo.user_name}</td>
+                                <td>{$vo.finish_orders}</td>
+                                <td>{$vo.month}</td>
+                            </tr>
+                            {~$k++}
+                        </volist>
+                        <if condition="count($list) GT 0">
+                            <tr>
+                                <td colspan="2">合计</td>
+                                <td>{$all.finish_count}</td>
+                                <td></td>
+                            </tr>
+                            <else/>
+                            <tr>
+                                <td colspan="8">暂无数据</td>
+                            </tr>
+                        </if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            $('.datepicker').datetimepicker({
+                format: 'yyyy-mm',  //  这两个参数一起使用可以保证只选到月份
+                startView: 3, //  这两个参数一起使用可以保证只选到月份
+                minView: 3,   // 这两个参数一起使用可以保证只选到月份
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                autoclose: true,
+                language: 'zh-CN'
+            });
+
+            // 导出
+            $("button.export").click(function(){
+                window.location.href = "/newmedia/statistics_ranking?month={$month}&export=1";
+            });
+        });
+    </script>
+</block>

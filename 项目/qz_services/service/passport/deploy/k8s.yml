@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: passport
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    matchLabels:
+      app: passport
+  template:
+    metadata:
+      labels:
+        app: passport
+    spec:
+      imagePullSecrets:
+        - name: "container-registry-a"
+      containers:
+        - name: passport
+          # image: registry.cn-shanghai.aliyuncs.com/qizuang/passport:master-040ce9e
+          image: <K8S_IMAGE>
+          imagePullPolicy: Always
+          # command: [ "echo", "SUCCESS" ]
+          ports:
+            - name: passport
+              containerPort: 19000
+              protocol: TCP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          # envFrom:
+          # - configMapRef:
+          #     name: env-app-config
+          volumeMounts:
+            - mountPath: /data/app/passport/config
+              name: app-volume
+      volumes:
+        - name: app-volume
+          configMap:
+            defaultMode: 256
+            items:
+              - key: passport
+                path: config.toml
+            name: app-config
+            optional: false
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: passport
+  # namespace: development
+  namespace: <K8S_NAMESPACE>
+spec:
+  selector:
+    app: passport
+  ports:
+    - name: passport
+      protocol: TCP
+      port: 19000
+      targetPort: 19000
+  type: ClusterIP

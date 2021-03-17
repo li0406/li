@@ -1,0 +1,201 @@
+<extend name="Home@Index:basic"/>
+<block name="meta">
+    <title>{$tkd.title} - 齐装网装修效果图</title>
+    <meta name="keywords" content="{$tkd.keyword}" />
+    <meta name="description" content="{$tkd.description}" />
+    <notempty name="info.header.canonical">
+        <link rel="canonical" href="{$info.header.canonical}/"/>
+    </notempty>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="{$static_host}/assets/home/tags/css/meitu-tag.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <div class="wrap clearfix">
+        <div class="bread">
+            <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}">装修美图</a>&nbsp;&gt;&nbsp;<a href="/tags/">标签大全</a>&nbsp;&gt;&nbsp;{$tkd.title}
+        </div>
+        <div class="tit-box">
+            <span class="tit-content redcolor">{$tkd.title}</span>
+            <span class="tit-count">当前与<i class="redcolor">{$tkd.title}</i>相关的结果{$num}条</span>
+        </div>
+        <div id="main">
+            <ul id="imgBox" class="img-box show">
+                <volist name="list" id="v">
+                    <li>
+                        <div class="img-tp">
+                            <div class="img-top">
+                                <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$v.id}.html" title="{$v.title}" target="_blank">
+                                    <img class="lazy" src="http://{:C('QINIU_DOMAIN')}/{$v.imgs.0.img_path}-w300.jpg" alt="{$v.title}" data-original="http://{:C('QINIU_DOMAIN')}/{$v.imgs.0.img_path}-w300.jpg">
+                                </a>
+                                <div class="span">
+                                    <if condition="in_array($v['id'], $collect)">
+                                        <span data-id="{$v.id}" data-on="1" class="collect mt-mfbj">
+                                            <i class="fa fa-star"></i> 已收藏
+                                        </span>
+                                    <else />
+                                        <span data-id="{$v.id}" data-on="0" class="collect mt-mfbj">
+                                            <i class="fa fa-star"></i> 收藏
+                                        </span>
+                                    </if>
+                                    <span class="mt-mfsj">装修这种风格要多少钱?</span>
+                                </div>
+                            </div>
+                            <div class="glance">
+                                <div class="glance-top clearfix">
+                                    <span class="left">
+                                        <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$v.id}.html" title="{$v.title}" target="_blank">{$v.title}</a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </volist>
+            </ul>
+            <div class="content pageContent">
+                {$page}
+            </div>
+        </div>
+    </div>
+    <div class="friend" id="friend">
+        <div class="wrap">
+            <div class="tab-nav j-tab-nav-link">
+                <a href="javascript:void(0);" class="current">热门标签</a>
+                <a href="javascript:void(0);">新标签</a>
+            </div>
+            <div class="tab-con">
+                <div class="j-tab-con-link">
+                    <div class="tab-con-item" style="display: block;padding: 0;">
+                        <volist name="hotTags" id="v">
+                            <li><a href="/tags/meitu{$v.id}/" target="_blank">{$v.name}</a></li>
+                        </volist>
+                    </div>
+                    <div class="tab-con-item" style="padding: 0;">
+                        <volist name="newTags" id="v">
+                            <li><a href="/tags/meitu{$v.id}/" target="_blank">{$v.name}</a></li>
+                        </volist>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script src="/assets/common/plugin/lazyload/js/jquery.lazyload.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/plugin/wookmark/js/wookmark.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jQuery.rTabs.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(document).ready(function(){
+        //装修报价
+        $('.mt-mfsj').click(function(event) {
+            window.open("{$baseUrl}/zxbj/");
+        });
+
+        $('#imgBox').wookmark({
+            autoResize: true,
+            container: $('#main'),
+            offset: 16,
+            itemWidth: 290
+        });
+
+        /*异步加载结束后调用瀑布流重新排版*/
+        var browser=navigator.appName;
+        function wookmarkreset(){
+            var wookmark = new Wookmark('#imgBox', {
+                    offset: 8
+            });
+        }
+        if(browser=="Microsoft Internet Explorer"){
+            var b_version=navigator.appVersion
+            var version=b_version.split(";");
+            var trim_Version=version[1].replace(/[ ]/g,"");
+            if(trim_Version=="MSIE8.0"){
+                var lazy_list=$(".lazy");
+                for(var i=0; i<lazy_list.length;i++){
+                    var imgSrc=$(lazy_list[i]).data("original");
+                    $(lazy_list[i]).attr("src",imgSrc);
+                }
+                setTimeout(wookmarkreset,1500);
+            }else{
+                $('img.lazy').lazyload({
+                     effect:"fadeIn",
+                     load:wookmarkreset
+                });
+            }
+
+        }else{
+            $('img.lazy').lazyload({
+                 effect:"fadeIn",
+                 load:wookmarkreset
+            });
+        }
+
+
+        //链接
+        $("#friend").rTabs({
+            btnClass:'.j-tab-nav-link',
+            conClass:'.j-tab-con-link',
+            speed:2000,
+            auto:false
+        });
+    });
+</script>
+<if condition="!isset($_SESSION['u_userInfo'])">
+    <script>
+        $(".collect").click(function(event) {
+            $.ajax({
+                url: '/login/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    ssid: "{$ssid}"
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = "{$SCHEME_HOST.scheme_full}{:C('QZ_PASSPORT_ACCOUNT_DONAMES')}/login?redirect="+window.location.href;
+                }
+            }).fail(function(xhr) {
+                //显示提示
+                $.pt({
+                    target: _this,
+                    content: '操作失败,请稍后再试！',
+                    width: 'auto'
+                });
+            });
+        });
+    </script>
+<elseif condition="isset($_SESSION['u_userInfo']) AND $_SESSION['u_userInfo']['classid'] NEQ 3 AND !$caseInfo['collect']" />
+    <script>
+        $(".collect").click(function(event) {
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            if (_this.attr("data-on") == 1) {
+                return false;
+            }
+            $.ajax({
+                url: '{$baseUrl}/collect/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    classtype: "4",
+                    classid: id,
+                    ssid: "{$ssid}"
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    _this.attr("data-on", 1).html('<i class="on fa fa-star"></i>已收藏');
+                }
+            }).fail(function(xhr) {
+                //显示提示
+                $.pt({
+                    target: _this,
+                    content: '操作失败,请稍后再试！',
+                    width: 'auto'
+                });
+            });
+        });
+    </script>
+</if>
+</block>

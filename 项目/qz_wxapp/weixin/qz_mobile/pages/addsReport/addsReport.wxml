@@ -1,0 +1,278 @@
+<view class="info no-margin" wx:if="{{!showChoose}}">
+  <view class='li no-border'>
+      <text>合作类型</text>
+      <text class='fr60' bindtap='showChoose'>{{member==''?'请选择':member}}</text> 
+      <image src='../../img/right.png' class="arrow"></image>
+  </view>
+</view>
+<view class='style-choose' wx:if="{{showChoose}}">
+  <view class="type">合作类型</view>
+  <view class="ul">
+      <view class="li {{item.id == 10?'li-w': (item.id == 11?'id11 mr0':(item.id == 12?'id12 mr0':(item.id == 13?'id13 liw13':(item.id == 14?'id14 mr0':(item.id == 15?'id15':'')))))}}" bindtap="chooseMember" wx:for="{{hzList}}" data-type="{{item.id}}" data-text="{{item.name}}" data-index="{{index}}" >{{item.name}}</view>
+  </view>
+</view>
+<view class="main" wx:if="{{!showChoose}}">
+  <view class="info">
+    <!-- <view class="li">
+      <text>合作类型</text>
+      <image src='../../img/right.png' class="arrow"></image>
+      <picker value="index" data-selecthx="{{hzList[hzIndex].name}}" range="{{hzList}}" range-key="{{'name'}}"  bindchange="selecthz">
+        <view class="picker fr60">
+          {{hzList[hzIndex].name}}
+        </view>
+      </picker>
+    </view> -->
+    <view class="li li-company" wx:if="{{hzIndex == 10 || hzIndex == 13 }}">
+      <text>网店代码</text>
+      <input class="company-id" bindinput="company_id" maxlength="20" value='{{parms.company_id}}' placeholder="请输入"></input>
+      <button class="company-id-btn" size="mini" bindtap="getCompanyInfoBtn">确定</button>
+    </view>
+    <view class="li" wx:if="{{hzIndex != 8 }}">
+      <text>公司名称</text>
+      <input class="{{hzIndex == 13 ? 'c999' : ''}}" bindinput="company_name" maxlength="20" value='{{parms.company_name}}' placeholder="{{hzIndex == 13 ? '输入网店代码后显示' : '请输入'}}" disabled="{{hzIndex == 13}}"></input>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 8 }}">
+      <text>返点订单</text>
+      <text bindtap="bindOrderId" class="cs">{{parms.order_id !== '' ? parms.order_id:'请选择'}}</text>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 8 && parms.order_id }}">
+      <text>签单会员</text>
+      <text class="cs c999">{{parms.company_name}}</text>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex != 8 && hzIndex != 10 && hzIndex != 13 }}">
+      <text>{{hzIndex == 11 ? '退款':'收款'}}城市</text>
+      <image wx:if="{{hzIndex != 8}}" src='../../img/right.png' class="arrow"></image>
+      <text class="cs" bindtap="toCity">{{curCity}}</text>
+    </view>
+    <view class="li li-cs" wx:if="{{(hzIndex == 8 && parms.order_id) || hzIndex == 10 || hzIndex == 13}}">
+      <text>收款城市</text>
+      <text class="cs c999">{{curCity}}</text>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 1 || hzIndex == 2 || hzIndex == 3 || hzIndex == 7}}">
+      <text>单倍/几倍</text>
+      <image src='../../img/right.png' class="arrow"></image>
+      <picker bindchange="selectbs" value="{{bsIndex}}" range="{{bsList}}">
+        <view class="picker fr60">
+          <view>{{bsList[bsIndex]}}</view>
+        </view>
+      </picker>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 14}}">
+      <text>单倍/几倍</text>
+      <text class="text c999">标杆会员（保产值）</text>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 6 || hzIndex == 8 || hzIndex == 10}}">
+      <text>返点比例</text>
+      <image src='../../img/right.png' class="arrow"></image>
+      <picker bindchange="selectRatio" value="{{RatioIndex}}" range="{{Ratios}}">
+        <view class="picker fr60">
+          <view>{{Ratios[RatioIndex]}}</view>
+        </view>
+      </picker>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 15}}">
+      <text>返点比例</text>
+      <text class="text c999">标杆会员（保产值）</text>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 10 || hzIndex == 13}}">
+      <text>保证金余额</text>
+      <text class="cs c999">{{parms.deposit_money}}</text>
+    </view>
+    <view class="li li-deposit-order" wx:if="{{hzIndex == 10 }}">
+      <text>保证金抵扣轮单费</text>
+      <input bindinput="depositToRoundMoney" maxlength="20" value='{{parms.deposit_to_round_money}}' placeholder="请输入"></input>
+    </view>
+    <view class="li w59" wx:if="{{hzIndex == 13 }}">
+      <text>保证金抵扣金额</text>
+      <input bindinput="depositToPlatformMoney" maxlength="20" value='{{parms.deposit_to_platform_money}}' placeholder="请输入"></input>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 8 && parms.order_id }}">
+      <text>返点金额</text>
+      <text class="cs c999">{{orderBackMoney}}</text>
+    </view>
+    <view class="li li-hkr" wx:if="{{hzIndex != 10 && hzIndex != 11 && hzIndex != 13}}">
+      <text>汇款方名称</text>
+      <input bindinput="payment_uname" maxlength="20" value='{{parms.payment_uname}}' placeholder="请输入汇款方户名"></input>
+    </view>
+    <view class="li li-hkr">
+      <text>{{hzIndex == 11 ? '退款':'汇款'}}时间</text>
+      <view class='select'>
+        <image src='../../img/right.png' class="arrow"></image>
+        <picker mode="date" value="{{payment_date}}" bindchange="dateChange1">
+          <view class="picker fr60">
+            {{parms.payment_date==''?'请选择':parms.payment_date}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="li" wx:if="{{hzIndex != 10 && hzIndex != 11 && hzIndex != 13}}">
+      <text>收款金额</text>
+      <input bindinput="payment_total_money" maxlength="30" type="number" value='{{parms.payment_total_money}}' placeholder="请输入{{hzIndex==8 ?'，未填写默认为0':''}}"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 11}}">
+      <text>退款金额</text>
+      <input bindinput="refund_money" maxlength="30" type="number" value='{{parms.refund_money}}' placeholder="请输入"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 1 || hzIndex == 2 || hzIndex == 3 || hzIndex == 6 || hzIndex == 7 || hzIndex == 14 || hzIndex == 15}}">
+      <text>{{hzIndex == 6 || hzIndex == 15 ? '轮单费' : '会员费'}}</text>
+      <input class="round" bindinput="round_order_money" maxlength="30" type="number" value='{{parms.round_order_money}}' placeholder="请输入{{hzIndex == 6 || hzIndex == 15 ? '轮单费' : '会员费'}}"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 1 || hzIndex == 2 || hzIndex == 3 || hzIndex == 6 || hzIndex == 7 || hzIndex == 14 || hzIndex == 15}}">
+      <text>平台使用费</text>
+      <input class="w68" bindinput="platform_money" type="number" value='{{parms.platform_money}}' placeholder="0"></input>
+    </view>
+    <view class="li li-hkr" wx:if="{{(parms.platform_money != 0 && parms.platform_money != '' && (hzIndex == 1 || hzIndex == 2 || hzIndex == 3 || hzIndex == 6 || hzIndex == 7 || hzIndex == 14 || hzIndex == 15)) || hzIndex == 12 || hzIndex == 13}}">
+      <text>平台使用费有效期开始时间</text>
+      <view class='select'>
+        <image src='../../img/right.png' class="arrow"></image>
+        <picker mode="date" value="{{platform_money_start_date}}" bindchange="platform_money_start_date">
+          <view class="picker fr60">
+            {{parms.platform_money_start_date==''?'请选择':parms.platform_money_start_date}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="li li-hkr" wx:if="{{(parms.platform_money != 0 && parms.platform_money != '' && (hzIndex == 1 || hzIndex == 2 || hzIndex == 3 || hzIndex == 6 || hzIndex == 7 || hzIndex == 14 || hzIndex == 15)) || hzIndex == 12 || hzIndex == 13}}">
+      <text>平台使用费有效期结束时间</text>
+      <view class='select'>
+        <image src='../../img/right.png' class="arrow"></image>
+        <picker mode="date" value="{{platform_money_end_date}}" bindchange="platform_money_end_date">
+          <view class="picker fr60">
+            {{parms.platform_money_end_date==''?'请选择':parms.platform_money_end_date}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 6 || hzIndex == 15}}">
+      <text>保证金(不算业绩)</text>
+      <input class="w58" bindinput="deposit_money" maxlength="30" type="number" value='{{parms.deposit_money}}' placeholder="请输入"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 8}}">
+      <text>保证金抵扣(算业绩)</text>
+      <input class="w55" bindinput="deposit_money" maxlength="30" type="number" value='{{parms.deposit_money}}' placeholder="请输入，可不填"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex == 8}}">
+      <text>轮单费抵扣(不算业绩)</text>
+      <input class="w51" bindinput="round_order_money" maxlength="30" type="number" value='{{parms.round_order_money}}' placeholder="请输入，可不填"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex != 10 && hzIndex != 11 && hzIndex != 12 && hzIndex != 13}}">
+      <text>其他金额(不算业绩)</text>
+      <input class="w55" bindinput="other_money" maxlength="30" type="number" value='{{parms.other_money}}' placeholder="无数据可不填写"></input>
+    </view>
+    <view class="li" wx:if="{{hzIndex != 10 && hzIndex != 11 && hzIndex != 12 && hzIndex != 13}}">
+      <text>其他金额类型</text>
+      <input class="w65" bindinput="other_money_remark" maxlength="30" value='{{parms.other_money_remark}}' disabled="{{!parms.other_money}}" placeholder="{{parms.other_money?'如返利，定金退回等':'请先填写其他金额'}}"></input>
+    </view>
+    <view class="li li-cs" wx:if="{{hzIndex == 8 || hzIndex == 9 || hzIndex == 10 || hzIndex == 13}}">
+      <text>收款类型</text>
+      <text class="cs c999">{{lxList[lxIndex].name}}</text>
+    </view>
+    <view class="li" wx:else>
+      <text>{{hzIndex == 11 ? '退款':'收款'}}类型</text>
+      <image src='../../img/right.png' class="arrow"></image>
+      <picker bindchange="selectlx" value="{{lxIndex}}" range="{{lxList}}" range-key="name" >
+        <view class="picker fr60">
+          <view>{{lxList[lxIndex].name}}</view>
+        </view>
+      </picker>
+    </view>
+    <block wx:if="{{hzIndex != 10 && hzIndex != 11 && hzIndex != 13}}">
+      <view class="li li-zhfs">
+        <text>收款方名称<text wx-if="{{hzIndex == 8}}" class="tips8">（未收款可不填）</text></text>
+        <image src='../../img/right.png' class="arrow"></image>
+        <view class="picker fr60">
+          <view bindtap="toggleDialog">请选择</view>
+        </view>
+      </view>
+      <view class="li check-items" wx:if="{{checkDatas.length > 0}}">
+        <block wx:for="{{checkDatas}}" wx:key="{{payee_type}}">
+          <text class="check-item">{{item.payee_type_name}}</text>
+        </block>
+      </view>
+    </block>
+   
+    <view class="li">
+      <view class="person">
+        <text>{{hzIndex == 11 ? '相关':'其他'}}业绩人</text>
+        <image src='../../img/right.png' class="arrow"></image>
+        <view class="picker fr60">
+          <view bindtap="toPerformancePerson">请选择</view>
+        </view>
+      </view>
+      <view class="person" wx:if="{{personList}}">
+        <view wx:for="{{personList}}" wx:key="item.saler_id">
+          <image src="../../img/error.png" data-id="{{item.saler_id}}" bindtap="deletePerson"></image>
+          <text>{{item.saler_name}}</text>
+          <text>{{item.share_ratio}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="info next-info">
+    <view class='li pb30 no-border'>
+      <view>{{hzIndex == 11 ? '退款':'汇款'}}凭证{{hzIndex == 10?'（可不填）': ''}}<text wx-if="{{hzIndex == 8}}" class="tips8">（未收款可不填）</text><text wx-if="{{hzIndex == 11}}" class="tips8">（请附上财务已经把款退给该公司的退款记录）</text></view>
+      <view class='uploader-img clearfix' wx:if="{{pics}}">
+        <view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+          <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+          <image class='delete' data-index="{{index}}" src='../../img/xerror.png' mode="widthFix" bindtap='deleteImg' />
+        </view>
+        <view class='upAdd' bindtap='chooseImg'>+</view>
+      </view>
+    </view>
+    <view class="li" wx:if="{{!(showDialog || showPayeeDialog)}}">
+      <view>备注</view>
+      <textarea  bindinput="remark" maxlength="255" disable-default-padding value='{{parms.remark}}' placeholder="备注"/>
+    </view>
+  </view>
+  <view class="info next-info" wx-if="{{creator_name}}">
+    <view class="li">
+      <text>报备人</text>
+      <input maxlength="30" class="pb-peo" disabled value='{{creator_name}}'></input>
+    </view>
+  </view>
+</view>
+<view class="bottom"  wx:if="{{!showChoose}}">
+  <view class="bths" wx-if="{{!creator_name}}">
+    <view class="submit" bindtap="submit">保存</view>
+  </view>
+  <view class="bths" wx-if="{{creator_name}}">
+    <view class="sub-del" bindtap="subDel">删除</view>
+    <view class="sub-save" bindtap="submit">保存</view>
+  </view>
+</view>
+<!-- 弹框 选择收款方 -->
+<view class="free-dialog {{ showDialog ? 'free-dialog--show' : '' }}">
+  <view class="free-dialog__mask" bindtap="toggleDialog"></view>
+  <view class="free-dialog__container">
+    <view style="padding: 5% 5% 15%;">
+      <view bindtap='freetoBack' class="free-button free-dialog-reset">取消</view>
+      <view bindtap='freeBack' class="free-button free-dialog-submit">确定</view>
+      <scroll-view scroll-y class="scroll-group">
+        <checkbox-group bindchange="checkboxChange">
+          <label class="ui-radio" wx:for="{{datas}}" wx:key="{{item.payee_type}}">
+            <text>{{item.payee_type_name}}</text>
+            <checkbox value='{{item.payee_type}}' checked="{{item.checked}}"></checkbox>
+          </label>
+        </checkbox-group>
+      </scroll-view>
+    </view>
+  </view>
+</view>
+<!-- 收款方明细 -->
+<view class="payee-dialog" wx-if="{{showPayeeDialog}}">
+  <view class="payee-pup" bindtap="payeeCancel"></view>
+  <scroll-view class="payee-dialog-main" scroll-y="{{true}}"> 
+    <view class="title">收款方明细</view>
+    <view class="tips red">存在多收款方名称需填写明细</view>
+    <view class="money">收款金额：{{parms.payment_total_money}}</view>
+    <view class="li" wx:for="{{checkDatas}}">
+      <view class="li-title">{{item.payee_type_name}}：</view>
+      <input class="li-input" value="{{item.payee_money}}" type="number" placeholder="请输入" data-index="{{index}}" bindinput="payeeInputChange" bindblur="payeeInputBlur"></input>
+    </view>
+    <view class="warning red" wx:if="{{payeeNeq}}">合计不得超出总收款金额！</view>
+    <view class="bottom-btn">
+      <button size="mini" class="ok btn" catchtap="payeeOk">确定</button>
+      <button size="mini" class="cancel btn" catchtap="payeeCancel">取消</button>
+    </view>
+  </scroll-view>
+</view>

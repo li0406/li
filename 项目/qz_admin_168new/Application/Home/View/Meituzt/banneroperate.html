@@ -1,0 +1,242 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>{$info['id']!=null?'编辑':'新增'}banner - banner管理</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/common/plugins/bootstrap-switch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+	<section class="content-header">
+		<h1>{$info['id']!=null?'编辑':'新增'}banner</h1>
+		<ol class="breadcrumb">
+			<li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+		</ol>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-body">
+						<form id="editForm" action="" method="POST" onsubmit="return false">
+							<div class="row">
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-5">
+										<div class="h4">Banner所属模块:</div>
+										<select class="form-control" name="type" id="type">
+											<option value="0">请选择</option>
+											<option value="1" {$info['type']==1?'selected':''}>装修攻略</option>
+											<option value="2" {$info['type']==2?'selected':''}>美图专题</option>
+											<option value="3" {$info['type']==3?'selected':''}>全屋案例</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-5">
+										<div class="h4">Banner名称:</div>
+										<input class="form-control" type="text" id="title" name="title" placeholder="请输入banner名称" value="{$info.title}">
+									</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-1">
+										<div class="h4">排序:</div>
+										<input class="form-control" type="text"  id="order_id" name="order_id" placeholder="请输入序号" value="{$info.order_id}">
+									</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-1">
+										<div class="h4">启用状态:</div>
+										<input type="checkbox" class="checkbox" name="status" <if condition="isset($info['status']) && $info['status'] == 1">checked<elseif condition="isset($info['status']) && $info['status'] == 2"/><else/>checked</if> />
+									</div>
+
+								</div>
+								<div class="col-xs-12 h4  no-padding">
+									<div class="col-xs-12 h4">上传PC端图片</div>
+									<div class="col-xs-5">
+										<input id="images" type="file"/>
+										<input type="hidden" name="thumb" id="thumb" value="{$info.thumb}" />
+									</div>
+									<div class="col-xs-12 h4" style="color:red">提示: 上传图片大小限制为930px×340px</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-5">
+										<div class="h4">PC端地址:</div>
+										<input class="form-control" type="text"  id="url" name="url" placeholder="请输入链接地址(以http://或者https://)" value="{$info.url}">
+									</div>
+								</div>
+								<div class="col-xs-12 h4  no-padding">
+									<div class="col-xs-12 h4">上传m端和小程序图片：</div>
+									<div class="col-xs-5">
+										<input id="image" type="file"/>
+										<input type="hidden" name="img" id="img" value="{$info.img}" />
+									</div>
+									<div class="col-xs-12 h4" style="color:red">提示: 上传图片大小限制为750px×320px</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-5">
+										<div class="h4">m端地址:</div>
+										<input class="form-control" type="text"  id="m_url" name="m_url" placeholder="请输入m端地址(以http://或者https://)" value="{$info.m_url}">
+									</div>
+								</div>
+								<div class="col-xs-12 no-padding">
+									<div class="col-xs-5">
+										<div class="h4">小程序地址:</div>
+										<input class="form-control" type="text"  id="bd_url" name="bd_url"
+                                               placeholder="请输入小程序地址(示例:'/pages/gonglue/guide/guide')" value="{$info.bd_url}">
+									</div>
+								</div>
+								<div class="col-xs-12 h4">
+									<button class="btn btn-info" id="btn-save">保存</button>
+									<button class="btn btn-default"  onclick="history.back(-1)">返回</button>
+								</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+	<!--<script type="text/javascript" src="/assets/home/meituzt/js/imgupload.js?v={:C('STATIC_VERSION')}"></script>-->
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$.fn.bootstrapSwitch.defaults.size = 'mini';
+			$.fn.bootstrapSwitch.defaults.onText = ' 是 ';
+			$.fn.bootstrapSwitch.defaults.offText = ' 否 ';
+			$(".checkbox").bootstrapSwitch();
+
+			//提交表单
+			$('#btn-save').click(function(event) {
+				var _this = $(this);
+
+				if($('#type').val() == 0){
+					layer.msg('请选择banner所属模块',{time: 1300});
+					return false;
+				}
+
+				if($('#title').val() == ''){
+					layer.msg('文章标题不符合规定',{time: 1300});
+					return false;
+				}
+
+				if($('#url').val() == ''){
+					layer.msg('请填写正确的URL链接地址',{time: 1300});
+					return false;
+				}
+				var formdata = $('#editForm').serialize();
+				$.ajax({
+					url: '/meituzt/banneroperate?id={$info.id}',
+					type: 'POST',
+					dataType: 'JSON',
+					data: formdata,
+					success:function (result) {
+						if(parseInt(result.status) === 1){
+							$('#btn-save').attr('disabled', 'disabled');
+							layer.msg(result.info,{time: 800},function () {
+								window.location.href = {:empty($info['id'])?'\"/meituzt/banner?type=\"+result.type':($_SERVER['HTTP_REFERER'] == null?'"/meituzt/banner"':'"'.$_SERVER['HTTP_REFERER'].'"')};
+							});
+						}else{
+							layer.msg(result.info,{time: 800});
+							$('#btn-save').removeAttr('disabled');
+							return false;
+						}
+					},
+					error:function () {
+						$('#btn-save').removeAttr('disabled');
+						layer.msg('服务器去火星了~~',{time: 1300});
+					}
+				})
+			});
+
+			$("#image").fileinput({
+					language: 'zh', //设置语言,
+					uploadUrl:"/upload/uploadimg/",
+					browseClass:"btn btn-primary",
+					allowedFileExtensions : ['jpg','png','gif'],
+					uploadClass:"btn btn-info",
+					removeClass:"btn btn-danger",
+					uploadAsync: true,
+					dropZoneEnabled:false,
+					overwriteInitial: true,
+					maxFileCount:1,
+					uploadExtraData: {
+						prefix:'meitubanner',
+						chars:'true'
+					},
+					minImageWidth: 750, //图片的最小宽度
+					minImageHeight: 320,//图片的最小高度
+					maxImageWidth: 750,//图片的最大宽度
+					maxImageHeight: 320,//图片的最大高度
+					maxFileSize:1000000000,
+					previewSettings:{
+						image: {width: "323px", height: "164px"}
+					},
+				<notempty name="info.img"> initialPreview:["<img src='//{:C('QINIU_DOMAIN')}/{$info.img}' class='file-preview-image' >"  ],</notempty>
+		}).on('fileuploaded', function(event, data, id, index) {
+				if(1 == data.response.status){
+					$('#img').val(data.response.data.name);
+				}else{
+					alert(data.response.info);
+					return false;
+				}
+			}).on("fileuploaderror",function(event, data){
+				layer.msg('图片限制为750px×320px',{time: 2300});
+				return false;
+			}).on("fileclear",function(){
+				$("#img").val("");
+				$(".img-upload .fileinput-upload-button").removeClass('disabled');
+			});
+
+
+			$("#images").fileinput({
+					language: 'zh', //设置语言,
+					uploadUrl:"/upload/uploadimg/",
+					browseClass:"btn btn-primary",
+					allowedFileExtensions : ['jpg','png','gif'],
+					uploadClass:"btn btn-info",
+					removeClass:"btn btn-danger",
+					uploadAsync: true,
+					dropZoneEnabled:false,
+					overwriteInitial: true,
+					maxFileCount:1,
+					uploadExtraData: {
+						prefix:'meitubanner',
+						chars:'true'
+					},
+					minImageWidth: 930, //图片的最小宽度
+					minImageHeight: 340,//图片的最小高度
+					maxImageWidth: 930,//图片的最大宽度
+					maxImageHeight: 340,//图片的最大高度
+					maxFileSize:1000000000,
+					previewSettings:{
+						image: {width: "323px", height: "164px"}
+					},
+				<notempty name="info.thumb"> initialPreview:["<img src='//{:C('QINIU_DOMAIN')}/{$info.thumb}' class='file-preview-image' >"  ],</notempty>
+		}).on('fileuploaded', function(event, data, id, index) {
+				if(1 == data.response.status){
+					$('#thumb').val(data.response.data.name);
+				}else{
+					alert(data.response.info);
+					return false;
+				}
+			}).on("fileuploaderror",function(event, data){
+				layer.msg('图片限制为930px×340px',{time: 2300});
+				return false;
+			}).on("fileclear",function(){
+				$("#thumb").val("");
+				$(".img-upload .fileinput-upload-button").removeClass('disabled');
+			});
+
+
+
+		});
+	</script>
+</block>

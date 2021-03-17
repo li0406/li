@@ -1,0 +1,197 @@
+<div class="panel newAll panel-default">
+    <form class="form-horizontal">
+        <div class="panel-heading">
+            <div class="from-group" style="margin-bottom: 15px;">
+                <div class="row">
+                    <label class="col-sm-2 control-label">合作模式:</label>
+                    <div class="col-sm-2">
+                        <select name="cooperate_mode" id="cooperate_mode" class="form-control">
+                            <option value="">请选择</option>
+                            <option value="1" <eq name="list.all.cooperate_mode" value="1">selected</eq> >常规会员</option>
+                            <option value="2" <eq name="list.all.cooperate_mode" value="2">selected</eq> >新签返</option>
+                            <option value="3" <eq name="list.all.cooperate_mode" value="3">selected</eq> >常规标杆会员</option>
+                            <option value="4" <eq name="list.all.cooperate_mode" value="4">selected</eq> >新签返标杆会员</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="from-group">
+                <div class="row">
+                    <label class="col-sm-2 control-label">总合同时间:</label>
+                    <div class="col-sm-2">
+                        <input id="allbegin" type="text" class="form-control datepicker" placeholder="总合同开始时间" autocomplete="off" name="allbegin" value=""  />
+                    </div>
+                    <label class="col-sm-1 control-label"  style="text-align: center;">至:</label>
+                    <div class="col-sm-2">
+                        <input id="allend" type="text" class="form-control datepicker" placeholder="总合同结束时间" autocomplete="off" name="allend" value=""  />
+                    </div>
+                    <label class="col-sm-1 control-label" style="text-align: left;" id="allday">0天</label>
+                </div>
+            </div>
+            <br style="clear: both;" />
+        </div>
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    新合同
+                <a href="javascript:void(0)" class="pull-right preview">预览</a>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group now">
+                        <label class="col-sm-2 control-label">本次合同时间:</label>
+                        <div class="col-sm-2">
+                            <input id="begin" type="text" class="form-control datepicker" placeholder="本次合同开始时间" name="begin" value="{$list.now.start_time}"  autocomplete="off" />
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                        <div class="col-sm-2">
+                            <input id="end" type="text" class="form-control datepicker" placeholder="本次合同结束时间" name="end" value="{$list.now.end_time}"  autocomplete="off" />
+                        </div>
+                        <div class="col-sm-1">
+                            <select class="form-control" name="cooperationType">
+                                <volist name="cooperationType" id="vo">
+                                    <if condition="$list['now']['cooperation_type'] EQ $key">
+                                        <option value="{$key}" selected="selected">{$vo}</option>
+                                        <else />
+                                        <option value="{$key}">{$vo}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <select class="form-control" name="viptype" >
+                                <option value="">请选择</option>
+                                <volist name="viptype" id="vo">
+                                <option value="{$key}">{$vo}</option>
+                               </volist>
+                            </select>
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: left;" id="day">0天</label>
+                        <div class="col-sm-2">
+                            <button id="btnNewAdd" title="保存本次合同" type="button" class="btn  btn-success btn-sm"><i class="fa fa-floppy-o"></i> 保存</button>
+                            <button title="保存本次合同" type="button" class="btn  btn-danger btn-sm"><i class="fa fa-trash"></i> 删除</button>
+                        </div>
+                    </div>
+                    <br style="clear: both; display: none;" />
+                </div>
+                {$advTmp}
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(".newAll #allbegin").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $(".newAll #allend").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var start = $(".newAll #allbegin").datepicker("getDate");
+        if (start == null) {
+            alert("请输入总合同开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("总合同结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days=Math.floor(offset/(24*3600*1000))+1;
+        $(".newAll #allday").html(days+"天");
+    });
+
+    $(".newAll #begin").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $(".newAll #end").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var start = $(".newAll #begin").datepicker("getDate");
+        if (start == null) {
+            alert("请输入本次合同开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("本次合同结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days=Math.floor(offset/(24*3600*1000))+1;
+        $(".newAll #day").html(days+"天");
+    });
+
+    $(".newAll #btnNewAdd").click(function(event) {
+        var data = $(".newAll form").serializeArray();
+
+        var json = $("#search_company").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_company").select2("data") == "string"){
+                json = JSON.parse($("#search_company").select2("data"));
+            }
+            var company_id = json[0].id;
+            data.push({name:"company_id",value:company_id});
+            data.push({name:"company_name",value:json[0].jc});
+        };
+
+        json = $("#search_seller").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_seller").select2("data") == "string"){
+                json = JSON.parse($("#search_seller").select2("data"));
+            }
+            data.push({name:"saler_id",value:json[0].id});
+            data.push({name:"saler_name",value:json[0].text || json[0].name});
+        }
+        data.push({name:"isnew",value:1});
+        vipAdd(data, 0);
+    });
+
+    function vipAdd(data, erci_confirm){
+        var newdata = data;
+        newdata.push({name:"erci_confirm",value: erci_confirm});
+
+        $.ajax({
+            url: '/vip/vipadd/',
+            type: 'post',
+            dataType: 'json',
+            data: newdata
+        })
+        .done(function(response) {
+            if (response.code == 200) {
+                alert("操作成功！");
+                window.location.href = "/vip/vipaccount/";
+            } else if (response.code == 405) {
+                if (confirm(response.errmsg)) {
+                    vipAdd(data, 1);
+                }
+            } else {
+                alert(response.errmsg);
+            }
+        })
+        .fail(function() {
+            alert("发生异常,请稍后再试！");
+        });
+    }
+
+    $(".btn-danger").click(function(event) {
+        $(this).parents(".newAll").remove();
+    });
+
+</script>

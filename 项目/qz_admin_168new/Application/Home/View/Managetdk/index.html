@@ -1,0 +1,463 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>TDK管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>TDK管理</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header with-border">
+                <h4 class="box-title">条件查询</h4>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <form id="tdk_search" action="" method="get">
+                        <div class="col-xs-2">
+                            <div class="h5">选择终端：</div>
+                            <select name="search_location" class="form-control">
+                                <option value="">全部</option>
+                                <option value="1"
+                                <if condition="$_GET['search_location'] eq 1">selected</if>
+                                >PC端</option>
+                                <option value="2"
+                                <if condition="$_GET['search_location'] eq 2">selected</if>
+                                >移动端</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div class="h5">选择站点：</div>
+                            <select name="search_cs" class="form-control select2 site">
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}"
+                                    <if condition="$_GET['search_cs'] eq $vo['cid']">selected</if>
+                                    >{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2 choose_zxinfo">
+                            <div class="h5">选择频道：</div>
+                            <select name="search_model" class="form-control">
+                                <option value="">请选择</option>
+                                <volist name="model" id="vo">
+                                    <option value="{$key}"
+                                    <if condition="$_GET['search_model'] eq $key">selected</if>
+                                    >{$vo.model}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2 choose_zxinfo_child" style="display: none">
+                            <div class="h5">选择子频道：</div>
+                            <select name="search_zxinfo" class="form-control">
+                                <option value="">请选择</option>
+                                <volist name="zxinfo_child" id="vo">
+                                    <option value="{$vo.id}"
+                                    <if condition="$_GET['search_zxinfo'] eq $vo['id']">selected</if>
+                                    >{$vo.name}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 h5">
+                        <div class="search_btn col-xs-1 no-padding">
+                            <div class="btn btn-primary"><i class="fa fa-search"></i> 查询</div>
+                        </div>
+                        <div class="col-xs-1 no-padding">
+                            <div class="btn btn-success" data-toggle="modal" data-target="#addModal"><i
+                                    class="fa fa-plus"></i> 新增
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header with-border">
+                <h4 class="box-title" style="line-height: 34px;">页面列表</h4>
+                <div class="pull-right btn btn-success all_edit" data-toggle="modal" data-target="#eidtModal">批量修改</div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="bg-default" style="background: #f5f5f5">
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>URL</th>
+                        <th>终端</th>
+                        <th>城市</th>
+                        <th>模块</th>
+                        <th>子频道</th>
+                        <th>创建人</th>
+                        <th>修改人</th>
+                        <th>修改时间</th>
+                        <th>操作</th>
+                        </thead>
+                        <tbody>
+                        <volist name="info.list" id="vo">
+                            <tr>
+                                <td><input name="choose_id" type="checkbox" value="{$vo.id}"></td>
+                                <td>{$vo.id}</td>
+                                <td><a target="_blank" href="{$vo.jump_url}">{$vo.jump_url}</a></td>
+                                <td>
+                                    <if condition="$vo['location'] eq 1">pc端
+                                        <else/>
+                                        移动端
+                                    </if>
+                                </td>
+                                <td>{$vo.cname}</td>
+                                <td>
+                                    <php>echo $model[$vo['model']]['model']</php>
+                                </td>
+                                <td>
+                                    <if condition="$vo.model eq 3">{$vo.child_name}</if>
+                                </td>
+                                <td>{$vo.add_user}</td>
+                                <td>{$vo.last_user}</td>
+                                <td>{$vo.last_time|date="Y-m-d H:i:s",###}</td>
+                                <td>
+                                    <a href="javascript:;" class="text-success one_edit" data-toggle="modal"
+                                       data-target="#eidtModal" data-id="{$vo.id}">编辑TDK</a>&nbsp;
+                                    <a href="javascript:;" class="text-danger delTdk" data-toggle="modal"
+                                       data-id="{$vo.id}">删除TDK</a>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    {$info.page}
+                </div>
+            </div>
+        </div>
+        <!-- 新增 -->
+        <div class="modal fade" id="addModal" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title text-center"><label>新增TDK</label></h4>
+                    </div>
+                    <form class="add_form">
+                        <div class="modal-body" style="overflow: hidden">
+                            <div class="row">
+                                <div class="col-xs-12 no-padding">
+                                    <div class="col-xs-3">
+                                        <div class="h5"><label>选择终端：</label></div>
+                                        <select name="add_location" class="form-control">
+                                            <option>全部</option>
+                                            <option value="1">PC端</option>
+                                            <option value="2">移动端</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <div class="h5"><label>选择站点：</label></div>
+                                        <select name="add_cs" class="form-control select2 site" style="width: 100%;">
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3 choose_zxinfo_add">
+                                        <div class="h5"><label>选择频道：</label></div>
+                                        <select class="form-control" name="add_model">
+                                            <option value="">请选择</option>
+                                            <volist name="model" id="vo">
+                                                <option value="{$key}">{$vo.model}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3 choose_zxinfo_child_add" style="display: none">
+                                        <div class="h5">选择子频道：</div>
+                                        <select name="add_zxinfo" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="zxinfo_child" id="vo">
+                                                <option value="{$vo.id}"
+                                                <if condition="$_GET['search_zxinfo'] eq $vo['id']">selected</if>
+                                                >{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <div class="h5"><label>标题Title：</label></div>
+                                <input class="form-control parameter_class" type="text" name="add_title"
+                                       placeholder="请输入title" >
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <div class="h5"><label>关键词Keywords：</label></div>
+                                <input class="form-control parameter_class" type="text" name="add_keywords"
+                                       placeholder="请输入keywords" >
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <div class="h5"><label>描述Description：</label></div>
+                                <textarea class="form-control parameter_class" placeholder="请输入description"
+                                          name="add_description"></textarea>
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <div class="h5"><label>选取参数模板：</label></div>
+                                <volist name="parameter" id="vo">
+                                    <div class="col-xs-1 no-padding">
+                                        <button type="button" class="btn btn-primary pull-left parameter_btn btn-xs"
+                                                data-id="{$vo.logo}">{$vo.name}
+                                        </button>
+                                    </div>
+                                </volist>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary add_save">保存</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 编辑 -->
+        <div class="modal fade" id="eidtModal" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title text-center"><label>编辑TDK</label></h4>
+                    </div>
+                    <div class="modal-body" style="overflow: hidden">
+                        <div class="col-xs-12 no-padding">
+                            <div class="h5"><label>标题Title：</label></div>
+                            <input class="form-control parameter_class" type="text" name="edit_title"
+                                   placeholder="请输入title">
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <div class="h5"><label>关键词Keywords：</label></div>
+                            <input class="form-control parameter_class" type="text" name="edit_keywords"
+                                   placeholder="请输入keywords">
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <div class="h5"><label>描述Description：</label></div>
+                            <textarea class="form-control parameter_class" placeholder="请输入description"
+                                      name="edit_description"></textarea>
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <div class="h5"><label>选取参数模板：</label></div>
+                            <volist name="parameter" id="vo">
+                                <div class="col-xs-1 no-padding">
+                                    <button type="button" class="btn btn-primary pull-left parameter_btn btn-xs"
+                                            data-id="{$vo.logo}">{$vo.name}
+                                    </button>
+                                </div>
+                            </volist>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary edit_save">保存</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            //当搜索中是装修资讯,也显示子频道选择
+            if ('{$_GET["search_model"]}' == 3) {
+                $(".choose_zxinfo_child").css('display', 'block');
+            } else {
+                $(".choose_zxinfo_child").css('display', 'none');
+            }
+            //选择装修资讯才显示子频道选择
+            $(".choose_zxinfo").on('change', function () {
+                if ($('select[name="search_model"]').val() == 3) {
+                    $(".choose_zxinfo_child").css('display', 'block');
+                } else {
+                    $(".choose_zxinfo_child").css('display', 'none');
+                }
+            });
+            //新增 选择装修资讯才显示子频道选择
+            $(".choose_zxinfo_add").on('change', function () {
+                if ($('select[name="add_model"]').val() == 3) {
+                    $(".choose_zxinfo_child_add").css('display', 'block');
+                } else {
+                    $(".choose_zxinfo_child_add").css('display', 'none');
+                }
+            });
+            var edit_ids = '';
+            $(".site").select2({placeholder: "请选择"});
+            // 全选
+            $('.table thead tr th').eq(0).find('input').on('click', function (event) {
+                if ($(this).is(":checked")) {
+                    $(this).prop('checked', true);
+                    $('.table tbody tr').each(function (index, el) {
+                        $(el).find('td').eq(0).find('input').prop('checked', true).attr('gou', 'yes');
+                    });
+                    //点击全选时要获取要编辑的id
+                    $('input:checkbox[name=choose_id]:checked').each(function (i) {
+                        edit_ids += $(this).val() + ','
+                    });
+                } else {
+                    $(this).prop('checked', false);
+                    $('.table tbody tr').each(function (index, el) {
+                        $(el).find('td').eq(0).find('input').prop('checked', false).removeAttr('gou');
+                    });
+                    edit_ids = '';
+                }
+            });
+            // 单选
+            $('.table tbody tr td').find('input').on('click', function () {
+                var id = $(this).val();
+                if ($(this).is(":checked")) {
+                    $(this).prop('checked', true).attr('gou', 'yes');
+                    if ($('.table tbody input[gou="yes"]').length === $('.table tbody input').length) {
+                        $('.table thead tr th').eq(0).find('input').prop('checked', true)
+                    }
+                    //单选时要获取要编辑的id
+                    edit_ids += $(this).val() + ',';
+                } else {
+                    $(this).prop('checked', false).removeAttr('gou');
+                    $('.table thead tr th').eq(0).find('input').prop('checked', false)
+                    edit_ids = edit_ids.replace(id + ',', '');
+                }
+            });
+
+            //点击查询
+            $(".search_btn").on('click', function () {
+                $("#tdk_search").submit();
+            });
+            //批量编辑
+            $('.all_edit').on('click', function () {
+                $('input[name="edit_title"]').val('');
+                $('input[name="edit_keywords"]').val('');
+                $('textarea[name="edit_description"]').val('');
+            })
+            //单个编辑
+            $('.one_edit').on('click', function () {
+                //
+                $(this).parent().parent('tr').addClass('bg-primary');
+                //去除所有选中项
+                $(this).prop('checked', false);
+                $('.table tbody tr').each(function (index, el) {
+                    $(el).find('td').eq(0).find('input').prop('checked', false).removeAttr('gou');
+                });
+                edit_ids = '';
+                //重新取值
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/managetdk/getTdkInfo',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {id: id}
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $('input[name="edit_title"]').val(data.info.title);
+                            $('input[name="edit_keywords"]').val(data.info.keywords);
+                            $('textarea[name="edit_description"]').val(data.info.description);
+                            edit_ids = data.info.id;
+                        } else {
+                            alert(data.info)
+                        }
+                    });
+            })
+            $('button[data-dismiss="modal"]').on('click', function () {
+                $('table tbody tr').removeClass('bg-primary');
+            })
+            //编辑 保存
+            $(".edit_save").on('click', function () {
+                $(this).attr('disabled', 'disabled');
+                var data = {};
+                data.edit_title = $('input[name="edit_title"]').val();
+                data.edit_keywords = $('input[name="edit_keywords"]').val();
+                data.edit_description = $('textarea[name="edit_description"]').val();
+                data.edit_id = edit_ids;
+                console.log(data.edit_id);
+                $.ajax({
+                    url: '/managetdk/saveTdk',
+                    type: 'post',
+                    dataType: 'JSON',
+                    data: data
+                })
+                    .done(function (data) {
+                        if (data.status == 0) {
+                            alert(data.info)
+                        }
+                        window.location.href = window.location.href;
+                    });
+            });
+
+            //新增 保存
+            $(".add_save").on('click', function () {
+                $(this).attr('disabled', 'disabled');
+                $.ajax({
+                    url: '/managetdk/addTdk',
+                    type: 'post',
+                    dataType: 'JSON',
+                    data: $(".add_form").serializeArray()
+                })
+                    .done(function (data) {
+                        if (data.status == 0) {
+                            alert(data.info)
+                        }
+                        window.location.href = window.location.href;
+                    });
+            });
+
+            //删除操作
+            $(".delTdk").on('click', function () {
+                if (confirm("是否确认删除 ?")) {
+                    var id = $(this).attr('data-id');
+                    if (!id) {
+                        alert('未找到删除编号!');
+                        return;
+                    }
+                    $.ajax({
+                        url: '/managetdk/deltdk',
+                        type: 'get',
+                        dataType: 'JSON',
+                        data: {id: id}
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                window.location.href = window.location.href;
+                            } else {
+                                alert(data.info);
+                            }
+                        });
+                }
+            });
+
+            //光标添加标识
+            $('.parameter_class').on('focus', function () {
+                var f = Math.random() * 10;
+                $(this).attr('f', f);
+                $(".parameter_btn").attr('f', f);
+
+            });
+            //点击tdk参数
+            $(".parameter_btn").on('click', function () {
+                var _this = $(this)
+                $('.parameter_class').each(function (index, el) {
+                    if ($(el).attr('f') == _this.attr('f')) {
+                        //数据达到最大则不添加
+                        // if (Number($(el).attr('maxlength')) != ($(el).val().length)) {
+                        //     //将当前元素的最大长度加长
+                        //     $(el).attr('maxlength', (Number($(el).attr('maxlength')) + Number(_this.attr('data-id').length + 2)))
+                        //
+                        // }
+                        $(el).val($(el).val() + '{' + _this.attr('data-id') + '}');
+                    }
+                })
+            });
+        });
+    </script>
+</block>

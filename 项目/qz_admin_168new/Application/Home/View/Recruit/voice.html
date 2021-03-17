@@ -1,0 +1,140 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>招聘通话库</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/recruit/voice.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h4>招聘通话库</h4>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box laytop">
+                    <div class="box-body">
+                        <form action="" class="formbiaod" id="form1">
+                            <div class="col-xs-2">
+                                人员选择：</br>
+                                <select class="allwidth" name="pid">
+                                    <option value="">全部</option>
+                                    <volist name="personaleList" id="vo">
+                                        <option value="{$vo.id}" {$id== $vo[
+                                        'id'] ? 'selected':''}>{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                开始时间：</br>
+                                <input class="allwidth datepicker" id="start" placeholder="选择开始时间" name="begin">
+                            </div>
+                            <div class="col-xs-2">
+                                结束时间：</br>
+                                <input class="allwidth datepicker" id="end" placeholder="选择结束时间" name="end">
+                            </div>
+                            <div class="col-xs-2">
+                                通话时长：</br>
+                                <input class="allwidth" id="time" placeholder="请输入时长(秒)" name="time">
+                            </div>
+                            <div class="col-xs-1">
+                                </br>
+                                <button type="submit" class="btn btn-primary">&nbsp;查询</button>
+                            </div>
+                            <div class="col-xs-1">
+                                </br>
+                                <button type="button" class="btn btn-primary" id="reset">&nbsp;重置</button>
+                            </div>
+                        </form>
+                    </div>
+                    <table id="mytable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>被叫号码</th>
+                            <th>呼叫人员</th>
+                            <th>呼叫时间</th>
+                            <th>呼叫时长</th>
+                            <th>callSid</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="data.list" id="vo">
+                            <tr>
+                                <td>{$vo.id}</td>
+                                <td>{$vo.called}</td>
+                                <td>{$vo.uname}</td>
+                                <td>{$vo.time_add}</td>
+                                <td>{$vo.duration|timediff}</td>
+                                <td>{$vo.callsid}</td>
+                                <td>
+                                    <if condition="$vo['duration'] GT 0">
+                                        <if condition="$vo['channel'] EQ 'holly'">
+                                        <button class="play-record" data-callsid="{$vo.callsid}"
+                                                onclick="" title="点击播放 和 下载">
+                                            <img src="/assets/home/img/imgother/u95.png">
+                                        </button>
+                                        <else/>
+                                        <button class="play-record" data-callsid="{$vo.callsid}"
+                                                onclick="shiting($(this));" title="点击播放 和 下载">
+                                            <img src="/assets/home/img/imgother/u95.png">
+                                        </button>
+                                        </if>
+                                    </if>
+                                </td>
+                            </tr>
+                        </volist>
+
+                        </tbody>
+                    </table>
+                    <div class="col-xs-12" style="margin-top: 10px">{$data.page}</div>
+                </div>
+
+            </div>
+            <!-- 弹窗 -->
+            <div id="box-bg" class="col-xs-12 hidden-record">
+                <div id="box">
+                    <div class="box-prompt"><span>提示</span>
+                        <input type="button" name="" value="×">
+                    </div>
+                    <div id="pic">
+                        <!--content-->
+                    </div>
+                    <div class="auto-record hidden-record">
+                        <audio class="player" src="" autoplay="" preload="auto" controls="" onplay="record_log($(this))"
+                               data-on="0">
+                        </audio>
+                    </div>
+                    <button id="confirm" class="box-btn">确定</button>&nbsp;
+                    <button id="cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+
+    <script>
+        $(function () {
+            $(".datepicker").datetimepicker({
+                startView: 2,
+                minView: 'decade',
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                pickerPosition: "bottom-left",
+                startDate: "2018-01-01",
+                endDate: new Date()
+            });
+            $('#start').val('{$begin}');
+            $('#end').val('{$end}');
+
+            $('#reset').on("click", function () {
+                $('#start').val('');
+                $('#end').val('');
+                $("select[name='pid']").val('');
+            })
+        })
+    </script>
+    <!--不要更换JS次序-->
+    <script type="" src="/assets/home/recruit/voice.js?v={:C('STATIC_VERSION')}"></script>
+</block>

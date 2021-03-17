@@ -1,0 +1,523 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>订单状态统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/orderstat/css/orderstattongji.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单状态统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">订单状态统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="col-xs-12">
+                                <ul class="npoc-tab-wrap">
+                                    <li class="npoc-tab" data-tab='1'>
+                                        <span style="font-size: 14px;">按人统计</span>
+                                    </li>
+                                    <li class="npoc-tab" data-tab='2'>
+                                        按组统计
+                                    </li>
+                                    <li class="npoc-tab" data-tab='3'>
+                                        按师统计
+                                    </li>
+                                    <li class="npoc-tab" data-tab='4'>
+                                        按城市统计
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab1">
+                <div class="box">
+                    <div class="box-header">
+                        <form role="form">
+                            <div class="col-xs-2">
+                                <div>客服姓名</div>
+                                <select name="user" class="form-control">
+                                    <option value="0">请选择</option>
+                                    <volist name="user" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>客服组</div>
+                                <select name="group" type="text" class="form-control">
+                                    <option value="0">请选择</option>
+                                    <volist name="group" id="vo">
+                                        <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="time_real_start" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_start}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="time_real_end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_end}">
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="submit" class="btn-info form-control search-btn" data-index="1">查询</button>
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="button" class="btn-success form-control export-btn">导出EXCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding" >
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">客服姓名</th>
+                                    <th class="col-sm-1">客服组</th>
+                                    <th class="col-sm-1">发单量</th>
+                                    <th class="col-sm-1">新单</th>
+                                    <th class="col-sm-1">次新单</th>
+                                    <th class="col-sm-1">扫单</th>
+                                    <th class="col-sm-1">待定单</th>
+                                    <th class="col-sm-1">有效单</th>
+                                    <th class="col-sm-1">无效单</th>
+                                    <th class="col-sm-1">暂时无效</th>
+                                    <th class="col-sm-1">撤回单记录</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.user" id="vo">
+                                    <tr>
+                                        <td>{$vo.info.name}</td>
+                                        <td>{$vo.info.group_id}</td>
+                                        <td>{$vo.count}</td>
+                                        <td>{$vo.xin|default=0}</td>
+                                        <td>{$vo.cixin|default=0}</td>
+                                        <td>{$vo.sao|default=0}</td>
+                                        <td>{$vo.daiding|default=0}</td>
+                                        <td>{$vo.youxiao|default=0}</td>
+                                        <td>{$vo.wuxiao|default=0}</td>
+                                        <td>{$vo.zanshiwuxiao|default=0}</td>
+                                        <td>{$vo.chehui|default=0}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer  no-padding">
+                        <table class="table  table-bordered">
+                            <tr>
+                                <td class="col-sm-1">汇总:</td>
+                                <td class="col-sm-1">-</td>
+                                <td class="col-sm-1">{$all.count}</td>
+                                <td class="col-sm-1">{$all.xin|default=0}</td>
+                                <td class="col-sm-1">{$all.cixin|default=0}</td>
+                                <td class="col-sm-1">{$all.sao|default=0}</td>
+                                <td class="col-sm-1">{$all.daiding|default=0}</td>
+                                <td class="col-sm-1">{$all.youxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.wuxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.zanshiwuxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.chehui|default=0}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab2">
+                <div class="box">
+                    <div class="box-header">
+                        <form>
+                            <div class="col-xs-2">
+                                <div>客服组</div>
+                                <select name="group" class="form-control" type="text">
+                                    <option value="0">请选择</option>
+                                    <volist name="group" id="vo">
+                                        <option value="{$vo.kfgroup}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>客服师</div>
+                                <select name="manager" type="text" class="form-control">
+                                    <option value="0">请选择</option>
+                                    <volist name="manager" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="time_real_start" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_start}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="time_real_end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_end}">
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="submit" class="btn-info form-control search-btn" data-index="2">查询</button>
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="button"  class="btn-success form-control export-btn">导出EXCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>客服组</th>
+                                    <th>客服师</th>
+                                    <th>发单量</th>
+                                    <th>新单</th>
+                                    <th>次新单</th>
+                                    <th>扫单</th>
+                                    <th>待定单</th>
+                                    <th>有效单</th>
+                                    <th>无效单</th>
+                                    <th>暂时无效</th>
+                                    <th>撤回单记录</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.group" id="vo">
+                                    <tr>
+                                        <td>{$vo.info.group_id}</td>
+                                        <td>{$vo.info.manager_name}</td>
+                                        <td>{$vo.count}</td>
+                                        <td>{$vo.xin|default=0}</td>
+                                        <td>{$vo.cixin|default=0}</td>
+                                        <td>{$vo.sao|default=0}</td>
+                                        <td>{$vo.daiding|default=0}</td>
+                                        <td>{$vo.youxiao|default=0}</td>
+                                        <td>{$vo.wuxiao|default=0}</td>
+                                        <td>{$vo.zanshiwuxiao|default=0}</td>
+                                        <td>{$vo.chehui|default=0}</td>
+                                    </tr>
+                                </volist>
+                                <tr>
+                                    <td class="col-sm-1">汇总:</td>
+                                    <td class="col-sm-1">-</td>
+                                    <td class="col-sm-1">{$all.count}</td>
+                                    <td class="col-sm-1">{$all.xin|default=0}</td>
+                                    <td class="col-sm-1">{$all.cixin|default=0}</td>
+                                    <td class="col-sm-1">{$all.sao|default=0}</td>
+                                    <td class="col-sm-1">{$all.daiding|default=0}</td>
+                                    <td class="col-sm-1">{$all.youxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.wuxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.zanshiwuxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.chehui|default=0}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab3">
+                <div class="box">
+                    <div class="box-header">
+                        <form>
+                            <div class="col-xs-2">
+                                <div>客服师</div>
+                                <select name="manager" class="form-control" type="text">
+                                    <option value="0">请选择</option>
+                                    <volist name="manager" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="time_real_start" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_start}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="time_real_end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_end}">
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="submit" class="btn-info form-control search-btn" data-index="3">查询</button>
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="button" class="btn-success form-control export-btn">导出EXCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>客服师</th>
+                                    <th>客服组数</th>
+                                    <th>发单量</th>
+                                    <th>新单</th>
+                                    <th>次新单</th>
+                                    <th>扫单</th>
+                                    <th>待定单</th>
+                                    <th>有效单</th>
+                                    <th>无效单</th>
+                                    <th>暂时无效</th>
+                                    <th>撤回单记录</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.manager" id="vo">
+                                    <tr>
+                                        <td>{$vo.info.manager_name}</td>
+                                        <td>{$vo.info.group_count}</td>
+                                        <td>{$vo.count}</td>
+                                        <td>{$vo.xin|default=0}</td>
+                                        <td>{$vo.cixin|default=0}</td>
+                                        <td>{$vo.sao|default=0}</td>
+                                        <td>{$vo.daiding|default=0}</td>
+                                        <td>{$vo.youxiao|default=0}</td>
+                                        <td>{$vo.wuxiao|default=0}</td>
+                                        <td>{$vo.zanshiwuxiao|default=0}</td>
+                                        <td>{$vo.chehui|default=0}</td>
+                                    </tr>
+                                </volist>
+                                <tr>
+                                    <td class="col-sm-1">汇总:</td>
+                                    <td class="col-sm-1">-</td>
+                                    <td class="col-sm-1">{$all.count}</td>
+                                    <td class="col-sm-1">{$all.xin|default=0}</td>
+                                    <td class="col-sm-1">{$all.cixin|default=0}</td>
+                                    <td class="col-sm-1">{$all.sao|default=0}</td>
+                                    <td class="col-sm-1">{$all.daiding|default=0}</td>
+                                    <td class="col-sm-1">{$all.youxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.wuxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.zanshiwuxiao|default=0}</td>
+                                    <td class="col-sm-1">{$all.chehui|default=0}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab4">
+                <div class="box">
+                    <div class="box-header">
+                        <form>
+                            <div class="col-xs-2">
+                                <div>城市</div>
+                                <select name="city" class="form-control" type="text">
+                                    <option value="0">请选择</option>
+                                    <volist name="city" id="vo">
+                                        <option value="{$vo.cid}">{$vo.char_name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-开始:</div>
+                                <input type="text" name="time_real_start" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_start}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询时间-结束:</div>
+                                <input type="text" name="time_real_end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.time_real_end}">
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="submit" class="btn-info form-control search-btn" data-index="4">查询</button>
+                            </div>
+                            <div class="col-xs-2 pull-right">
+                                <br><button type="button" class="btn-success form-control export-btn">导出EXCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-1">城市</th>
+                                    <th class="col-sm-1">发单量</th>
+                                    <th class="col-sm-1">新单</th>
+                                    <th class="col-sm-1">次新单</th>
+                                    <th class="col-sm-1">扫单</th>
+                                    <th class="col-sm-1">待定单</th>
+                                    <th class="col-sm-1">有效单</th>
+                                    <th class="col-sm-1">无效单</th>
+                                    <th class="col-sm-1">暂时无效</th>
+                                    <th class="col-sm-1">撤回单记录</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.city" id="vo">
+                                    <tr>
+                                        <td>{$city[$key]['cname']}</td>
+                                        <td>{$vo.count}</td>
+                                        <td>{$vo.xin|default=0}</td>
+                                        <td>{$vo.cixin|default=0}</td>
+                                        <td>{$vo.sao|default=0}</td>
+                                        <td>{$vo.daiding|default=0}</td>
+                                        <td>{$vo.youxiao|default=0}</td>
+                                        <td>{$vo.wuxiao|default=0}</td>
+                                        <td>{$vo.zanshiwuxiao|default=0}</td>
+                                        <td>{$vo.chehui|default=0}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer  no-padding">
+                        <table class="table  table-bordered">
+                            <tr>
+                                <td class="col-sm-1">汇总:</td>
+                                <td class="col-sm-1">{$all.count}</td>
+                                <td class="col-sm-1">{$all.xin|default=0}</td>
+                                <td class="col-sm-1">{$all.cixin|default=0}</td>
+                                <td class="col-sm-1">{$all.sao|default=0}</td>
+                                <td class="col-sm-1">{$all.daiding|default=0}</td>
+                                <td class="col-sm-1">{$all.youxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.wuxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.zanshiwuxiao|default=0}</td>
+                                <td class="col-sm-1">{$all.chehui|default=0}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+
+        $('#tab1 table:first').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true
+        });
+
+        $('#tab2 table:first').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true
+        });
+
+
+        $('#tab4 table:first').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true
+        });
+
+
+        //初始化
+        var user = '{$Think.get.user}';
+        if (user != '' && user != 0 && user != 'undefined') {
+            $('select[name=user]').val(user);
+        };
+        var group = '{$Think.get.group}';
+        if (group != '' && group != 0 && group != 'undefined') {
+            $('select[name=group]').val(group);
+        };
+        var manager = '{$Think.get.manager}';
+        if (manager != '' && manager != 0 && manager != 'undefined') {
+            $('select[name=manager]').val(manager);
+        };
+        var city = '{$Think.get.city}';
+        if (city != '' && city != 0 && city != 'undefined') {
+            $('select[name=city]').val(city);
+        };
+
+        /*S-初始化tab切换*/
+        var tabIndex = localStorage.orderStatTabIndex;
+        tabIndex = tabIndex > 0 ? tabIndex : 1;
+        $("#tab1,#tab2,#tab3,#tab4").hide();
+        $('#tab'+tabIndex).show();
+        $('.npoc-tab').removeClass('npoc-tab-active');
+        $('.npoc-tab-wrap').find('li[data-tab='+tabIndex+']').addClass('npoc-tab-active');
+        //tab切换
+        $('.npoc-tab').on('click', function() {
+            $('.npoc-tab').removeClass('npoc-tab-active');
+            $(this).addClass('npoc-tab-active');
+            var tabIndex = $(this).attr('data-tab');
+            $("#tab1,#tab2,#tab3,#tab4").hide();
+            $('#tab'+tabIndex).show();
+        });
+        /*E-初始化tab切换*/
+
+        $('.search-btn').click(function(event) {
+            //tab栏定位
+            var orderStatTabIndex = $(this).attr('data-index');
+            localStorage.orderStatTabIndex = orderStatTabIndex;
+            var wrap            = $(this).parent().parent();
+            var user            = wrap.find('select[name=user]').val();
+            var group           = wrap.find('select[name=group]').val();
+            var manager         = wrap.find('select[name=manager]').val();
+            var city            = wrap.find('select[name=city]').val();
+            var time_real_start = wrap.find('input[name=time_real_start]').val();
+            var time_real_end   = wrap.find('input[name=time_real_end]').val();
+            window.location.href = '/orderstat/orderstattongji/?user=' + user + '&group=' + group + '&manager=' + manager + '&city=' + city + '&time_real_start=' + time_real_start + '&time_real_end=' + time_real_end;
+        });
+
+        $(".export-btn").click(function(event) {
+            var taget = $(this).parent().parent().parent().parent();
+            var colums = [];
+            var data = [];
+            taget.find(".dataTables_scrollHeadInner th").each(function() {
+                var text = $(this).text().trim();
+                var sub = [];
+                sub["text"] = text;
+                colums.push(sub);
+            });
+            data.push(colums);
+            taget.find("tbody tr").each(function(i) {
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function() {
+                    var text = $(this).text().trim();
+                    var _td = {
+                        text: text
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+            $(this).exportExcel({
+                data: data,
+                title: "新客服分单统计",
+                url: "/export/download",
+                show:true
+            });
+        });
+    </script>
+</block>

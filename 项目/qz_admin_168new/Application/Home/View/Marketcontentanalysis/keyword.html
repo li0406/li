@@ -1,0 +1,232 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>内容统计分析</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div class="h4 pull-left" style="width: 140px;">内容统计分析</div>
+                        <ul class="nav nav-tabs col-xs-10">
+                            <li><a href="/marketcontentanalysis/artstat#classification">分类文章统计</a></li>
+                            <li><a href="/marketcontentanalysis/artstat#substation">分站文章统计</a></li>
+                            <li class="active"><a href="/marketcontentanalysis/keyword">关键词查重-主站</a></li>
+                            <li><a href="/marketcontentanalysis">主站文章业绩分析</a></li>
+                            <li><a href="/marketcontentanalysis/subart">分站文章业绩分析</a></li>
+                            <li><a href="/marketcontentanalysis/meitu">美图业绩分析</a></li>
+                            <li><a href="/marketcontentanalysis/wenda">问答业绩分析</a></li>
+                            <li><a href="/marketcontentanalysis/wenda">百科业绩分析</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box box-default" id="tabContent" class="tab-content" >
+                    <div class="tab-pane fade in active" id="">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">条件查询</h4>
+                        </div>
+                        <div class="box-body">
+                            <form id="searchForm"  action="/marketcontentanalysis/keyword" method="get">
+                                <div class="col-xs-2">
+                                    <label>展示页面</label>
+                                    <select id="category" name="type" class="form-control btn-flat">
+                                        <option value="">请选择</option>
+                                        <volist name="viewtype" key="k" id="vo">
+                                            <option value="{$k}" <if condition="$Think.get.type == $k">selected</if>>{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <label>发布开始时间</label>
+                                    <input type="text" name="start_time" class="form-control datepicker btn-flat" autocomplete="off" placeholder="选择日期" value="{$Think.get.start_time}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label>发布结束时间</label>
+                                    <input type="text" name="end_time" class="form-control datepicker btn-flat" autocomplete="off" placeholder="选择日期" value="{$Think.get.end_time}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <label class="col-xs-12" style="opacity: 0;">查询</label>
+                                    <button type="submit" id="btnSearch" class="btn btn-flat btn-default"><i class="fa fa-search"></i> 查询</button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label class="col-xs-12" style="opacity: 0;">批量导入</label>
+                                    <button type="button" id="import" class="btn btn-flat btn-info" data-toggle="modal" data-target="#modal">批量导入</button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <label class="col-xs-12 pull-right hideLoading" style="opacity: 0;">导出</label>
+                                    <button  type="button" id="export" class="btn btn-flat btn-success hideLoading">导出 Excel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="col-xs-12">
+                        <form role="form" class="list-form">
+                        <table class="table table-hover dataTable">
+                            <thead class="thead1">
+                                <tr role="row">
+                                    <th>序号</th>
+                                    <th>关键词名称</th>
+                                    <th>重复次数</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="info" id="vo">
+                                <tr>
+                                    <td>{$key+1}</td>
+                                    <td>{$vo.keyword}</td>
+                                    <td>{$vo.count|default=0}</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 批量导入模态框 -->
+        <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                        <div class="form-group">
+                            <label class=" control-label">选择文件:</label>
+                            <div class=" file-group">
+                                <input id="fileUp" name="excel" type="file" />
+                            </div>
+                        </div>
+                        </form>
+                        <div class="form-group">
+                        <p>注意事项：</p>
+                        <p>1.点击右侧模板下载，按规范填写信息</p>
+                        <p>2.请上传文件EXCEL格式文档</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        /*初始化插件*/
+        $('.datepicker').datepicker({
+            weekStart: 1,
+            todayHighlight: 1,
+            todayBtn: true,
+            minView: 0,
+            autoclose: true,
+            language: 'zh-CN',
+            format: 'yyyy-mm-dd'
+        }).on("change", function () {
+            if (toTimeStamp($("input[name=start_time]").val()) > toTimeStamp($("input[name=end_time]").val())) {
+                msg("发布开始时间必须小于发布结束时间", function () {
+                    $("input[name=end_time]").val("");
+                });
+            }
+        });
+        $("#fileUp").fileinput({
+            language: 'zh', //设置语言,
+            allowedFileExtensions:['xls','xlsx'],
+            uploadUrl:"/marketcontentanalysis/uploadExcel/",
+            browseClass:"btn btn-primary",
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            showPreview:false,
+            uploadAsync:true,
+            showRemove:true,
+            showCancel:false,
+            showUpload:true,
+            maxFileCount:1,
+            dropZoneEnabled:false
+        }).on('fileuploaded', function(event, data) {
+            if(0 == data.response.status){
+                window.location.href =  window.location.href;
+            }else{
+               alert('上传失败');
+            }
+        });
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+
+        //导出功能
+        $('#export').click(function(event) {
+            var colums = [];
+            var data =[];
+            $(".list-form .thead1 th").each(function(){
+                var text = $(this).html().trim();
+                text = text.split("/")[0];
+                var sub =[];
+                sub["text"] = text;
+                sub["fontColor"] = $(this).css("color");
+                sub["bgColor"] = $(this).css("background-color");
+                colums.push(sub);
+            });
+            data.push(colums);
+            $(".list-form tbody tr").each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(){
+                    var text = $(this).text().trim();
+                    text = text.split("(")[0];
+                    var _td = {
+                        text:text,
+                        fontColor:$(this).css("color"),
+                        bgColor:$(this).css("background-color")
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+            var type = $("#category").val();
+            if(type == 1){
+                var text = "-装修攻略详情";
+            }else if(type == 2){
+                var text = "-装修百科详情";
+            }else{
+                var text = '';
+            }
+            $(this).exportExcel({
+                data:data,
+                title:"关键词查重"+text,
+                url:"/export/download"
+            });
+        });
+    </script>
+</block>

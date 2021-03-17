@@ -1,0 +1,161 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-按时间段图表界面</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <a href="/orderstat/sendordertrend/" class="btn btn-default">发单量走势</a>
+                            <button type="button" class="btn btn-info">发单量总览</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border text-center">
+                        <div class="box-title">单时段发单量折线图</div>
+                    </div>
+                    <div class="box-header">
+                        <select id="c01-select" class="form-control select2 select2-hidden-accessible" multiple="multiple" data-placeholder="选择时间段" style="display: inline-block;width: 60%" tabindex="-1" aria-hidden="true" name="time">
+                           <volist name="time" id="vo">
+                           <if condition="array_key_exists($key,$time_array)">
+                                <option value="{$key}" selected="selected">{$key}</option>
+                           <else/>
+                                <option value="{$key}">{$key}</option>
+                           </if>
+                           </volist>
+                        <select>
+                        <div class="pull-right" role="group" aria-label="Large button group">
+                            <a href="/orderstat/sendorderoverview/?begin={$Think.get.begin}&end={$Think.get.end}" type="button" class="btn btn-info">切换至表格</a>
+                        </div>
+                    </div>
+                    <div class="box-header text-right" style="padding-top: 0;padding-bottom:0;text-decoration:underline">
+                        <a href="/orderstat/sendorderaveragechart/?begin={$Think.get.begin}&end={$Think.get.end}" class="btn btn-sm btn-default">按平均值查看</a>
+                    </div>
+                    <div class="box-body">
+                        <div id="canvas" class="col-xs-11 no-padding" style="height: 600px;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(function(){
+        var Dom = document.querySelector("#canvas");
+        var myChart = echarts.init(Dom);
+        var jsonData = JSON.parse('{$data|json_encode}');
+        var timeData = JSON.parse('{$time|json_encode}');
+        var option = {};
+
+        initView();
+        function initView(arr) {
+            myChart.clear();
+            var xAxisData = [];
+            var legendData = [];
+            var seriesData = [];
+
+            if (typeof arr != "undefined" && arr.length > 0) {
+                for (var i in jsonData["date"]) {
+                    xAxisData.push(jsonData["date"][i]);
+                }
+
+                for (var i in timeData) {
+                    legendData.push(i);
+                }
+
+                for (var i in jsonData["child"]) {
+                    if ($.inArray(i, arr) != -1) {
+                        var sub =  {
+                            name: i,
+                            type: 'line',
+                            data:new Array()
+                        }
+                        for (var j in  jsonData["child"][i]["child"]){
+                            sub["data"].push(jsonData["child"][i]["child"][j]);
+                        }
+                        seriesData.push(sub);
+                    }
+                }
+            }
+
+
+            option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b} <br/>  {c}'
+                },
+                legend: {
+                    left: 'right',
+                    top:'0',
+                    data: legendData,
+                    orient:'vertical'
+                },
+                xAxis: {
+                    type: 'category',
+                    name: 'x',
+                    splitLine: {show: false},
+                    data: xAxisData,
+                     axisLabel: {
+                        interval: 0,
+                        rotate: 60,
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'y',
+                    splitNumber:10,
+                     min: 0,
+                     // max: 4
+                },
+                series: seriesData
+            };
+            myChart.setOption(option);
+        }
+
+        // 时间段选择
+        $("#c01-select").select2({
+          multiple: true
+        }).on("select2:select",function(e){
+            var data = $(this).select2("data");
+            var array = [];
+            for(var i in data) {
+                array.push(data[i]["text"]);
+            }
+
+            initView(array);
+
+        }).on("select2:unselect",function(e){
+            var data = $(this).select2("data");
+            var array = [];
+            for(var i in data) {
+                array.push(data[i]["text"]);
+            }
+
+            initView(array);
+        });
+
+        // 窗口大小改变时，图表重新渲染
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+    });
+</script>
+</block>

@@ -1,0 +1,194 @@
+<div class="win_box step">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="zb_box_in">
+            <div class="zb_box_title">
+                <div class="zb_box_hd">
+                    <h1>恭喜您申请成功!</h1>
+                    <div class="zb_box_info">
+                   客服将在工作日内与您联系,现在请您完善您的订单信息,以便我们能够更好的为您服务！
+                    </div>
+                </div>
+                <span class="win_box_close" title="关闭">
+                </span>
+            </div>
+            <div class="zb_box_form">
+                <div class="input">
+                     <div class="half">
+                        <label class="label-control">您的称呼</label>
+                        <input type="text" class="input-control" name="name" placeholder="您的称呼" value="{$step.name}"/>
+                        <div class="input-error"></div>
+                    </div>
+                    <div class="half">
+                        <label class="label-control">量房时间</label>
+                        <select name="lftime" class="input-control">
+                            <option>今天</option>
+                            <option>明天</option>
+                            <option>三天内</option>
+                            <option>一周内</option>
+                            <option>一周以上</option>
+                        </select>
+                        <div class="input-error"></div>
+                    </div>
+                </div>
+                <div class="input">
+                    <div class="half">
+                        <label class="label-control">装修时间</label>
+                        <select name="start" class="input-control">
+                            <option>半个月内</option>
+                            <option>1个月</option>
+                            <option>2个月</option>
+                            <option>3个月</option>
+                            <option>3个月以上</option>
+                            <option>面议</option>
+                        </select>
+                        <div class="input-error"></div>
+                    </div>
+                    <div class="half">
+                        <label class="label-control">房屋类型</label>
+                        <select class="input-control" name="huxing">
+                            <volist name="step.hx" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                        <div class="input-error"></div>
+                    </div>
+                </div>
+                <div class="input">
+                    <div class="half">
+                        <label class="label-control">装修预算</label>
+                        <select class="input-control" name="yusuan">
+                            <option value=""  selected="selected">请选择</option>
+                            <volist name="step.jiage" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                        <div class="input-error"></div>
+                    </div>
+                    <div class="half">
+                        <label class="label-control">装修类型</label>
+                        <select class="input-control" name="fangshi">
+                            <volist name="step.fs" id="vo">
+                                <if condition="$vo['id'] EQ 30">
+                                    <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                <else/>
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                </if>
+                            </volist>
+                        </select>
+                        <div class="input-error"></div>
+                    </div>
+                </div>
+                <div class="input">
+                    <div class="half">
+                        <label class="label-control">装修面积</label>
+                        <input type="text" class="input-control" name="mianji" placeholder="面积" value="{$step.mianji}" />
+                        <i class="input-info">㎡</i>
+                        <div class="input-error"></div>
+                    </div>
+                    <div class="half">
+                        <label class="label-control">楼盘名称</label>
+                        <input type="text" class="input-control" placeholder="楼盘"  name="xiaoqu" />
+                        <div class="input-error"></div>
+                    </div>
+                </div>
+                <div class="input">
+                    <button id="stepSave" type="button" class="button">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".step .win_box_close").click(function(event) {
+        $.ajax({
+            url: '/refresh/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                ssid:"{$step.ssid}"
+            }
+        })
+        .done(function(data) {
+            $("#safecode").val(data.data.safecode);
+            $("#safekey").val(data.data.safekey);
+            if($(".secbox_form").length > 0){
+               for(var i =0;i < $(".secbox_form").length;i++){
+                    $(".secbox_form")[i].reset();
+               }
+            }
+
+            if(data.status == 1){
+                $(".step").fadeOut(400,function(){
+                    $(".step").remove();
+                });
+            }
+        });
+    });
+
+    $("#stepSave").click(function(event) {
+        $(".focus").removeClass('focus');
+        $(".input-error").html("");
+        var _this = $(this);
+
+
+        if(!App.validate.run($(".step input[name=mianji]").val(),"num")){
+            $(".step input[name=mianji]").addClass('focus');
+            $(".step input[name=mianji]").parent().find(".input-error").html("无效的面积");
+            return false;
+        }
+
+        if(!App.validate.run($(".step input[name=mianji]").val())){
+            $(".step input[name=mianji]").addClass('focus');
+            $(".step input[name=mianji]").parent().find(".input-error").html("请填写面积");
+            return false;
+        }
+
+        if(!App.validate.run($(".step input[name=xiaoqu]").val())){
+            $(".step input[name=xiaoqu]").addClass('focus');
+            $(".step input[name=xiaoqu]").parent().find(".input-error").html("请填写楼盘");
+            return false;
+        }
+
+        $.ajax({
+            url: '/fb_order/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                name:$(".step input[name=name]").val(),
+                lftime:$(".step select[name=lftime]").val(),
+                mianji:$(".step input[name=mianji]").val(),
+                start:$(".step select[name=start]").val(),
+                huxing:$(".step select[name=huxing]").val(),
+                yusuan:$(".step select[name=yusuan]").val(),
+                lx:$(".step select[name=lx]").val(),
+                xiaoqu:$(".step input[name=xiaoqu]").val(),
+                safecode:"{$step.safecode}",
+                safekey:"{$step.safekey}",
+                ssid:"{$step.ssid}",
+                orderid:"{$step.orderid}",
+                step:2
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $(".step").remove();
+                $("body").append(data.data.tmp);
+            } else {
+                $.pt({
+                    target: _this,
+                    content: data.info,
+                    width: 'auto'
+                });
+            }
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target: _this,
+                content: '发布失败,请刷新页面！',
+                width: 'auto'
+            });
+        });
+    });
+</script>

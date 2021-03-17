@@ -1,0 +1,474 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+	<title>全瞰-续费月数完成率</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+	<div class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="overflow-x">
+						<div class="overflow-box" style="width: 1580px;">
+							<div class="box-header">
+								<h3><i class="xs-icon quankanxfyswcl-icon"></i> 全瞰-续费月数完成率</h3>
+								<form class="form-horizontal">
+									<div class="from-list">
+										<div class="from-item">
+											<span class="width-auto">部门：</span>
+											<select id="department" name="department" type="text">
+												<switch name="department">
+						                            <case value="0">
+						                                <option value="0" <if condition="$keyword['department'] eq 0">selected="selected"</if>>营销中心</option>
+						                                <option value="1" <if condition="$keyword['department'] eq 1">selected="selected"</if>>商务</option>
+						                                <option value="2" <if condition="$keyword['department'] eq 2">selected="selected"</if>>外销</option>
+						                            </case>
+						                            <case value="1">
+						                                <option value="1" <if condition="$keyword['department'] eq 1">selected="selected"</if>>商务</option>
+						                            </case>
+						                            <case value="2">
+						                                <option value="2" <if condition="$keyword['department'] eq 2">selected="selected"</if>>外销</option>
+						                            </case>
+						                        </switch>
+											</select>
+										</div>
+										<div class="from-item" >
+											<span class="timer-tit">财年：</span>
+											<input type="text" name="date" class="form-control datepicker timer-input" placeholder="选择年份" value="{$keyword.time}">
+											<i class="fa fa-calendar timer-icon"></i>
+										</div>
+										<button class="search-btn xs-btn">查询</button>
+									</div>
+								</form>
+							</div>
+							<div class="box-body">
+								<div class="todo-item">
+									<div class="pull-right position-relative">
+										<i class="xs-icon zhushi-icon"></i>
+										<div class="zhushi-info">
+											<p>输入人注意事项：本页数据以部门及月份为唯一标识，其他数据均为部门及月份附属信息，
+					                        默认显示数据为：部门=“营销中心”的记录（每年的2月到次年1月）
+					                         名词解释：（当月的数据：当月1日凌晨0.10到当日凌晨0:10，之前月数据：统计当月1日凌晨0.10到次月1日凌晨0：10）</p>
+											<p>所有百分比类型的是指全部为：XX.X%，即取值小数点后1位，比如：90.17%取值90.2%，90.14%取值90.1%四舍五入，90%取值90.0%。
+					                         数值为小数点后1位的（四舍五入）：续费月数指标、实际续费月数、超出月数、<span class="redcolor">到期数</span></p>
+											<p>1、部门：城市归属部门，
+					                          外销、商务“续费月数完成率指标、全年续费月数完成率均值、续费月数完成率<span class="redcolor">封顶值</span>、月度系数”读取《部门续费月度系数》的对应值，“续费月数完成率指标、全年续费月数完成率均值、<span class="redcolor">续费月数完成率封顶值</span>、月度系数“读取《中心续费月度系数》的对应值。</p>
+											<p><span class="redcolor">2、到期数：读取系统设置中“到期数指标”。</span></p>
+											<p>3、续费月数指标：<span class="redcolor">到期数*3个月</span></p>
+											<p>4、实际续费月数：<span class="redcolor">读取系统设置中“实际续费月数”。</span>营销中心为外销+商务的总和</p>
+											<p>5、续费月数完成率：实际续费月数/续费月数指标*100%</p>
+											<p>6、续费月数完成率达成：续费月数完成率/续费月数完成率指标*100%</p>
+											<p>7、系数后续费月数完成率：续费月数完成率/续费月数完成率月度系数。</p>
+											<p>8、超出月数：（续费月数完成率-续费月数完成率指标）*续费月数指标，≤0的情况下均为0</p>
+											<p>9、月度系数：平衡淡旺季，取去年实际续费，当月月度系数=（当月续费率+当月续费月数完成率）/（全年续费率+全年续费月数完成率），作为今年的月度系数。以上为2017财年的设定公式，2018财年之后以最新公式为准。</p>
+											<p>10、当月数据显示：以当月1日凌晨0.10到当日凌晨0:10的数值显示，比如4月16日当天数据显示为4月1日凌晨0：10到4月16日凌晨0：10的数值，分析折线图不显示4月数值。</p>
+											<p>13、所有统计数值，取次月1日凌晨0：10的数值定格保存。</p>
+										</div>
+									</div>
+								</div>
+								<table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+					                <thead class="thead1" style="width: 1580px;">
+					                    <tr role="row">
+					                    	<th title="月份">月份</th>
+					                    	<th title="部门">部门</th>
+					                    	<th title="到期数">到期数</th>
+					                    	<th title="续费月数指标">续费月数指标</th>
+					                    	<th title="实际续费月数">实际续费月数</th>
+					                    	<th title="续费月数完成率">续费月数完成率</th>
+					                    	<th title="续费月数完成率指标">续费月数完成率指标</th>
+					                    	<th title="续费月数完成率达成">续费月数完成率达成</th>
+					                    	<th title="全年续费月数完成率均值">全年续费月数完成率均值</th>
+					                    	<th title="系数后续费月数完成率">系数后续费月数完成率</th>
+					                    	<th title="续费月数完成率封顶值">续费月数完成率封顶值</th>
+					                    	<th title="超出月数">超出月数</th>
+					                    </tr>
+					                </thead>
+					                <thead class="thead2" style="width: 1580px;">
+					                    <tr role="row">
+					                    	<th title="月份">月份</th>
+					                    	<th title="部门">部门</th>
+					                    	<th title="到期数">到期数</th>
+					                    	<th title="续费月数指标">续费月数指标</th>
+					                    	<th title="实际续费月数">实际续费月数</th>
+					                    	<th title="续费月数完成率">续费月数完成率</th>
+					                    	<th title="续费月数完成率指标">续费月数完成率指标</th>
+					                    	<th title="续费月数完成率达成">续费月数完成率达成</th>
+					                    	<th title="全年续费月数完成率均值">全年续费月数完成率均值</th>
+					                    	<th title="系数后续费月数完成率">系数后续费月数完成率</th>
+					                    	<th title="续费月数完成率封顶值">续费月数完成率封顶值</th>
+					                    	<th title="超出月数">超出月数</th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                    <volist name="list" id='v'>
+						                    <tr role="row" class="odd">
+						                        <td><span>{$v.time}</span></td>
+												<td><span>{$v.department}</span></td>
+												<td><span>{$v.total_daoqi|default="0"}</span></td>
+												<td><span>{$v.total_renew_month_point|default="0"}</span></td>
+												<td><span>{$v.total_renew_month|default="0"}</span></td>
+												<td><span>{$v.xufeilyuewanchenglv|default="0"}</span></td>
+												<td><span>{$v.xfyswczb|default="0"}</span></td>
+												<td><span>{$v.xfyswcldc|default="0"}</span></td>
+												<td><span>{$v.qnxfyswcljz|default="0"}</span></td>
+												<td><span>{$v.xshxfyswcl|default="0"}</span></td>
+												<td><span>{$v.xflyswczg|default="0"}</span></td>
+												<td><span>{$v.over_month|default="0"}</span></td>
+						                    </tr>
+					                   	</volist>
+					                </tbody>
+					            </table>
+							</div>
+							<div class="box-footer">
+								<div class="col-xs-12 no-padding max-width-1352">
+							        <div id="canvas" class="col-xs-6 no-padding canvas-height-300"></div>
+									<div id="canvas1" class="col-xs-6 no-padding canvas-height-300"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</block>
+<block name="script">
+	<script src="/assets/common/js/echarts/3.5.4/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$(function() {
+			// canvas
+			var dom1 = document.getElementById("canvas");
+			var dom2 = document.getElementById("canvas1");
+			var myChart1 = echarts.init(dom1);
+			var myChart2 = echarts.init(dom2);
+			var option1 = {
+			    title : {
+			        text: '续费月数完成率环比',
+			        // subtext: '会员数',
+			        x:'left',
+			        textStyle: {
+                     color: '#369beb',          // 主标题文字颜色
+                           },
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}续费月数完成率指标','{$table_data.year}续费月数完成率','','{$table_data.year}全年续费月数完成率均值','{$table_data.year}续费月数完成率最高值'],
+			        y:'bottom',
+			        align:'left',
+			        // itemGap:15,
+
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}%',
+			            },
+			            splitArea:{
+                         	show:true
+			            },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$table_data.year}续费月数完成率指标',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.xfyswczb}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#369beb',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_data.year}续费月数完成率',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.xufeilyuewanchenglv}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#f5994c',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_data.year}全年续费月数完成率均值',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.qnxfyswcljz}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#de6aab'
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_data.year}续费月数完成率最高值',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.xflyswczg}],
+			            itemStyle : {
+                                normal : {
+                                    color:'#515e8a'
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			}
+			var option2 = {
+			    title : {
+			        text: '续费月数完成率同比',
+			        // subtext: '会员数',
+			        x:'left',
+			        textStyle: {
+                     color: '#369beb'          // 主标题文字颜色
+                           },
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['{$table_data.year}续费月数完成率','{$table_data.year}全年续费月数完成率均值','','{$table_last.year}续费月数完成率','{$table_last.year}全年续费月数完成率均值'],
+			        y:'bottom'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['02','03','04','05','06','07','08','09','10','11','12','01']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}%'
+			            },
+			            splitArea:{
+                         show:true
+			                  },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'{$table_data.year}续费月数完成率',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.xufeilyuewanchenglv}],
+			            itemStyle : {
+                                normal : {
+                                        color:'#369beb',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_data.year}全年续费月数完成率均值',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_data.qnxfyswcljz}],
+			            itemStyle : {
+                                normal : {
+                                        color:'#f5994c',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}续费月数完成率',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.xufeilyuewanchenglv}],
+
+			            itemStyle : {
+                                normal : {
+                                        color:'#de6aab',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'{$table_last.year}全年续费月数完成率均值',
+			            type:'line',
+			            smooth:true,
+			            data:[{$table_last.qnxfyswcljz}],
+			            itemStyle : {
+                                normal : {
+                                        color:'#515e8a',
+                                }
+                            },
+			            markPoint : {
+                            symbolSize: 70,
+                            itemStyle: {
+                                normal: {
+                                    label:{
+                                        show: true,
+                                        formatter: '{c}%'
+                                    }
+                                }
+                            },
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			myChart1.setOption(option1, true);
+			myChart2.setOption(option2, true);
+			// 窗口缩放时canvas重新渲染
+			$(window).on('resize',function(){
+				var myChart1 = echarts.init(dom1);
+				var myChart2 = echarts.init(dom2);
+				myChart1.setOption(option1, true);
+				myChart2.setOption(option2, true);
+			});
+			// 时间选择
+			$(".datepicker").datetimepicker({
+				startView:4,
+				minView:'decade',
+				format:"yyyy",
+				autoclose:true,
+				pickerPosition: "bottom-left"
+			});
+			// 注释信息
+			$('.zhushi-icon').click(function() {
+				if($(this).attr('show') == 'show'){
+					$('.zhushi-info').hide();
+					$(this).removeAttr('show')
+				}else{
+					$('.zhushi-info').show();
+					$(this).attr('show','show');
+				}
+			});
+			// 竖向滚动时，表格头部悬浮
+			var scrollLeft=0;
+			$(document).on('scroll',function(){
+				if($(document).scrollTop() >= 268){
+					$('.thead1').show();
+					$('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-scrollLeft,'z-index':10});
+				}else{
+					$('.thead1').hide();
+					$('.thead2').css({'position':'relative',left:0});
+				}
+			});
+			// 横向滚动时，表格头部悬浮
+			$('.overflow-x').on('scroll',function(){
+				scrollLeft = $(this).scrollLeft();
+				$('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+			});
+		})
+	</script>
+</block>

@@ -1,0 +1,479 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+ <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+ <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+ <link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">账号管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>用户管理</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-sm-12 ">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <volist name="topDept" id="vo">
+                            <if condition="($_GET['tab'] EQ $vo['id']) OR (!isset($_GET['tab']) AND $key EQ 0) OR (count($topDept) EQ 1)">
+                            <li role="presentation" class="active"><a href="/auth/role?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            <else/>
+                            <li role="presentation"><a href="/adminuser?tab={$vo.id}" role="tab">{$vo.name}</a></li>
+                            </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <div class="box-header">
+                        条件查询
+                    </div>
+                    <div class="box-body">
+                        <form method="get" action="/adminuser">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    <label for="exampleInputEmail1">账号名称：</label>
+                                    <select id="account" name="id" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="users" id="vo">
+                                        <option value="{$vo.id}">{$vo.user}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="department">所属角色：</label>
+                                    <select id="role" name="role" class="col-sm-12">
+                                        <option value="">请选择</option>
+                                        <volist name="list.roles" id="vo">
+                                        <option value="{$key}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <label for="department">所属部门：</label>
+                                    <select id="department" name="dept" class="col-sm-12">
+                                        <option value="">请选择</option>
+                                        <volist name="list.department" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label for="exampleInputEmail1">是否在职:</label>
+                                    <select id="state" name="state" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="1">在职</option>
+                                        <option value="0">离职</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label for="exampleInputEmail1">状态:</label>
+                                    <select id="stat" name="stat" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="1">已启用</option>
+                                        <option value="0">已禁用</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="exampleInputEmail1">添加时间:</label>
+
+                                    <input class="form-control datepicker" name="time" placeholder="添加时间" value="{$Think.get.time}" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <label >&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label >&nbsp;</label>
+                                    <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus-circle" ></i>添加帐号</button>
+                                </div>
+                                <input name="tab" type="hidden" value="{$tab}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>账号名称</th>
+                                    <th>所属角色</th>
+                                    <th>所属部门</th>
+
+                                    <th>直属上级</th>
+                                    <th>电话</th>
+                                    <th>QQ</th>
+                                    <th>微信</th>
+
+                                    <th>添加时间</th>
+                                    <th>是否在职</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.list" id="vo">
+                                    <tr>
+                                        <td>{$key+1}</td>
+                                        <td>{$vo.user}</td>
+                                        <td>{$vo.role_name}</td>
+                                        <td>{$vo.department}</td>
+
+                                        <td>{$vo.up_name}</td>
+                                        <td>{$vo.tel_work1}</td>
+                                        <td>{$vo.qq_work1}</td>
+                                        <td>{$vo.wx_work1}</td>
+
+                                        <td>{$vo.addtime|default='-'}</td>
+                                        <td>
+                                        <if condition="$vo['state'] EQ 1">
+                                            <span class="green">在职</span>
+                                        <else/>
+                                            <span class="red">离职</span>
+                                        </if>
+                                        </td>
+                                        <td>
+                                            <if condition="$vo['stat'] EQ 1">
+                                                <span class="green">已启用</span>
+                                            <else/>
+                                                 <span class="red">已禁用</span>
+                                            </if>
+                                        </td>
+                                        <td>
+                                            <a class="set-city" href="/adminuser/cityup?id={$vo.id}">城市设置</a>
+                                            <a class="reset" href="javascript:void(0)" data-id="{$vo.id}">密码重置</a>
+                                            <a class="edit" data-id="{$vo.id}"  href="javascript:void(0)">编辑</a>
+                                            <if condition="$vo['stat'] EQ 0">
+                                            <a class="del" href="javascript:void(0)" data-id="{$vo.id}" data-state="{$vo.state}" data-stat="1">启用</a>
+                                            <else/>
+                                            <a class="del" href="javascript:void(0)" data-id="{$vo.id}"  data-state="{$vo.state}" data-stat="0">禁用</a>
+                                            </if>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="userForm" class="form-horizontal">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">账号名称：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="user"  placeholder="账号名称">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">姓名：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="name"  placeholder="姓名">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">所属角色：</label>
+                                <div class="col-sm-10">
+                                    <select id="addRole" name="role" class="col-sm-12" style="width: 100%">
+                                        <option value="">请选择</option>
+                                        <volist name="list.roles" id="vo">
+                                        <option value="{$key}">{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <if condition="$isKf EQ 1">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">客服团：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="kfgroup"  placeholder="客服团">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">客服师：</label>
+                                <div class="col-sm-10">
+                                    <select id="kfmanager" name="kfmanager" class="col-sm-12" style="width: 100%">
+                                        <option value="">请选择</option>
+                                        <volist name="kfusers.manager" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            </if>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">所属部门：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="department" id="input_department" readonly placeholder="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">直属上级：</label>
+                                <div class="col-sm-10">
+                                    <select id="leader" name="up_id" class="col-sm-12" style="width: 100%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">电话：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="tel_work1" placeholder="请输入" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">工作QQ：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="qq_work1" placeholder="请输入" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">微信：</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="wx_work1" placeholder="请输入" />
+                                </div>
+                            </div>
+                            <div class="form-group" id="state_box" style="display: none;">
+                                <label for="inputEmail3" class="col-sm-4 control-label">是否在职：</label>
+                                <div class="col-sm-8">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="state" value="1"> 在职
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="state" value="0"> 离职
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="id"/>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="btnSave" type="button" class="btn btn-primary pull-left">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="myModal2" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog  modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">确认禁用该账号？</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <input type="hidden" name="id"/>
+                            <input type="hidden" name="stat"/>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button id="btnSave2" type="button" class="btn btn-primary pull-left">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+$("#role").select2();
+$("#role").select2("val","{$Think.get.role}");
+$("#department").select2();
+$("#department").select2("val","{$Think.get.dept}");
+$("#account").select2();
+$("#account").select2("val","{$Think.get.id}");
+
+$("#addRole").select2();
+$("#kfmanager").select2();
+$("#leader").select2();
+
+
+$("#state").val("{$Think.get.state}");
+$("#stat").val("{$Think.get.stat}");
+
+$(".datepicker").datepicker({
+    format:"yyyy-mm-dd",
+    minViewMode:0
+});
+
+$("#btnSave").click(function(event) {
+    var data =  $("#userForm").serializeArray();
+    $.ajax({
+        url: '/adminuser/userup/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: data
+    })
+    .done(function(data) {
+        if (data.status == 1) {
+            if (data.data.act_type == "add") {
+                alert(data.info);
+            }
+            window.location.href = window.location.href;
+        } else {
+            alert(data.info);
+        }
+    });
+});
+$(".btn-success").click(function () {
+    $("#myModal #myModalLabel").html("添加用户")
+})
+
+var default_up_id;
+$(".edit").click(function(event) {
+    var _this = $(this);
+    $("#myModal #myModalLabel").html("编辑用户")
+    $.ajax({
+        url: '/adminuser/getuserinfo',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {id : _this.attr("data-id")}
+    })
+    .done(function(data) {
+        if (data.status == 1) {
+            $("#myModal #userForm input[name=user]").val(data.data.user);
+            $("#myModal #userForm input[name=name]").val(data.data.name);
+            $("#myModal #userForm input[name=id]").val(data.data.id);
+            $("#myModal #userForm input[name=kfgroup]").val(data.data.kfgroup);
+            $("#myModal #userForm input[name=qq_work1]").val(data.data.qq_work1);
+            $("#myModal #userForm input[name=wx_work1]").val(data.data.wx_work1);
+            $("#myModal #userForm input[name=tel_work1]").val(data.data.tel_work1);
+            $("#addRole").select2("val",data.data.uid);
+            $("#myModal #userForm input[name=user]").attr("disabled","disabled");
+
+            default_up_id = data.data.up_id;
+            $("#state_box").show();
+            if (data.data.state == 1) {
+                $("#myModal input[type=radio]").eq(0).attr("checked","checked").prop("checked",true);
+            } else {
+                $("#myModal input[type=radio]").eq(1).attr("checked","checked").prop("checked",true);
+            }
+
+            if ($("#kfmanager").length > 0) {
+                $("#kfmanager").select2("val",data.data.kfmanager);
+            }
+
+            $("#myModal").modal().on("hidden.bs.modal",function(){
+                $("#userForm")[0].reset();
+                $("#addRole").select2("val","");
+                $("input[name=user]").attr("disabled",false);
+                $("#state_box").hide();
+            })
+        }
+    });
+});
+
+$(".del").click(function(event) {
+    var _this = $(this);
+    var stat = _this.attr("data-stat");
+    if (stat == 0) {
+        $("#myModal2 .modal-title").html("确认禁用该账号？");
+    } else {
+        $("#myModal2 .modal-title").html("确认启用该账号？");
+    }
+    $("#myModal2 form input[name=id]").val(_this.attr("data-id"));
+    $("#myModal2 form input[name=stat]").val(_this.attr("data-stat"));
+
+    $("#myModal2").modal().on("hidden.bs.modal",function(){
+        $("#myModal form")[0].reset();
+    });
+});
+
+$("#btnSave2").click(function(event) {
+    $.ajax({
+        url: '/adminuser/deleteuser',
+        type: 'POST',
+        dataType: 'JSON',
+        data:$("#myModal2 form").serializeArray()
+    })
+    .done(function(data) {
+        if (data.status == 1) {
+            window.location.href = window.location.href;
+        }
+    });
+});
+
+$(".reset").click(function(event) {
+    var _this = $(this);
+    if (confirm("确认恢复初始密码？")) {
+        $.ajax({
+            url: '/adminuser/reset/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {id: _this.attr("data-id")}
+        })
+        .done(function(data) {
+            alert(data.info);
+        });
+    }
+});
+
+
+// 角色选择事件
+$("#addRole").on("change", function(){
+    var user_list = [];
+    var department_name = "";
+    var role_id = $(this).val();
+
+    if (role_id) {
+        $.post("{:u('getRoleUserList')}", {
+            role_id: role_id
+        }, function(resp){
+            if (resp["status"] == 1) {
+                if (resp["data"]["top_level"] == 1) {
+                    $("#leader").attr("disabled", true);
+                } else {
+                    $("#leader").attr("disabled", false);
+                    user_list = resp["data"]["user_list"];
+                }
+
+                department_name = resp["data"]["department"]["department_fullname"];
+            }
+
+            setRoleFormatter(department_name, user_list);
+        });
+    } else {
+        setRoleFormatter(department_name, user_list);
+    }
+});
+
+function setRoleFormatter(department_name, user_list){
+    var userOptions = '<option value="">请选择</option>';
+    for (var i in user_list) {
+        userOptions += '<option value="'+user_list[i]['id']+'">'+user_list[i]['name']+'</option>';
+    }
+
+    $("#input_department").val(department_name);
+    $("#leader").html(userOptions);
+
+    if (default_up_id) {
+        $("#leader").select2("val", default_up_id);
+        default_up_id = ""
+    } else {
+        $("#leader").select2("val", "");
+    }
+}
+</script>
+</block>

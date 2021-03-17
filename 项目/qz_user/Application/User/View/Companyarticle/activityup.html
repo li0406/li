@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/article/css/ht-sale.css?v={:C('STATIC_VERSION')}">
+
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/common/js/laydate.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Companyarticle:activityheader" />
+        <div class="ht-main">
+            <dl class="sale-change">
+                <dt>
+                    <span>优惠标题：</span>
+                    <input name="title" type="text" placeholder="优惠标题" value="{$info.article.title}">
+                    <em class="red err-tips"></em>
+                </dt>
+                <dt>
+                  <span class="vtop">活动描述：</span>
+                    <textarea name="remark" type="text" placeholder="活动描述">{$info.article.subtitle}</textarea>
+                    <em class="red err-tips vtop"></em>
+                    <div class="gray ml100"><i class="mr10 icon-exclamation-sign"></i>活动描述最多60个字符,请尽量精简！</div>
+                </dt>
+                <dt>
+                    <span>活动日期：</span>
+                    <i id="ht-sale-date">
+                      <input id="start" name="start" class="laydate-icon" placeholder="请选择开始日期" value="{$info.article.start|default=''|date='Y-m-d',###}">
+                    到 <input id="end" name="end" class="laydate-icon"  placeholder="请选择结束日期"  value="{$info.article.end|default=''|date='Y-m-d',###}">
+                    </i>
+                    <em class="red err-tips"></em>
+                </dt>
+                <dd>
+                   <div  id="editor"></div>
+                   <div class="red mt20">
+                        *内容中或图片上,可写联系电话、QQ，但请勿包含 网址\其他网站LOGO\微博、微信帐号\二维码 等"相关联系方式",否则将会被删除。
+                    </div>
+                </dd>
+            </dl>
+            <div class="ht-yes">
+              <a href="javascript:void(0)"><i class="icon-ok mr10"></i>确认发布</a>
+              <em class="red err-tips"></em>
+              <input name="id" type="hidden" value="{$info.article.id}" />
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    //绑定元素
+    //日期范围限制
+      var start = {
+        elem: '#start',
+        format: 'YYYY-MM-DD',
+        // max: '{:date("Y-m-d")}', //最大日期
+        istime: true,
+        istoday: false,
+        choose:function(datas){
+           end.min = datas;
+        }
+      };
+
+      var end = {
+          elem: '#end',
+          format: 'YYYY-MM-DD',
+          istime: true,
+          istoday: false,
+          choose: function(datas) {
+              //start.max = datas; //结束日选好后，充值开始日的最大日期
+          }
+      };
+      laydate(start);
+      laydate(end);
+
+      var ue = UE.getEditor('editor');
+      ue.addListener("ready", function () {
+          // editor准备好之后才可以使用
+         ue.setContent('{$info.article.text}');
+      });
+      $(".ht-yes a").click(function(event) {
+          $(".err-tips").html("");
+          $(".focus").removeClass('focus');
+          var _this = $(this);
+
+          if(!App.validate.run($("input[name=title]").val())){
+              $("input[name=title]").focus();
+              $("input[name=title]").addClass('focus');
+              $("input[name=title]").parent().find(".err-tips").html("请填写文章标题");
+              return false;
+          }
+
+          if(!App.validate.run($("textarea[name=remark]").val())){
+              $("textarea[name=remark]").focus();
+              $("textarea[name=remark]").addClass('focus');
+              $("textarea[name=remark]").parent().find(".err-tips").html("请填写活动描述");
+              return false;
+          }
+
+          if($("textarea[name=remark]").val().length > 60){
+              $("textarea[name=remark]").focus();
+              $("textarea[name=remark]").addClass('focus');
+              $("textarea[name=remark]").parent().find(".err-tips").html("请填写活动描述太长了,请精简");
+              return false;
+          }
+
+
+
+          if(!App.validate.run($("input[name=start]").val())){
+              $("input[name=start]").focus();
+              $("input[name=start]").addClass('focus');
+              $("input[name=start]").parent().parent().find(".err-tips").html("请填写开始活动时间");
+              return false;
+          }
+
+          if(!App.validate.run($("input[name=end]").val())){
+              $("input[name=end]").focus();
+              $("input[name=end]").addClass('focus');
+              $("input[name=end]").parent().parent().find(".err-tips").html("请填写开始活动时间");
+              return false;
+          }
+          var content = ue.getContent();
+          if(!App.validate.run(content)){
+              _this.parent().find(".err-tips").html("亲,您的活动内容总得写点什么吧！");
+              return false;
+          }
+
+          $.ajax({
+                url: '/activityup/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    start:$("input[name=start]").val(),
+                    title: $("input[name=title]").val(),
+                    end:$("input[name=end]").val(),
+                    content:content,
+                    remark:$("textarea[name=remark]").val(),
+                    id:$("input[name=id]").val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href="/success/activit/"+data.data;
+                }else{
+                    _this.parent().find(".err-tips").html(data.info);
+                }
+            })
+            .fail(function() {
+                 _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+            });
+
+      });
+</script>
+</html>

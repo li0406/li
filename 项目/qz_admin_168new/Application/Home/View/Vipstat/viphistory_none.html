@@ -1,0 +1,120 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>无会员续费城市历史记录 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/bootstrap-year-calendar/bootstrap-year-calendar.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/vip/css/vipstat.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>无会员续费城市历史记录</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>无会员续费城市历史记录</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-sm-4" >
+                            <table id="all_list" class="table table-hover table-bordered" style="min-width: auto;">
+                                <thead>
+                                    <tr>
+                                        <th>城市</th>
+                                        <th>城市类别</th>
+                                        <th>持续天数</th>
+                                    </tr>
+                                    <tbody>
+                                    <volist name="list" id="vo">
+                                        <tr class="item" data-id="{$vo.cs}" style="cursor: pointer;">
+                                            <td>{$vo.cname}</td>
+                                            <td>{$vo.type}</td>
+                                            <td>{$vo.offset}</td>
+                                        </tr>
+                                    </volist>
+                                    </tbody>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="col-sm-7">
+                            <div id="calendar"></div>
+                        </div>
+                        <input type="hidden" name="cs" value="{$cs}"/>
+                    </div>
+                    <div class="box box-default">
+                        <div class="alert alert-warning">
+                            <p>说明</p>
+                            <p>1.右侧日历中的红色圆形表示这些日期该城市不存在会员装修公司</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/bootstrap-year-calendar/bootstrap-year-calendar.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var fullYear = '{$fullYear|json_encode}';
+         fullYear = JSON.parse(fullYear);
+
+        $(".item").each(function(){
+            if ('{$cs}' == $(this).attr("data-id")) {
+                $(this).addClass('active');
+            }
+        });
+
+        $('#all_list').DataTable({
+            paging:false,
+            searching:false,
+            language:{
+                zeroRecords: "没有内容",
+                info:""
+            },
+            scrollY:"600px",
+             "order": [[ 2, "asc" ]]
+        });
+
+
+
+        var data = [];
+        for(var i in fullYear){
+            for(var j in fullYear[i]) {
+                if (fullYear[i][j]['show'] == 1) {
+                    data.push(fullYear[i][j]['day']);
+                }
+            }
+        }
+
+        $("#calendar").calendar({
+            headerView:2,
+            startYear:'{$Think.get.year}',
+            clickYear:function(event){
+                var year = event.date;
+                window.location.href = "/vipstat/viphistory?type=2&cs="+$("input[name=cs]").val()+"&year="+year;
+            },
+            customDayRenderer:function(e, d){
+                var date = new Date(d.getTime());
+                Y = date.getFullYear() + '-';
+                M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                D = date.getDate() < 10 ? '0'+date.getDate():date.getDate();
+                var year = Y + M + D;
+                if (data.indexOf(year) != -1) {
+                    $(e).css('background-color', 'red');
+                    $(e).css('color', 'white');
+                    $(e).css('border-radius', '15px');
+                }
+            }
+        });
+
+        $(".item").click(function(event) {
+            window.location.href = "/vipstat/viphistory?type=2&cs="+$(this).attr("data-id");
+        });
+    </script>
+</block>

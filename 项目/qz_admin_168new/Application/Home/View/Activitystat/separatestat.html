@@ -1,0 +1,457 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title> 新客服分单统计- 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/activity/css/activity.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新客服分单统计</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header">
+                <div class="button-box" id="bottom-box">
+                    <form class="form-horizontal" method="GET" action="/activitystat/separateStat/">
+                    <div class="button" data-tab='1'>按人统计</div>
+                    <div class="button" data-tab='2'>按组统计</div>
+                    <div class="button" data-tab='3'>按师统计</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab1">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/activitystat/separatestat" method="get">
+                    <div class="col-xs-2">
+                        <div>客服姓名</div>
+                        <select id="kfList" name="kf" data-search='1' class="form-control" name="kf">
+                            <option value="">选择客服</option>
+                            <volist name="kfList" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups1" name="groups" data-search='1' type="text"  tabindex="3">
+                            <option value="">选择客服组</option>
+                            <volist name="groups" id="vo">
+                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="1" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="1">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table id="myTable2" class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>客服姓名</th>
+                                <th>客服组</th>
+                                <th>登陆天数</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>分单率</th>
+                                <th>赠单量</th>
+                                <th>综合分单量</th>
+                                <th>综合分单率</th>
+                                <th>日均分单量</th>
+                                <th>日均综合分单量</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <volist name="list" id="vo" key="key">
+                        <tr>
+                            <td>{$key}</td>
+                            <td class="center-middle">{$vo.name}</td>
+                            <td>{$vo.kfgroup}</td>
+                            <td>{$vo.day|default=0}</td>
+                            <td>{$vo.all|default=0}</td>
+                            <td>{$vo.fen|default=0}</td>
+                            <td>{$vo.fen_rate|default=0}%</td>
+                            <td>{$vo.zen|default=0}</td>
+                            <td>{$vo.fen_zen|default=0}</td>
+                            <td>{$vo.fen_zen_rate|default=0}%</td>
+                            <td>{$vo.day_fen|default=0}</td>
+                            <td>{$vo.day_fen_zen|default=0}</td>
+                        </tr>
+                        </volist>
+                        <tr>
+                            <td colspan="3">合计</td>
+                            <td>{$sum_ren.day|default=0}</td>
+                            <td>{$sum_ren.all|default=0}</td>
+                            <td>{$sum_ren.fen|default=0}</td>
+                            <td>{$sum_ren['fen']/$sum_ren['all']*100|number_format=4}%</td>
+                            <td>{$sum_ren.zen|default=0}</td>
+                            <td>{$sum_ren.fen_zen|default=0}</td>
+                            <td>{$sum_ren['fen_zen']/$sum_ren['all']*100|number_format=4}%</td>
+                            <td>{$sum_ren.day_fen|default=0}</td>
+                            <td>{$sum_ren.day_fen_zen|default=0}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">平均</td>
+                            <td>{$sum_ren['day']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['all']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['fen']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['fen_pre']}%</td>
+                            <td>{$sum_ren['zen']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['fen_zen']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['all_pre']}%</td>
+                            <td>{$sum_ren['day_fen']/$sum_ren['count']|number_format=2}</td>
+                            <td>{$sum_ren['day_fen_zen']/$sum_ren['count']|number_format=2}</td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab2">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/activitystat/separatestat" method="get">
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups2" name="groups" data-search='1'  type="text">
+                            <volist name="groups" id="vo">
+                            <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager1" name="manager" data-search='1' name="cs" type="text"  tabindex="3">
+                            <volist name="manager" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="2" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button"  class="btn-success form-control export" data-tab="2">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>客服组</th>
+                                <th>客服师</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>分单率</th>
+                                <th>赠单量</th>
+                                <th>综合分单量</th>
+                                <th>综合分单率</th>
+                                <th>日均分单量</th>
+                                <th>日均综合分单量</th>
+                            </tr>
+                    </thead>
+                        <tbody>
+                            <volist name="grouplist" id="vo" key="key">
+                            <tr>
+                                <td class="center-middle">{$key}</td>
+                                <td>{$vo.kfgroup}</td>
+                                <td>{$vo.manager}</td>
+                                <td>{$vo.all|default=0}</td>
+                                <td>{$vo.fen|default=0}</td>
+                                <td>{$vo.fen_rate|default=0}%</td>
+                                <td>{$vo.zen|default=0}</td>
+                                <td>{$vo.fen_zen|default=0}</td>
+                                <td>{$vo.fen_zen_rate|default=0}%</td>
+                                <td>{$vo.day_fen|default=0}</td>
+                                <td>{$vo.day_fen_zen|default=0}</td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td colspan="3">合计</td>
+                                <td>{$sum_zu.all|default=0}</td>
+                                <td>{$sum_zu.fen|default=0}</td>
+                                <td>{$sum_zu['fen']/$sum_zu['all']*100|number_format=4}%</td>
+                                <td>{$sum_zu.zen|default=0}</td>
+                                <td>{$sum_zu.fen_zen|default=0}</td>
+                                <td>{$sum_zu['fen_zen']/$sum_zu['all']*100|number_format=4}%</td>
+                                <td>{$sum_zu.day_fen|default=0}</td>
+                                <td>{$sum_zu.day_fen_zen|default=0}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">平均</td>
+                                <td>{$sum_zu['all']/$sum_zu['count']|number_format=2}</td>
+                                <td>{$sum_zu['fen']/$sum_zu['count']|number_format=2}</td>
+                                <td>{$sum_zu['fen_pre']}%</td>
+                                <td>{$sum_zu['zen']/$sum_zu['count']|number_format=2}</td>
+                                <td>{$sum_zu['fen_zen']/$sum_zu['count']|number_format=2}</td>
+                                <td>{$sum_zu['all_pre']}%</td>
+                                <td>{$sum_zu['day_fen']/$sum_zu['count']|number_format=2}</td>
+                                <td>{$sum_zu['day_fen_zen']/$sum_zu['count']|number_format=2}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="tab3">
+            <div class="box">
+                <div class="box-header">
+                    <form action="/activitystat/separatestat" method="get">
+                    <div class="col-xs-2">
+                        <div>客服师</div>
+                        <select id="manager2" name="manager" data-search='1'  type="text">
+                            <volist name="manager" id="vo">
+                            <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-开始:</div>
+                        <input type="text" data-search='1' name="begin" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.begin}">
+                    </div>
+                    <div class="col-xs-2">
+                        <div>查询时间-结束:</div>
+                        <input type="text" data-search='1' name="end" class="form-control datepicker" placeholder="选择日期" value="{$Think.get.end}">
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                        <input type="hidden" name="index" value="3" />
+                    </div>
+                    <div class="col-xs-2 pull-right">
+                        <div style="opacity:0;">导出EXCEL</div>
+                        <button type="button" class="btn-success form-control export" data-tab="3">导出EXCEL</button>
+                    </div>
+                    <div class="col-xs-12">
+                        <span class="pull-right set-mt16">综合分单量=分单量+赠单量/10</span>
+                    </div>
+                    </form>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>客服组数</th>
+                                <th>负责人</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>分单率</th>
+                                <th>赠单量</th>
+                                <th>综合分单量</th>
+                                <th>综合分单率</th>
+                                <th>日均分单量</th>
+                                <th>日均综合分单量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="managerlist" id="vo">
+                            <volist name="vo.child" id="v">
+                            <tr>
+                                <td>{$v.kfgroup}组</td>
+                                <td>{$v.groupmanager}</td>
+                                <td>{$v.all|default=0}</td>
+                                <td>{$v.fen|default=0}</td>
+                                <td>{$v.fen_rate|default=0}%</td>
+                                <td>{$v.zen|default=0}</td>
+                                <td>{$v.fen_zen|default=0}</td>
+                                <td>{$v.fen_zen_rate|default=0}%</td>
+                                <td>{$v.day_fen|default=0}</td>
+                                <td>{$v.day_fen_zen|default=0}</td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle"><b>汇总</b></td>
+                                <td><b>{$vo.manager}</b></td>
+                                <td><b>{$vo.all|default=0}</b></td>
+                                <td><b>{$vo.fen|default=0}</b></td>
+                                <td><b>{$vo.fen_rate|default=0}%</b></td>
+                                <td><b>{$vo.zen|default=0}</b></td>
+                                <td><b>{$vo.fen_zen|default=0}</b></td>
+                                <td><b>{$vo.fen_zen_rate|default=0}%</b></td>
+                                <td><b>{$vo.day_fen|default=0}</b></td>
+                                <td><b>{$vo.day_fen_zen|default=0}</b></td>
+                            </tr>
+                            </volist>
+                            <tr>
+                                <td class="center-middle">总计</td>
+                                <td>-</td>
+                                <td>{$total.all|default=0}</td>
+                                <td>{$total.fen|default=0}</td>
+                                <td>{$total.fen_rate|default=0}%</td>
+                                <td>{$total.zen|default=0}</td>
+                                <td>{$total.fen_zen|default=0}</td>
+                                <td>{$total.fen_zen_rate|default=0}%</td>
+                                <td>{$total.day_fen|default=0}</td>
+                                <td>{$total.day_fen_zen|default=0}</td>
+                            </tr>
+                            <tr>
+                                <td class="center-middle">平均数</td>
+                                <td>-</td>
+                                <td>{$total['all']/$total['count']|number_format=2}</td>
+                                <td>{$total['fen']/$total['count']|number_format=2}</td>
+                                <td>{$total.fen_pre|default=0}%</td>
+                                <td>{$total['zen']/$total['count']|number_format=2}</td>
+                                <td>{$total['fen_zen']/$total['count']|number_format=2}</td>
+                                <td>{$total.all_pre|default=0}%</td>
+                                <td>{$total['day_fen']/$total['count']|number_format=2}</td>
+                                <td>{$total['day_fen_zen']/$total['count']|number_format=2}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+
+    $(document).ready(function() {
+        $("#kf").select2({
+            allowClear: true,
+            placeholder: "选择城市"
+        });
+        $("#kf").select2("val", "{$Think.get.kf}");
+
+        $("#groups1").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#groups1").select2("val","{$Think.get.groups}");
+        $("#groups2").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#groups2").select2("val","{$Think.get.groups}");
+        $("#manager1").select2({
+                    allowClear: true,
+                    placeholder: "选择师长"
+         });
+         $("#manager1").select2("val","{$Think.get.manager}");
+         $("#manager2").select2({
+                    allowClear: true,
+                    placeholder: "选择师长"
+         });
+         $("#manager2").select2("val","{$Think.get.manager}");
+
+        $("#tab1,#tab2,#tab3").hide();
+        $('#tab1').show();
+
+        $('.button-box .button').eq({$Think.get.index|default=1}-1).addClass('button-active');
+
+        $("#bottom-box .button").click(function(){
+            $('.button-active').removeClass('button-active');
+            $(this).addClass('button-active');
+            var tabIndex = $(this).attr('data-tab');
+            $("#tab1,#tab2,#tab3").hide();
+            $('#tab'+tabIndex).show();
+        });
+
+        $(".button-active").trigger('click');
+            $(".datepicker").datepicker({
+            format:"yyyy-mm-dd"
+        });
+
+
+
+        $('#tab1 table').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+           sWidth:"100%",
+           scrollY:"600px",
+           "bSort":true
+        });
+
+        // $('#tab2 table').DataTable({
+        //    paging:false,
+        //    searching:false,
+        //    language:{
+        //         zeroRecords: "没有内容",
+        //         info:""
+        //    },
+        //    sWidth:"100%",
+        //    scrollY:"600px",
+        //    "bSort":true
+        // });
+
+        // $('#tab3 table').DataTable({
+        //    paging:false,
+        //    searching:false,
+        //    language:{
+        //         zeroRecords: "没有内容",
+        //         info:""
+        //    },
+        //    sWidth:"100%",
+        //    scrollY:"600px",
+        //    "bSort":true
+        // });
+
+
+        // $(".datetimepicker").datetimepicker({
+        //    autoclose: true,
+        //    todayBtn: true,
+        //    todayHighlight: true,
+        //    pickerPosition: "bottom-left",
+        //    startView: 2,//月视图
+        //    endDate : new Date(),
+        //    minView: 1//日期时间选择器所能够提供的最精确的时间选择视图
+        // });
+    });
+
+    </script>
+</block>

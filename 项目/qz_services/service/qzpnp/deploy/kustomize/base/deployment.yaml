@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qzpnp
+spec:
+  selector:
+    matchLabels:
+      deployment: qzpnp
+  template:
+    metadata:
+      labels:
+        deployment: qzpnp
+    spec:
+      containers:
+        - name: qzpnp
+          image: registry.cn-shanghai.aliyuncs.com/qizuang/qzpnp:master-040ce9e
+          imagePullPolicy: Always
+          # command: [ "echo", "SUCCESS" ]
+          ports:
+            - containerPort: 18801
+              name: 18801tcp00
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 18801
+              httpHeaders:
+                - name: X-Custom-Header
+                  value: Awesome
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          # envFrom:
+          # - configMapRef:
+          #     name: env-app-config
+          volumeMounts:
+            - mountPath: /data/app/qzpnp/config
+              name: vol1
+      imagePullSecrets:
+        - name: "container-registry-a"
+      volumes:
+        - configMap:
+            defaultMode: 256
+            items:
+              - key: qzpnp
+                path: config.toml
+            name: app-config
+            optional: false
+          name: vol1

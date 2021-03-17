@@ -1,0 +1,188 @@
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">收货确认</span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line"></span>
+    </div>
+    <if condition="empty($expresslist)">
+        <div class="step5 step-container">
+            <div class="no_record">
+                <div class="no_img pull-left"></div>
+                <span class="pull-left">暂时没有合同快递呦~~</span>
+            </div>
+        </div>
+    <else />
+        <div class="step3 step-container ">
+            <div class="height_limit_x150">
+                 <volist name='expresslist' id="v">
+                    <div class="shouhuo_item_x150">
+                        <div class="shouhuo_item_head_x150">
+                            <!-- <label class="all_xuanz">
+                                <input class="quanxuan" type="checkbox">全选
+                            </label> -->
+                            <span class="contract_code_x150">合同编号</span>
+                            <span class="contract_status_x150">状态</span>
+                            <span class="resender_name_x150">发件人:&nbsp;{$v.name}</span>
+                            <span class="confirm_button_x150"><button class="button saveOne">确认收到</button></span>
+                            <if condition="$isshow EQ 1">
+                            <span class="confirm_button_yishi"><button class="button yishicolor">遗失</button></span>
+                            </if>
+                            <span class="close_button_x150">展开</span>
+                        </div>
+                        <div class="shuohuo_item_body ">
+                            <div class="record_row record_num">订单号:&nbsp;{$v.expressid}</div>
+                            <label class="all_xuanz">
+                                <input class="quanxuan" type="checkbox" checked="checked">全选
+                            </label>
+                            <volist name="v['contract']" id="vo">
+                            <div class="record_row">
+                                <label class="all_xuanz02">
+                                    <input class="quanxuan02" type="checkbox" value="{$vo.id}" checked="checked">
+                                </label>
+                                <span class="contract_code_x150 contractid" data-id="{$vo.id}">{$vo.contractid}</span>
+                                <span class="contract_status_x150 <if condition="($vo.special eq 2) or ($vo.special eq 3)">no_start<else />has_end</if>">{$vo.status}</span>
+                            </div>
+                            </volist>
+                        </div>
+                    </div>
+                    </volist>
+            </div>
+
+        </div>
+    </if>
+</div>
+<link href="/assets/home/hetong/css/alert_info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<script  type="text/javascript" src="/assets/home/hetong/js/alert_info.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+
+    $(function(){
+        $($(".close_button_x150")[0]).text("收起");
+        $($(".shuohuo_item_body")[0]).addClass('height_auto');
+        $(".close_button_x150").click(function(event) {
+            var text=$(this).text();
+            var targetEle=$(this).parent().next();
+            var index=$(this).index();
+            if(text=="展开"){
+
+                $(".close_button_x150").text("展开");
+                $(".shuohuo_item_body").removeClass("height_auto");
+                targetEle.addClass('height_auto');
+                $(this).text("收起");
+
+            }else{
+                targetEle.removeClass('height_auto');
+                targetEle.css("overflow","hidden");
+                $(this).text("展开");
+            }
+
+        });
+
+        $('.height_auto .all_xuanz .quanxuan').click(function(){
+            var isChecked=$(this).prop("checked");
+            $(".record_row .all_xuanz02 .quanxuan02").prop("checked",isChecked);
+
+        });
+    });
+
+    $('body').on('click','.submitAll',function(){
+        $('.myexpress .fa-check-square-o').each(function(){
+            var id = $(this).parent().attr('data-id');
+            shData.push(id);
+        });
+        $.ajax({
+            url: '/contractmanage/confirmget/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                ids:shData,
+                from:{$expressstatus}
+            }
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                alert(data.info);
+                window.location.href = window.location.href;
+            } else {
+                alert_info_x150(data.info);
+            }
+        })
+        .fail(function(xhr) {
+            alert_info_x150('发生未知错误，请联系技术部门~');
+            return false;
+        })
+    });
+    //遗失
+    $('.yishicolor').each(function(){
+        $(this).click(function(){
+            var shData=[];//选中的值，此时将变为遗失
+            var notCheck=[];//未选的值，此时将变为确认收货状态
+            $(this).parent().parent().next().find('.quanxuan02').each(function(){
+                var id = $(this).val();
+                if(this.checked){
+                    shData.push(id);
+                }else{
+                    notCheck.push(id);
+                }
+            });
+            $.ajax({
+                url: '/contractmanage/confirmget/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    lost:shData,
+                    from:{$expressstatus}
+                }
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    alert_info_x150(data.info,true);
+
+                } else {
+                   alert_info_x150(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert_info_x150('发生未知错误，请联系技术部门~');
+                return false;
+            })
+        });
+    });
+    //确认收到
+    $('.saveOne').each(function(){
+        $(this).click(function(){
+            var shData=[];//选中的值，此时将变为确认收货状态
+            var notCheck=[];//未选的值，此时将变为遗失
+            $(this).parent().parent().next().find('.quanxuan02').each(function(){
+                var id = $(this).val();
+                if(this.checked){
+                    shData.push(id);
+                }else{
+                    notCheck.push(id);
+                }
+            });
+            $.ajax({
+                url: '/contractmanage/confirmget/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    ids:shData,
+                    from:{$expressstatus}
+                }
+            })
+            .done(function(data) {
+                if (data.status == '1') {
+                    alert_info_x150(data.info,true);
+
+                } else {
+                   alert_info_x150(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert_info_x150('发生未知错误，请联系技术部门~');
+                return false;
+            })
+        });
+    });
+</script>

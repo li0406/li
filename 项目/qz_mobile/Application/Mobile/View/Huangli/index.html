@@ -1,0 +1,199 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="/assets/mobile/huangli/css/lucky.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/js/tooltips/tooltips.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+    <div class="m-header-tit">装修黄历</div>
+</block>
+<block name="content">
+    <article>
+        <div class="lucky-img">
+            <img src="/assets/mobile/images/hl.png" width="640" height="142" alt="">
+        </div>
+        <div class="lucky-bd hl-main">
+            <ul class="m-bj-edit">
+                <li><input name="name" class="m-row-int1 m-bj-edit-list" type="text" maxlength="13" placeholder="请输入您的称呼"></li>
+                <li>
+                    <input name="tel" class="m-row-int1 m-bj-edit-list" type="tel" maxlength="11" placeholder="请输入您的手机号">
+                    <input type="hidden" name="fb_type" value="huangli">
+                </li>
+                <li>
+                    <div class="select col-xf-6 pull-left">
+                        <select id="fb-cs" name="cs" class="m-row-int1 m-bj-edit-list"></select>
+                    </div>
+                    <div class="select col-xf-6 pull-right">
+                        <select id="fb-qy" name="qy" class="m-row-int1 m-bj-edit-list"></select>
+                    </div>
+                </li>
+                <li>
+                    <div class="select">
+                        <select class=" m-row-int1 m-bj-edit-list" name="xztime">
+                            <option value="1">1个月内装修</option>
+                            <option value="2" selected="selected">3个月内装修</option>
+                            <option value="3">半年内装修</option>
+                        </select>
+                    </div>
+                </li>
+                <li id="shenming">
+                    <input type="checkbox" checked="checked" id="mianze">
+                    <label for="mianze" id="check" class="fa fa-check"></label>
+                    <span>我已阅读并同意齐装网的</span>
+                    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+                </li>
+                <li>
+                    <button id="btnstepSave">马上测算</button>
+                </li>
+            </ul>
+        </div>
+  </article>
+    <div id="zxkf">
+        <a rel="nofollow" href="{:OP('53kf_ty')}"><img src="/assets/mobile/common/img/kefu.png" alt="在线客服"></a>
+    </div>
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+
+    <!--<include file="Common:float-sj" />-->
+</block>
+
+<block name="script">
+<script type="text/javascript" src="/assets/mobile/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="{$cityfile}"></script>
+
+<script type="text/javascript" src="/assets/common/js/tooltips/jquery.pure.tooltips.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var shen = null,shi = null;
+        shen = citys["shen"];
+        shi = citys["shi"];
+        App.citys.init("#fb-cs","#fb-qy",shen,shi,"{$cityid}");
+
+        $("#btnstepSave").click(function(event){
+            $(".input-error").html("");
+            $(".focus").removeClass("focus");
+            if(!App.validate.run($(".hl-main input[name=name]").val())){
+                $(".hl-main input[name=name]").focus();
+                $.pt({
+                    target: $(".hl-main input[name=name]"),
+                    content: '请输入您的称呼',
+                    width: 'auto'
+                });
+                return false;
+            }else{
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if(!reg.test($(".hl-main input[name=name]").val())){
+                    $(".hl-main input[name=name]").focus();
+                    $.pt({
+                        target: $(".hl-main input[name=name]"),
+                        content: '请输入正确的名称，只支持中文和英文',
+                        width: 'auto'
+                    });
+                    return false;
+                }
+            }
+
+            if(!App.validate.run($(".hl-main input[name=tel]").val())){
+                $(".hl-main input[name=tel]").focus();
+                $.pt({
+                    target: $(".hl-main input[name=tel]"),
+                    content: '请填写正确的手机号码 ^_^!',
+                    width: 'auto'
+                });
+                return false;
+            }else{
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if(!reg.test($(".hl-main input[name=tel]").val())){
+                    $(".hl-main input[name=tel]").focus();
+                    $(".hl-main input[name=tel]").val('');
+                    $.pt({
+                        target: $(".hl-main input[name=tel]"),
+                        content: '请填写正确的手机号码 ^_^!',
+                        width: 'auto'
+                    });
+                    return false;
+                }
+            }
+
+            if(!App.validate.run($(".hl-main select[name=cs]").val())){
+                $(".hl-main select[name=cs]").focus();
+                $.pt({
+                    target: $(".hl-main select[name=cs]"),
+                    content: '请选择您的所在城市',
+                    width: 'auto'
+                });
+                return false;
+            }
+
+            if(!App.validate.run($(".hl-main select[name=qy]").val())){
+                $(".hl-main select[name=qy]").focus();
+                $.pt({
+                    target: $(".hl-main select[name=qy]"),
+                    content: '请选择您的所在区域',
+                    width: 'auto'
+                });
+                return false;
+            }
+            var checked = $("#mianze").is(':checked');
+            if(!checked){
+                alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+                return false;
+            }
+            window.order({
+                extra:{
+                    tel: $(".hl-main input[name=tel]").val(),
+                    fb_type: $(".hl-main input[name=fb_type]").val(),
+                    name: $(".hl-main input[name=name]").val(),
+                    cs: $(".hl-main select[name=cs]").val(),
+                    qx: $(".hl-main select[name=qy]").val(),
+                    hltime: $(".hl-main select[name=xztime]").val(),
+                    source: '313',
+                    ssid:"{$ssid}",
+                    module:'moblie',
+                    step:99
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+                    $.pt({
+                        target: _this,
+                        content: '发布失败,请刷新页面！',
+                        width: 'auto'
+                    });
+                },
+                success:function(data, status, xhr){
+                    if (data.status == 1) {
+                        var hltime = $(".hl-main select[name=xztime]").val();
+                        if('1' == hltime){
+                            window.location.href="/huangli/bj1";
+                        }
+                        if('2' == hltime){
+                            window.location.href="/huangli/bj2";
+                        }
+                        if('3' == hltime){
+                            window.location.href="/huangli/bj3";
+                        }
+                    } else {
+                        $.pt({
+                            target: _this,
+                            content: data.info,
+                            width: 'auto'
+                        });
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+
+        //切换免责对勾
+        $("#check").click(function(){
+            $(this).toggleClass('fa-check');
+        });
+    </script>
+</block>

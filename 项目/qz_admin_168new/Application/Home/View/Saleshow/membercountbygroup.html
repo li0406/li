@@ -1,0 +1,426 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+	<title>师/团会员统计 - 控制台</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/common/js/plugins/newTree/css/style.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/home/css/specialarticle.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/home/css/sale.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+	<style>
+	.select-list .check-label {
+		display: inline-block;
+		width:auto;
+		float: left;
+		margin-right: 5px;
+	}
+	.daterangepicker .input-mini{
+		padding: 0 6px 0 28px !important;
+	}
+</style>
+</block>
+
+<block name="content">
+	<section class="content-header">
+		<span class="h3">会员详情统计</span>
+		<a href="#">返回上一级</a>
+	</section>
+		<section class="content-header">
+		<a href="/saleshow/memberCount/" class="btn btn-primary">按城市统计</a>
+		<a href="/saleshow/memberCountByGroup/?type=tuan" class="btn btn-primary">按团统计</a>
+		<a href="/saleshow/memberCountByGroup/?type=shi" class="btn btn-primary">按师统计</a>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-body">
+						<div class="h4">
+							筛选条件
+							<div class="col-xs-2 set-mt16 pull-right">
+								<button type="button" id="clear" class="btn btn-primary col-xs-12">清空选项</button>
+							</div>
+						</div>
+						<div class="row">
+							<form class="form-horizontal" method="GET" action="">
+								<div class="col-xs-12">
+									<div class="col-xs-2">
+										<div>城市</div>
+										<select id="search" name="cs" type="text" placeholder="所属城市" class="select2-offscreen" tabindex="-1">
+											<option value="">全部城市</option>
+											<volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+										</select>
+									</div>
+									<div class="col-xs-2">
+										<div>部门</div>
+										<select id="search1" name="cs1" type="text" placeholder="所属部门" class="select2-offscreen" tabindex="-1">
+											<option value="">全部部门</option>
+											<volist name="tree" id="vo">
+                                                <option value="{$vo.id}" >{$vo.name}</option>
+                                            </volist>
+										</select>
+									</div>
+									<div class="col-xs-2">
+										<div>时间</div>
+										<input type="text" id="time1" name="date" class="form-control datepicker" placeholder="选择日期" value="{$search.time1}">
+									</div>
+									<div style="width:3%;float:left;text-align:center">
+										<div>对比</div>
+										<input id="compare" type="checkbox" style="height:32px;" <if condition="$search.time2 neq ''">checked</if>>
+									</div>
+									<div class="col-xs-2" id="timeWrap" <if condition="$search.time2 neq ''">style="opacity:1"<else/>style="opacity:0"</if>>
+										<div>时间</div>
+										<input type="text" id="time2" name="date" class="form-control datepicker" placeholder="选择日期" value="{$search.time2}">
+									</div>
+									<div class="col-xs-1 set-mt16 pull-right">
+										<button type="button" id="searchTime" class="btn btn-primary col-xs-12">查询</button>
+									</div>
+									<div class="col-xs-1 set-mt16 pull-right">
+										<button type="button" id="tongbi" class="btn btn-primary col-xs-12">同比</button>
+									</div>
+									<div class="col-xs-1 set-mt16 pull-right">
+										<button type="button" id="huanbi" class="btn btn-primary col-xs-12">环比</button>
+									</div>
+
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="box box-default">
+					<div class="box-body">
+						<div class="row">
+							<div class="set-rel">
+
+								<div class="col-xs-2">
+									<div class="col-xs-8" data-toggle="modal" data-target="#check-list">
+										<i class="fa fa-fw fa-outdent"></i>
+										<span>自定义列</span>
+									</div>
+								</div>
+								<div class="col-xs-2">
+									<div class="col-xs-8" id="export">
+										<i class="fa fa-fw fa-file-excel-o"></i>
+										<span>导出Excel</span>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-12 set-mt16">
+								<div class="oflow">
+									<table id="myTable" class="table table-bordered table-hover dataTable no-footer" role="grid" aria-describedby="myTable_info">
+										<thead>
+											<tr role="row">
+												<th class="sorting nowrap sale-gray colTh0" tableindex="0" aria-controls="myTable">部门 </th>
+												<th class="sorting nowrap sale-gray colTh1" tableindex="0" aria-controls="myTable">城市 </th>
+												<th class="sorting nowrap sale-gray colTh2" tableindex="0" aria-controls="myTable">综合会员数 </th>
+												<th class="sorting nowrap sale-gray colTh3" tableindex="0" aria-controls="myTable">真实会员数 </th>
+												<th class="sorting nowrap sale-gray colTh4" tableindex="0" aria-controls="myTable">多倍会员数 </th>
+												<th class="sorting nowrap sale-gray colTh5" tableindex="0" aria-controls="myTable">到期会员数 </th>
+												<th class="sorting nowrap sale-gray colTh6" tableindex="0" aria-controls="myTable">续费会员数 </th>
+												<th class="sorting nowrap sale-gray colTh7" tableindex="0" aria-controls="myTable">暂停会员数 </th>
+												<th class="sorting nowrap sale-gray colTh8" tableindex="0" aria-controls="myTable">退费会员数 </th>
+												<th class="sorting nowrap sale-gray colTh9" tableindex="0" aria-controls="myTable" style="display:none;">提前续费数 </th>
+												<th class="sorting nowrap sale-gray colTh10" tableindex="0" aria-controls="myTable" style="display:none;">滞后续费数 </th>
+												<th class="sorting nowrap sale-gray colTh11" tableindex="0" aria-controls="myTable" style="display:none;">续费率 </th>
+												<th class="sorting nowrap sale-gray colTh12" tableindex="0" aria-controls="myTable" style="display:none;">续费月 </th>
+												<th class="sorting nowrap sale-gray colTh13" tableindex="0" aria-controls="myTable" style="display:none;">季度折算 </th>
+												<th class="sorting nowrap sale-gray colTh14" tableindex="0" aria-controls="myTable" style="display:none;">90天内会员数 </th>
+												<th class="sorting nowrap sale-gray colTh15" tableindex="0" aria-controls="myTable" style="display:none;">90天内占比 </th>
+												<th class="sorting nowrap sale-gray colTh16" tableindex="0" aria-controls="myTable" style="display:none;">90-177天会员数 </th>
+												<th class="sorting nowrap sale-gray colTh17" tableindex="0" aria-controls="myTable" style="display:none;">90-177天占比 </th>
+												<th class="sorting nowrap sale-gray colTh18" tableindex="0" aria-controls="myTable" style="display:none;">178-396天会员数 </th>
+												<th class="sorting nowrap sale-gray colTh19" tableindex="0" aria-controls="myTable" style="display:none;">178-396天占比 </th>
+												<th class="sorting nowrap sale-gray colTh20" tableindex="0" aria-controls="myTable" style="display:none;">396天以上会员数 </th>
+												<th class="sorting nowrap sale-gray colTh21" tableindex="0" aria-controls="myTable" style="display:none;">396天以上占比 </th>
+												<th class="sorting nowrap sale-gray colTh22" tableindex="0" aria-controls="myTable">师长/团长 </th>
+											</tr>
+										</thead>
+										<tbody>
+											<style type="text/css">
+												.par{position: relative;}
+												.opop{width: 160px; min-height:20px;overflow: hidden; border: 1px solid #ccc;display: none;position: absolute;top:0 ;background-color: #fff;}
+												.opop span{float: left;padding-left: 10px;}
+											</style>
+											<volist name="departmentData" id="v">
+												<tr role="row" class="">
+													<td class="colTd0">{$v.name}</if></td>
+													<td class="colTd1 par">
+														{$v.citynum}
+														<div class="opop">
+															<volist name="v.city" id="vo">
+															<div>
+																<span>{$vo}</span>
+															</div>
+															</volist>
+														</div>
+													</td>
+													<td class="colTd2">
+														<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')">({$search.time1})</if>{$v.vipcnt}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>({$search.time2}{$search.tongbi}{$search.huanbi}){$v.duibi_vipcnt}</if>
+													</td>
+													<td class="colTd3">
+														{$v.realvip}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_realvip}</if>
+													</td>
+													<td class="colTd4">
+														{$v.doublecnt}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_doublecnt}</if>
+													</td>
+													<td class="colTd5">
+														{$v.daoqi}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_daoqi}</if>
+													</td>
+													<td class="colTd6">
+														{$v.xufei}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_xufei}</if>
+													</td>
+													<td class="colTd7">
+														{$v.zhanting}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_zhanting}</if>
+													</td>
+													<td class="colTd8">
+														{$v.tuifei}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_tuifei}</if>
+													</td>
+													<td style="display:none;" class="colTd9">
+														{$v.tqxufei}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_tqxufei}</if>
+													</td>
+													<td style="display:none;" class="colTd10">
+														{$v.zhxufei}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_zhxufei}</if>
+													</td>
+													<td style="display:none;" class="colTd11">
+														{$v.xufeilv}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_xufeilv}</if>
+													</td>
+													<td style="display:none;" class="colTd12">
+														{$v.xfyue}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_xfyue}</if>
+													</td>
+													<td style="display:none;" class="colTd13">
+														{$v.xfjidu}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_xfjidu}</if>
+													</td>
+													<td style="display:none;" class="colTd14">
+														{$v.usercount1}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_usercount1}</if>
+													</td>
+													<td style="display:none;" class="colTd15">
+														{$v.userconpersent1}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_userconpersent1}</if>
+													</td>
+													<td style="display:none;" class="colTd16">
+														{$v.usercount2}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_usercount2}</if>
+													</td>
+													<td style="display:none;" class="colTd17">
+														{$v.userconpersent2}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_userconpersent2}</if>
+													</td>
+													<td style="display:none;" class="colTd18">
+														{$v.usercount3}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_usercount3}</if>
+													</td>
+													<td style="display:none;" class="colTd19">
+														{$v.userconpersent3}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_userconpersent3}</if>
+													</td>
+													<td style="display:none;" class="colTd20">
+														{$v.usercount4}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_usercount4}</if>
+													</td>
+													<td style="display:none;" class="colTd21">
+														{$v.userconpersent4}<if condition="($search.time2 neq '') OR ($search.tongbi neq '') OR ($search.huanbi neq '')"><div style="border-top: 1px solid #999;"></div>{$v.duibi_userconpersent4}</if>
+													</td>
+													<td class="colTd22">{$v.info}</td>
+												</tr>
+											</volist>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-xs-4">总记录：<span>{$total}</span>条</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal fade" id="check-list" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+							<h4>选择查看的列</h4>
+						</div>
+						<div class="modal-body judge-input" style="height: auto;overflow: hidden;">
+							<!-- <div class="check-label"><label class="select-all text-danger"><input type="checkbox" name=""><span>全选</span></label></div> -->
+							<style type="text/css">
+								.select-list{width: 750px;overflow: hidden;}
+								.select-list .check-label{padding-right: 5px;}
+							</style>
+							<div style="float:left;line-height:26px;">
+								<div class="check-label">会员信息列项:</div></br>
+								<div class="check-label" style="margin-top: 25px;">会员所属列项:</div></br>
+								<div class="check-label" style="margin-top: 25px;">职能列项:</div></br>
+							</div>
+							<div class="select-list selectBox pull-right">
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>部门</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>城市</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>综合会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>真实会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>多倍会员数</span></label></div>
+
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>到期会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>续费会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>暂停会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]" checked><span>退费会员数</span></label></div>
+								<div style="clear:both" class="check-label"><label><input type="checkbox" name="cols[]"><span>提前续费数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>滞后续费数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>续费率</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>续费月数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>季度折算</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>90天内会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>90天内占比</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>90-177天会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>90-177天占比</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>178-396天会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>178-396天占比</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>396天以上会员数</span></label></div>
+								<div class="check-label"><label><input type="checkbox" name="cols[]"><span>396天以上占比</span></label></div>
+								<div style="clear:both" class="check-label"><label><input type="checkbox" name="cols[]" checked><span>师长/团长</span></label></div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+							<button type="button" class="btn btn-primary btn-ok" data-dismiss="modal">确认</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" name="type" value="{$type}" id="searchtype">
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/plugins/daterangepicker/moment.js?v={:C('STATIC_VERSION')}"></script>
+	<script src="/assets/common/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		var startDateSelf,endDateSelf,startDateSelf2,endDateSelf2;
+		$(function() {
+			$("#search").select2({
+				allowClear: true,
+				placeholder: "选择城市"
+			});
+			$("#search1").select2({
+				allowClear: true,
+				placeholder: "选择部门"
+			});
+			$("#search").select2("val", "{$search.city}");
+			$("#search1").select2("val", "{$search.department}");
+			$(".datepicker").datepicker({
+				format: "yyyy-mm-dd",
+				minViewMode: 0
+			});
+
+			$("#searchTime").on('click',function(){
+				var city = $("#search").val();
+				var department = $("#search1").val();
+				var time1 = $("#time1").val();
+				var time2 = $("#time2").val();
+				var type = $("#searchtype").val();
+				window.location.href = "/saleshow/memberCountByGroup/?type="+type+"&city="+city+"&department="+department+"&time1="+time1+"&time2="+time2;
+			});
+			$("#tongbi").on('click',function(){
+				var city = $("#search").val();
+				var department = $("#search1").val();
+				var time1 = $("#time1").val();
+				var time2 = $("#time2").val();
+				var tongbi = 1;
+				var type = $("#searchtype").val();
+				if(time1 == ''){
+					alert("请选择一个对比时间！");
+					return false;
+				}
+				if(time2 != ''){
+					alert("已经选择对比时间，不能进行同比操作！");
+					return false;
+				}
+				window.location.href = "/saleshow/memberCountByGroup/?type="+type+"&city="+city+"&department="+department+"&time1="+time1+"&tongbi="+tongbi;
+			});
+			$("#huanbi").on('click',function(){
+				var city = $("#search").val();
+				var department = $("#search1").val();
+				var time1 = $("#time1").val();
+				var time2 = $("#time2").val();
+				var huanbi = 1;
+				var type = $("#searchtype").val();
+				if(time1 == ''){
+					alert("请选择一个对比时间！");
+					return false;
+				}
+				if(time2 != ''){
+					alert("已经选择对比时间，不能进行环比操作！");
+					return false;
+				}
+				window.location.href = "/saleshow/memberCountByGroup/?type="+type+"&city="+city+"&department="+department+"&time1="+time1+"&huanbi="+huanbi;
+			});
+			$('#export').click(function(event) {
+                $('#export').attr('disabled','disabled');
+                $('#export').text('正在导出···');
+                var city = $("#search").val();
+				var department = $("#search1").val();
+				var time1 = $("#time1").val();
+                window.location.href = '/saleshow/downloadCityUsersInfo/?type=2';
+            });
+		});
+	</script>
+
+	<script type="text/javascript">
+		// 同比/环比按钮禁止与释放
+		$("#compare").change(function() {
+			if($(this).is(':checked')){
+				$('#timeWrap').css('opacity',1);
+				$('#tongbi,#huanbi').attr('disabled',true);
+			}
+			else{
+				$('#timeWrap').css('opacity',0);
+				$('#tongbi,#huanbi').attr('disabled',false);
+				$("#time2").attr('value','');
+			}
+		});
+		$("#clear").on('click',function(){
+			var type = $("#searchtype").val();
+			window.location.href = "/saleshow/memberCountByGroup/?type="+type;
+		});
+
+		$('.par').each(function(index, el) {
+
+			$(el).hover(function() {
+				$(el).find('.opop').css({'left':$(el).width()}).stop().show(200);
+			}, function() {
+				$(el).find('.opop').stop().hide(200);
+			});
+
+		});
+
+		// 列表选择
+		$('.btn-ok').on('click', function(){
+
+			$('#myTable thead tr th').hide();
+			$('#myTable tbody tr td').hide();
+
+			$('.selectBox input[name="cols[]"]').each(function(index, el) {
+				if ($(this).is(":checked")) {
+                    $('#myTable tbody .colTd'+index).show();
+					$('#myTable thead .colTh'+index).show();
+            	}
+			});
+
+			$('#check-list').modal('hide');
+		});
+		// 获取日期，查询，同比，环比
+		/*$(function(){
+			$('#searchTime').click(function(){
+				alert($('#time1').val()+'---'+$('#time1').val());
+			});
+			$('#tongbi').click(function(){
+				alert($('#time1').val()+'---'+$('#time1').val());
+			});
+			$('#huanbi').click(function(){
+				alert($('#time1').val()+'---'+$('#time1').val());
+			});
+		});*/
+	</script>
+
+</block>

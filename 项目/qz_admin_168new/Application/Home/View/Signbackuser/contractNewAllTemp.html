@@ -1,0 +1,160 @@
+<div class="panel-body contractNewAll">
+    <form>
+        <div class="panel panel-default">
+            <div class="panel-heading" style="text-align: center;">
+                新合同<button class="close" onclick="signBackActive.close_contact_layout()">×</button>
+            </div>
+
+            <div class="panel-body">
+                <div class="row" style="margin-bottom: 15px;">
+                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">总合同时间:</label>
+                    <div class="col-sm-4">
+                        <input id="allbegin" type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="总合同开始时间" name="allbegin"/>
+                    </div>
+                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                    <div class="col-sm-4">
+                        <input id="allend" type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="总合同结束时间" name="allend" />
+                    </div>
+                    <div class="col-sm-1"></div>
+                </div>
+                <hr>
+                <div class="row" style="margin-bottom: 15px;">
+                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">本次合同时间:</label>
+                    <div class="col-sm-4">
+                        <input id="begin" type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="本次合同开始时间" name="begin" />
+                    </div>
+                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                    <div class="col-sm-4">
+                        <input id="end" type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="本次合同结束时间" name="end"/>
+                    </div>
+                    <div class="col-sm-1"></div>
+                </div>
+
+                <div class="row" style="margin-bottom: 15px;">
+                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">广告报备:</label>
+                    <div class="col-sm-9">
+                        <div class="row advform" style="margin: 0; border-radius: 5px; border: 1px solid #CCC; padding: 10px;">
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">投放位置:</label>
+                                <div class="col-sm-4">
+                                    <select name="type" class="form-control">
+                                        <option value="1">老站</option>
+                                        <option value="2">新站</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">轮显:</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="lunbo" placeholder="轮显报备时长" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏A:</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="tl_A" placeholder="通栏A报备时长" />
+                                </div>
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏B:</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="tl_B" placeholder="通栏B报备时长" />
+                                </div>
+                            </div>
+                            <div class="row form-group adv-item">
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏C:</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="tl_C" placeholder="通栏C报备时长" />
+                                </div>
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">通栏D:</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control" name="tl_D" placeholder="通栏D报备时长" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-1"></div>
+                </div>
+
+                <div class="row" style="text-align: center;">
+                    <button id="btnAdd" type="button" class="btn btn-success">
+                        <i class="fa fa-floppy-o"></i> 保存
+                    </button>
+                    &nbsp;&nbsp;
+                    <button type="button" class="btn btn-danger" onclick="signBackActive.close_contact_layout()">
+                        <i class="fa fa-trash-o"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        $(".contractNewAll #btnAdd").click(function(event) {
+            var _this = $(this);
+            var data = $(".contractNewAll form").serializeArray();
+
+            data.push({
+                name: "company_id",
+                value: signBackActive["param"]["company_id"]
+            });
+
+            data.push({
+                name: "company_name",
+                value: signBackActive["param"]["company_name"]
+            });
+
+            data.push({
+                name: "saler_id",
+                value: signBackActive["param"]["saler_id"]
+            });
+
+            data.push({
+                name: "saler_name",
+                value: signBackActive["param"]["saler_name"]
+            });
+
+            $.ajax({
+                url: '/signbackuser/addCompanyContract/',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.close_contact_layout();
+                    signBackActive.get_contact_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });;
+        });
+
+        $(".contractNewAll #allbegin,.contractNewAll #allend").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $(".contractNewAll #begin,.contractNewAll #end").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $(".contractNewAll select[name=type]").change(function(event) {
+            var parent = $(this).parents(".advform");
+            $(".adv-item", parent).show();
+            if ($(this).val() == 2) {
+                $(".adv-item", parent).hide();
+            }
+        });
+    });
+</script>

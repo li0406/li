@@ -1,0 +1,190 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检-团队问题点汇总统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/qcstat/css/teamcollectstat.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检系统-团队问题点汇总统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/qcstat/teamcollectstat/">团队问题点汇总统计</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row mgb-10">
+                            <div class="col-xs-2">
+                            开始时间：<input type="text" name="time_start" class="form-control datepicker" placeholder="开始时间" value="{$Think.get.time_start}">
+                            </div>
+                            <div class="col-xs-2">
+                            结束时间：<input type="text" name="time_end" class="form-control datepicker" placeholder="结束时间" value="{$Think.get.time_end}">
+                            </div>
+                            <div class="col-xs-2">
+                                统计类型：
+                                <select name="type" class="form-control">
+                                    <eq name="Think.get.type" value="manager">
+                                        <option value="group">按团统计</option>
+                                        <option value="manager" selected="selected">按师统计</option>
+                                    <else />
+                                        <option value="group" selected="selected">按团统计</option>
+                                        <option value="manager">按师统计</option>
+                                    </eq>
+                                </select>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">团队问题点汇总</h3>
+                    </div>
+                    <div class="box-body">
+                        <div id="chart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form role="form" class="list-form">
+                            <table class="table table-hover table-bordered" align="center" valign="middle" >
+                                <thead>
+                                    <tr>
+                                        <th>团师\日期</th>
+                                        <volist name="main.date" id="vi">
+                                            <th title="{$vi}" rowspan="2">{:substr($vi, 8)}</th>
+                                        </volist>
+                                        <th>合计</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>合计</td>
+                                        <volist name="main.date" id="vk">
+                                            <td>{$main['sums']['date'][$vk]|default=0}</td>
+                                        </volist>
+                                        <td>{$main.total}</td>
+                                    </tr>
+                                    <eq name="Think.get.type" value="manager">
+                                        <volist name="main.manager" id="vi">
+                                            <tr>
+                                                <td class="item-parent">{$vi.name}师</td>
+                                                <volist name="main.date" id="vj">
+                                                    <td>{$main['info']['manager'][$vi['id']][$vj]|default=0}</td>
+                                                </volist>
+                                                <td>{$main['sums']['manager'][$vi['id']]|default=0}</td>
+                                            </tr>
+                                        </volist>
+                                    <else />
+                                        <volist name="main.group" id="vi">
+                                            <tr>
+                                                <td class="item-parent">客服{$vi.kfgroup}团</td>
+                                                <volist name="main.date" id="vj">
+                                                    <td>{$main['info']['group'][$vi['kfgroup']][$vj]|default=0}</td>
+                                                </volist>
+                                                <td>{$main['sums']['group'][$vi['kfgroup']]|default=0}</td>
+                                            </tr>
+                                        </volist>
+                                    </eq>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    $(document).ready(function(){
+        //初始化插件
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+        //搜索按钮
+        $('#search').click(function(event) {
+            var time_start = $('input[name=time_start]').val();
+            var time_end = $('input[name=time_end]').val();
+            window.location.href = '/qcstat/teamcollectstat/?time_start=' + time_start + '&time_end=' + time_end + '&type=' + $('select[name=type]').val();
+        });
+    })
+    </script>
+    <eq name="Think.get.type" value="manager">
+        <script>
+            $(document).ready(function(){
+                /*S-图表生成*/
+                var chart = echarts.init(document.getElementById('chart'));
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:{$main.echarts.manager.legend}
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: {$main.echarts.manager.xAxis}
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: {$main.echarts.manager.series}
+                };
+                chart.setOption(option);
+                /*E-图表生成*/
+            })
+        </script>
+    <else />
+        <script>
+            $(document).ready(function(){
+                /*S-图表生成*/
+                var chart = echarts.init(document.getElementById('chart'));
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:{$main.echarts.group.legend}
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: {$main.echarts.group.xAxis}
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: {$main.echarts.group.series}
+                };
+                chart.setOption(option);
+                /*E-图表生成*/
+            })
+        </script>
+    </eq>
+</block>

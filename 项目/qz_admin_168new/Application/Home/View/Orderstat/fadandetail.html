@@ -1,0 +1,235 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道来源发单明细 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/fadandetail.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .dataTables_filter {display:none}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>渠道来源发单明细</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/ordersrcstats/">订单渠道来源统计</a></li>
+        </ol>
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body act-box" style="min-width:500px">
+            <form id="searchForm" action="/ordersrcstats/fadandetail" method="get">
+                <div class="col-sm-1">
+                    <label for="" class="">订单状态：</label>
+                    <select name="state" class="form-control">
+                        <option value="">全部</option>
+                        <option value="1">分单</option>
+                        <option value="2">赠单</option>
+                        <option value="3">分没人跟</option>
+                        <option value="4">赠没人跟</option>
+                        <option value="5">其他</option>
+                    </select>
+                </div>
+                <div class="input-group" >
+                    <div class="input-group-btn" id="reset">
+                        <button type="submit" class="btn btn-success">重置</button>
+                    </div>
+                    <div class="input-group-btn" id="search">
+                        <button type="submit" class="btn btn-success">搜索</button>
+                        <button id="btnExport" type="button" class="btn btn-success" style="margin-left: 20px;">导出</button>
+                        <input name="src" type="hidden" value="{$Think.get.src}"/>
+                        <input name="start" type="hidden" value="{$Think.get.start}"/>
+                        <input name="end" type="hidden" value="{$Think.get.end}"/>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box" id="dingdan">
+                <h3>订单列表</h3>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th width="200">发单日期</th>
+                            <th width="200">渠道来源</th>
+                            <th width="200">订单备注</th>
+                            <th width="200">城市区县</th>
+                            <th width="200">手机号码</th>
+                            <th width="200">手机号重复</th>
+                            <th width="200">IP重复</th>
+                            <th width="200">订单状态</th>
+                        </tr>
+                        <volist name="list" id="vo">
+                        <tr>
+                            <td>{$vo.time_real|date="Y-m-d H:i:s",###}</td>
+                            <td>{$vo.source_group_name}-{$vo.source_src}</td>
+                            <td>{$vo.remarks}</td>
+                            <td>{$vo.cname}{$vo.qz_area}</td>
+                            <td>{$vo.tel}</td>
+                            <td class="phone-number">
+                                <if condition="$vo['telcount'] GT 1">
+                                重复<a href="javascript:void(0)" data-source="{$vo.id}">(查看详情)</a>
+                                <else/>
+                                不重复
+                                </if>
+                            </td>
+                            <td class="ip-number">
+                                <if condition="$vo['ipcount'] GT 1">
+                                重复<a href="javascript::void(0)" data-source="{$vo.ip}">(查看详情)</a>
+                                <else/>
+                                不重复
+                                </if>
+                            </td>
+                            <td>{$vo.type}</td>
+                        </tr>
+                        </volist>
+                    </tbody>
+                </table>
+                <div class="box-footer clearfix">
+                       {$page}
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pop pop1">
+    <h3>记录列表</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>订单号</th>
+                <th>发布时间</th>
+                <th>发布人</th>
+                <th>手机号</th>
+                <th>城市</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <div id="close1">
+        <button>关闭</button>
+    </div>
+</div>
+<div class="pop pop2">
+    <h3>记录列表</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>订单号</th>
+                <th>发布时间</th>
+                <th>发布人</th>
+                <th>IP地址</th>
+                <th>城市</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="close2">
+        <button>关闭</button>
+    </div>
+</div>
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".datetime").change(function(){
+        checkTime();
+    });
+
+    $("select[name=state]").val("{$Think.get.state}");
+
+    $('.phone-number a').click(function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/ordersrcstats/gettellist/',
+            type: 'post',
+            dataType: 'json',
+            data: {
+                source:_this.attr("data-source"),
+                begin:"{$Think.get.start}",
+                end:"{$Think.get.end}"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                var tmp = "";
+                for(var i in data.data) {
+                    tmp += '<tr><td>'+data.data[i].id+'</td><td>'+data.data[i].time_real+'</td><td>'+data.data[i].name+'</td><td>'+data.data[i].tel+'</td><td>'+data.data[i].cname+""+data.data[i].qz_area+'</td><td>'+data.data[i].type+'</td></tr>';
+                }
+                $(".pop1 tbody").html(tmp);
+                $('.pop1').show();
+            }
+        });
+    })
+    $('.ip-number a').click(function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/ordersrcstats/getiplist/',
+            type: 'post',
+            dataType: 'json',
+            data: {
+                source:_this.attr("data-source"),
+                begin:"{$Think.get.start}",
+                end:"{$Think.get.end}"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                var tmp = "";
+                for(var i in data.data) {
+                    tmp += '<tr><td>'+data.data[i].id+'</td><td>'+data.data[i].time_real+'</td><td>'+data.data[i].name+'</td><td>'+data.data[i].ip+'</td><td>'+data.data[i].cname+""+data.data[i].qz_area+'</td><td>'+data.data[i].type+'</td></tr>';
+                }
+                $(".pop2 tbody").html(tmp);
+                $('.pop2').show();
+            }
+        });
+    })
+
+    $('#close1').click(function(event) {
+        $('.pop1').hide();
+    });
+    $('#close2').click(function(event) {
+        $('.pop2').hide();
+    });
+
+    $("#btnExport").click(function(event) {
+        var target = $("#searchForm");
+        var data = target.serializeArray();
+        var form=$("<form></form>");//定义一个form表单
+        form.attr("style","display:none");
+        form.attr("method","post");
+        form.attr("action","/export/fadandetail");
+        for (var i in data) {
+            var input = $("<input type='hidden'/>");
+            input.attr("name",data[i].name);
+            input.attr("value",data[i].value);
+            form.append(input);
+        }
+        $("body").append(form);//将表单放置在web中
+        form.submit();//表单提交
+    });
+});
+</script>
+</block>

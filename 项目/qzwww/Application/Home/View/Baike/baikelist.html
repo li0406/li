@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="renderer" content="webkit" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+        <meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/baike/{$mobile_agent}" />
+        <title>{$keys.title}-{$title}</title>
+        <link rel="alternate" media="only screen and (max-width: 640px)" href="{$alternate}" >
+        <meta name="keywords" content="{$keys.keywords}" />
+        <meta name="description" content="{$keys.description}" />
+        <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$baikeList.0.thumb}" />
+        <include file="Index:resource" />
+        <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/baike/{$mobile_agent}" rel="canonical" />
+        <link rel="stylesheet" href="{$static_host}/assets/home/baike/css/baike.css?v={:C('STATIC_VERSION')}">
+    </head>
+    <body class="bodyList">
+        {$headerTmp}
+        <div class="wrap ">
+            <div class="bread revise mt10">
+                <a href="/">齐装网</a> &gt;
+                <a href="/baike/">装修百科</a> &gt;
+                <if condition="$taglevel2 eq 1">
+                    <a href="{$taglevel1_url}">{$taglevel1_name}</a> &gt;
+                    <span>{$taglevel2_name}</span>
+                <else/>
+                    <span>{$taglevel1_name}</span>
+                </if>
+            </div>
+        </div>
+        <div class="wrap" id="baike-head">
+            <div class="baike-list-box mt10">
+                <div class="list-head">
+                    <ul>
+                        <volist name="category" id="vo">
+                            <li id="{$vo.cid}">
+                                <a href="/baike/{$vo.url}/" class="0">{$vo.name}</a>
+                                <span><i class="fa fa-sort-up"></i></span>
+                                <div>
+                                    <a href="/baike/{$vo.url}/" class="0">全部</a>
+                                    <volist name="vo.sub_cate" id="v">
+                                        <a id="{$v.cid}" href="/baike/{$v.url}/">{$v.name}</a>
+                                    </volist>
+                                </div>
+                            </li>
+                        </volist>
+                        <div class="gray-back">
+
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="wrap clearfix mt20">
+            <div class="main-left left mt20">
+                <ul class="baikeList-box">
+                    <volist name="baikeList" id="vo">
+                    <li>
+                       <a href="/baike/{$vo.id}.html" target="_blank" class="bklist-box"><img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.thumb}" alt=""></a>
+                        <div class="jxbk-container">
+                            <p class="jxbk-title"><a href="/baike/{$vo.id}.html" target="_blank">{$vo.title}</a></p>
+                            <div class="jxbk-content">
+                                <a target="_blank" href="/baike/{$vo.id}.html">{:mbstr($vo['description'],0,45,'utf-8')}</a>
+                            </div>
+                            <div class="tj-item-bottom">
+                                <span class="fa fa-clock-o"></span>
+                                <span>{$vo.post_time|date='Y-m-d',###}</span>
+                            </div>
+                        </div>
+                    </li>
+                    </volist>
+                </ul>
+                <div class="content pageContent">
+                    {$pageList}
+                </div>
+            </div>
+
+            <div class="main-right right">
+            <br><br>
+                {$orderTmp}
+                <if condition="$baikeHotCount NEQ 0">
+                <div class="qzbk-box mt20">
+                    <div class="left-title">
+                        百科热搜
+                    </div>
+                    <div class="search-title">
+                        <volist name="baikeHot" id="w" >
+                            <a target="_blank" href="/baike/{$w.id}.html">{$w.title}</a>
+                        </volist>
+                    </div>
+                </div>
+                </if>
+                <if condition="isset($participle_words)">
+                <div class="qzbk-box mt20 partArticle">
+                    <div class="left-title">
+                        相关标签
+                    </div>
+                    <div class="search-title tags">
+                        <ul id="partArticle">
+                        <volist name="participle_words" id="vo">
+                            <li>
+                                <a href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/zhishi/{$vo.id}/" target="_blank">{$vo.name}</a>
+                            </li>
+                        </volist>
+                        </ul>
+                    </div>
+                </div>
+                </if>
+            </div>
+        </div>
+     <!-- 底部弹窗e -->
+    <include file="Common@Friendlink/index"/>
+    <include file="Index:footer"/>
+    <include file="Common@Order/bottom_fadan" type="2" />
+    <include file="Common@lotteryDraw/index" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    </body>
+    <script>
+        var pid ="{$menuInfo.pid}",
+            cid="{$menuInfo.cid}",
+            key="{$menuInfo.keyword}";
+
+            if(key){
+                 $("#baike-head").css("display","none");
+             }else{
+                $("#"+pid).addClass("head-active");
+                if(cid==0){
+                     $("#"+pid+" "+".0").css("color","#ff5353");
+                }else{
+                     $('#'+cid).css("color","#ff5353");
+                }
+           }
+
+
+
+        $(document).ready(function(){
+            $(".list-head ul li").hover(function(){
+                $(this).addClass("head-active");
+                $(this).siblings().removeClass("head-active");
+            });
+        });
+        // 设计报价滚动到1282px 悬浮
+        var partLength = $("#partArticle li").length
+        if(partLength < 1){
+            $(".partArticle").hide()
+            $(window).scroll(function(event) {
+                if($(window).scrollTop() >= 1200){
+                    $('.secbox_form').css({
+                        "width":"260px",
+                        "margin-top":"0",
+                        "position":"fixed",
+                        "top":"85px",
+                        "zIndex":2
+                    });
+                }else{
+                    $('.secbox_form').css({
+                        "margin-top":"15px",
+                        "position":"",
+                        "top":"",
+                        "zIndex":''
+                    });
+                }
+            });
+        }
+
+
+    </script>
+</html>

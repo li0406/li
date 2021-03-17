@@ -1,0 +1,212 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>签单审核管理-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css">
+    <link rel="stylesheet" href="/assets/home/orders/css/order.css">
+    <link rel="stylesheet" href="/assets/home/orders/css/editorder.css">
+    <link rel="stylesheet" href="/assets/home/orders/css/qiandan.css">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>签单审核管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>签单审核管理</li>
+        </ol>
+    </section>
+    <section class="content clearfix">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row b-pb20">
+                    <form id="myForm" method="get" action="/orders/qiandan/" class="form-horizontal">
+                        <div class="col-xs-12 b-mbt20">
+                            <div class="col-xs-2 reset-padding">
+                                <div>订单查询：</div>
+                                <input type="text" name="id" class="form-control order-num"
+                                       placeholder="订单号、小区名称" value="{$Think.get.id}" autocomplete="off" />
+                            </div>
+                            <div class="col-xs-2">
+                                <div>起始日期：</div>
+                                <input type="text" name="begin"
+                                       class="form-control datepicker start-time"
+                                       placeholder="起始日期" value="{$Think.get.begin}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>截止日期：</div>
+                                <input type="text" name="end"
+                                       class="form-control datepicker start-time"
+                                       placeholder="截止日期" value="{$Think.get.end}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>签单审核状态选择：</div>
+                                <select id="status" name="status" type="text" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="1">已签约</option>
+                                    <option value="0">审核中</option>
+                                    <option value="2">继续跟踪</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>赠单/分单筛选：</div>
+                                <select id="state" name="state" type="text" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="2">赠单</option>
+                                    <option value="1">分单</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 b-mbt20">
+                            <!--区域-->
+                            <div class="col-xs-2">
+                                <div>所属城市：</div>
+                                <select id="city" name="city" class="form-control" type="text" placeholder="选择城市">
+                                    <option value="">请选择</option>
+                                    <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>公司名称：</div>
+                                <input type="text" name="company" class="form-control clear-target order-num"
+                                       value="{$Think.get.company}" placeholder="公司名称" autocomplete="off" />
+                            </div>
+                            <div class="col-xs-2">
+                                <div>签单返点订单：</div>
+                                <select id="qian" name="qian" type="text" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="1">是</option>
+                                    <option value="2">否</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-3 pull-right">
+                                <div>&nbsp;</div>
+                                <button type="submit" id="btnSearch" class="btn btn-primary  search">
+                                    搜索
+                                </button>
+                                <button type="reset" id="btnReset" class="btn btn-default  reset">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <h3 class="order-title">
+                订单列表
+                <button id="btnUnList" class="pull-right btn btn-success">不通过列表</button>
+            </h3>
+            <div class="box order-box">
+                <div class="box-body  b-mt20">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr class="orderitem">
+                            <th >订单编号</th>
+                            <th >申请签单时间</th>
+                            <th >发单时间</th>
+                            <th >城市/区县</th>
+                            <th >订单类型</th>
+                            <th >签单小区</th>
+                            <th >签单面积</th>
+                            <th >签单金额</th>
+                            <th >联系人</th>
+                            <th >申请公司</th>
+                            <th >签单审核状态</th>
+                            <th >操作</th>
+                        </tr>
+                        </thead>
+                        <tbody class="orderxq">
+                        <volist name="info.list" id="vo">
+                        <tr>
+                            <td class="order-num" data-id="{$vo.id}">
+                                {$vo.id}
+                                <if condition="$vo['classid'] EQ 6 || $vo['cooperate_mode'] eq 2">
+                                    <span class="red">返</span>
+                                </if>
+                            </td>
+                            <td>{$vo.qiandan_addtime|date="Y-m-d",###}</td>
+                            <td>{$vo.time_real|date="Y-m-d",###}</td>
+                            <td>{$vo.cname} - {$vo.qz_area}</td>
+                            <td>
+                                <if condition="$vo['type_fw'] EQ 1">
+                                分单
+                                <else/>
+                                赠单
+                                </if>
+                            </td>
+                            <td>{$vo.xiaoqu}</td>
+                            <td>{$vo.mianji}㎡</td>
+                            <td>{$vo.qiandan_jine}万</td>
+                            <td>{$vo.name}{$vo.sex}</td>
+                            <td>{$vo.qc}</td>
+                            <td>
+                                <if condition="$vo['qiandan_status'] EQ 1">
+                                <p style="color: #008000;">已签单</p>
+                                <a href="javascript:void(0)" data-source='{$vo|json_encode}' class="canncel">取消</a>
+                                <elseif condition="$vo['qiandan_status'] EQ 0"/>
+                                <p style="color: #FF9900;">请审核</p>
+                                <else/>
+                                <p>继续跟踪</p>
+                                </if>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" data-id="{$vo.id}" class="oedit operate">受理</a>
+                                <a href="/voip/othervoiprecord/?id={$vo.id}" class="orecode operate" target="_blank">呼叫记录({$vo.tel_count|default=0})</a>
+                            </td>
+                        </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    {$info.page}
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="failModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="min-width: 1440px; max-width: 1440px; overflow-x: atuo;  ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: 0"><span aria-hidden="true" >&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">不通过列表</h4>
+                </div>
+                <div class="modal-body" style="padding: 0">
+                   <iframe id="myframe" src="/orders/qiandanfail/" frameborder="0" width="100%" height="680"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cancelModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: 0"><span aria-hidden="true" >&times;</span></button>
+                    <h4 class="modal-title" ></h4>
+                </div>
+                <div class="modal-body">
+                    <form id="cancelForm">
+                        <textarea name="reason" class="form-control" placeholder="取消审核的原因" style="height: 200px;"></textarea>
+                        <input type="hidden" name="id"/>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCancel" class="btn btn-primary" style="margin-right: 10px;">提交</button>
+                    <button class="btn btn-default" data-dismiss="modal" style="margin-right: 10px;">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js"></script>
+<script src="/assets/common/js/plugins/select2-42/select2.min.js"></script>
+<script type="text/javascript" src="/assets/home/orders/js/qiandan.js"></script>
+<script type="text/javascript">
+    $("#city").select2();
+    $("#city").select2("val","{$Think.get.city}");
+    $("#status").val("{$Think.get.status}");
+    $("#state").val("{$Think.get.state}");
+</script>
+</block>

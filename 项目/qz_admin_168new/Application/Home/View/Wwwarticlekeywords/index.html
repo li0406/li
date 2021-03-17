@@ -1,0 +1,385 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网文章榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/wwwarticlekeywords/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>文章内链关键字设置</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/wwwarticlekeywords/">文章内链关键字设置</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">计划任务日志</h3>
+                        <div class="box-tools">
+                            <div class="pull-right">
+                                <button type="button" data-module="baike" class="btn btn-primary add-task" style="font-size: 10px;">
+                                    <i class="fa fa-refresh"></i> 批量更新百科
+                                </button>
+                                <button type="button" data-module="wwwarticle" class="btn btn-primary add-task" style="font-size: 10px;">
+                                    <i class="fa fa-refresh"></i> 批量更新攻略
+                                </button>
+                                <button type="button" data-module="subarticle" class="btn btn-primary add-task" style="font-size: 10px;">
+                                    <i class="fa fa-refresh"></i> 批量更新分站
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>任务名称</th>
+                                        <th>请求更新时间</th>
+                                        <th>任务状态</th>
+                                        <th>操作/执行数量</th>
+                                    </tr>
+                                    <volist name="info.keywordbatch" id="vo">
+                                        <tr>
+                                            <td>
+                                                <switch name="vo.module">
+                                                    <case value="wwwarticle">攻略文章</case>
+                                                    <case value="subarticle">分站文章</case>
+                                                    <case value="baike">百科文章</case>
+                                                </switch>
+                                            </td>
+                                            <td>{$vo.time|date="Y-m-d H:i:s",###}</td>
+                                            <td>
+                                                <if condition="$vo['status'] EQ 1">
+                                                    执行完毕
+                                                <else/>
+                                                    加入计划任务等待执行
+                                                </if>
+                                            </td>
+                                            <td>
+                                                <if condition="$vo['status'] NEQ 0">
+                                                    {$vo.total}
+                                                <else/>
+                                                    <a href="javascript:void(0)" data-module="{$vo.module}" class="delete-task" data-id="{$vo.id}" >取消</a>
+                                                </if>
+                                            </td>
+                                            </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-3">
+                            关键字/链接：<input type="text" name="keyword" class="form-control" placeholder="关键字/链接" value="{$Think.get.keyword}">
+                            </div>
+                            <div class="col-xs-2">
+                                模块：
+                                <select name="keyword_module" class="form-control" >
+                                    <option value="0">全部</option>
+                                    <option value="1">攻略</option>
+                                    <option value="2">分站</option>
+                                    <option value="3">百科</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                            <div class="col-xs-4 pull-right">
+                                <br/>
+                                <a target="_blank" href="/wwwarticlekeywords/downloadarticlekeywords/" class="pull-right">
+                                    <button class="btn btn-block btn-warning normal" style="width:auto;margin-left: 10px;">
+                                        <i class="fa fa-download"></i>下载
+                                    </button>
+                                </a>
+                                <a href="/wwwarticlekeywords/uploadarticlekeywords/" class="pull-right">
+                                    <button class="btn btn-block btn-info normal" style="width:auto;margin-left: 10px;">
+                                        <i class="fa fa-upload"></i>批量上传
+                                    </button>
+                                </a>
+                                <a href="/wwwarticlekeywords/operate/" class="pull-right">
+                                    <button class="btn btn-block btn-success normal" style="width:auto;margin-left: 10px;">
+                                        <i class="fa fa-plus-circle"></i>新增内链
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <span id="reverse">全选</span>
+                        <a href="javascript:void()" id="deleteall">批量删除</a>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th></th>
+                                        <th>序号</th>
+                                        <th>关键字</th>
+                                        <th>链接地址</th>
+                                        <th>模块</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="info.info.list" id="vo">
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="selected[]" value="{$vo.id}" class="bids" data-id="{$vo.id}">
+                                            </td>
+                                            <td>{$listPageIndex  * $listPageCount + $key + 1}</td>
+                                            <td>{$vo.name}</td>
+                                            <td>{$vo.href}</td>
+                                            <td>
+                                                <switch name="vo.keyword_module">
+                                                    <case value="1"><span class="module-zz">攻略</span></case>
+                                                    <case value="2"><span class="module-fz">分站</span></case>
+                                                    <case value="3"><span class="module-bk">百科</span></case>
+                                                    <default />
+                                                </switch>
+                                            </td>
+                                            <td>{$vo.time|date='Y-m-d H:i:s',###}</td>
+                                            <td data-id="{$vo.id}">
+                                                <a href="/wwwarticlekeywords/operate/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" class="delete">
+                                                    <span title="删除" class="fa fa-trash"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$info.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            //反选
+            $('#reverse').click(function(){
+                $("input[class='bids']").each(function() {
+                      var flag = $(this).prop("checked");
+                    $(this).prop("checked", !flag);
+                })
+            })
+
+            $('select[name=keyword_module]').val('{$Think.get.keyword_module|default=0}');
+
+            $('.add-task').click(function() {
+                var module = $(this).attr('data-module');
+                $.ajax({
+                    url: '/wwwarticlekeywords/addtask/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        module:module
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+
+            $('.delete-task').click(function() {
+                var module = $(this).attr('data-module');
+                $.ajax({
+                    url: '/wwwarticlekeywords/deletetask/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        module:module
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+
+            $('.delete').click(function(){
+                var id = $(this).parent().attr('data-id');
+                if(confirm("确定要删除该文章吗？此操作不可恢复！！")){
+                    $.ajax({
+                        url: '/wwwarticlekeywords/delete/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                }
+            });
+
+
+            //批量删除
+            $('#deleteall').click(function(){
+                var allde = new Object();
+                $("input[class=bids]").each(function(key) {
+                    var flag = $(this).prop("checked");
+                    if(flag){
+                        allde[key] = {
+                            id:$(this).parent().parent().find('.bids').attr('data-id')
+                        }
+                    }
+                })
+
+                var hasProp = false;
+                for (var prop in allde){
+                    hasProp = true;
+                    break;
+                }
+                if (!hasProp){
+                    var d = dialog({
+                        title: '消息',
+                        content: '请选择需要删除的关键字！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    d.show();
+                    return false;
+                }
+
+                if (confirm('确定要批量删除所选关键字吗？该操作不可恢复！')) {
+                    $.ajax({
+                        url: '/wwwarticlekeywords/deleteall/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            allde:allde
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,网络错误！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                };
+            })
+
+            $('#search').click(function(){
+                window.location.href = '/wwwarticlekeywords/?keyword='+$('input[name=keyword]').val() + '&keyword_module=' + $('select[name=keyword_module]').val();
+            });
+        })
+    </script>
+</block>

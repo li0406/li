@@ -1,0 +1,753 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/auth/css/area.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="cover"></div>
+    <section class="content-header">
+        <h1>小区维护管理</h1>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <label>城市：</label>
+                                        <select id="city" name="city" type="text"  class="form-control" >
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <label>行政区：</label>
+                                        <select id="area" name="area" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <label>小区：</label>
+                                        <input type="text" id="xiaoqu" name="xiaoqu" class="form-control">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <label>坐标：</label>
+                                        <select id="location" name="location"  class="form-control">
+                                            <option value="0">请选择</option>
+                                            <option value="1">有</option>
+                                            <option value="2">无</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4 set-mt16">
+                                        <button type="button" id="search" class="btn btn-success col-xs-1">搜索</button>
+                                        <button type="button" id="add" class="btn btn-download col-xs-1">新增</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box box-list">
+                    <div class="box-header">
+                        <ul>
+                            <if condition="$type EQ 1">
+                                <li><a href="/auth/area?type=1" class="active">最近新增</a></li>
+                                <else/>
+                                <li><a href="/auth/area?type=1">最近新增</a></li>
+                            </if>
+
+                            <if condition="$type EQ 2">
+                                <li><a href="/auth/area?type=2" class="active">所有小区</a></li>
+                                <else/>
+                                <li><a href="/auth/area?type=2">所有小区</a></li>
+                            </if>
+                        </ul>
+                    </div>
+                    <div class="area-show" style="margin-top:-10px;">
+                        <div class="box-body no-padding box1">
+                            <table class="table table-hover table-bordered" id="tablelist">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>城市</th>
+                                    <th>行政区</th>
+                                    <th>小区</th>
+                                    <th>地址</th>
+                                    <th>坐标</th>
+                                    <th>物业类型</th>
+                                    <th>物业费</th>
+                                    <th>总建面积</th>
+                                    <th>总户数</th>
+                                    <th>建造年代</th>
+                                    <th>停车位</th>
+                                    <th>容积率</th>
+                                    <th>绿化率</th>
+                                    <th>开发商</th>
+                                    <th>物业公司</th>
+                                    <th>相关学校</th>
+                                    <th>小区介绍</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <volist name="weeklist" id="vo">
+                                    <tr>
+                                        <td><input type="checkbox" value="{$vo.id}" class="allchoose"></td>
+                                        <td>{$vo.cityname}</td>
+                                        <td>{$vo.areaname}</td>
+                                        <td title="{$vo.name}" class="xiaoqu-tit">{$vo.name_new}</td>
+                                        <td title="{$vo.address}">{$vo.address_new}</td>
+                                        <td>
+                                            <?php if(!empty( floatval($vo["longitude"]) )&&!empty(floatval($vo["latitude"]))){
+                                                echo $vo["longitude"].','.$vo["latitude"];
+                                            }?>
+                                        </td>
+                                        <td>{$vo.wuyename}</td>
+                                        <td>{$vo.wuye_money}</td>
+                                        <td>{$vo.size}</td>
+                                        <td>
+                                        <notempty name="vo.houses">
+                                            {$vo.houses}户
+                                        </notempty>
+                                        </td>
+                                        <td>
+                                        <notempty name="vo.year">
+                                            {$vo.year}年
+                                        </notempty>
+                                        </td>
+                                        <td>
+                                        <notempty name="vo.parking">
+                                           {$vo.parking}
+                                        </notempty>
+                                        </td>
+                                        <td>
+                                        <notempty name="vo.volume">
+                                            {$vo.volume}%
+                                        </notempty>
+                                        </td>
+                                        <td>{$vo.greening}</td>
+                                        <td title="{$vo.producer}">{$vo.producer_new}</td>
+                                        <td title="{$vo.management}">{$vo.management_new}</td>
+                                        <td title="{$vo.school}">{$vo.school_new}</td>
+                                        <td title="{$vo.info}" data-value="{vo.info}">{$vo.info_new}</td>
+                                        <td class="edit" data-id="{$vo.id}">编辑</td>
+                                    </tr>
+                                </volist>
+                                </tbody>
+                            </table>
+                            <div class="area-choose">
+                                <input type="checkbox" id="area-qx"><label for="area-qx" class="area-qx">全选</label>
+                                <p class="area-mark">标记为已读</p>
+                            </div>
+                        </div>
+                        <div class="box-body no-padding  box2" style="display:none;">
+                            <table class="table table-hover table-bordered" id="tablelist-all">
+                                <thead>
+                                <tr>
+                                    <th>城市</th>
+                                    <th>行政区</th>
+                                    <th>小区</th>
+                                    <th>地址</th>
+                                    <th>坐标</th>
+                                    <th>物业类型</th>
+                                    <th>物业费</th>
+                                    <th>总建面积</th>
+                                    <th>总户数</th>
+                                    <th>建造年代</th>
+                                    <th>停车位</th>
+                                    <th>容积率</th>
+                                    <th>绿化率</th>
+                                    <th>开发商</th>
+                                    <th>物业公司</th>
+                                    <th>相关学校</th>
+                                    <th>小区介绍</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.cityname}</td>
+                                        <td>{$vo.areaname}</td>
+                                        <td title="{$vo.name}" class="xiaoqu-tit">{$vo.name_new}</td>
+                                        <td title="{$vo.address}">{$vo.address_new}</td>
+                                        <td>
+                                            <?php if(!empty( floatval($vo["longitude"]) )&&!empty(floatval($vo["latitude"]))){
+                                                echo $vo["longitude"].',123'.$vo["latitude"];
+                                            }?>
+                                        </td>
+                                        </td>
+                                        <td>{$vo.wuyename}</td>
+                                        <td>{$vo.wuye_money}</td>
+                                        <td>{$vo.size}</td>
+                                        <td>
+                                            <notempty name="vo.houses">
+                                                {$vo.houses}户
+                                            </notempty>
+                                        </td>
+                                        <td>
+                                            <notempty name="vo.year">
+                                                {$vo.year}年
+                                            </notempty>
+                                        </td>
+                                        <td>
+                                            <notempty name="vo.parking">
+                                                {$vo.parking}
+                                            </notempty>
+                                        </td>
+                                        <td>
+                                            <notempty name="vo.volume">
+                                                {$vo.volume}%
+                                            </notempty>
+                                        </td>
+                                        <td>{$vo.greening}</td>
+                                        <td title="{$vo.producer}">{$vo.producer_new}</td>
+                                        <td title="{$vo.management}">{$vo.management_new}</td>
+                                        <td title="{$vo.school}">{$vo.school_new}</td>
+                                        <td title="{$vo.info}">{$vo.info_new}</td>
+                                        <td><a href="#"  data-id="{$vo.id}" class="edit">编辑</a><a href="#"  data-id="{$vo.id}" class="delete_id">删除</a></td>
+                                    </tr>
+                                </volist>
+                                </tbody>
+                            </table>
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--编辑模态框-->
+        <div class="area-model">
+            <div class="model-top">
+                <label class="bianji_button">编辑</label>
+                <em class="close" aria-hidden="true" style="font-style:normal;">×</em>
+            </div>
+            <form id="myForm">
+            <div class="model-dialog">
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">城市：</label>
+                        <select id="model-city" name="model-city" type="text" placeholder="请选择" style="width:157px;height:34px;">
+                            <option value="">请选择</option>
+                        </select>
+                        <span class="star">*</span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">行政区：</label>
+                        <select id="model-area" name="model-area" type="text" placeholder="请选择" style="width:157px;height:34px;">
+                            <option value="0">请选择</option>
+                        </select>
+                        <span class="star">*</span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">类型：</label>
+                        <select name="leixing" style="width:157px;height:34px;" id="model-type" value="1">
+                            <option value="1">小区</option>
+                            <option value="2">道路</option>
+                            <option value="3">其他</option>
+                        </select>
+                        <span class="star">*</span>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">小区：</label>
+                        <input type="text" name="xiaoqu" id="model-xiaoqu"  class="delete-content">
+                        <span class="star">*</span>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">坐标：</label>
+                        <input type="text" name="jingwei" id="model-location" class="delete-content">
+                        <span class="star">*</span>
+                        <a href="https://api.map.baidu.com/lbsapi/getpoint/index.html" target="_blank">坐标查询</a>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">地址：</label>
+                        <input type="text" name="address" class="delete-content">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">相关学校：</label>
+                        <input type="text" name="school"  class="delete-content">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6" class="wuye-check">
+                        <label class="comm-yangshi">物业类型：</label>
+                        <div id="wrap">
+                            <div id="selectBoard">
+                                <ul id="selectul">
+                                    <volist name="wuyetype" id="vo" key="key">
+                                        <li><input class="wuyetype" type="checkbox"  value={$vo} data-id="{$key}"/>{$vo}</li>
+                                    </volist>
+                                </ul>
+                                <span id="shuju" ></span>
+                                <input type="hidden" name="wuye_type" id="wuye_type">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">物业费：</label>
+                        <input type="text" name="wuye_money" class="delete-content">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">总建面积：</label>
+                        <input type="text" name="size" class="delete-content">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">总户数：</label>
+                        <input type="number" name="houses" class="delete-content zonghs">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">建造年代：</label>
+                        <input type="number" name="year" class="delete-content jianzaond">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">停车位：</label>
+                        <input type="number" name="parking" class="delete-content tingchewei">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">容积率：</label>
+                        <input type="text" name="volume" class="delete-content">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">绿化率：</label>
+                        <input type="text" name="greening" class="delete-content">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">物业公司：</label>
+                        <input type="text" name="management" class="delete-content">
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="comm-yangshi">开发商：</label>
+                        <input type="text" name="producer" class="delete-content">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <label style="margin-left:15px;" class="comm-yangshi">小区介绍：</label>
+                    <textarea style="width:420px;" name="info" class="delete-content"></textarea>
+                </div>
+            </div>
+                <input type="hidden" value="{$info.id}" name="id">
+            </form>
+            <button class="tijiao">提交</button>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/App.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $('#city').val('{$_GET["city"]}');
+        $('#area').val('{$_GET["area"]}');
+        $('#xiaoqu').val('{$_GET["xiaoqu"]}');
+        $('#locaition').val('{$_GET["zuobiao"]}');
+
+        $(document).ready(function(){
+            var citys=JSON.parse('{$citys}');
+            var arr = [];
+            var shen = null, shi = null;
+            shen = citys["shen"];
+            shi = citys["shi"];
+
+
+            shen.forEach( function(element, index) {
+                element.text = element.cname;
+            });
+            $("#city").select2({
+                data:shen
+            });
+            $("#city").change(function(){
+                var id = $(this).val();
+                if (id==0){
+                    return
+                }
+                var area = [{id:0,text:"请选择"}];
+                shi[id].forEach(function(ele,index){
+                    var item = {id:ele.qz_areaid, text:ele.qz_area};
+                    area.push(item);
+                });
+                $("#area").html("");
+                $("#area").select2({
+                    data:area
+                });
+            })
+
+             initCity(citys);
+             function initCity(citys){
+                 var cityShi='{$shi}';
+                 if(cityShi!=""){
+                     $("#city").select2("val", cityShi);
+                     $("#location").val('{$zuobiao}');
+                     $.each(citys.shi,function(i,value){
+                         if(i === cityShi){
+                             for(var j = 0; j < value.length; j++){
+                                 var oPt =  "<option value="+value[j].qz_areaid+">"+value[j].oldName+"</option>"
+                                 $('select[name=area]').append(oPt);
+                             }
+                         }
+                     })
+                     $("#area").select2("val", '{$area}');
+                 }
+             }
+            $("#xiaoqu").on("keypress" , function(event){
+                if(event.keyCode == 13){
+                    return false;
+                }
+            })
+
+
+            $("#model-city").change(function(){
+                var id = $(this).val();
+                if (id==0){
+                    return
+                }
+                var area = [{id:0,text:"请选择"}];
+                shi[id].forEach(function(ele,index){
+                    var item = {id:ele.qz_areaid, text:ele.qz_area};
+                    area.push(item);
+                });
+                $("#model-area").html("");
+                $("#model-area").select2({
+                    data:area
+                });
+            })
+            /*判断td中的文字长度*/
+
+            $("tbody .xiaoqu-tit").each(function(index,value){
+                var result = $(this).text()
+                if(result.length <= 10){
+                    console.log(1111111111)
+                    $(this).removeAttr("title");
+                }
+            })
+
+            /*下拉复选框*/
+            $("#selectBoard").click(function(event){
+                var ev = event || window.event;
+                //阻止默认事件及封装
+                if (ev.stopPropagation) {
+                    ev.stopPropagation();
+                }else{
+                    ev.cancelable = true;
+                }
+                $("#selectBoard ul").css("display","block");
+            });
+            $(window).click(function(){
+                $("#selectBoard ul").css("display","none");
+            });
+
+            //监听checkbox的value值 改变则执行下列操作
+            $("body").on("change","#selectBoard input",function(){
+                if ($(this).prop("checked")) {
+                    if(arr.length >2){
+                        $(this).attr("checked",false)
+                        alert("物业类型最多只能选择三个")
+                        return;
+                    }
+                    arr.push($(this).val());
+                }else{
+                    var sded = $(this).val();
+                    for(var i=0;i<arr.length;i++){
+                        if(arr[i]==sded){
+                            arr.splice(i,1)
+                        }
+                    }
+                }
+
+                $("#shuju").html(arr.join(","));
+                return false;
+            })
+
+            $(".box-header ul li").click(function(){
+                $(".box-header ul li a").css("border","none");
+                var index = $(this).index();
+                $(this).children("a").addClass("active").siblings().removeClass("active");
+                $(".area-show>div").eq(index).show().siblings().hide();
+            })
+
+
+            var type = '{$_GET["type"]|default=1}';
+           if(type == 2){
+               $(".box1").hide();
+               $(".box2").show();
+           }
+
+            /*点击新增按钮*/
+            $("#add").click(function(){
+                /*$(".area-model input").val().replace(/\s+/g,"");*/
+                $('input[name=id]').val('');
+                $(".bianji_button").html('新增');
+                $(".cover").show();
+                $(".area-model").show();
+                $("#model-city").select2({
+                    data:shen
+                });
+            })
+            /*点击编辑按钮*/
+            $(".edit").click(function(){
+                /*$(".area-model input").val().replace(/\s+/g,"");*/
+                $(".bianji_button").html('编辑');
+                $("#selectul").html('');
+                var id = $(this).attr('data-id');
+                $('input[name=id]').val(id);
+                //获取单条信息
+                $.ajax({
+                    url: '/auth/getOneArea/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {id:id}
+                })
+                    .done(function(data) {
+                      //  console.log(data)
+                        if(data.status == 0){
+                            var info = data.data;
+                            var cityData=JSON.parse('{$citys}');
+                            //填值
+                            $('#model-xiaoqu').val(info.name);
+                            $('select[name=leixing]').val(info.type);
+                            //$('select[name=model-city]').val(info.city);
+
+                            $("#model-city").select2({
+                                data:shen
+                            });
+                            $("#model-city").select2("val", info.city);
+                            $.each(cityData.shi,function(i,value){     // i:省得id ；value：市（数组）
+                                if(i===info.city){
+                                    for(var j=0;j<value.length;j++){
+                                        var oPt =  "<option value="+value[j].qz_areaid+">"+value[j].oldName+"</option>"
+                                        $('select[name=model-area]').append(oPt);
+                                    }
+                                }
+                            })
+                            //$('select[name=model-area]').val(info.area);
+                            $("#model-area").select2();
+                            $("#model-area").select2("val", info.area);
+                            //console.log($('select[name=model-area]').val())
+                            $('input[name=address]').val(info.address);
+                            $('input[name=jingwei]').val(info.longitude+','+info.latitude);
+                            $('input[name=wuye_type]').val(info.wuye_type);
+                            $('input[name=wuye_money]').val(info.wuye_money);
+                            $('input[name=size]').val(info.size);
+                            $('input[name=houses]').val(info.houses);
+                            $('input[name=year]').val(info.year);
+                            $('input[name=parking]').val(info.parking);
+                            $('input[name=volume]').val(info.volume);
+                            $('input[name=greening]').val(info.greening);
+                            $('input[name=producer]').val(info.producer);
+                            $('input[name=management]').val(info.management);
+                            $('input[name=school]').val(info.school);
+                            $('textarea').val(info.info);
+                            //遍历勾选
+                            $("#selectul").html(info.listr);
+                            $("#shuju").html(info.wuyename);
+                            $(".cover").show();
+                            $(".area-model").show()
+                            if($("#shuju").html() != ""){
+                                var brr = [];
+                                brr = $("#shuju").html().split(",")
+                                for(var j = 0; j < brr.length ; j++){
+                                    arr.push(brr[j])
+                                }
+                            }
+                        }
+                    });
+
+                $(".cover").show();
+                $(".area-model").show()
+            })
+            /*点击模态框的关闭按钮*/
+            $(".close").click(function(){
+                var area = [{id:0,text:"请选择"}];
+                $("#model-city").select2({
+                    data:shen
+                });
+                $("#model-area").html("");
+                $("#model-area").select2({
+                    data: area
+                });
+
+                $("#model-city").select2("val","")
+                $("#model-area").select2("val","0")
+                $("#model-type").val("1")
+                $(".cover").hide();
+                $(".area-model").hide();
+                $(".area-model .delete-content").val("");
+                arr = [];
+                $("#shuju").html("");
+                $("#selectBoard ul li input").prop("checked",false)
+
+            })
+
+            /*点击全选按钮*/
+            $("#area-qx").click(function(){
+                if($(this).is(":checked")){
+                    $(".allchoose").prop("checked",true)
+                }else{
+                    $(".allchoose").prop("checked",false)
+                }
+            })
+
+            /*点击提交按钮*/
+            $("body").on("click",".tijiao",function(){
+                //获取选中的分类
+                var fenlei = new Array();
+                $(".wuyetype").each(function(index, element) {
+                    if($(this).prop('checked')){
+                        fenlei.push($(this).attr('data-id'));
+                    }
+                })
+
+                var fenlei_str = fenlei.join(",");
+                var regTest = /^[0-9]*[1-9][0-9]*$/;
+                console.log($("#comm-yangshi").val())
+                $("#wuye_type").val(fenlei_str);
+                if($("#model-city").val() == 0){
+                    alert("请填写城市");
+                    return false;
+                }
+                if($("#model-area").val() == 0){
+                    alert("请填写行政区");
+                    return false;
+                }
+                if($("#comm-yangshi").val() == ''){
+                    alert("请填写类型");
+                    return false;
+                }
+                if($("#model-xiaoqu").val().trim() == ''){
+                    alert("请填写小区");
+                    return false;
+                }
+                if($("#model-location").val() == ''){
+                    alert("请填写坐标");
+                    return false;
+                }
+
+                if(arr.length > 3){
+                    alert("物业类型最多只能选择三个，请删除多余的物业类型");
+                    return false;
+                }
+                if($(".zonghs").val() != ""){
+                    if(!regTest.test($(".zonghs").val())){
+                        alert("总户数为正整数");
+                        return false;
+                    }
+                }
+                if($(".jianzaond").val() != ""){
+                    if(!regTest.test($(".jianzaond").val())){
+                        alert("建造年代为正整数");
+                        return false;
+                    }
+                }
+                if($(".tingchewei").val() != ""){
+                    if(!regTest.test($(".tingchewei").val())){
+                        alert("停车位为正整数");
+                        return false;
+                    }
+                }
+
+                $.ajax({
+                    url: '/auth/editArea/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: $("#myForm").serializeArray()
+                })
+                    .done(function(data) {
+                        if (data.status == 0) {
+                            $(".cover").hide();
+                            $(".area-model").hide();
+                            $(".area-model .delete-content").val("");
+                            $(".area-model select").val("");
+                            $("#shuju").html("");
+                            $("#selectBoard ul li input").prop("checked",false);
+                            alert(data.info);
+                            window.location.href = window.location.href;
+                        } else {
+                            alert(data.info);
+                        }
+                    });
+
+            })
+
+            $("#search").click(function(){
+                var city = $('#city').val();
+                var area = $('#area').val();
+                var xiaoqu =  $('#xiaoqu').val();
+                var zuobiao = $('#location').val();
+
+
+                window.location.href = '/auth/area/?type='+type+'&city='+city+'&area='+area+'&xiaoqu='+xiaoqu+'&zuobiao='+zuobiao;
+                console.log(city)
+
+            })
+            //删除
+            $('.delete_id').click(function(){
+                var that =  $(this);
+                if (confirm('确认删除该小区！')) {
+                    var id = that.attr("data-id");
+                    $.ajax({
+                        url: '/auth/deleteArea/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data:{id:id}
+                    })
+                            .done(function(data) {
+                                if (data.status == 0) {
+                                    alert("删除成功");
+                                    that.parent().parent().hide();
+                                } else {
+                                    alert(data.info);
+                                }
+                            });
+                }
+            })
+            //标记为已读
+            $(".area-mark").click(function(){
+                //获取选中的分类
+                var ids = new Array();
+                $(".allchoose").each(function() {
+                    if($(this).prop('checked')){
+                        ids.push($(this).val());
+                    }
+                })
+                if(ids.length == 0){
+                    return;
+                }
+                $.ajax({
+                    url: '/auth/editRead/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:{ids:ids}
+                })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                    window.location.href = window.location.href;
+                            } else {
+                                alert(data.info);
+                            }
+                        });
+            })
+
+        })
+    </script>
+</block>

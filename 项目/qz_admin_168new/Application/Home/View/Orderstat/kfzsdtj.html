@@ -1,0 +1,633 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/kfzsdtj.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}"></block>
+<block name="content">
+    <section class="content-header">
+        <h1>条件查询</h1></section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" action="/orderstat/kfzsdtj" method="get">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>开始时间：</div>
+                                        <input type="text" name="begin" class="form-control datepicker clear-target" placeholder="选择日期" autocomplete="off" value="{$Think.get.begin}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>结束时间：</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target" placeholder="选择日期" autocomplete="off" value="{$Think.get.end}">
+                                    </div>
+                                      <div class="col-xs-3 text-center">
+                                     <button type="submit" id="search" class="btn btn-primary col-xs-4 pull-left sous"><i class="fa fa-search"></i> 搜索</button>
+                                     </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>赠单总数</th>
+                                    <th>距离远</th>
+                                    <th>预算低</th>
+                                    <th>面积小</th>
+                                    <th>交房时间长</th>
+                                    <th>开工时间长</th>
+                                    <th>城市未开</th>
+                                    <th>需要垫资</th>
+                                    <th>不能量房</th>
+                                    <th>改动项目少</th>
+                                    <th>与装修相关</th>
+                                    <th>只要设计</th>
+                                    <th>意向不强</th></tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr>
+                                    <td>客服{$key}团</td>
+                                    <td>{$vo.all}</td>
+                                    <td>{$vo.1.count|default=0}</td>
+                                    <td>{$vo.2.count|default=0}</td>
+                                    <td>{$vo.3.count|default=0}</td>
+                                    <td>{$vo.4.count|default=0}</td>
+                                    <td>{$vo.5.count|default=0}</td>
+                                    <td>{$vo.6.count|default=0}</td>
+                                    <td>{$vo.7.count|default=0}</td>
+                                    <td>{$vo.8.count|default=0}</td>
+                                    <td>{$vo.9.count|default=0}</td>
+                                    <td>{$vo.10.count|default=0}</td>
+                                    <td>{$vo.11.count|default=0}</td>
+                                    <td>{$vo.12.count|default=0}</td>
+                                </tr>
+                                </volist>
+                                <tr>
+                                    <td>汇总</td>
+                                    <td>{$all.all|default=0}</td>
+                                    <td>{$all.1|default=0}</td>
+                                    <td>{$all.2|default=0}</td>
+                                    <td>{$all.3|default=0}</td>
+                                    <td>{$all.4|default=0}</td>
+                                    <td>{$all.5|default=0}</td>
+                                    <td>{$all.6|default=0}</td>
+                                    <td>{$all.7|default=0}</td>
+                                    <td>{$all.8|default=0}</td>
+                                    <td>{$all.9|default=0}</td>
+                                    <td>{$all.10|default=0}</td>
+                                    <td>{$all.11|default=0}</td>
+                                    <td>{$all.12|default=0}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas2" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="box">
+                      <div class="box-body no-padding">
+                         <div id="canvas3" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                      </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas4" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas5" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas6" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas11" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas12" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="col-xs-4">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div id="canvas99" class="col-xs-12 no-padding" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript"  charset="UTF-8">
+    $(document).ready(function() {
+        /*S-初始化插件*/
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+
+
+
+            var Dom = document.querySelector("#canvas");
+            var myChart = echarts.init(Dom);
+
+           option = {
+            title : {
+                text: '1团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.1.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.1.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.1.color|json_encode}
+        };
+
+            myChart.setOption(option);
+
+            window.onresize=function(){
+                var myChart = echarts.init(Dom);
+                myChart.setOption(option);
+            }
+
+            var Dom = document.querySelector("#canvas2");
+            var myChart = echarts.init(Dom);
+
+           option = {
+            title : {
+                text: '2团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data: {$data.2.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.2.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.2.color|json_encode}
+        };
+
+            myChart.setOption(option);
+
+            window.onresize=function(){
+                var myChart = echarts.init(Dom);
+                myChart.setOption(option);
+            }
+
+
+            var Dom = document.querySelector("#canvas3");
+            var myChart = echarts.init(Dom);
+
+            option = {
+            title : {
+                text: '3团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.3.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.3.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.3.color|json_encode}
+        };
+
+            myChart.setOption(option);
+
+            window.onresize=function(){
+                var myChart = echarts.init(Dom);
+                myChart.setOption(option);
+            }
+
+
+             var Dom = document.querySelector("#canvas4");
+            var myChart = echarts.init(Dom);
+
+           option = {
+            title : {
+                text: '4团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.4.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.4.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.4.color|json_encode}
+        };
+
+            myChart.setOption(option);
+
+            window.onresize=function(){
+                var myChart = echarts.init(Dom);
+                myChart.setOption(option);
+            }
+
+            var Dom = document.querySelector("#canvas5");
+            var myChart = echarts.init(Dom);
+
+           option = {
+            title : {
+                text: '5团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:   {$data.5.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.5.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.5.color|json_encode}
+        };
+
+        myChart.setOption(option);
+
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+
+        var Dom = document.querySelector("#canvas6");
+        var myChart = echarts.init(Dom);
+
+        option = {
+            title : {
+                text: '6团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.6.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.6.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+            color: {$data.6.color|json_encode}
+        };
+
+        myChart.setOption(option);
+
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+        var Dom = document.querySelector("#canvas11");
+        var myChart = echarts.init(Dom);
+
+        option = {
+            title : {
+                text: '11团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.11.item|default=""|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.11.child|default=""|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+            color: {$data.11.color|default=""|json_encode}
+        };
+
+        myChart.setOption(option);
+
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+        var Dom = document.querySelector("#canvas12");
+        var myChart = echarts.init(Dom);
+
+        option = {
+            title : {
+                text: '12团赠单原因占比',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.12.item|default=""|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.12.child|default=""|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+            color: {$data.12.color|default=""|json_encode}
+        };
+
+        myChart.setOption(option);
+
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+        var Dom = document.querySelector("#canvas99");
+        var myChart = echarts.init(Dom);
+
+        option = {
+            title : {
+                text: '汇总',
+                // subtext: '纯属虚构',
+                x:'center',
+                top:'30px'
+            },
+
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right',
+                top:'85px',
+                data:  {$data.all.item|json_encode},
+            },
+            series : [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['40%', '60%'],
+                    data:{$data.all.child|json_encode},
+                  itemStyle:{
+                    normal:{
+                          label:{
+                            show: true,
+                            formatter: '{d}%'
+                          },
+                          labelLine :{show:true}
+                        }
+                    },
+                }
+            ],
+
+            color: {$data.all.color|json_encode}
+        };
+
+        myChart.setOption(option);
+
+        window.onresize=function(){
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+
+    });
+    </script>
+</block>

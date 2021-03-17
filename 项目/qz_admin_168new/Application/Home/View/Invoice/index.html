@@ -1,0 +1,319 @@
+<!--会员报备审核-->
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/home/Indicators/index/css/index.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .reset-width {
+            width: 12%;
+        }
+
+        #tablelist td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .width-150 {
+            width: 150px !important;
+        }
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>发票审核</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="#">发票审核</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" id="search_form">
+                                <div class="col-xs-12 ">
+                                    <div class="col-xs-2 reset-width">
+                                        <div>发票抬头：</div>
+                                        <input type="text" name="invoice_title" id="invoice_title" class="form-control clear-target"
+                                               placeholder="请输入" value="{$_GET['invoice_title']}">
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>报备人：</div>
+                                        <input type="text" name="invoice_report_username" id="invoice_report_username" class="form-control clear-target"
+                                               placeholder="请输入" value="{$_GET['invoice_report_username']}">
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                      <div>开票类型：</div>
+                                      <select id="type" name="type" id="type" type="text" placeholder="请选择"
+                                              class="form-control">
+                                          <option value="">请选择</option>
+                                          <volist name="type" id="item">
+                                              <if condition="$key+1 eq $_GET['type']">
+                                                  <option value="{$item.id}" selected>{$item.name}</option>
+                                              <else/>
+                                                  <option value="{$item.id}">{$item.name}</option>
+                                              </if>
+                                            <!--<option value="{$item.id}">{$key}</option>-->
+                                          </volist>
+                                      </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>是否到账：</div>
+                                        <select id="is_in_account" name="is_in_account" type="text" placeholder="请选择"
+                                                class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="is_in_account" id="item">
+                                                <if condition="$key+1 eq $_GET['is_in_account']">
+                                                    <option value="{$item.id}" selected>{$item.name}</option>
+                                                <else/>
+                                                    <option value="{$item.id}">{$item.name}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>开票状态：</div>
+                                        <select id="status" name="status" type="text" placeholder="请选择"
+                                                class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="status" id="item">
+                                                <if condition="$item.id eq $_GET['status']">
+                                                    <option value="{$item.id}" selected>{$item.name}</option>
+                                                <else/>
+                                                    <option value="{$item.id}">{$item.name}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>提交时间：</div>
+                                        <input type="text" name="submit_start_date"
+                                               class="form-control datetimepicker clear-target"
+                                               placeholder="选择开始日期" value="{$_GET['submit_start_date']}">
+
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>&nbsp;</div>
+                                        <input type="text" name="submit_end_date"
+                                               class="form-control datetimepicker clear-target"
+                                               placeholder="选择结束日期" value="{$_GET['submit_end_date']}">
+                                    </div>
+
+                                    <div class="col-xs-2 reset-width">
+                                        <div>所属部门：</div>
+                                        <select id="top_team_id" name="top_team_id" type="text" placeholder="请选择"
+                                                class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="dept" id="item">
+                                                <if condition="$item.current_id eq $_GET['top_team_id']">
+                                                    <option value="{$item.current_id}" selected>{$item.current_name}</option>
+                                                <else/>
+                                                    <option value="{$item.current_id}">{$item.current_name}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-xs-2 reset-width">
+                                        <div>&nbsp;</div>
+                                        <button type="submit" id="search" class="btn btn-query">查询</button>
+                                        <div  id="restart" class="btn btn-reset">重置</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>发票抬头</th>
+                                <th>纳税人识别号</th>
+                                <th>开票类型</th>
+                                <th>开票金额</th>
+                                <th>实际到账金额</th>
+                                <th>是否到账</th>
+                                <th>开票公司</th>
+                                <th>开票状态</th>
+                                <th>提交时间</th>
+                                <th>报备人</th>
+                                <th>审核时间</th>
+                                <th class="width-150">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="data.list" id="item">
+                                <tr>
+                                    <td>{:(($_GET['p']?:1)-1)*($_GET['size']?:20) + $key+1}</td>
+                                    <!-- <td>{$item.id}</td> -->
+                                    <td>
+                                        <div class="flex">
+                                            <div>{$item.invoice_title}</div>
+                                            <if condition="$item.warning_info != ''">
+                                            <div class="tips" onclick="opentips()">!</div>
+                                            </if>
+                                        </div>
+                                    </td>
+                                    <td>{$item.taxpayer_identification_number}</td>
+                                    <td>{$item.type_name}</td>
+                                    <td>{$item.invoice_price}</td>
+                                    <td>{$item.account_money}</td>
+                                    <td>{$item.is_in_account_name}</td>
+                                    <td>{$item.billing_company_name}</td>
+                                    <td>
+                                        <switch name="item.status">
+                                            <case value="2"><span style="color: #FFCC00">{$item.status_name}</span></case>
+                                            <case value="3"><span style="color: #5DBB16">{$item.status_name}</span></case>
+                                            <case value="4"><span style="color: #008000">{$item.status_name}</span></case>
+                                            <case value="5"><span style="color: #FF3B3B">{$item.status_name}</span></case>
+                                            <default />
+                                            <span>{$item.status_name}</span>
+                                        </switch>
+                                    </td>
+                                    <td>{$item.submit_date}</td>
+                                    <td>{$item.invoice_report_username}</td>
+                                    <td>{$item.check_time}</td>
+                                    <td>
+                                        <a href="/invoice/detail?id={$item.id}" target="_blank">查看</a>
+                                        <if condition="$item['status'] != 5">
+                                            <a class="trial btn_exam" data-id="{$item.id}" data-status="{$item.status}" onclick="opentrial()">审核</a>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--<div class="flex jus-con pad">-->
+                    <!--    <div>共20条</div>-->
+                    <!--    <div class="leftpoint"></div>-->
+                    <!--    <div class="rightpoint"></div>-->
+                    <!--    <div class="flex">前往<input class="pagenum" type="text" placeholder="1"> 页</div>-->
+                    <!--</div>-->
+                    <if condition="$data['page']['total_number'] gt 0">
+                        <div class="col-xs-12">{$data.pageshow}</div>
+                    </if>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="dialog-tips">
+      <div class="tips-div">
+        <div class="x" onclick="closetips()">x</div>
+        <div class="tips-title">预警信息</div>
+        <div class="tips-content">发票中相关小报备已被驳回，请核实后重新提交</div>
+        <div class="tips-btn" onclick="closetips()">我知道了</div>
+      </div>
+    </div>
+<!--  审核弹窗  -->
+    <div class="dialog-trial">
+      <div class="trial-div">
+        <div class="x" onclick="closetrial()">x</div>
+        <div class="trial-title">审核</div>
+        <div class="trial-content" id="invoice_status">
+          <label class="trial-label"><input onclick="getRadioVal()" type="radio" name="invoice_status" value="3"  />待开票</label>
+          <label class="trial-label"><input onclick="getRadioVal()" type="radio" name="invoice_status" value="4" />已开票</label>
+          <label class="trial-label"><input onclick="getRadioVal()" type="radio" name="invoice_status" value="5" />驳回</label>
+        </div>
+        <div class="trial-remarks-div">
+          <input id="check_reason" class="trial-remarks" type="text" placeholder="请输入审核备注">
+        </div>
+        <div class="trial-btn-div flex" onclick="closetips()">
+            <input type="hidden" name="id" id="check_id" />
+          <div class="trial-cancel trial-btn " onclick="closetrial()">取消</div>
+          <div class="trial-confirm trial-btn btn-confirm-exam" onclick="closetrial()">确认</div>
+        </div>
+      </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/Indicators/index/js/index.js"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        $(function () {
+            $('.datetimepicker').datetimepicker({
+                language:"zh-CN",
+                todayBtn:  1,
+                minuteStep:5, // 时间间隔
+                startView:2,
+                minView:'decade',
+                format:"yyyy-mm-dd",
+                autoclose:true,
+            }).on("change", function () {
+                console.log(33);
+                if (toTimeStamp($("input[name=submit_start_date]").val()) > toTimeStamp($("input[name=submit_end_date]").val())) {
+                    alert("结束时间不得早于开始时间");
+                    $('input[name="submit_end_date"]').val("");
+                }
+            });
+
+            // 重置
+            $("#restart").click(function(){
+                $("input[name=invoice_title]").val("");
+                $("input[name=invoice_report_username]").val("");
+                $("#type").val("");
+                $("#is_in_account").val("");
+                $("#status").val("");
+                $("input[name=submit_start_date]").val("");
+                $("input[name=submit_end_date]").val("");
+                $("#top_team_id").val("");
+            });
+
+            // 审核弹窗
+            $(".btn_exam").click(function(){
+                $("#check_id").val($(this).data("id"));
+            });
+
+            //审核操作
+            $('.btn-confirm-exam').click(function () {
+                var id = $("#check_id").val();
+                var check_reason = $('#check_reason').val();
+                var invoice_status = $("#invoice_status input[type=radio]:checked").val();
+                if (invoice_status == undefined) {
+                    alert("请先选择审核状态");
+                    return false;
+                }
+
+                $.ajax({
+                    url: "/invoice/check_invoice",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        id: id,
+                        remark: check_reason,
+                        status: invoice_status
+                    }
+                }).done(function (data) {
+                    if (data.error_code == 0) {
+                        window.location.reload();
+                    }else {
+                        alert(data.error_msg);
+                    }
+                });
+            });
+
+
+        });
+    </script>
+
+</block>

@@ -1,0 +1,97 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>七牛文件上传 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+     <section class="content-header">
+        <h1>七牛文件上传</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">七牛文件上传</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <form>
+                            <input id="uploadInput" type="file" />
+                            <div class="form-group" style="margin-top: 5px;">
+                                <label for="inputEmail3" class="control-label">自定义文件访问路径</label>
+                                <input type="text" name="path" class="form-control" id="inputEmail3" placeholder="自定义文件访问路径,访问路径勿使用含中文和文件后缀名 示例: custom/20180816/test">
+                            </div>
+                            <div class="form-group" >
+                                <label for="inputEmail3" class="control-label">保留文件后缀名</label>
+                                <input id="switch" type="checkbox" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body callback-box">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="control-label">访问地址:</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $("#uploadInput").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/upsinglefile/",
+            showCaption:true,
+            browseClass:"btn btn-primary",
+            maxFileSize: 0,
+            enctype : 'multipart/form-data',
+            maxFileCount:1,
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            uploadAsync:true,
+            dropZoneEnabled:true,
+            previewSettings:{
+                image: {width: "auto", height: "200px"}
+            },uploadExtraData:function(){
+                return {
+                    path: $("input[name=path]").val(),
+                    fileExt:$("#switch").attr("checked") == "checked"?1:0
+                }
+            },
+        }).on('fileuploaded', function(event, data) {
+            if(1 == data.response.status){
+                var url = data.response.data.filename +"访问地址：" + " //{:C('QINIU_DOMAIN')}/" +  data.response.data.key;
+                $(".callback-box").append('<div class="form-group" ><input name="callback" type="text" class="form-control" readonly="readonly" value="'+url+'" /></div>');
+            } else {
+                alert(data.response.info);
+            }
+        }).on("fileuploaderror",function(event, data){
+            alert('文件上传失败,请检查文件格式，规格是否符合要求');
+            return false;
+        }).on("filebatchuploadsuccess",function(event, data){
+            alert(data.response.info);
+        });
+
+        $('#switch').bootstrapSwitch({
+            onText: "是",
+            offText: "否",
+            onColor: "info",
+            offColor: "danger",
+            onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                }else{
+                    $el.attr("checked","checked")
+                }
+            }
+        });
+    </script>
+</block>

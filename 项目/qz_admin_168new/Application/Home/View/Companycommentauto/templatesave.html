@@ -1,0 +1,123 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+        rel="stylesheet" />
+    <link href="/assets/home/company/css/templatelist.css?v={:C('STATIC_VERSION')}"
+        rel="stylesheet" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>新增评论模板</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <form id="dataForm">
+                <div class="col-xs-12">
+                    <div class="box box-default">
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">装修阶段:</label>
+                                    <div class="col-sm-4">
+                                        <select name="stage" id="" class="form-control">
+                                            <option value="">请选择阶段</option>
+                                            <volist name="stage_list" id="item">
+                                                <option value="{$key}" <eq name="info.stage" value="$key">selected</eq>
+                                                    >{$item}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">编辑模板:</label>
+                                    <textarea name="content" id="edit-template" cols="30" rows="10"
+                                        maxlength="500">{$info.content}</textarea>
+                                    <div class="choose-val">可选变量<span class="jianchen">{公司简称}</span></div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <label class="col-sm-1 control-label">是否启用:</label>
+                                    <div class="y-n col-sm-2">
+                                        <label>
+                                            <input name="on_status" type="radio" value="1" <neq name="info.on_status"
+                                                value="2">checked</neq> />是
+                                        </label>
+                                        <label>
+                                            <input name="on_status" type="radio" value="2" <eq name="info.on_status"
+                                                value="2">checked</eq> />否
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group clearfix">
+                                    <input type="hidden" name="id" value="{$info.id}" />
+                                    <div class="btn btn-success save"><i class="fa fa-save"></i>保存</div>
+                                    <div class="btn btn-default back"><i class="fa fa-reply"></i>返回</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 返回
+        $('.back').click(function () {
+            window.location.href = "{$_SERVER['HTTP_REFERER']}";
+        });
+
+        // 保存
+        $('.save').click(function () {
+            var data = getFormData("#dataForm");
+            if (data.stage == "") {
+                alert("请先选择装修阶段");
+                return false;
+            } else if (data.content == "") {
+                alert("请先填写模板内容");
+                return false;
+            }
+
+            $.ajax({
+                url: "{:u()}",
+                type: "POST",
+                dataType: "JSON",
+                data: data
+            }).done(function (resp) {
+                if (resp.status == 1) {
+                    window.location.href = "{$_SERVER['HTTP_REFERER']}";
+                } else {
+                    alert(resp.msg);
+                }
+            }).fail(function (resp) {
+                alert("程序运行出错，请联系管理员（" + response.status + "）");
+            });
+        });
+
+        $('.jianchen').click(function () {
+            var str = $(this).text();
+            var text = $('#edit-template').val() + str
+            $('#edit-template').val(text)
+        });
+
+        // 获取表单数据
+        function getFormData(targetElement) {
+            var o = {};
+            var a = $(targetElement).serializeArray();
+            $.each(a, function () {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+
+            return o;
+        }
+    </script>
+</block>

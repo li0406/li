@@ -1,0 +1,250 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网分站标识管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/taglist.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>分站标识管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/tags/">分站标识管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="">
+                                <div class="col-xs-1 w10">
+                                    城市：
+                                    <select name="cs" class="form-control" id="input_cs">
+                                        <option value="">请选择</option>
+                                        <volist name="quyuList" id="item">
+                                            <option value="{$item.cid}" <eq name="input.cs" value="$item['cid']">selected</eq> >{$item.first_abc} {$item.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1 w10">
+                                    状态：
+                                    <select name="enabled" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="1" <eq name="input.enabled" value="1">selected</eq> >启用</option>
+                                        <option value="2" <eq name="input.enabled" value="2">selected</eq> >禁用</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1 w10">
+                                    标识名：
+                                    <input type="text" class="form-control" name="name" value="{$input.name}" placeholder="标识名">
+                                </div>
+                                <div class="col-xs-1 w10">
+                                    添加时间-开始：
+                                    <input type="text" class="form-control datepicker" name="date_begin" value="{$input.date_begin}" placeholder="添加时间-开始" autocomplete="off">
+                                </div>
+                                <div class="col-xs-1 w10">
+                                    添加时间-结束：
+                                    <input type="text" class="form-control datepicker" name="date_end" value="{$input.date_end}" placeholder="添加时间-结束" autocomplete="off">
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button type="submit" id="search" class="btn btn-block btn-primary normal">
+                                        <i class="fa fa-search"></i>&nbsp;查询
+                                    </button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button type="button" class="btn btn-block btn-primary normal" id="reset">
+                                        <i class="fa fa-refresh"></i>&nbsp;重置
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a id="pl-excel" href="javascript:void(0)" class="pull-right">
+                                    <button class="btn btn-info normal">
+                                        <i class="fa fa-plus"></i>批量导入
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a id="deleteall" href="javascript:void(0)" class="pull-right">
+                                    <button class="btn btn-warning normal">
+                                        <i class="fa fa-trash"></i>批量删除
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a id="tagsbox" href="javascript:void(0)" class="pull-right">
+                                    <button class="btn btn-success normal">
+                                        <i class="fa fa-plus-circle"></i>新增标识
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">标识列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th id="reverse">全选</th>
+                                        <th>标识名</th>
+                                        <th>城市</th>
+                                        <th>添加时间</th>
+                                        <th>装修公司</th>
+                                        <th>设计师</th>
+                                        <th>装修案例</th>
+                                        <th>分站文章</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+
+                                    <volist name="data.list" id="item">
+                                        <tr data-id="{$item.id}">
+                                            <td>
+                                                <input type="checkbox" class="bids" name="check" data-id="{$item.id}" />
+                                            </td>
+                                            <td>{$item.name}</td>
+                                            <td>{$item.cname}</td>
+                                            <td>{$item.created_date}</td>
+                                            <td class="zx-gs">{$item.count_company}</td>
+                                            <td class="sjs">{$item.count_designer}</td>
+                                            <td class="zx-al">{$item.count_case}</td>
+                                            <td class="fz-wz">{$item.count_article}</td>
+                                            <td><eq name="item.enabled" value="1">启用<else />禁用</eq></td>
+                                            <td>
+                                                <span class="blue edit" data-id="{$item.id}" data-cs="{$item.cs}" data-name="{$item.name}" data-enabled="{$item.enabled}">编辑</span>&nbsp;|
+                                                <eq name="item.enabled" value="1">
+                                                    <span class="blue stop" data-id="{$item.id}" data-val="2">禁用</span>&nbsp;|
+                                                <else />
+                                                    <span class="blue stop" data-id="{$item.id}"  data-val="1">启用</span>&nbsp;|
+                                                </eq>
+                                                <span class="blue del" data-id="{$item.id}">删除</span>
+                                            </td>
+                                       </tr>
+                                   </volist>
+                                   <empty name="data.list">
+                                        <tr>
+                                            <td colspan="10" align="center">暂无数据</td>
+                                        </tr>
+                                    </empty>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$data.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 新增标识 -->
+    <div class="modal fade" id="tagsModal" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增/编辑标识</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="group">
+                            <span>标识名称</span>
+                            <input type="text" class="form-control" name="name" id="tag_name" maxlength="15" placeholder="请输入标识名称">
+                        </div>
+                        <div class="group">
+                            <span>所属城市</span>
+                            <select name="cs" class="form-control" id="tag_cs">
+                                <option value="">请选择城市</option>
+                                <volist name="quyuList" id="item">
+                                    <option value="{$item.cid}">{$item.first_abc} {$item.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="group">
+                            <span>启用状态</span>
+                            <div class="switch">
+                                <input id="switch" name="enabled" type="checkbox" checked>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id" id="tag_id">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success tag-save-btn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 批量导入 -->
+    <div class="modal fade" id="excelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label class=" control-label">选择文件:</label>
+                            <div class=" file-group">
+                                <input id="fileUp" name="fileup" type="file" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">模板文件:</label>
+                            <div class="file-group">
+                                <a href="/assets/home/subtag/template/subtag_template.xlsx" target="_blank" download="分站标识批量导入模板.xlsx">
+                                    <button type="button" class="btn btn-warning">下载</button>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="zzc">
+        <div class="win-box">
+            <div class="win-head">
+                <span class="pull-left win-title"></span>
+                <span class="pull-right close">×</span>
+            </div>
+            <div class="win-body" style="overflow-y:hidden;">
+                <iframe src="" width="100%" height="100%" id="selectBox" frameborder="0" scrolling="yes"></iframe>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/subtag/js/taglist.js?v={:C('STATIC_VERSION')}"></script>
+</block>

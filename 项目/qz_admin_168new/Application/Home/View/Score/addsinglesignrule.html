@@ -1,0 +1,340 @@
+<!--签到现金券设置-->
+
+<extend name="Main:baseTemplate"/>
+
+<block name="title">
+    <title>{$actionName}签到规则</title>
+</block>
+<block name="style">
+    <!--<link rel="stylesheet" type="text/css" href="/assets/home/hetong/css/hetong_mx.css?v={:C('STATIC_VERSION')}" />-->
+    <link href="/assets/home/basicinfo/css/desgin.css?v={:C('STATIC_VERSION')}" rel="stylesheet"
+          type="text/css"/>
+    <link rel="stylesheet" href="/assets/home/orderstat/css/config.css?v={:C('STATIC_VERSION')}">
+    <!--<link href="//assets.qizuang.com/plugins/datetimepicker/bootstrap-datetimepicker.css" rel="stylesheet">-->
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <style type="text/css">
+        .control-label{
+            width: 110px;
+        }
+        #all_list{
+            margin-top: 10px;
+        }
+        #all_list tr th:nth-child(1){
+            width: 20%;
+        }
+        #all_list tr th:nth-child(2){
+            width: 30%;
+        }
+        #all_list tr th:nth-child(3){
+            width: 30%;
+        }
+        #all_list tr th:nth-child(4){
+            width: 20%;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <h4><a href="/score/signrule/">签到现金券设置</a> &emsp;&gt;&emsp;{$actionName}签到规则</h4>
+                    </div>
+                    <div class="box-body">
+                        <div><h4>规则设置</h4></div>
+
+                        <form class="form-horizontal" onsubmit="return false" id="formdata">
+                            <div class="box-body">
+	                            <if condition="$id gt 0">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">
+                                        规则id:
+                                    </label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="id" id="id" class="form-control" disabled
+                                               value="{$data.id}">
+                                    </div>
+                                </div>
+	                            </if>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">
+                                        <i style="color: red;margin-right: 5px;">*</i>规则名称:
+                                    </label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="id" class="form-control" value="{$data.name}"
+                                               id="name" placeholder="请输入" maxlength="48">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">开始时间:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" name="time_start" class="form-control datepicker" id="start_time"
+                                               placeholder="请选择"  value="{$data.start_time}">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="row">
+
+                            <div class="col-xs-4">
+                                <div class="clearfix">
+                                    <h4 class="pull-left">现金券设置</h4>
+                                    <button class="btn btn-info pull-right" id="addDay">添加天数</button>
+                                </div>
+                                <h5>周期：<span id="all-day">{$data.circle}</span>天 &emsp; 总现金券：<span id="all-integral">{$data.score}</span>现金券</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <table class="table table-hover" id="all_list">
+                                    <tr>
+                                        <th>连续天数</th>
+                                        <th><i style="color: red;margin-right: 5px;">*</i>正常现金券</th>
+                                        <th>额外现金券</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <foreach name="data.rules" item="vo">
+
+                                        <tr class="list">
+                                            <td>{$key+1}</td>
+                                            <td><input type="text" class="form-control" name="common" oninput="count()"
+                                                       value="{$vo.common_score}" onkeyup="regNum(this)"></td>
+                                            <td><input type="text" class="form-control" name="extra" oninput="count()"
+                                                       value="{$vo.extra_score}"  onkeyup="regNum1(this)"></td>
+                                            <td><a href="javascript:;" class="btnDelete">删除</a></td>
+                                        </tr>
+                                    </foreach>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-info btn-sm mr10" data-id="{$data.id}" id="btnSave">保存</button>&emsp;
+                            <button class="btn btn-default btn-sm" id="back">返回</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h4>说明：</h4>
+        <p>用户连续签到一定天数，获取对应现金券</p>
+        <p>额外标识：连续签到一定天数，除获取正常现金券奖励，还能获取额外现金券奖励</p>
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/css/bootstrap/js/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+
+        function getDay(num, str) {
+            var today = new Date();
+            var nowTime = today.getTime();
+            var ms = 24*3600*1000*num;
+            today.setTime(parseInt(nowTime + ms));
+            var oYear = today.getFullYear();
+            var oMoth = (today.getMonth() + 1).toString();
+            if (oMoth.length <= 1) oMoth = '0' + oMoth;
+            var oDay = today.getDate().toString();
+            if (oDay.length <= 1) oDay = '0' + oDay;
+            return oYear + str + oMoth + str + oDay;
+        }
+
+        var isAdd = true;
+        if($("#id").val()){
+            isAdd = false;
+            if($("#start_time").val() == '暂未设置'){
+                $("#start_time").val('')
+            }
+
+        }
+
+        if(isAdd){
+            for(var i=0;i<7;i++){
+                allHtml(i+1)
+            }
+            $("#all-day").html(7)
+            $("#all-integral").html(0);
+        }
+
+        var startDay= getDay('0', '-')
+
+        /*初始化插件*/
+        $('.datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            weekStart: 1,
+            todayHighlight: 1,
+            todayBtn: false,  // 今天按钮
+            minView: 0,
+            autoclose: true, // 选择完关闭
+            language: 'zh-CN',
+            startDate:startDay
+        })
+
+        function toTimeStamp(time) {
+            if (time != undefined) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+
+        var listLength = 0;
+
+        //添加行
+        $("#addDay").click(function () {
+            listLength = $("#all_list tr").length;
+            allHtml(listLength);
+            $("#all-day").html(parseInt($("#all-day").html())+1)
+        })
+
+        //删除行
+        $("#all_list").on("click", ".btnDelete", function () {
+            listLength = $("#all_list tr").length;
+            console.log(listLength)
+            if(listLength >2){
+                $(this).closest('tr').remove();
+                sortTrNumber();
+                $("#all-day").html($("#all-day").html()-1)
+            }else {
+                layer.msg("天数必须≥1天")
+            }
+
+        })
+
+        //序号处理
+        function sortTrNumber() {
+            $('#all_list tr').each(function (index, obj) {
+                $(obj).find("td:first-child").html(index);
+            });
+        }
+
+        //html 处理
+        function allHtml(i) {
+            $("#all_list").append(
+                "<tr class=\"list\">\n" +
+                "<td>" + i + "</td>\n" +
+                "<td><input type=\"text\" class=\"form-control\" value=\"\" name=\"common\" oninput=\"count()\" onkeyup=\"regNum(this)\"></td>\n" +
+                "<td><input type=\"text\" class=\"form-control\" value=\"\" name=\"extra\" oninput=\"count()\"  onkeyup=\"regNum1(this)\"></td>\n" +
+                "<td><a href=\"javascript:;\" class=\"btnDelete\">删除</a></td>\n" +
+                "</tr>"
+            )
+        }
+
+        //天数 、现金券
+        function count(){
+            var allDay = $("#all_list tr").length-1;
+            $("#all-day").html(allDay);
+
+            var allIntegral = 0;
+            $("#all_list tbody tr").each(function (i,t) {
+                if(i>0){
+                    if(parseInt($(this).find("input[name=common]").val())){
+                        allIntegral += parseInt($(this).find("input[name=common]").val())
+                    }
+                    if(parseInt($(this).find("input[name=extra]").val())){
+                        allIntegral += parseInt($(this).find("input[name=extra]").val())
+                    }
+                }
+                $("#all-integral").html(allIntegral);
+            })
+        }
+
+        $("#btnSave").click(function () {
+            var data = {};
+            var rule = {};
+            if(!isAdd){
+                rule.rule_id = $("#id").val();
+            }
+            rule.type = 1;
+            if($("#name").val()){
+                rule.name = $("#name").val();
+            }else {
+                layer.msg("请输入规则名称")
+                return false
+            }
+            rule.start_time = $("#start_time").val();
+            data.rule = rule;
+
+            var rules = new Array();
+            var result = true;
+            $(".list").each(function (index) {
+                var ayyay = {};
+                if(!!$(this).find("input[name=common]").val()){
+                    var common = $(this).find("input[name=common]").val();
+                }else {
+                    layer.msg("请输入正常现金券值");
+                    result = false;
+                    return false
+                }
+
+                var extra = $(this).find("input[name=extra]").val();
+                ayyay.common_score = common;
+                ayyay.extra_score = extra;
+                rules[index] = ayyay;
+            })
+            if(!result){
+                return false
+            }
+            data.rules = rules;
+            // console.log(data);
+
+            $.ajax({
+                url: '/score/saveSignRule/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data,
+                success: function (res) {
+                    // console.log('进了吗', res)
+                    if (res.error_code == 1) {
+                        layer.msg('保存成功');
+                        goList();
+                    }else {
+                        layer.msg(res.error_msg);
+                    }
+                },
+                error: function (res) {
+                    layer.msg('服务器异常');
+                }
+            })
+        })
+
+        $("#back").click(function () {
+            if(isAdd){
+                layer.confirm('是否放弃添加签到规则？', {
+                    btn: ['确认','取消'] //按钮
+                }, function(){
+                    goList();
+                });
+            }else {
+                goList();
+            }
+
+        })
+
+        function goList() {
+            window.location = '/score/signrule/'
+        }
+        //正整数验证
+        function regNum1(obj){
+            if(obj.value.length==1){
+                obj.value=obj.value.replace(/[^0-9]/g,'')
+            }else{
+                obj.value=obj.value.replace(/\D/g,'')
+            }
+        }
+
+        function regNum(obj){
+            if(obj.value.length==1){
+                obj.value=obj.value.replace(/[^1-9]/g,'')
+            }else{
+                obj.value=obj.value.replace(/\D/g,'')
+            }
+        }
+
+    </script>
+</block>

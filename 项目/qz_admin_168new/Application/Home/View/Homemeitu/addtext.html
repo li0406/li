@@ -1,0 +1,135 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>{$title}-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>装修效果图文字管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/homemeitu">装修效果图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <form class="form-horizontal" id="form" method="post" action="">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">标题：</label>
+                        <div class="col-sm-4">
+                            <input type="text" name="search" id="search">
+                            <input type="hidden" name="title" id="title">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">链接：</label>
+                        <div class="col-sm-4">
+                            <input class="form-control" id="url" name="url">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">排序：</label>
+                        <div class="col-sm-1">
+                            <input class="form-control" id="sort" name="sort">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <button type="submit" id="submit" class="btn btn-success button">保存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back()"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                    </div>
+                </div>
+            </form>
+            <!-- E form -->
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#search").select2({
+                allowClear: true,
+                minimumInputLength: 1,
+                maximumInputLength:10,
+                query: function(query) {
+                    var result = null;
+                    $.ajax({
+                        url: '/homemeitu/gettexttitle',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            query: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text:data.data[i].name,
+                                    type:data.data[i].type
+                                });
+                            }
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+
+            $("#search").change(function(event) {
+                var id = $("#search").select2("data").id;
+                var type = $("#search").select2("data").type;
+                var url = "";
+                if("location" == type){
+                    url = "l"+ id +"f0h0c0";
+                }
+                if("fengge" == type){
+                    url = "l0f"+ id +"h0c0";
+                }
+                if("huxing" == type){
+                    url = "l0f0h"+ id +"c0";
+                }
+                document.getElementById("url").value = "meitu.{:C('QZ_YUMING')}/list-"+ url;
+            });
+
+            $("#submit").click(function(event) {
+                if(trim($("input[name=search]").val()) === ''){
+                    $("input[name=search]").focus();
+                    $("input[name=search]").addClass('focus');
+                    alert("请填写标题~ ");
+                    return false;
+                }
+
+                var title = $("#search").select2("data").text;
+                document.getElementById("title").value = title;
+
+                if(trim($("input[name=url]").val()) === ''){
+                    $("input[name=url]").focus();
+                    $("input[name=url]").addClass('focus');
+                    alert("请填写链接~ ");
+                    return false;
+                }
+                if(trim($("input[name=sort]").val()) === ''){
+                    $("input[name=sort]").focus();
+                    $("input[name=sort]").addClass('focus');
+                    alert("请填写位置~ ");
+                    return false;
+                }
+
+                $("#form").submit();
+            });
+        })
+    </script>
+</block>

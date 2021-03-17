@@ -1,0 +1,185 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>微信数据录入 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<section class="content-header">
+	<h1><small class="ftjz">微信数据录入</small></h1>
+</section>
+<section class="content">
+	<div class="box">
+		<div class="box-header">
+			<div class="col-xs-6 no-padding">
+				<span class="pull-left lh-34">选择时间：</span>
+				<div class="col-xs-4">
+					<input name="add_time_start" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}" value="{$Think.get.add_time_start}">
+				</div>
+				<div class="col-xs-4">
+					<input name="add_time_end" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}"  value="{$Think.get.add_time_end}">
+				</div>
+				<div class="col-xs-2">
+					<button id="search" data-triger="#search"  class="form-control btn btn-primary"><i class="fa fa-fw fa-search"></i>查询</button>
+				</div>
+			</div>
+			<div class="from-item pull-right">
+				<button type="button" class="btn btn-primary add-data" >录入数据</button>
+			</div>
+			<!-- Modal 弹窗 -->
+			<div class="modal fade add-data-modal"  id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+					<div class="modal-header no-border">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title text-center" id="myModalLabel">录入数据</h4>
+					</div>
+				    <div class="modal-body">
+				       	<h5 class="text-center  no-border">当前粉丝数为 <span style="color: red;" class="current-data"></span></h5>
+				        <div class="col-xs-12 xzfs no-padding">
+							<span class="col-xs-4 lh-34 text-right">新增粉丝数</span>
+							<div class="col-xs-6">
+								<input type="text" class="form-control increased-data">
+							</div>
+						</div>
+						<div class="col-xs-12 mgg">
+							<div class="col-xs-10">
+								<div class="text-right h6">上次录入时间 <span class="timeys last-time"></span></div>
+							</div>
+						</div>
+				    </div>
+					<div class="modal-footer no-border">
+						<div class="col-xs-10">
+							<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-info btn-primary increased-data-btn">确定</button>
+						</div>
+					</div>
+			    </div>
+			  </div>
+			</div>
+		</div>
+	</div>
+	<div class="box">
+		<div class="box-header">
+			<h4 class="sjlb"><small>数据列表</small></h4>
+		</div>
+		<div class="box-body">
+			<table id="" class="table table-bordered table-hover dataTable no-footer" role="grid">
+				<thead>
+					<tr role="row">
+						<th class="" tabindex="0">时间</th>
+						<th class="" tabindex="0">当前粉丝数</th>
+						<th class="" tabindex="0">新增粉丝数</th>
+						<th class="" tabindex="0">操作人</th>
+					</tr>
+				</thead>
+				<tbody>
+					<volist name="main.info.list" id="vi">
+						<tr role="row" class="odd">
+							<td><span>{$vi.add_time}</span></td>
+							<td><span>{$vi.current_follower}</span></td>
+							<td><span>{$vi.increased_follower}</span></td>
+							<td><span>{$vi.name}</span></td>
+						</tr>
+					</volist>
+				</tbody>
+			</table>
+		</div>
+		<div class="box-footer text-center no-border">
+			{$main.info.page}
+		</div>
+	</div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+	$(function(){
+		// 时间选择
+		$(".datepicker").datetimepicker({
+			startView:2,
+			minView:'decade',
+			format:"yyyy-mm-dd",
+			autoclose:true,
+			pickerPosition: "bottom-left"
+		});
+
+		//搜索按钮
+		$('#search').click(function(event) {
+			window.location.href = '/market/wenxinfollower/?add_time_start=' + $('input[name=add_time_start]').val() + '&add_time_end=' + $('input[name=add_time_end]').val();
+		});
+
+		//录入数据模态框
+		$('.add-data').click(function(event) {
+			$.ajax({
+                url: '/market/addwenxinfollower/',
+                type: 'GET',
+                dataType: 'JSON'
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    if (data.data == null) {
+                        $('.add-data-modal .current-data').text(0);
+                        $('.add-data-modal .last-time').text('暂无记录');
+                        $('.add-data-modal').modal('show');
+                    } else {
+                        $('.add-data-modal .current-data').text(parseInt(data.data.current_follower) + parseInt(data.data.increased_follower));
+                        $('.add-data-modal .last-time').text(data.data.add_time);
+                        $('.add-data-modal').modal('show');
+                    }
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+		});
+
+		//录入数据
+		$('.increased-data-btn').click(function(event) {
+			$.ajax({
+                url: '/market/addwenxinfollower/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                	increased_follower:$('.increased-data').val()
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                	alert('录入成功');
+                	window.location.href = '/market/wenxinfollower/';
+                }else{
+                    alert(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请联系技术部门！');
+            })
+		});
+	})
+</script>
+</block>

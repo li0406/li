@@ -1,0 +1,321 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/comment/font/font-awesome.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/comment/css/ht-appraise.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/swiper-3.3.1.min.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/raty/jquery.raty.min.js?v={:C('STATIC_VERSION')}"></script>
+
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Comment:header" />
+        <div class="ht-main">
+            <table class="ht-appraise" border="0" cellspacing="0" cellpadding="0">
+                <tr class="ht-appraise-tit">
+                    <td>用户名</td>
+                    <td class="main">评价详情</td>
+                    <td>发布时间</td>
+                    <td>是否回复</td>
+                    <td>操作</td>
+                </tr>
+                <volist name="info.commnets" id="vo">
+                <if condition="$vo['rptxt'] NEQ ''">
+                <tr>
+                <else/>
+                <tr class="ht-appraise-list">
+                </if>
+                    <td>{$vo.name}</td>
+                    <td class="main">
+                        <p class="text-left">
+                            <em>{$vo.text}</em>
+                            <span class="read-detail" data-id="{$vo.id}">查看详情</span>
+                        </p>
+                    </td>
+                    <td>{$vo.time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <if condition="$vo['rptxt'] NEQ ''">
+                            已回复
+                        <else/>
+                            -
+                        </if>
+                    </td>
+                    <td class="index-btn">
+                        <a class="blue reply" data-id="{$vo.id}" href="javascript:void(0)">回复</a>
+                        <if condition="$vo['rptxt'] NEQ ''">
+                        <a class="red del" data-id="{$vo.id}"  href="javascript:void(0)">删除回复</a>
+                        </if>
+                        <if condition="$vo['company_recommend'] EQ 1">
+                            <a class="blue recommend fa fa-exclamation-circle" data-id="{$vo.id}" href="javascript:void(0)">推荐
+                                <div class="tishi01">
+                                    <div class="xiangxiems">点击推荐之后,此条用户评论会在前台装修公司频道,装修公司列表中显示,如下图所示:</div>
+                                    <div class="tupian"></div>
+                                </div>
+                            </a>
+                        <else />
+                            <a class="blue unrecommend" data-id="{$vo.id}" href="javascript:void(0)">取消推荐</a>
+                        </if>
+                    </td>
+                    <input class="ht-txt" type="hidden" value="{$vo.text}" />
+                </tr>
+                <if condition="$vo['rptxt'] NEQ ''">
+                  <tr class="ht-appraise-list ht-appraise-rptxt">
+                    <td colspan="5">
+                      <i>回复:</i>
+                      <p>{$vo.rptxt}</p>
+                    </td>
+                  </tr>
+                </if>
+                </volist>
+            </table>
+            {$info.page}
+        </div>
+        <div class="clearfloat"></div>
+    </div>
+    <!--查看详情弹窗-->
+    <div class="detail-mask">
+        <div class="detail-box">
+            <div class="detail-top">评价详情</div>
+            <p class="detail-comment"></p>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+            <button type="button" class="close-read">关闭</button>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript" src="/assets/common/js/swiper-3.3.1.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".reply").click(function(event) {
+        var _this = $(this);
+        var id = _this.attr("data-id");
+        $.ajax({
+            url: '/recomment/',
+            type: 'GET',
+            dataType: 'JSON',
+            data:{
+                id:id
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                 $("body").append(data.data);
+              }else{
+                $.pt({
+                  target: _this,
+                  content:data.info,
+                  width: 'auto'
+                });
+              }
+          })
+          .fail(function(xhr) {
+              $.pt({
+                  target: _this,
+                  content:"发生了未知不到的错误,请稍后再试！",
+                  width: 'auto'
+              });
+          });
+    });
+
+    $(".del").click(function(event) {
+        if(confirm("确定删除吗?")){
+            var _this = $(this);
+            var id = _this.attr("data-id");
+            $.ajax({
+                url: '/delcomment/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    id:id
+                }
+              })
+              .done(function(data) {
+                  if(data.status == 1){
+                     window.location.href= window.location.href;
+                  }else{
+                    $.pt({
+                      target: _this,
+                      content:data.info,
+                      width: 'auto'
+                    });
+                  }
+              })
+              .fail(function(xhr) {
+                  $.pt({
+                      target: _this,
+                      content:"发生了未知不到的错误,请稍后再试！",
+                      width: 'auto'
+                  });
+              });
+          }
+    });
+    //推荐评论
+    $(".recommend").on('click',function () {
+        if(confirm("确定推荐此条评论吗?")){
+            var _this = $(this);
+            var id = _this.attr("data-id");
+            $.ajax({
+                url: '/comment/recommend/',
+                type: 'POST',
+                dataType: 'JSON',
+                data:{
+                    id:id
+                }
+            })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href= window.location.href;
+                    }else{
+                        $.pt({
+                            target: _this,
+                            content:data.info,
+                            width: 'auto'
+                        });
+                    }
+                })
+                .fail(function(xhr) {
+                    $.pt({
+                        target: _this,
+                        content:"发生了未知不到的错误,请稍后再试！",
+                        width: 'auto'
+                    });
+                });
+        }
+    });
+    //取消推荐评论
+    $(".unrecommend").on('click',function () {
+        if(confirm("确定取消推荐此条评论吗?")){
+            var _this = $(this);
+            var id = _this.attr("data-id");
+            $.ajax({
+                url: '/comment/recommend',
+                type: 'GET',
+                dataType: 'JSON',
+                data:{
+                    id:id
+                }
+            })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href= window.location.href;
+                    }else{
+                        $.pt({
+                            target: _this,
+                            content:data.info,
+                            width: 'auto'
+                        });
+                    }
+                })
+                .fail(function(xhr) {
+                    $.pt({
+                        target: _this,
+                        content:"发生了未知不到的错误,请稍后再试！",
+                        width: 'auto'
+                    });
+                });
+        }
+    });
+    //点击查看按钮
+    $(".read-detail").click(function () {
+        $(".swiper-wrapper").html("");
+        mySwiper.init();
+        $(".swiper-container .swiper-button-prev").addClass("hide");
+        var id = $(this).data("id");
+        $.ajax({
+            url: '/getcommentimgs',
+            method: "GET",
+            dataType: "JSON",
+            data: {
+                id: id
+            }
+        }).done(function (res) {
+            if (res.error_code == 1) {
+                $(".detail-comment").text(res.data.content);
+                $(".detail-mask").show();
+                if(res.data.imglist.length == 0){
+                    $(".swiper-container").hide();
+                }else{
+                    $(".swiper-container").show();
+                    if(res.data.imglist.length == 1){
+                        var html = '<div class="swiper-slide">\n' +
+                            '                        <img src="'+ res.data.imglist[0] +'?imageMogr2/thumbnail/360x" />\n' +
+                            '                    </div>'
+                        $(".swiper-wrapper").html(html);
+                        $(".swiper-pagination").hide();
+                        $(".swiper-button-prev").hide();
+                        $(".swiper-button-next").hide();
+                    }else{
+                        var html = '';
+                        $(".swiper-pagination").show();
+                        $(".swiper-button-prev").show();
+                        $(".swiper-button-next").show();
+                        $.each(res.data.imglist,function (index,item) {
+                            html += '<div class="swiper-slide">\n' +
+                                '                        <img src="'+ item +'?imageMogr2/thumbnail/360x" />\n' +
+                                '                    </div>'
+                            $(".swiper-wrapper").html(html)
+                        })
+                    }
+                }
+            } else {
+                alert(res.error_msg);
+            }
+        })
+            .fail(function (xhr) {
+                alert("未知错误，请刷新重试")
+            });
+    });
+    //评价弹框轮播
+    var mySwiper;
+    $(function(){
+        mySwiper = new Swiper('.swiper-container',{
+            // loop: true,
+            slidesPerView : 1,
+            observer:true,//修改swiper自己或子元素时，自动初始化swiper
+            observeParents:true,//修改swiper的父元素时，自动初始化swiper
+            pagination : '.swiper-pagination',
+            prevButton:'.swiper-button-prev',
+            nextButton:'.swiper-button-next',
+            onTouchStart:function(){
+                $(".swiper-container .swiper-button-prev").removeClass("hide");
+            },
+            onSlideChangeEnd:function (swiper) {    //判断是否为最后一张  是：隐藏前进按钮  否：显示前进按钮   >
+                if(swiper.isEnd){
+                    swiper.nextButton.css('display','none');
+                }else{
+                    swiper.nextButton.css('display','block');
+                }
+            },
+            onSlideChangeStart:function (swiper) {     //判断是否为第一张  是：隐藏后退按钮  否：显示后退按钮    <
+                if(swiper.isBeginning){
+                    swiper.prevButton.css('display','none');
+                }else{
+                    swiper.prevButton.css('display','block');
+                }
+            }
+        });
+    });
+    //关闭弹窗
+    $("body").on("click",".close-read",function () {
+        $(".detail-mask").hide();
+    })
+</script>
+</html>

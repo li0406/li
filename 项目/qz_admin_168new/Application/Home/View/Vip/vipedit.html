@@ -1,0 +1,559 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+<style>
+.lunBoLog {width:100%; height:100%; background: rgba(0,0,0,0.8);position: fixed; left:0px;top:0px;  z-index: 99999; display: none;}
+.win-box{width:800px; height:90%; background: #fff; margin:20px auto;}
+.win-head{overflow: hidden; border-bottom: 1px solid #DEDEDE; font-size:16px; padding:10px 0px; }
+.win-head span{padding:3px 10px;display: inline-block; cursor: pointer;}
+.win-body{padding:5px 10px; height:calc(100% - 105px); overflow: auto}
+.chose-box{margin-bottom: 20px; display: none;}
+</style>
+</block>
+<block name="content">
+<section class="content">
+    <div class="row">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">会员信息</h3>
+            </div>
+            <div class="box-body">
+                <div class="col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <form id="myForm" class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">会员ID:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" disabled="disabled" class="form-control" value="{$info.id}" />
+                                    </div>
+                                    <label class="col-sm-2 control-label">公司名称:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" disabled="disabled" class="form-control" value="{$info.jc}" />
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a href="javascript:void(0)" title="点击编辑" class="fa fa-pencil-square-o"></a>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">所在城市:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" disabled="disabled" class="form-control" value="{$info.cname}" />
+                                    </div>
+                                    <label class="col-sm-2 control-label">销售工号:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" disabled="disabled" class="form-control" value="{$info.saler}" disabled="disabled" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">接单人:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="jd_name1" class="form-control" value="{$info.jd_tel_name_1}" disabled="disabled" />
+                                    </div>
+                                    <label class="col-sm-2 control-label">手机:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="jd_tel1" class="form-control" value="{$info.jd_tel_1}" disabled="disabled" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">接单人:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="jd_name2" class="form-control" value="{$info.jd_tel_name_2}" disabled="disabled" />
+                                    </div>
+                                    <label class="col-sm-2 control-label">手机:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="jd_tel2" class="form-control" value="{$info.jd_tel_2}" disabled="disabled" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">假会员:</label>
+                                    <div class="col-sm-3" style="margin-top: 7px;">
+                                        <if condition="$info['fake'] EQ 1">
+                                        <input type="checkbox" name="fake" checked="checked" disabled="disabled"> <else />
+                                        <input type="checkbox" name="fake" disabled="disabled"> </if>
+                                    </div>
+                                    <label class="col-sm-2 control-label">轮播：</label>
+                                    <div class="col-sm-3">
+                                        <button type="button" class="btn btn-warning btn-flat lunBoLogBtn">
+                                            <i class="fa fa-bars"></i>&nbsp;查看轮播展示日志
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-2 col-sm-offset-2">
+                                        <button id="btnSave" type="button" class="btn btn-success" disabled="disabled" style="display: none;"><i class="fa fa-floppy-o"></i> 保存</button>
+                                        <input type="hidden" value="{$info.id}" name="company_id" />
+                                    </div>
+                                    <div class="col-sm-6 err-msg">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box contract_box">
+            <div class="box-header with-border">
+                <h3 class="box-title">会员时间</h3>
+            </div>
+            <div class="box-body">
+                <div class="col-sm-10">
+                    <div class="panel panel-default tmp">
+                        <volist name="list" id="vo" key="allkey">
+                        <div id="myFormDate" class="form-horizontal">
+                            <div class="panel-heading">
+                                <div class="from-group">
+                                    <label class="col-sm-2 control-label">总合同时间:</label>
+                                    <div class="col-sm-2">
+                                        <input id="allbegin" type="text" class="form-control datepicker" placeholder="总合同开始时间" value="{$vo.start_time}" disabled="disabled" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                                    <div class="col-sm-2">
+                                        <input id="allend" type="text" class="form-control datepicker" placeholder="总合同结束时间" value="{$vo.end_time}" disabled="disabled" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: left;" id="allday">{$vo.day|default=0}天</label>
+                                </div>
+                                <br style="clear: both;" />
+                            </div>
+                            <volist name="vo.item" id="v" key="k">
+                            <div class="panel-body">
+                                <div class="panel panel-default">
+                                     <div class="panel-heading">
+                                        本次合同
+                                        <a href="javascript:void(0)" class="pull-right prev_contract" title="合同预览" data-id="{$v.id}">预览</a>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <form id="form_{$v.id}">
+                                            <label class="col-sm-2 control-label">本次合同时间:</label>
+                                            <div class="col-sm-2">
+                                                <input id="begin" type="text" class="form-control datepicker editor" placeholder="本次合同开始时间" name="begin" value="{$v.start_time}" disabled="disabled"  />
+                                            </div>
+                                            <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                                            <div class="col-sm-2">
+                                                <input id="end" type="text" class="form-control datepicker editor" placeholder="本次合同结束时间" name="end" value="{$v.end_time}" disabled="disabled"  />
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <select class="form-control" name="cooperationType" disabled="disabled" >
+                                                    <volist name="cooperationType" id="vo">
+                                                        <if condition="$v['cooperation_type'] EQ $key">
+                                                            <option value="{$key}" selected="selected">{$vo}</option>
+                                                            <else />
+                                                            <option value="{$key}">{$vo}</option>
+                                                        </if>
+                                                    </volist>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <select class="form-control editor" name="viptype" disabled="disabled" >
+                                                    <option value="">请选择</option>
+                                                    <volist name="viptype" id="voo">
+                                                    <if condition="$v['viptype'] EQ $key">
+                                                    <option value="{$key}" selected="selected">{$voo}</option>
+                                                    <else />
+                                                    <option value="{$key}">{$voo}</option>
+                                                    </if>
+                                                   </volist>
+                                                </select>
+                                            </div>
+                                            <label class="col-sm-1 control-label" style="text-align: left;" id="day">{$v.day|default=0}天</label>
+                                            <if condition="$v['editMark'] EQ 1">
+                                            <div class="col-sm-1">
+                                                <button  title="保存" type="button" class="btn  btn-success btn-xs" style="display: none; margin-top: 5px;" data-source="{$v.id}" data-type="1"><i class="fa fa-floppy-o"></i> 保存</button>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <a href="javascript:void(0)" style="margin-top: 10px;" data-key="{$v.id}" title="点击编辑" class="fa fa-pencil-square-o"></a>
+                                            </div>
+                                            </if>
+                                            </form>
+                                        </div>
+                                        <volist name="v.child" id="item" key="j">
+                                        <switch name="item.type">
+                                        <case value="3">
+                                        <div class="form-group">
+                                            <form id="form_{$item.id}">
+                                            <label class="col-sm-2 control-label">{$j}.&nbsp;多倍:</label>
+                                            <div class="col-sm-2">
+                                                <input id="start_{$item.id}"  type="text" class="form-control datepicker" placeholder="多倍开始时间" value="{$item.start_time}" disabled="disabled" />
+                                            </div>
+                                            <label class="col-sm-1 control-label"  style="text-align: center;">至:</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control datepicker editor" placeholder="多倍结束时间" name="end" value="{$item.end_time}" disabled="disabled" data-index="{$item.id}" />
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <select class="form-control editor" name="viptype" disabled="disabled">
+                                                    <option value="">请选择</option>
+                                                    <foreach name="viptype" item="h" key="j">
+                                                    <if condition="$item['viptype'] EQ $j">
+                                                    <option value="{$j}" selected="selected">{$h}</option>
+                                                    <else />
+                                                    <option value="{$j}">{$h}</option>
+                                                    </if>
+                                                    </foreach>
+                                                </select>
+                                            </div>
+                                            <label class="col-sm-1 control-label day" style="text-align: left;">{$item.day|default=0}天</label>
+                                            <div class="col-sm-1">
+                                                <button  title="保存" type="button" class="btn  btn-success btn-xs" style="display: none; margin-top: 5px;" data-id="{$item.id}" data-type="3"><i class="fa fa-floppy-o"></i> 保存</button>
+                                            </div>
+                                            <if condition="$item['editMark'] EQ 1">
+                                            <div class="col-sm-1">
+                                                <a href="javascript:void(0)" style="margin-top: 10px;" data-key="{$item.id}" title="点击编辑" class="fa fa-pencil-square-o"></a>
+                                            </div>
+                                            </if>
+                                            </form>
+                                        </div>
+                                        </case>
+                                        <case value="4|6">
+                                        <div>
+                                        <form id="form_{$item.id}">
+                                        <div class="form-group ">
+                                            <label class="col-sm-2 control-label">{$j}.&nbsp;暂停:</label>
+                                            <div class="col-sm-2">
+                                                <input id="start_{$item.id}"  type="text" class="form-control datepicker" placeholder="暂停开始时间" value="{$item.start_time}" disabled="disabled" />
+                                            </div>
+                                            <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control datepicker editor" placeholder="暂停结束时间" name="end" value="{$item.end_time}" disabled="disabled" data-index="{$item.id}"  />
+                                            </div>
+                                            <label class="col-sm-1 control-label day" style="text-align: left;">{$item.day|default=0}天</label>
+                                        </div>
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label">延期天数</label>
+                                            <div class="col-sm-2">
+                                                <input id="pause_delayday_{$item.id}" name="delay_day"  type="text" class="form-control editor" placeholder="天数" value="{$item.delay_day}" disabled="disabled"/>
+                                            </div>
+                                            <label class="col-sm-1 control-label">延期至</label>
+                                            <div class="col-sm-2">
+                                                <input id="pause_delay_{$item.id}" name="delay_time" type="text" class="form-control datepicker editor" placeholder="延期到期时间" value="{$item.delay_time}" disabled="disabled" />
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <button  title="保存" type="button" class="btn  btn-success btn-xs" style="display: none; margin-top: 5px;" data-source="{$item.id}" data-type="4"><i class="fa fa-floppy-o"></i> 保存</button>
+                                            </div>
+                                            <if condition="$item['editMark'] EQ 1">
+                                            <div class="col-sm-1">
+                                                <a href="javascript:void(0)" style="margin-top: 10px;" data-key="{$item.id}" title="点击编辑" class="fa fa-pencil-square-o"></a>
+                                            </div>
+                                            </if>
+                                        </div>
+                                        </form>
+                                        </div>
+                                        </case>
+                                        </switch>
+                                        </volist>
+                                        <br style="clear: both; display: none;" />
+                                    </div>
+                                    <div class="panel-heading">
+                                        广告报备
+                                    </div>
+                                    <div class="panel-body">
+                                        <form id="form_adv_{$v.company_id}_{$allkey}_{$k}">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">投放位置:</label>
+                                            <div class="col-sm-2">
+                                                <select name="type" class="form-control editor" disabled="disabled" data-index = "{$v.company_id}_{$allkey}_{$k}">
+                                                    <if condition="$v['report']['flag'] EQ 0">
+                                                    <option value="1"  >老站</option>
+                                                    <option value="2" selected="selected">新站</option>
+                                                    <else/>
+                                                    <option value="1"  selected="selected">老站</option>
+                                                    <option value="2" >新站</option>
+                                                    </if>
+                                                </select>
+                                            </div>
+                                            <if condition="$v['reportEditMark'] EQ 1">
+                                            <div class="col-sm-1 pull-right">
+                                                <a href="javascript:void(0)" style="margin-top: 10px;" data-key="adv_{$v.company_id}_{$allkey}_{$k}"  title="点击编辑" class="fa fa-pencil-square-o"></a>
+                                            </div>
+                                            <div class="col-sm-1 pull-right">
+                                                <button  title="保存" type="button" class="btn  btn-success btn-xs" style="display: none; margin-top: 5px;" data-source="{$v.company_id}_{$allkey}_{$k}" data-id="{$v.company_id}" data-type="5" data-date="{$v.start_time}" data-parent="{$v.id}"><i class="fa fa-floppy-o"></i> 保存</button>
+                                            </div>
+                                            </if>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">轮显:</label>
+                                            <div class="col-sm-2">
+                                               <input type="text" class="form-control editor" name="lunbo" placeholder="轮显报备时长" value="{$v['report']['1'][0]['total']}" disabled="disabled"/>
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: center;">已使用时间: {$vo.advShowLog}天</label>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">通栏A:</label>
+                                            <div class="col-sm-2">
+                                               <input type="text" class="form-control editor" name="tl_A" placeholder="通栏A报备时长" value="{$v['report']['2'][1]['total']}" disabled="disabled" />
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$v['report']['2'][1]['use_day']|default=0}天</label>
+                                            <label class="col-sm-2 control-label">通栏B:</label>
+                                            <div class="col-sm-2">
+                                               <input type="text" class="form-control editor" name="tl_B" placeholder="通栏B报备时长" value="{$v['report']['2'][2]['total']}" disabled="disabled"/>
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$v['report']['2'][2]['use_day']|default=0}天</label>
+                                        </div>
+                                        <div class="form-group" >
+                                            <label class="col-sm-2 control-label">通栏C:</label>
+                                            <div class="col-sm-2">
+                                               <input type="text" class="form-control editor" name="tl_C" placeholder="通栏C报备时长" value="{$v['report']['2'][3]['total']}" disabled="disabled" />
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$v['report']['2'][3]['use_day']|default=0}天</label>
+                                            <if condition="$v['report']['flag'] EQ 0">
+                                            <div class="adv-item"  style="display: none;">
+                                            <else/>
+                                            <div class="adv-item" >
+                                            </if>
+                                            <label class="col-sm-2 control-label">通栏D:</label>
+                                            <div class="col-sm-2">
+                                               <input type="text" class="form-control editor" name="tl_D" placeholder="通栏D报备时长" value="{$v['report']['2'][4]['total']}" disabled="disabled" />
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: center;">已使用时间:{$v['report']['2'][4]['use_day']|default=0}天</label>
+                                            </div>
+                                        </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                           </volist>
+                        </div>
+                       </volist>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">合同预览</h4>
+                </div>
+                <div class="modal-body" style="max-height: 600px; overflow-y:auto;">
+                    <p>One fine body&hellip;</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="lunBoLog">
+        <div class="win-box">
+            <div class="win-head"><span class="pull-left win-title">日志详情</span></div>
+            <div class="win-body" style="overflow-y:visible;">
+                <iframe src="" width="100%" height="100%" id="lunBoLogBox" frameborder="0" scrolling="no"></iframe>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="module" name="module" value="">
+                <button type="button" class="btn btn-primary hideLoading" id="saveBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(function() {
+
+    $('.lunBoLogBtn').click(function(event){          
+        $(".lunBoLog").fadeIn();
+        $("#lunBoLogBox",parent.document.body).attr("src","/advbanner/lunbolog?companyid="+{$info.id})
+    });
+
+    $('#saveBtn').click(function(){     
+        $(".lunBoLog").fadeOut();
+    });
+
+
+    $(".datepicker.editor").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var index = $(ev.target).attr("data-index");
+        var start = $("#start_"+index).val();
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime()) - 8*3600*1000;
+        if (endTime < startTime) {
+            alert("多倍结束时间不能小于开始时间");
+            return false;
+        }
+        var offset = endTime - startTime;
+        var days = Math.floor(offset/(24*3600*1000))+1;
+        $(ev.target).parents("#form_" + index).find(".day").html(days+"天");
+    });;
+
+    $("#myForm a").click(function(event) {
+        $("#myForm [name *= jd_],#myForm button,#myForm input[type=checkbox]").attr("disabled", false);
+        $("#myForm button").show();
+    });
+
+    $("select[name=type]").change(function(event) {
+            var parent = $(this).parents("#form_adv_"+$(this).attr("data-index"));
+
+            if ($(this).val() == 2) {
+                $(".adv-item",parent).hide();
+            }else{
+                 $(".adv-item",parent).show();
+            }
+    });
+
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var data = $("#myForm").serializeArray();
+        $("#myForm .err-msg").html("");
+
+        data.push({
+            name: "fake",
+            value: $("input[name=fake]:checked").val() == "on" ? 1 : 0
+        });
+        $.ajax({
+                url: '/vip/extendinfo',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    _this.hide();
+                    $("#myForm [name *= jd_],#myForm input[type=checkbox]").attr("disabled", "disabled");
+                } else {
+                    $("#myForm .err-msg").html(data.errmsg);
+                }
+            })
+            .fail(function() {
+                $("#myForm .err-msg").html("发生异常,请稍后再试！");
+            });
+    });
+
+    $("#myFormDate .fa-pencil-square-o").click(function(event) {
+        var index = $(this).attr("data-key");
+        $(this).parents("#form_" + index).find(".editor").attr("disabled", false);
+        $(this).parents("#form_" + index).find(".btn-success").show();
+    });
+
+    $(".prev_contract").click(function(event) {
+        $.ajax({
+            url: '/vip/preview',
+            type: 'post',
+            dataType: 'JSON',
+            data: {id:$(this).attr("data-id")},
+        })
+        .done(function(data) {
+            $("#myModal .modal-body").html(data.tmp);
+            $("#myModal").modal();
+        });
+    });
+
+    $("#myFormDate .btn-success").click(function(event) {
+        var index = $(this).attr("data-source");
+        var type =  $(this).attr("data-type");
+        var _this = $(this);
+
+        switch(type){
+            case "1":
+            send_vip(index,_this);
+            break;
+            case "3":
+            send_multi(index,_this);
+            break;
+            case "4":
+            send_pause(index,_this);
+            break;
+            case "5":
+            send_advreport(index,_this);
+            break;
+        }
+    });
+
+    function send_vip (index,obj) {
+        var data = $("#form_" + index).serializeArray();
+        data.push({name:"id",value:index});
+        $.ajax({
+            url: '/vip/editvip/',
+            type: 'post',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                obj.hide();
+                $("#form_" + index).find("*:not(button)").attr("disabled","disabled");
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    }
+
+    function send_multi (index,obj) {
+        var data = $("#form_" + index).serializeArray();
+        data.push({name:"id",value:index});
+        $.ajax({
+            url: '/vip/editmulti/',
+            type: 'post',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                obj.hide();
+                $("#form_" + index).find("*:not(button)").attr("disabled","disabled");
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    }
+
+    function send_pause (index,obj) {
+        var data = $("#form_" + index).serializeArray();
+        data.push({name:"id",value:index});
+        $.ajax({
+            url: '/vip/editpause/',
+            type: 'post',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                obj.hide();
+                $("#form_" + index).find("*:not(button)").attr("disabled","disabled");
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    }
+
+    function send_advreport(index,_this) {
+        var data = $("#form_adv_" + index).serializeArray();
+        data.push({name:"date",value:_this.attr("data-date")});
+        data.push({name:"id",value:_this.attr("data-id")});
+        data.push({name:"contract_id",value:_this.attr("data-parent")});
+
+        $.ajax({
+            url: '/vip/editadvreport/',
+            type: 'post',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                _this.hide();
+                $("#form_adv_" + index).find("*:not(button)").attr("disabled","disabled");
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    }
+});
+</script>
+</block>

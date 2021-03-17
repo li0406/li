@@ -1,0 +1,220 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网精英设计师添加后台 - 控制台</title>
+</block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/homedesigner.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>精英设计师添加</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/homedesigner/">精英设计师管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="nav-tabs-custom">
+            <div class="row">
+                <div class="form-horizontal">
+                    <form id="homedesigner">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    设计师名字
+                                </label>
+                                <div class="col-sm-2">
+                                    <input type="text" id="search">
+                                </div>
+                                <div class="col-sm-1">
+                                    <input id="designerid" type="text" disabled class="form-control" placeholder="设计师ID">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    所在城市
+                                </label>
+                                <div class="col-sm-3">
+                                    <span id="city" type="text" disabled class="form-control"></span>
+                                </div>
+                                <if condition="in_array('000001',getMyCityIds())">
+                                    <div class="col-sm-1">
+                                        <button id="main" type="button" class="btn btn-info"><i class="fa fa-legal"></i>设为总站</button>
+                                    </div>
+                                </if>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    所在装修公司
+                                </label>
+                                <div class="col-sm-3">
+                                    <span id="company_name" type="text" disabled class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    设计师排序
+                                </label>
+                                <div class="col-sm-2">
+                                    <input type="text" class="form-control validate[required]" placeholder="设计师排序" name="sort">
+                                </div>
+                                <div class="col-sm-6 designer-error">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    是否有效
+                                </label>
+                                <div class="col-sm-2">
+                                    <select class="form-control" id="status">
+                                        <option value="1" selected>有效</option>
+                                        <option value="0">无效</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 designer-error">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <div class="col-sm-4"></div>
+                            <div class="col-sm-2">
+                                <button id="add" type="button" class="btn btn-success pull-right"><i class="fa fa-plus-circle"></i>增加
+                                </button>
+                                <a href="/homedesigner/">
+                                    <button type="button" class="btn btn-default pull-right"><i class="fa fa-mail-reply"></i>返回</button>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine_zh_CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/validation/js/jquery.validationEngine.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // 自定义参数调用
+            $('#homedesigner').validationEngine('attach', {
+              promptPosition: 'centerRight',
+              autoHidePrompt: true,
+              autoHideDelay: '1000',
+              scroll: true
+            });
+
+            $(".form_datetime").datepicker({
+                format:"yyyy-mm-dd",
+                minViewMode:0
+            });
+
+            $('#main').click(function(){
+                if(confirm('确定要设为总站吗？')){
+                    $('#city').text('总站首页');
+                    $("#search").select2("data").cs = '000001';
+                }
+            })
+
+            $('#add').click(function(){
+                if(! $('#homedesigner').validationEngine('validate')){
+                    return false;
+                }
+                var data = new Object();
+                data.sort = $('input[name=sort]').val();
+                if('' == $('#designerid').val()){
+                    var d = dialog({
+                        title: '消息',
+                        content: '请选择设计师！！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    d.show();
+                    return false;
+                }
+                data.status = $("#status").val();
+                data.city_id = $("#search").select2("data").cs;
+                data.uid = $("#search").select2("data").id;
+                data.uname = $("#search").select2("data").text;
+                data.company_id = $("#search").select2("data").comid;
+
+                $.ajax({
+                    url: '/homedesigner/add/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        data:data
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        $("#errorinfo").empty();
+                        $("#errorinfo").text(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    $("#errorinfo").empty();
+                    $("#errorinfo").text('操作失败,请联系技术部门！');
+                })
+            })
+
+            $("#search").select2({
+                allowClear: true,
+                minimumInputLength: 1,
+                maximumInputLength:10,
+                query: function(query) {
+                    var result = null;
+                    $.ajax({
+                        url: '/homedesigner/getvipdesignerlist',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            condition: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            var company = data.data;
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text: data.data[i].name,
+                                    cs: data.data[i].cs,
+                                    cname:data.data[i].cname,
+                                    comid:data.data[i].comid,
+                                    company_name:data.data[i].company_name
+                                });
+                            }
+                            $('#search').change(function(){
+                                var cname = $("#search").select2("data").cname;
+                                var designerid = $("#search").select2("data").id;
+                                var company_name = $("#search").select2("data").company_name;
+                                $('#city').text(cname);
+                                $('#designerid').val(designerid);
+                                $('#company_name').text(company_name);
+                            })
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+        })
+    </script>
+</block>

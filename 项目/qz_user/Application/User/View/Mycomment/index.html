@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="User:resource" />
+    <link rel="stylesheet" href="/assets/common/css/step.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/user/need/css/yh-need.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+    <include file="User:header" />
+    <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+        <div class="yh-main">
+            <h1 class="yh-tit">我的评价记录</h1>
+            <if condition="$info['comments']">
+            <ul class="assess-list">
+                <volist name="info.comments" id="vo">
+                <li>
+                    <p>
+                      <a class="red pull-left" href="http://{$vo.bm}.{:C('QZ_YUMING')}/company_home/{$vo.comid}" target="_blank">{$vo.qc}</a><span class="gray pull-right">{$vo.time|date="Y-m-d",###}</span></p>
+                    <p>
+                      <strong>评价内容：</strong>
+                      <span class="pull-left">{$vo.text}</span>
+                      <if condition="$vo['edit'] NEQ false">
+                      <a href="javascript:void(0)" data-title="{$vo.qc}" data-content="{$vo.text}" data-id="{$vo.id}"  class="blue pull-right ht-eidt">编辑</a>
+                      </if>
+                    </p>
+                    <p>
+                      <if condition="$vo['sj'] NEQ 0">
+                      <strong>评分：</strong>
+                      <em>设计水平:<i>{$vo.sj}</i></em>
+                      <em>服务态度:<i>{$vo.fw}</i></em>
+                      <em>施工质量:<i>{$vo.sg}</i></em>
+                      <else/>
+                        <strong>综合评分：</strong>
+                        <em>:<i>{$vo.count}</i></em>
+                      </if>
+                    </p>
+                    <if condition="$vo['rptxt'] NEQ ''">
+                      <p class="gray">
+                         <strong >回复：</strong>
+                         <span class="pull-left">{$vo.rptxt}</span>
+                      </p>
+                    </if>
+                </li>
+                </volist>
+            </ul>
+            <else/>
+                <p class="none-msg">您还没有发布过评价哦！</p>
+            </if>
+            {$info.page}
+        </div>
+    </div>
+    <div class="win_box step comment_box">
+        <div class="win_box_bg">
+        </div>
+        <div class="win_box_content">
+          <div class="zb_box_in">
+              <div class="zb_box_form">
+                  <div class="input">
+                    <label class="label-control">评论公司:</label>
+                    <em class="label-control label-title"></em>
+                    <div class="input-error"></div>
+                  </div>
+                  <div class="input">
+                    <label class="label-control">回复:</label>
+                    <textarea class="label-content" name="content"></textarea>
+                    <div class="red err-tips"></div>
+                  </div>
+                  <div class="input">
+                    <button id="stepSave" type="button" class="button">提交</button>
+                    <button id="cancelbtn" type="button" class="button close">关闭</button>
+                    <div class="red err-tips"></div>
+                     <input type="hidden" name="id"/>
+                  </div>
+              </div>
+          </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $("#cancelbtn").click(function(event) {
+      $(".comment_box").hide();
+  });
+
+  $(".ht-eidt").click(function(event) {
+      $(".focus").removeClass('focus');
+      $(".err-tips").html("");
+      var title = $(this).attr("data-title");
+      var content = $(this).attr("data-content");
+      var id = $(this).attr("data-id");
+      $(".label-title").html(title);
+      $(".label-content").val(content);
+      $("input[name=id]").val(id);
+      $(".comment_box").show();
+  });
+
+  $("#stepSave").click(function(event) {
+      $(".focus").removeClass('focus');
+      $(".err-tips").html("");
+      var _this = $(this);
+      if(!App.validate.run($("textarea[name=content]").val())){
+        $("textarea[name=content]").addClass('focus').focus().parent().find(".err-tips").html("亲,您总得回复点什么吧！");
+        return false;
+      }
+
+      $.ajax({
+        url: '/setcomment/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            content:$("textarea[name=content]").val(),
+            id:$("input[name=id]").val()
+        },
+      })
+      .done(function(data) {
+          if(data.status == 1){
+            window.location.href = window.location.href;
+          }else{
+            _this.parent().find(".err-tips").html(data.info);
+          }
+      })
+      .fail(function(xhr) {
+          _this.parent().find(".err-tips").html("发生了意想不到的错误,请刷新重试！");
+      });
+  });
+
+</script>
+</html>

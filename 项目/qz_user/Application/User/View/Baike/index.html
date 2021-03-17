@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="keywords" content="{$keys.keywords}">
+<meta name="description" content="{$keys.description}">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<title>装修百科 - {$title}</title>
+<include file="Index:resource" />
+<include file="Designer:resource" />
+<link rel="stylesheet" href="/assets/user/home/css/global.css?v={:C('STATIC_VERSION')}">
+
+</head>
+<body>
+    <if condition="$info['user']['classid'] EQ '1' ">
+      <include file="User:header" />
+      <div class="ht-wrap oflow">
+        <include file="User:usernavleft" />
+    <elseif condition="$info['user']['classid'] EQ '2' "/>
+      <include file="Designer:header" />
+      <div class="ht-wrap oflow">
+        <include file="Designer:desnavleft" />
+    <else/>
+    <link rel="stylesheet" href="/assets/user/home/css/ht-public.css?v={:C('STATIC_VERSION')}">
+      <include file="Home:header" />
+      <div class="ht-wrap oflow">
+        <include file="Home:comnavleft" />
+    </if>
+
+    <div class="yh-main">
+    <ul class="collect-tit">
+      <li><a {$info.visible_style} href="/baike/">已提交的百科</a></li>
+      <li><a {$info.hidden_style} href="/baike?visible=1">未通过审核</a></li>
+    </ul>
+    <a class="add-btn" href="/baike/add"><i class="icon-plus mr10"></i>我要写百科</a>
+
+    <table class="list-tb" border="0" cellspacing="0" cellpadding="0">
+    <tr class="ht-article-tit">
+        <td style="text-align:left">标题</td>
+        <td>分类</td>
+        <td>时间</td>
+        <td>状态</td>
+        <td>操作</td>
+    </tr>
+    <volist name="list" id="vo">
+      <tr class="main-list">
+        <td style="text-align:left">
+        <if condition="$vo.visible EQ '0' ">
+        <a target="_blank" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/baike/{$vo.id}.html">{$vo.item}</a>
+        <else />
+        <a href="javascript:;">{$vo.item}</a>
+        </if>
+        </td>
+        <td width="120">{$vo.name}</td>
+        <td width="120">{$vo.post_time|date='Y-m-d H:i',###}</td>
+        <td width="100">
+
+        <if condition="$vo.review EQ '0' ">
+            <span class="label review"><i>待审核</i></span>
+        <else />
+            <if condition="$vo.visible EQ '1' ">
+                <if condition="$vo.review EQ '1' ">
+                    <span class="label stat0"><i>不通过</i></span>
+                <else />
+                    <span class="label stat0 reasoninfo"><i class="icon-info-sign"></i> <i>不通过</i></span>
+                    <span class="reasonBox">{$vo.review}</span>
+                </if>
+            </if>
+            <if condition="$vo.visible EQ '0' "><span class="label stat1"><i>通过</i></span></if>
+            <if condition="$vo.visible EQ '9' "><span class="label del"><i>已删除</i></span></if>
+        </if>
+        </td>
+        <td width="50">
+            <if condition="$vo.visible EQ '0' ">
+                <span style="float: right; margin-right: 6px;" title="删除" class="ico icon-trash" data-id="{$vo.id}"></span>
+            <else />
+                <span title="编辑" class="ico icon-pencil" data-id="{$vo.id}"></span>
+                <span title="删除" class="ico icon-trash" data-id="{$vo.id}"></span>
+            </if>
+        </td>
+      </tr>
+    </volist>
+  </table>
+  {$page}
+</div>
+</div>
+
+<script type="text/javascript">
+$('.icon-trash').click(function(){
+    if(confirm("您确定要删除吗？此操作不可恢复。")){
+        var id = $(this).attr('data-id');
+        if(id === ''){
+            alert('数据错误');
+            return;
+        }
+        $.ajax({
+          url: '/baike/remove?id='+id,
+          type: 'POST',
+          dataType: 'JSON'
+        })
+        .done(function(data) {
+            if(data.status == 1){
+              alert('OK');
+            }else{
+              alert(data.info);
+            }
+        })
+        .fail(function() {
+             alert("发生了未知的错误,请刷新重试！");
+        });
+    }
+})
+
+$('.icon-pencil').click(function(){
+  var id = $(this).attr('data-id');
+  if(id === ''){
+      alert('数据错误');
+      return;
+  }
+  location.href="/baike/edit?id="+id;
+})
+
+//显示原因
+$('.reasoninfo').click(function(){
+    var reason = $(this).parent().find('.reasonBox').html();
+    modal(reason,'审核不通过原因');
+})
+
+</script>
+<include file="Index:footer" />
+</body>
+</html>

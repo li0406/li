@@ -1,0 +1,386 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/order/css/allorder.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <div class="cover"></div>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <h4 class="order-title">订单查询</h4>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row b-pb20">
+                            <form id="searchform" method="get" action="" class="form-horizontal clearfix">
+                                <div class="col-xs-12 b-mbt20" style="margin:10px 0;">
+                                    <div class="col-xs-9">
+                                        <div class="col-xs-3">
+                                            <label>开始时间</label>
+                                            <input type="text" name="time_start" class="form-control datepicker start-time" placeholder="发布开始时间" autocomplete="off" />
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>结束时间</label>
+                                            <input type="text" name="time_end" class="form-control datepicker end-time" placeholder="发布结束时间" autocomplete="off" />
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>预算</label>
+                                            <select name='yusuan' class="form-control budget">
+                                                <option value="">请选择预算</option>
+                                                <volist name="main.yusuan" id="vo">
+                                                    <option value="{$vo.id}">{$vo.name}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>分/赠送</label>
+                                            <select name='type_fw' class="form-control">
+                                                <option value="">请选择</option>
+                                                <volist name="main.type_fw" id="vo">
+                                                    <option value="{$key}">{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 b-mbt20">
+                                    <div class="col-xs-9">
+                                        <div class="col-xs-3">
+                                            <label>装修类型</label>
+                                            <select name='lx' class="form-control decoration-type">
+                                                <option value="">请选择</option>
+                                                <volist name="main.lx" id="vo">
+                                                    <option value="{$key}">{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>装修方式</label>
+                                            <select name="fangshi" class="form-control decoration-fangshi">
+                                                <option value="">请选择</option>
+                                                <volist name="main.fangshi" id="vo">
+                                                    <option value="{$vo.id}">{$vo.name}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>选择城市</label>
+                                            <select id="cs" name="cs" type="text" placeholder="选择城市">
+                                                <option value="">选城市</option>
+                                                <volist name="main.cs" id="vo">
+                                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <label>选择区县</label>
+                                            <select id="qx" name="qx" class="area">
+                                                <option value="">选区域</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <button type="button" class="search">查询</button>
+                                        <button type="button" class="reset">重置</button>
+                                        <button type="button" id="explode" class="btn btn-success col-xs-1"
+                                                style="width: 80px; float: none">导出
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <h4 class="order-title">订单列表</h4>
+                <div class="box order-box">
+                    <div class="box-body  b-mt10">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr class="orderitem">
+                                <th>发布日期</th>
+                                <th>业主名称</th>
+                                <th>地区</th>
+                                <th>小区名</th>
+                                <th>面积（㎡）</th>
+                                <th>预算</th>
+                                <th>分/赠送</th>
+                                <th>装修类型</th>
+                                <th>装修方式</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody class="orderxq">
+                                <volist name="main.info.list" id="vo">
+                                    <tr>
+                                        <td>{$vo.time|date='Y-m-d H:i',###}</td>
+                                        <td>{$vo.name|default=''}{$vo.sex|default=''}</td>
+                                        <td>{$vo.city}{$vo.area}</td>
+                                        <td>{$vo.xiaoqu|default=''}</td>
+                                        <td>{$vo.mianji}</td>
+                                        <td>    {$vo.yusuan_name}</td>
+                                        <td>
+                                            <if condition="$vo.type_fw eq 2">
+                                                <span style="color: green">{$vo.type_fw_name}</span>
+                                                <else/>
+                                                {$vo.type_fw_name}
+                                            </if>
+                                        </td>
+                                        <td>
+                                            {$vo.lx_name}
+                                        </td>
+                                        <td>
+                                            {$vo.fangshi_name}
+                                        </td>
+                                        <td data-id="{$vo.id}" data-time="{$vo.time|date='Y-m-d H:i',###}" data-text="{$vo.text}" data-mianji="{$vo.mianji}"
+                                            data-name="{$vo.name|default=''}{$vo.sex|default=''}" data-yt="{$vo.yt}" data-tel="{$vo.tel}" data-fangshi="{$vo.fangshi_name}" data-qx="{$vo.city}{$vo.area}"
+                                            data-fengge="{$vo.fengge_name}" data-lx="{$vo.lx_name}" data-yusuan="{$vo.yusuan_name}" data-xiaoqu="{$vo.xiaoqu}"
+                                            data-lxs="{$vo.huxing_name}" data-order2com_opname="{$vo.fendan_name}" data-status="{$vo.type_fw_name}" data-mj="{$vo.mj_mark}" data-ys="{$vo.ys_mark}" data-companys="{$vo.companys}"><a href="javascript:void(0)" class="view">查看</a>
+                                            <eq name="main.auth.checkcall" value="1">
+                                                <gt name="vo.call_repeat_count" value="0">
+                                                    <a href="javascript:void(0)" title="点击查看" class="call-record">
+                                                        呼叫记录({$vo.call_repeat_count|default=0})
+                                                    </a>
+                                                </gt>
+                                            </eq>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    {$main.info.page}
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="view-model">
+        <div class="model-top">
+            <img src="/assets/common/img/logo-new.jpg" valign="middle"/>
+            <img src="/assets/common/img/logo-fubiao.gif"  valign="middle"/>
+            <span class="detail-orderid">订单编号：2018120355430886</span>
+            <span class="closed">×</span>
+        </div>
+        <div class="model-content">
+            <ul>
+                <li>
+                    <span>发布时间：</span>
+                    <input type="text" class="detail-time"  style="color: green; font-weight: bold"/>
+                </li>
+                <li>
+                    <span>订单状态：</span>
+                    <input type="text" class="detail-status"   style="color: red; font-weight: bold"/>
+                </li>
+                <li>
+                    <span>业主：</span>
+                    <input type="text" class="detail-name"/>
+                </li>
+                <li>
+                    <span>联系电话：</span>
+                    <input type="text" class="detail-tel"  />
+                </li>
+                <li>
+                    <span>小区名称：</span>
+                    <input type="text" class="detail-xiaoqu"  />
+                </li>
+                <li>
+                    <span>区域：</span>
+                    <input type="text" class="detail-qx" />
+                </li>
+                <li>
+                    <span>面积：</span>
+                    <input type="text" class="detail-mianji"/>
+                </li>
+                <li>
+                    <span>房屋户型：</span>
+                    <input type="text" class="detail-lxs"/>
+                </li>
+                <li>
+                    <span>装修类型：</span>
+                    <input type="text" class="detail-lx"/>
+                </li>
+                <li>
+                    <span>预算：</span>
+                    <input type="text"  class="detail-yusuan"/>
+                </li>
+                <li>
+                    <span>风格：</span>
+                    <input type="text" class="detail-fengge"/>
+                </li>
+                <li class="full-line" style="height: auto;">
+                    <span>装修要求：</span>
+                    <textarea class="detail-text"></textarea>
+                </li>
+                <li class="full-line">
+                    <span style="vertical-align: middle">选择公司：</span>
+                    <div type="text" class="detail-companys" style="padding:5px; width: 650px; margin:0 !important;float: right;"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            //导出操作
+            $("#explode").on('click',function () {
+                var time_start = $('input[name=time_start]').val();
+                var time_end = $('input[name=time_end]').val();
+                var yusuan = $('select[name=yusuan]').val();
+                var type_fw = $('select[name=type_fw]').val();
+                var lx = $('select[name=lx]').val();
+                var fangshi = $('select[name=fangshi]').val();
+                var cs = $('select[name=cs]').val();
+                var qx = $('select[name=qx]').val();
+
+                var data = {
+                    'time_start': time_start,
+                    'time_end': time_end,
+                    'yusuan': yusuan,
+                    'lx': lx,
+                    'fangshi': fangshi,
+                    'cs': cs,
+                    'qx': qx,
+                    'type_fw': type_fw,
+                };
+                var uri = parseParam(data);
+                window.open('/export/exportAllOrder?' + uri);
+            });
+            $(".view").click(function () {
+                var id = $(this).parent().attr('data-id');
+                $(".view-model").show();
+                $(".detail-orderid").html("订单编号："+$(this).parent().attr('data-id'));
+                $(".detail-status").val($(this).parent().attr('data-status'));
+                $(".detail-time").val($(this).parent().attr('data-time'));
+                $(".detail-mianji").val($(this).parent().attr('data-mianji'));
+                if ($(this).parent().attr('data-mj') == 1){
+                    $(".detail-mianji").css({
+                        "font-weight":"bold",
+                        "color":"red"
+                    });
+                } else {
+                    $(".detail-mianji").css({
+                        "font-weight":"normal",
+                        "color":"inherit"
+                    });
+                }
+                $(".detail-name").val($(this).parent().attr('data-name'));
+                $(".detail-tel").val($(this).parent().attr('data-tel'));
+                $(".detail-qx").val($(this).parent().attr('data-qx'));
+                $(".detail-fengge").val($(this).parent().attr('data-fengge'));
+                $(".detail-lx").val($(this).parent().attr('data-lx'));
+                $(".detail-yusuan").val($(this).parent().attr('data-yusuan'));
+                if ($(this).parent().attr('data-ys') == 1){
+                    $(".detail-yusuan").css({
+                        "font-weight":"bold",
+                        "color":"red"
+                    });
+                } else {
+                    $(".detail-yusuan").css({
+                        "font-weight":"normal",
+                        "color":"inherit"
+                    });
+                }
+
+                $(".detail-xiaoqu").val($(this).parent().attr('data-xiaoqu'));
+                $(".detail-lxs").val($(this).parent().attr('data-lxs'));
+                var text = $(this).parent().attr('data-text');
+                $(".detail-text").text(text.replace(/\\n/g,"<br/>"));
+                $(".detail-companys").html($(this).parent().attr('data-companys'));
+                $(".cover").show();
+            })
+            $("#cs").select2();
+            $("#qx").select2();
+            $(".closed").click(function () {
+                $(".view-model").hide();
+                $(".cover").hide();
+            })
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+            $(".reset").click(function () {
+                $(".start-time,.end-time").val("");
+                $("select").val("");
+                $("input").val("");
+                $("select[name=cs]").select2('val', '');
+                $("select[name=qx]").select2('val', '');
+                $("#qx").empty();
+            })
+            $("#cs").change(function(){
+                changecity();
+            });
+            /*S-初始化筛选条件*/
+            $("input[name=time_start]").val('{$Think.get.time_start}' == '' ? "" : '{$Think.get.time_start}');
+            $("input[name=time_end]").val('{time_end.get.status}' == '' ? "" : '{$Think.get.time_end}');
+            $('select[name=yusuan]').val('{$Think.get.yusuan}' == '' ? "" : '{$Think.get.yusuan}');
+            $('select[name=type_fw]').val('{$Think.get.type_fw}' == '' ? "" : '{$Think.get.type_fw}');
+            $('select[name=lx]').val('{$Think.get.lx}' == '' ? "" : '{$Think.get.lx}');
+            $('select[name=fangshi]').val('{$Think.get.fangshi}' == '' ? "" : '{$Think.get.fangshi}');
+            $('select[name=cs]').val('{$Think.get.cs}' == '' ? "" : '{$Think.get.cs}');
+            $("select[name=cs]").select2('val', '{$Think.get.cs}' == '' ? "" : '{$Think.get.cs}');
+            changecity();
+            $("select[name=qx]").select2('val', '{$Think.get.qx}' == '' ? "" : '{$Think.get.qx}');
+            /*S-搜索按钮*/
+            $('.search').on('click', function() {
+                var time_start = $('input[name=time_start]').val();
+                var time_end = $('input[name=time_end]').val();
+                var yusuan = $('select[name=yusuan]').val();
+                var type_fw = $('select[name=type_fw]').val();
+                var lx = $('select[name=lx]').val();
+                var fangshi = $('select[name=fangshi]').val();
+                var cs = $('select[name=cs]').val();
+                var qx = $('select[name=qx]').val();
+                //判断时间间隔
+                if ((time_end != '') && (time_start > time_end)) {
+                    alert('开始时间不能大于结束时间')
+                    return false;
+                };
+                window.location.href = '/order/allorder?time_start=' + time_start + '&time_end=' + time_end + '&yusuan=' + yusuan + '&type_fw=' + type_fw + '&lx=' + lx + '&fangshi=' + fangshi + '&cs=' + cs + '&qx=' + qx;
+            });
+            $('.call-record').click(function(event) {
+                var id = $(this).parent().attr('data-id');
+                window.open('/voip/voiprecord?id='+id);
+            });
+        })
+        function changecity() {
+            var cs   = $('#cs option:selected').val();//城市
+            $.ajax({
+                url: '/order/getCityInfoById',
+                type: 'POST',
+                dataType: 'JSON',
+                async:false,
+                data: {
+                    cs:cs
+                },
+            }).done(function(data) {
+                $("#qx ").empty();
+                $("#qx").prepend("<option value=''>选区域</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#qx").append("<option value='" + data[i]['qz_areaid'] + "'>" + data[i]['qz_area'] + "</option>");
+                }
+            }).fail(function(xhr) {
+                alert('网络错误，请重试！');
+            });
+        }
+        //将对象转成url 参数
+        var parseParam = function (param, key) {
+            var paramStr = "";
+            if (param instanceof String || param instanceof Number || param instanceof Boolean) {
+                paramStr += "&" + key + "=" + encodeURIComponent(param);
+            } else {
+                $.each(param, function (i) {
+                    var k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
+                    paramStr += '&' + parseParam(this, k);
+                });
+            }
+            return paramStr.substr(1);
+        };
+    </script>
+</block>

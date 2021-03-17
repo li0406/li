@@ -1,0 +1,146 @@
+<script type="text/javascript" src="//assets.qizuang.com/g-js/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="/assets/mobile/calculator/css/calculator.css?v={:C('STATIC_VERSION')}">
+<script src="/assets/mobile/calculator/js/calculator.js?v={:C('STATIC_VERSION')}"></script>
+<div id="calculator">
+    <div class="calculator-container">
+        <div class="calculator-area">
+            <div class="closed"><i id="calculator-closed" class="fa fa-times"></i></div>
+            <div class="calculator-item">
+                <table class="calculator-title">
+                    <td style="font-size:0.2rem"><span>8</span></td><td>秒免费估算装修该花多少钱</td>
+                </table>
+                <p style="padding-bottom: 0">今天已有 <span id="num">{:fbrs()}</span> 位业主获取装修预算</p>
+            </div>
+            <form>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="number" placeholder="输入您的房屋面积" name="mianji" class="mianji"/><div class="danwei">㎡</div>
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <gt name="mapUseInfo.vipcount" value="0">
+                            <button id="showCityPicker4" class="c-zb-city" type="button">
+                                <i class="site fa fa-map-marker"></i>
+                                <empty name="info.cityarea">
+                                请选择您所在的区域
+                                <else />
+                                {$mapUseInfo.provincefull} {$mapUseInfo.name} {$info.cityarea.name}
+                                </empty>
+                            </button>
+                            <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                            <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                            <input type="hidden" name="area" data-id="{$info.cityarea.id}">
+                        <else />
+                            <button id="showCityPicker4" class="c-zb-city" type="button">
+                                <i class="site fa fa-map-marker"></i>
+                                请选择您所在的区域
+                            </button>
+                            <input type="hidden" name="province" data-id="">
+                            <input type="hidden" name="city" data-id="">
+                            <input type="hidden" name="area" data-id="">
+                        </gt>
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="text" placeholder="您的小区，以便估算报价" name="xiaoqu" id="xiaoqu">
+                    </div>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box">
+                        <input type="tel" maxlength="11" placeholder="输入手机号码获取报价清单" name="tel">
+                    </div>
+                </div>
+                <div class="calculator-item" id="shenming2" style="width: 80%;margin: 0 auto;">
+                    <input type="checkbox" checked="checked" id="mianze2">
+                    <label for="mianze2" id="check2" class="fa fa-check"></label>
+                    <span>我已阅读并同意齐装网的</span>
+                    <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+                </div>
+                <div class="calculator-item">
+                    <div class="input-box border-none" style="margin-top:2px;">
+                       <div id="btnSave">立即免费计算</div>
+                    </div>
+                </div>
+
+            </form>
+            <div class="prompt">
+                <span>*</span> 为了您的权益，您的隐私将被严格保密
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //切换免责对勾
+    $("#check2").click(function(){
+        $(this).toggleClass('fa-check');
+    });
+    $("#calculator #btnSave").click(function(event) {
+        var container = $(this).parents("#calculator");
+        var checked = $("#mianze2").is(':checked');
+
+
+        if(!checked){
+            alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+            return false;
+        }
+        window.order({
+            extra:{
+                mianji:$("input[name=mianji]",container).val(),
+                cs: $('input[name=city]',container).attr('data-id'),
+                qx: $('input[name=area]',container).attr('data-id'),
+                xiaoqu:$("input[name=xiaoqu]",container).val(),
+                tel:$("input[name=tel]",container).val(),
+                source: '340'
+            },
+            submitBtn:{
+                className:$(this),
+                type:'btn'
+            },
+            error:function(){
+
+                return true;
+            },
+            success:function(data, status, xhr){
+
+                if(data.status == 1){
+                    window.location.href = "/details/";
+                }else{
+                    alert(data.info);
+                }
+            },
+            validate:function(item, value, method, info){
+                if (('cs' == item || 'qx' == item) && 'notempty' == method) {
+                    alert(method);
+                    return false;
+                };
+                if ('mianji' == item && '' != method) {
+                    alert(info);
+                    //$("input[name=mianji]",container).val("");
+                    // $("input[name=mianji]",container).focus();
+                    return false;
+                };
+                if ('xiaoqu' == item && 'notempty' == method) {
+                    alert(info);
+                    // $("input[name=xiaoqu]").focus();
+                    return false;
+                };
+
+                if(!isNaN($("#xiaoqu").val())){
+                    // $("input[name=xiaoqu]").focus();
+                    alert("小区名称不能是纯数字");
+                    return false;
+                }
+                if ('tel' == item && '' != method) {
+                    alert(info);
+                    // $("input[name=tel]",container).focus();
+                    //$("input[name=tel]",container).val('');
+                    return false;
+                };
+
+                return true;
+            }
+        });
+    });
+</script>

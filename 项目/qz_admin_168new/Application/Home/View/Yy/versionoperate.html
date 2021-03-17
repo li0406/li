@@ -1,0 +1,200 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>运营系统-页面分析 - {$operate}版本</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/uploadstyle.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/yy/css/versionoperate.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h4><a href="/yy/version/">上线版本管理</a> > {$operate}版本</h4>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="col-xs-12 h5">
+                                    <div class="col-xs-1 no-padding">
+                                        <span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>所属分类：</span>
+                                    </div>
+                                    <div class="col-xs-4 page-category-wrap">
+                                        <div class="col-xs-4 no-padding">
+                                            <select class="form-control level-one" data-value="{$vars.info.parent_category_id}">
+                                            </select>
+                                        </div>
+                                        <div class="col-xs-7 no-padding pull-right">
+                                            <select name="yy_page_category_id" class="form-control level-two" data-value="{$vars.info.yy_page_category_id}">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 h5">
+                                    <div class="col-xs-1 no-padding">
+                                        <span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>版本号：</span>
+                                    </div>
+                                    <div class="col-xs-4">
+                                        <empty name="Think.get.id">
+                                            <input name="version_number" class="form-control" type="text" value="{$vars.info.version_number}">
+                                        <else />
+                                            <input name="version_number" class="form-control" type="text" value="{$vars.info.version_number}" disabled="disabled">
+                                        </empty>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 h5">
+                                    <div class="col-xs-1 no-padding">
+                                        <span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>标题：</span>
+                                    </div>
+                                    <div class="col-xs-4">
+                                        <input name="version_title" class="form-control" type="text" value="{$vars.info.version_title}">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 h5">
+                                    <div class="col-xs-1 no-padding"><span class="pull-right h5"><span style="color: red">*&nbsp;&nbsp;</span>上线时间：</span></div>
+                                    <div class="col-xs-4">
+                                        <input name="online_time" class="form-control datetimepicker" type="text" value="{$vars.info.online_time}">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 h5">
+                                    <div class="col-xs-1 no-padding"><span class="pull-right h5">页面说明：</span></div>
+                                    <div class="col-xs-4">
+                                        <textarea name="remark" class="form-control">{$vars.info.remark}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 h5 enclosure-wrap">
+                                    <div class="col-xs-1 no-padding"><span class="pull-right h5">附件：</span></div>
+                                    <div class="col-xs-4">
+                                        <form class="uploader white" method="post" enctype="multipart/form-data">
+                                            <input type="text" class="filename" value="{$vars.info.enclosureName|default='请选择附件'}" readonly />
+                                            <input type="button" class="button" value="浏览···" />
+                                            <input name="file" type="file" size="30" data-enclosure="{$vars.info.enclosure}" />
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 operate-wrap">
+                                    <div class="col-xs-1"></div>
+                                    <div class="col-xs-4">
+                                        <button class="btn btn-primary submit-save">确定</button>
+                                        <button class="btn btn-default pull-right" onclick="history.back(-1)">返回</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/jquery-ajaxfileupload/js/jquery.ajaxfileupload.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            //页面分类
+            $('.page-category-wrap').cxSelect({
+                selects: ['level-one', 'level-two'],
+                jsonValue: 'id',
+                jsonName: 'name',          // 数据标题字段名称
+                jsonSub: 'children',            // 子集数据字段名称
+                data: {$vars.category}
+            });
+            $(".datetimepicker").datetimepicker({
+                format:"yyyy-mm-dd hh:ii:ss",
+                minViewMode:0,
+                todayBtn:true,
+                autoclose:true
+            });
+
+            /*S-文件上传*/
+            $(".enclosure-wrap input[type=file]").change(function(){
+                $(this).parents(".uploader").find(".filename").val($(this).val());
+                if ('' != $(this).val()) {
+                    var formData = new FormData();
+                    formData.append('file', $(this)[0].files[0]);
+                    formData.append('token', '{$vars.token}');
+                    $.ajax({
+                        url: 'http://upload.qiniu.com/',
+                        type: 'POST',
+                        data: formData,
+                        cache: false,
+                        processData: false,
+                        contentType: false
+                    }).done(function(data) {
+                        if ('undefined' != typeof(data) && 'undefined' != typeof(data.name)) {
+                            $(".enclosure-wrap input[type=file]").attr('data-enclosure', data.name);
+                        } else {
+                            alert('上传失败');
+                        }
+                    }).fail(function(xhr) {
+                        alert('发生网络错误');
+                    });
+                };
+            });
+            /*E-文件上传*/
+
+            //保存
+            $('.submit-save').click(function(event) {
+                var page_category_id = $('select[name=yy_page_category_id]').val();
+                $.ajax({
+                    url: '/yy/versionoperate/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:'{$vars.info.id}',
+                        yy_page_category_id:$('select[name=yy_page_category_id]').val(),
+                        version_number:$('input[name=version_number]').val(),
+                        version_title:$('input[name=version_title]').val(),
+                        online_time:$('input[name=online_time]').val(),
+                        remark:$('textarea[name=remark]').val(),
+                        enclosure:$(".enclosure-wrap input[type=file]").attr('data-enclosure')
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                                window.location.href = '/yy/version/';
+                            }
+                        });
+                        e.width(300).show();
+                    } else {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                            }
+                        });
+                        e.width(300).show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,网络错误！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.width(300).show();
+                })
+            });
+        })
+    </script>
+</block>

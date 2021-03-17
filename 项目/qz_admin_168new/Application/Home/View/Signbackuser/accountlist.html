@@ -1,0 +1,258 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>签单返点会员管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">搜索条件</h3>
+                </div>
+                <form id="searchForm" class="form-horizontal" action="/signbackuser/accountlist/" method="get">
+                    <div class="box-body">
+                        <div class="form-group">
+                            <div class="col-sm-2">
+                                所属城市:
+                                <br/>
+                                <select id="city" name="city" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                会员ID:
+                                <br/>
+                                <input type="text" class="form-control" id="uid" placeholder="请输入会员ID" name="uid"
+                                       value="{$input.uid}">
+                            </div>
+                            <div class="col-sm-2">
+                                会员名称:
+                                <br/>
+                                <input type="text" class="form-control" id="jc" placeholder="请输入会员简称" name="jc"
+                                       value="{$input.jc}">
+                            </div>
+                            <div class="col-sm-2">
+                                所属销售:
+                                <br/>
+                                <input type="text" class="form-control" id="saler" placeholder="请输入销售名称" name="saler"
+                                       value="{$input.saler}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                本次合同时间:
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control datepicker" id="begin"
+                                               autocomplete="off" placeholder="请选择合同开始时间" name="begin" value="{$input.begin}">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control datepicker" id="end"
+                                               autocomplete="off" placeholder="请选择合同结束时间" name="end" value="{$input.end}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                会员状态:
+                                <br/>
+                                <select class="form-control" name="on_status">
+                                    <option value="">请选择</option>
+                                    <option value="2" <eq name="input.on_status" value="2">selected</eq> >VIP</option>
+                                    <option value="-4" <eq name="input.on_status" value="-4">selected</eq> >暂停</option>
+                                    <option value="-1" <eq name="input.on_status" value="-1">selected</eq> >到期</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-1 text-center">
+                                <br/>
+                                <button id="btnReset" type="button" class="btn btn-warning"><i class="fa fa-refresh"></i> 重置</button>
+                            </div>
+                            <div class="col-sm-1 text-center">
+                                <br/>
+                                <button id="btnSearch" type="submit" class="btn btn-primary">
+                                    <i class="fa fa-search"></i> 查询
+                                </button>
+                            </div>
+                            <div class="col-sm-1 text-center">
+                                <br/>
+                                <button type="button" class="btn btn-success" onclick="location.href='/signbackuser/accountup/'">
+                                    <i class="fa fa-plus-square"></i> 添加
+                                </button>
+                            </div>
+                            <div class="col-sm-1 text-center">
+                                <br/>
+                                <button id="btnExport" type="button" class="btn">
+                                    <i class="fa fa-external-link"></i> 导出
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <table class="table table-striped table-bordered table-hover text-center">
+                        <tr>
+                            <th>会员ID</th>
+                            <th>会员简称</th>
+                            <th class="">所属城市</th>
+                            <th class="">会员状态</th>
+                            <th class="">所属销售</th>
+                            <th class="">总合同开始时间</th>
+                            <th class="">总合同结束时间</th>
+                            <th class="">本次合同开始时间</th>
+                            <th class="">本次合同结束时间</th>
+                            <th class="">保证金</th>
+                            <th class="">返点比例</th>
+                            <th class="">操作</th>
+                        </tr>
+                        <volist name="data.list" id="vo">
+                            <tr>
+                                <td>{$vo.id}</td>
+                                <td>
+                                    {$vo.jc}
+                                    <if condition="$vo['order_stop_status'] EQ 2">&nbsp;<font color="red">停</font></if>
+                                </td>
+                                <td>
+                                    {$vo.city_name}
+                                </td>
+                                <td>
+                                    <switch name="vo.on">
+                                        <case value="2">VIP</case>
+                                        <case value="-4">暂停</case>
+                                        <case value="-1">到期</case>
+                                        <default /> -
+                                    </switch>
+                                </td>
+                                <td>
+                                    {$vo.saler|default='-'}
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        {$vo.contract_start_date|default='-'}
+                                    <else/>
+                                        -
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        {$vo.contract_end_date|default='-'}
+                                    <else/>
+                                        -
+                                    </if>
+                                </td>
+                                <td>
+                                    {$vo.start|default='-'}
+                                </td>
+                                <td>
+                                    {$vo.end|default='-'}
+                                </td>
+                                <td>
+                                    {$vo.deposit_money|default='-'}
+                                </td>
+                                <td>
+                                    {$vo.back_ratio_text|default='-'}
+                                </td>
+                                <td>
+                                    <if condition="$vo['fake'] EQ 0">
+                                        <a href="/signbackuser/signlist?company_id={$vo.id}">编辑</a>
+                                        <a href="javascript:void(0)" class="edit" data-id="{$vo.id}">日志</a>
+                                    </if>
+                                </td>
+                            </tr>
+                        </volist>
+                    </table>
+                    <div>{$data.page}</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="myModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        <h4 class="modal-title">操作日志</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(".datepicker").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "选择城市",
+            language: "zh-CN"
+        });
+        $("#city").select2("val", "{$input.city}");
+        $('#city').trigger('change');
+
+        $("#btnReset").click(function () {
+            $("#city").select2("val", "");
+            $("#searchForm :input").val("");
+            $("#searchForm :select").val("");
+        });
+
+        $(".edit").click(function (event) {
+            $.ajax({
+                url: '/vip/getviplog',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: $(this).attr("data-id"), contract_type: 6}
+            })
+            .done(function (data) {
+                $("#myModal .modal-body").html(data.tmp);
+                $("#myModal").modal();
+            });
+        });
+
+        // 查询
+        $("#btnSearch").click(function(){
+            var begin = $("#searchForm input[name=begin]").val();
+            var end = $("#searchForm input[name=end]").val();
+            if (begin != "" && end != "" && begin > end) {
+                alert("结束时间不能小于开始时间");
+                return false;
+            }
+
+            return true;
+        });
+
+        // 导出
+        $("#btnExport").click(function(){
+            var city = $("#city").select2("val");
+            var uid = $("#searchForm input[name=uid]").val();
+            var jc = $("#searchForm input[name=jc]").val();
+            var saler = $("#searchForm input[name=saler]").val();
+            var begin = $("#searchForm input[name=begin]").val();
+            var end = $("#searchForm input[name=end]").val();
+            var on_status = $("#searchForm select[name=on_status]").val();
+
+            window.location.href = "/signbackuser/accountExport?city="+ city + "&uid=" + uid + "&jc=" + jc + "&saler=" + saler + "&begin=" + begin + "&end=" + end + "&on_status=" + on_status;
+        });
+    </script>
+</block>

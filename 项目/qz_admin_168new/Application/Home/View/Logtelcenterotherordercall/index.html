@@ -1,0 +1,149 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>签单审核通话录音 - 控制台</title>
+</block>
+<block name="style">
+    <style>
+        #form .fa-play-circle-o{
+            font-size: 20px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>签单审核通话录音</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/logtelcenterotherordercall/">签单审核通话录音</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                部门：
+                                <select class="form-control" name="department">
+                                    <option value="0" selected>请选择</option>
+                                    <option value="1">外销</option>
+                                    <option value="2">商务</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                订单查询：
+                                <input type="text" name="condition" class="form-control" placeholder="订单ID" value="{$Think.get.condition}">
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>订单号</th>
+                                        <th>CallsID</th>
+                                        <th>拨打时间</th>
+                                        <th>呼叫人</th>
+                                        <th>录音</th>
+                                    </tr>
+                                    <volist name="vars.info.list" id="vo">
+                                        <tr>
+                                            <td>{$vo.orderid}</td>
+                                            <td>{$vo.callsid}</td>
+                                            <td>{$vo.time_add}</td>
+                                            <td>{$vo.admin_user}</td>
+                                            <td>
+                                                <eq name="vo.record" value="1">
+                                                    <a class="play-audio" href="javascript:void(0)" data-callsid="{$vo.callsid}">
+                                                        <i class="fa fa-play-circle-o"></i>
+                                                    </a>
+                                                <else />
+                                                    <a style="color: #ccc" class="play-audio" href="javascript:void(0)" data-callsid="{$vo.callsid}">
+                                                        <i class="fa fa-play-circle-o"></i>
+                                                    </a>
+                                                </eq>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$vars.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('select[name=department]').val("{$Think.get.department|default=0}");
+            $('#search').click(function(){
+                window.location.href = '/logtelcenterotherordercall/?department='+$('select[name=department]').val() + '&condition=' + $('input[name=condition]').val();
+            });
+            $('.play-audio').click(function(){
+                var _this = $(this)
+                _this.css('color', '#ccc');
+                var callid = _this.attr('data-callsid');
+                $.ajax({
+                    url: '/telcenter/cuctcallrecordurl',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        callid:callid,
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        var content = '<audio src="' + data.data + '" autoplay="" preload="auto" controls=""></audio>';
+                        _this.parent().html(content);
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '网络错误，请稍后再试！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+        })
+    </script>
+</block>

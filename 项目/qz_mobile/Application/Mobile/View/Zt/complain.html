@@ -1,0 +1,113 @@
+<extend name="Common:basic"/>
+<block name="link">
+<link href="{$static_host}/assets/mobile/zb/css/m-hxsj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="{$static_host}/assets/mobile/zt/style.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+<a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+<div class="m-header-tit">在线投诉</div>
+</block>
+<block name="content">
+<article>
+    <div class="m-t1">&nbsp;</div>
+    <ul class="m-bj-edit">
+        <li><input class="m-row-int1 m-bj-edit-list" type="text" name="name" placeholder="请输入您的称呼"></li>
+        <li><input class="m-row-int1 m-bj-edit-list" name="tel" type="tel" maxlength="13" placeholder="请输入您的手机号"></li>
+        <li><input class="m-row-int1 m-bj-edit-list" id="company" name="company" type="text" placeholder="请输入您要投诉的装修公司"></li>
+        <li>
+            <div class="choose">
+                <p class="choose-tit">请选择投诉内容</p>
+                <div class="choose-list">
+                    <p><input type="radio" name="reason" value="1">在规定的时间内未收到装修公司提供的礼品</p>
+                    <p><input type="radio" name="reason" value="2">本次活动原因，装修质量速度不过关</p>
+                    <p><input type="radio" name="reason" value="3">其他</p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="remarks">
+                <p class="remarks-tit">备注：</p>
+                <textarea class="m-row-int1 m-bj-edit-list" name="note" style="height:120px;" placeholder="请输入投诉内容"></textarea>
+            </div>
+        </li>
+    </ul>
+    <input type="hidden" name="selectComid" value="" id="selectComid">
+    <a class="m-b-btn save-submit">提交</a>
+</article>
+</block>
+<block name="script">
+<script type="text/javascript" src="{$cityfile}"></script>
+<link rel="stylesheet" href="/assets/mobile/zt/bigautocomplete.css?v={:C('STATIC_VERSION')}">
+<script type="text/javascript" src="/assets/mobile/zt/bigautocomplete.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(function(){
+
+    //投诉
+    $(".save-submit").click(function(event) {
+        var _this = $(this);
+
+        var tel = $(".m-bj-edit input[name=tel]");
+        var name = $('.m-bj-edit input[name="name"]');
+        var note = $(".m-bj-edit input[name=note]").val();
+        var company = $(".m-bj-edit input[name=company]");
+        var reason = $(".m-bj-edit input[name='reason']:checked").val();
+        var companyid = $('#selectComid').val();
+        
+        if (!App.validate.run(name.val())) {
+            alert('请输入您的称呼');
+            return false;
+        }
+
+        if (!App.validate.run(tel.val(),"moblie")) {
+            alert('请输入正确的手机号码');
+            return false;
+        }
+
+        if (!App.validate.run(company.val())) {
+            alert('请输入您要投诉的装修公司');
+            return false;
+        }
+
+        if(reason == undefined){
+            alert('请选择投诉类型哦！');
+        }
+        orderButtonChangeStatus(_this,"btn")
+        $.ajax({
+            url: "/zt/complain/",
+            type: 'POST',
+            dataType : "JSON",
+            data: {
+                tel: tel.val(),
+                name: name.val(),
+                company: $('#selectComid').val(),
+                reason:reason,
+                note:note
+            }
+        })
+        .done(function(data) {
+            orderButtonChangeStatus(_this,"btn","success")
+            alert(data.info);
+            if(data.data == '1'){
+                history.back();
+            }
+        })
+        .fail(function(xhr) {
+            orderButtonChangeStatus(_this,"btn","success")
+            alert('发生了未知的错误,请刷新页面');
+        });
+    });
+
+    $("#company").bigAutocomplete({
+        width:288,
+        data:[<volist name="info.company" id="v">
+            {title:"{$v.qc}",id:"{$v.uid}"},
+            </volist>
+        ],
+        callback:function(data){
+            $('#selectComid').val(data.id);
+        }
+    });
+
+});
+</script>
+</block>

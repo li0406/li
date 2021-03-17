@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/team/css/ht-team.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Team:header" />
+        <div class="ht-main">
+            <table class="ht-team-design" border="0" cellpadding="0" cellspacing="0">
+                <tr class="team-title">
+                    <td>头像</td>
+                    <td>姓名</td>
+                    <td>职位</td>
+                    <td>显示排序</td>
+                    <td>首页显示</td>
+                    <td>成员状态</td>
+                    <td colspan="2">企业操作</td>
+                </tr>
+                <volist name="info.designers" id="vo">
+                <tr class="team-list">
+                    <td>
+                        <span class="userhead">
+                        <img src="{$vo.logo}" width="80" height="80">
+                        </span>
+                    </td>
+                    <td>{$vo.name}</td>
+                    <td>{$vo.zw}</td>
+                    <td>{$vo.px}</td>
+                    <td>
+                    <if condition="$vo['xs'] EQ 1">
+                      是
+                    <else/>
+                      否
+                    </if>
+                    </td>
+                    <td>
+                      <switch name="vo.zt" >
+                      <case value="0">未处理</case>
+                      <case value="1">拒绝</case>
+                      <case value="2">入驻</case>
+                      </switch>
+                    </td>
+                    <if condition="$vo['zt'] EQ 2">
+                        <td><a title="编辑设计师" class="change-btn" href="/teamup/{$vo.uid}">编辑</a></td>
+                        <td><a title="移除设计师" class="del-btn" data-id="{$vo.uid}" href="">移除</a></td>
+                    <else/>
+                        <td colspan="2"><a class="uninvite-btn" data-id="{$vo.uid}" href="javascript:void(0)">取消邀请</a></td>
+                    </if>
+                </tr>
+                </volist>
+            </table>
+            {$info.page}
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    $(function(){
+        $(".del-btn").click(function(event) {
+            if(confirm("确定移除该设计师吗?")){
+                var _this = $(this);
+                var id = _this.attr("data-id");
+
+                $.ajax({
+                    url: '/removedesigner',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    },
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href = "/success/team/";
+                    }else{
+                        $.pt({
+                            target: _this,
+                            content:data.info,
+                            width: 'auto'
+                        });
+                    }
+                })
+                .fail(function() {
+                     $.pt({
+                        target: _this,
+                        content:"发生了未知的错误,请刷新重试！",
+                        width: 'auto'
+                       });
+                });
+            }
+            return false;
+        });
+
+        $(".uninvite-btn").click(function(event) {
+            if(confirm("确定取消邀请吗？")){
+                var id = $(this).attr("data-id");
+                var _this = $(this);
+                $.ajax({
+                    url: '/uninvite/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    },
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                      window.location.href = window.location.href;
+                    }else{
+                        $.pt({
+                          target: _this,
+                          content:data.info,
+                          width: 'auto'
+                         });
+                    }
+                })
+                .fail(function() {
+                  $.pt({
+                      target: _this,
+                      content:"发生了未知的错误,请刷新重试！",
+                      width: 'auto'
+                     });
+                });
+            }
+        });
+    });
+</script>
+</html>

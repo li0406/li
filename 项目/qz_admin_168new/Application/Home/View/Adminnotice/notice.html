@@ -1,0 +1,76 @@
+<extend name="Main:baseTemplate"/>
+<block name="content">
+    <section class="content-header">
+        <h1>编辑标准</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <form class="form-horizontal noticeform" id="edit_form">
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">标题</label>
+                        <div class="col-sm-4">
+                            <input type="text" id="title" name="title" class="form-control" placeholder="文章标题"
+                                   value="{$article.title}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                            <script id="editor1" name="content" type="text/javascript">
+                                {$article.content}
+                            </script>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-1 col-sm-1">
+                            <a href="javascript:void (0)" id="btnSave" class="btn btn-block btn-info">保存</a>
+                            <input type="hidden" id="edit_id" name="edit_id" value="{$article.article_id}" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/common/js/plugins/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var ue = UE.getEditor('editor1', {
+            autoClearinitialContent: false,
+            serverUrl: '/ueditor/upload/',
+            initialFrameWidth : 1500,
+            toolbars: [
+                ['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+                    'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+                    'paragraph', 'fontfamily', 'fontsize', '|',
+                    'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|', 'simpleupload', 'insertimage', 'link', 'unlink'
+                ]
+            ],
+            maximumWords: 10000
+        });
+        $(function () {
+            $("#btnSave").on('click',function () {
+                var data = $("#edit_form").serializeArray();
+                $.ajax({
+                    url: '/adminnotice/notice',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data,
+                    success:function(d){
+                        alert(d.info);
+                        if(d.status == 1){
+                            window.location.href = '/adminnotice';
+                        }
+                    },
+                    error:function(xhr){
+                        $(".error").html("出错啦,请找技术部门协助！");
+                    }
+                });
+            });
+
+        });
+    </script>
+</block>

@@ -1,0 +1,186 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>发单位置标识管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>发单位置标识管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/ordersource">发单位置标识管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                <form action="/ordersource/location/" method="get">
+                    <div class="col-xs-3">
+                        <p>发单位置名称：</p>
+                        <select id="source" class="select2 select2-offscree " name="source" type="text" placeholder="城市" tabindex="-1">
+                            <volist name="source" id="vo">
+                                <optgroup label="{$vo.name}">
+                                    <volist name="vo.child" id="v">
+                                        <option value="{$v.id}">{$v.name}</option>
+                                    </volist>
+                                </optgroup>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <p>标记代号:</p>
+                        <input class="form-control" type="text" name="src" placeholder="标记代号" value="{$Think.get.src}">
+                    </div>
+                    <div class="col-xs-2">
+                        <p>状态:</p>
+                        <select id="visible" class="select2 select2-offscree " name="visible" type="text" placeholder="城市" tabindex="-1">
+                            <option value="">请选择</option>
+                            <option value="0">已启用</option>
+                            <option value="1">已禁用</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <p>添加时间:</p>
+                        <input type="text" class="form-control pull-right" id="reservation" placeholder="添加时间">
+                        <input type="hidden" name="start" value="{$substart}" />
+                        <input type="hidden" name="end" value="{$subend}" />
+                    </div>
+                    <div class="col-sm-2 pull-right">
+                        <p>&nbsp;</p>
+                        <button type='submit' class="btn btn-success normal" style="width:auto"><i class="fa fa-search"></i> 查询</button>
+                    </div>
+                </form>
+                </div>
+                <div class="box-body act-box">
+                <div class="col-sm-2" style="margin-top:10px">
+                    <a href="/ordersource/sourcegroup"><button type='button' class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i> 模块管理</button></a>
+                    <a href="/ordersource/locationup"><button type='button' class="btn btn-success normal" style="width:auto"><i class="fa fa-plus-circle"></i> 添加发单位置</button></a>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">发单位置标识列表</h3>
+                    <div class="box-tools"></div>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered">
+                        <tbody>
+                            <tr style="font-size:14px;">
+                                <th width="10%">标记代号</th>
+                                <th width="10%">发单位置名称</th>
+                                <th width="10%">所属模块</th>
+                                <th width="10%">预览图</th>
+                                <th width="5%">添加时间</th>
+                                <th width="5%">状态</th>
+                                <th width="5%">操作</th>
+                            </tr>
+                            <volist name="list" id="v">
+                                <tr>
+                                    <td>{$v.src}</td>
+                                    <td>{$v.name}</td>
+                                    <td>
+                                       {$v.three_name}-{$v.groupname}
+                                    </td>
+                                    <td><span class="thumbimg" style="color: #3c8dbc; cursor: pointer;" data-img="//{:C('QINIU_DOMAIN')}/{$v.thumb}">查看</span></td>
+                                    <td>
+                                    {$v.addtime|date="Y-m-d",###}
+                                    </td>
+                                    <td>
+                                        <if condition="$v.visible EQ '1' "><span class="badge bg-yellow">已禁用</span></if>
+                                        <if condition="$v.visible EQ '0' "><span class="badge bg-green">已启用</span></if>
+                                    </td>
+                                    <td>
+                                        <if condition="$v['visible'] EQ '1' ">
+                                        <a title="启用" href="/ordersource/setstatus/?id={$v.id}&type=1">启用</a></if>
+                                        <if condition="$v['visible'] EQ '0' ">
+                                        <a title="禁用" href="/ordersource/setstatus/?id={$v.id}&type=2">禁用</a></if>
+                                        &nbsp;
+                                        <a title="编辑" href="/ordersource/locationup/?id={$v.id}" >编辑</a>
+                                    </td>
+                                </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer clearfix">
+                   {$page}
+                </div>
+
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-body" style="padding:0px;"><img src="" id="Preview" width="800"></div>
+            </div>
+        </div>
+    </div>
+
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$('.thumbimg').click(function(){
+    var imgUrl = $(this).attr('data-img');
+    $('#myModal').modal('show');
+    $("#Preview").attr("src",imgUrl);
+});
+
+ $("#source").select2({
+     placeholder:"请选择",
+     allowClear: true
+ });
+
+ $("#source").select2("val","{$Think.get.source}");
+ $("#group").select2();
+ $("#group").select2("val","{$Think.get.group}");
+ $("#visible").select2();
+ $("#visible").select2("val","{$Think.get.visible}");
+
+ $('#reservation').daterangepicker({
+    format: 'YYYY/MM/DD',
+    "alwaysShowCalendars": true,
+    locale : {
+        applyLabel : '确定',
+        cancelLabel : '取消',
+        fromLabel : '起始时间',
+        toLabel : '结束时间',
+        customRangeLabel : '自定义',
+        daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+        monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                '七月', '八月', '九月', '十月', '十一月', '十二月' ],
+        firstDay : 1
+    },
+    startDate: "{$substart|default=''}",
+    endDate: "{$subend|default=''}"
+},
+function(start, end, label) {
+    var hb = $("#addHuanBi").attr("checked") == "checked"?1:0;
+    var tb = $("#addTongBi").attr("checked") == "checked"?1:0;
+    $("input[name=start]").val(start.format('MM/DD/YY'));
+    $("input[name=end]").val(end.format('MM/DD/YY'));
+});
+</script>
+</block>

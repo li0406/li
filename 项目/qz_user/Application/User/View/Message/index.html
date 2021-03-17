@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/message/css/ht-messge.css?v={:C('STATIC_VERSION')}">
+    <link href="{$static_host}/assets/user/message/css/message.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Message:header" />
+        <div class="ht-main">
+            <div class="c-news-box">
+                <div class="c-news-operation">
+                    <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/message/" class="item-all">全部</a>
+                    <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/message/unread/" class="no-read">未读消息</a>
+                </div>
+                <ul class="c-news-ul">
+                    <volist name="info.notices" id="vo">
+                        <li class="readed">
+                            <input type="checkbox" class="icheck" data-id="{$vo.id}">
+                            <if condition="!$vo['isread']">
+                            <i class="icon-envelope"></i>
+                            <else/>
+                            <i class="icon-envelope-alt"></i>
+                            </if>
+                        <a href="{:C('QZ_YUMING_SCHEME')}://u.qizuang.com/message/{$vo.id}" class="c-news-tit">{$vo.title}</a>
+                        <i class="icon-trash" data-id="{$vo.id}"></i>
+                        <div class="c-news-date">{$vo.time|date="Y-m-d",###}</div>
+                    </li>
+                    </volist>
+                </ul>
+                <div class="c-news-operation">
+                    <a id="icheck-all" href="javascript:void(0)">全选</a>
+                    <a id="del-all" href="javascript:void(0)">删除</a>
+                </div>
+                {$info.page}
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+    <script type="text/javascript">
+       if(location.pathname.indexOf('unread')!=-1){
+           $(".no-read").addClass('active')
+           $('.item-all').removeClass('active')
+       }else{
+           $(".item-all").addClass('active')
+           $('.no-read').removeClass('active')
+       }
+        $('.icheck').iCheck({
+            checkboxClass: 'icheckbox_minimal-red',
+            radioClass: 'iradio_minimal-red',
+            increaseArea: '' // optional
+        }).on("ifChecked", function(event) {
+            var target = $(event.target);
+            target.attr("checked", "checked");
+        }).on("ifUnchecked", function(event) {
+            var target = $(event.target);
+            target.attr("checked", false);
+        });
+
+        $('#icheck-all').click(function(event) {
+             $('.icheck').iCheck("check");
+        });
+
+        $(".icon-trash").click(function(event) {
+            var _this = $(this);
+            openwindow("确定删除站内信吗？",function(){
+                var id = _this.attr("data-id");
+                $.ajax({
+                    url: '/delmessage/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                       id:id
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }else{
+                        openwindow(data.info);
+                    }
+                });
+            });
+        });
+
+        $("#del-all").click(function(event) {
+            var ids = [];
+            $(".icheck:checked").each(function(){
+                ids.push($(this).attr("data-id"));
+            });
+            if (ids.length > 0) {
+                openwindow("确定删除站内信吗？",function(){
+                    $.ajax({
+                        url: '/delmessage/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {id:ids}
+                    })
+                        .done(function(data) {
+                            if (data.status == 1) {
+                                window.location.href = window.location.href;
+                            }else{
+                                openwindow(data.info);
+                            }
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

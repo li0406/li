@@ -1,0 +1,82 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>媒体报道管理</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/mediareport/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="box">
+            <div class="box-body">
+                <div class="row">
+                    <form id="tdk_search" action="" method="get">
+                        <div class="col-xs-2">
+                            <div class="h5">标题：</div>
+                            <div><input name="title" class="form-control" placeholder="报道标题" value="{:I('get.title')}"></div>
+                        </div>
+                        <button class="search" type="submit">搜索</button>
+                    </form>
+                    <a href="/mediareport/detail/" class="add-media" style="">添加报道</a>
+                </div>
+            </div>
+        </div>
+        <div class="box box-body">
+            <div class="clearfix">
+                <volist name="list" id="vo">
+                    <div class="media-content">
+                        <div>
+                            <p class="media-tit">
+                                <a href="/mediareport/detail?id={$vo.id}">{$vo['title']}</a>
+                            </p>
+                            <div class="media-time">添加时间：{:date("Y-m-d",$vo['create_time'])}</div>
+                            <div class="media-img">
+                                <a href="/mediareport/detail?id={$vo.id}"><img src="//{:C('QINIU_DOMAIN')}/{$vo['image']}" /></a>
+                            </div>
+                            <p class="media-url">
+                                <a target="_blank" href="{$vo['url']}">{$vo['url']}</a>
+                            </p>
+                        </div>
+
+                        <div class="media-operate">
+                            <span><a href="/mediareport/detail?id={$vo.id}" class="media-edit"><i class="fa fa-pencil"></i>编辑</a></span>
+                            <span><button class="media-delete" data-id="{$vo.id}"><i class="fa fa-trash"></i>删除</button></span>
+                        </div>
+                    </div>
+                </volist>
+            </div>
+            {$page}
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(".media-delete").click(function () {
+                var id = $(this).attr('data-id');
+                layer.confirm('是否删除此媒体报道？', {
+                    btn: ['删除', '取消'] //按钮
+                }, function () {
+                    $.ajax({
+                        url: '/mediareport/deletes',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            layer.msg(data.error_msg, {time: 2300}, function () {
+                                window.location.reload();
+                            });
+                        },
+                        error: function () {
+                            layer.msg('服务器去火星了~~', {time: 1300});
+                        }
+                    })
+                });
+            })
+        });
+    </script>
+</block>

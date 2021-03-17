@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <title>{$keys.title}-{$title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <include file="Home@Index:resource" />
+    <link href="{$static_host}/assets/home/meitu/css/imglist.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="{$static_host}/assets/home/xiaoguotu/js/jQueryColor.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/home/xiaoguotu/js/jquery.masonry.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/home/xiaoguotu/js/jQeasing.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+    {$headerTmp}
+    <div class="wrap oflow">
+        <div class="bread">
+            <empty name="dname">
+                <a href="/">装修效果图</a>>名师
+            <else />
+                <a href="/">装修效果图</a>><a href="/mingshi/">名师</a>>{$dname}
+            </empty>
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="mingshi-main">
+            <dl>
+                <dt>
+                    名师
+                </dt>
+                <dd class="color">
+                    <volist name="info.mingshilist" id="vo">
+                        <if condition="$info['mingshi'] EQ $vo['shortname']">
+                            <a href="/mingshi/{$vo.shortname}/" class="active" >{$vo.name}</a>
+                        <else/>
+                            <a href="/mingshi/{$vo.shortname}/" >{$vo.name}</a>
+                        </if>
+                    </volist>
+                </dd>
+                <if condition="count($info['mingshilist']) GT 17 ">
+                    <em class="more" data-on="0"><i></i></em>
+                </if>
+            </dl>
+            <if condition="$info['mingshiname']">
+                <div class="meitu-chosed">
+                    <h1>已选择：</h1>
+                    <a href="/mingshi/"><span >{$info.mingshiname}<i>X</i></span></a>
+                </div>
+            </if>
+        </div>
+    </div>
+    <div class="content mt20">
+        <div class="waterfull clearfloat" id="waterfull">
+            <div class="content mt20">
+            <ul>
+                <volist name="info.meitu" id="vo">
+                    <li class="item">
+                        <div class="imglist_box">
+                            <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" class="a-img" target="_blank">
+                               <img src="http://{:C('QINIU_DOMAIN')}/{$vo.img_path}-w300.jpg" alt="{$vo.title}">
+                            </a>
+                            <div class="fadan_button">装成这样要花多少钱</div>
+                        </div>
+                        <a href="{$SCHEME_HOST.scheme_full}meitu.{$SCHEME_HOST.domain}/p{$vo.id}.html" class="a-img" target="_blank">
+                            <h2 class="li-title" title="{$vo.title}">{$vo.title}</h2>
+                        <p class="description">
+                            <span class="des1">{$vo.wz}</span>
+                            <span class="des2">{$vo.fg} {$vo.hx}</span>
+                            <span class="des3">{$vo.ys}</span>
+                        </p>
+                        <div class="qianm clearfloat">
+                            <span class="sp1"><b>{$vo.pv}</b>浏览</span>
+                        </div>
+                        </a>
+                    </li>
+                </volist>
+            </ul>
+            </div>
+        </div>
+    </div>
+    {$info.page}
+    <div class="wrap mt50">
+        <a href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/zhaobiao/" target="_blank"><img src="{$static_host}/assets/home/meitu/img/imglistbt.jpg" width="1210" height="190"></a>
+    </div>
+    <include file="Home@Index:footer" />
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script type="text/javascript">
+        var shen = null,
+        shi = null;
+        shen = citys["shen"];
+        shi = citys["shi"];
+        // $(function() {
+            $("#tab").rTabs({
+                auto: false,
+                bind: 'click',
+                animation: 'fadein'
+            });
+
+            var container = $('.waterfull ul');
+            function tores(){
+                var tmpWid=$(window).width();
+                if(tmpWid>1210){
+                    tmpWid=1210;
+                }else{
+                    var column=Math.floor(tmpWid/302);
+                    tmpWid=column*302;
+                }
+                $('.waterfull').width(tmpWid);
+            }
+            tores();
+            $(window).resize(function(){
+                tores();
+            });
+            container.imagesLoaded(function(){
+              container.masonry({
+                columnWidth: 302,
+                itemSelector : '.item',
+                isFitWidth: true,//是否根据浏览器窗口大小自动适应默认false
+                isAnimated: true,//是否采用jquery动画进行重拍版
+                isRTL:false,//设置布局的排列方式，即：定位砖块时，是从左向右排列还是从右向左排列。默认值为false，即从左向右
+                isResizable: true,//是否自动布局默认true
+                animationOptions: {
+                    duration: 800,
+                    easing: 'easeInOutBack',//变化方式
+                    queue: false//是否队列，从一点填充瀑布流
+                }
+              });
+            });
+
+            $(".mingshi-main .more").click(function(event) {
+                var _this = $(this);
+                if(_this.attr("data-on") == 0){
+                    _this.attr("data-on",1);
+                    $(".mingshi-main dl").addClass('extend');
+                }else{
+                    _this.attr("data-on",0);
+                    $(".mingshi-main dl").removeClass('extend');
+                }
+            });
+
+
+        $(".fadan_button").click(function(event) {
+            var _this = $(this);
+            $.ajax({
+                url: '/dispatcher/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    type:"bj",
+                    source: 17112924,
+                    action:"load"
+                }
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                  $("body").append(data.data);
+                  if(navigator.appName == "Microsoft Internet Explorer"){
+                    $(".zxfb").show();
+                    _this.hide();
+                  }else{
+                    $(".zxfb").fadeIn(400,function(){
+                        $(this).find("input[name='bj-xiaoqu']").focus();
+                    });
+                    $(".zxbj_content").removeClass('smaller');
+                  }
+                }
+            });
+        });
+        // });
+    </script>
+</body>
+</html>

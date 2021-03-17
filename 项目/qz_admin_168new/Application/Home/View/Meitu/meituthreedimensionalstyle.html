@@ -1,0 +1,199 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网美图榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/meitu3d.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>3D效果图-分类管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitu/">美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                <h4>3D效果图-分类管理</h4>
+                            </div>
+                            <div class="col-xs-2">
+                                <div class="col-xs-6 bg-info"><a class="text-center style-info" href="">风格管理</a></div>
+                                <div class="col-xs-6"><a class="text-center style-info" href="/meitu/meituthreedimensionallayout">户型管理</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h5 class="box-title">风格列表</h5>
+                        <div id="add-style" class="btn btn-info pull-right" data-toggle="modal" data-target="#addstyle">+ 新增风格</div>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover text-center" id="tablelist">
+                                <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>排序</th>
+                                        <th>推荐状态</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <volist name="style" id="v">
+                                    <tr>
+                                        <td>{$v.name}</td>
+                                        <td>{$v.sort}</td>
+                                        <td><if condition="($v.recommend eq 1)">是<else/>否</if></td>
+                                        <td>{$v.add_time}</td>
+                                        <td><i class="fa fa-pencil" data-id={$v.id} data-toggle="modal" data-target="#addstyle"></i><i class="fa fa-trash" data-id={$v.id} data-toggle="modal" data-target="#deletestyle"></i></td>
+                                    </tr>
+                                </volist>
+
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" tabindex="-1" role="dialog" id="addstyle">
+                <div class="modal-dialog" role="document" >
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">添加风格</h4>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div class="modal-box">
+                                <p class="col-xs-12"><span class="pull-left text-left">风格名称：</span><input class="stylename pull-left style-input" type="" name=""></p>
+                                <p class="col-xs-12"><span class="pull-left text-left">排序：</span><input type="" name="" class="stylesort pull-left number-input"></p>
+                                <input class="styleid" hidden>
+                                <p class="col-xs-12" style="overflow: hidden;">
+                                    <span class="pull-left text-left">是否推荐：</span>
+                                    <input class="stylerecommend pull-left bool-input  recommend-input" id="checkbox" type="checkbox" name="" value="1">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-add-ok"  data-dismiss="modal" >保存</button>
+                            <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" tabindex="-1" role="dialog" id="deletestyle">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">删除提示</h4>
+                        </div>
+                        <div class="modal-body text-center">确定删除该条内容吗？</div>
+                        <input class="styleid" hidden>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-delete-ok"  data-dismiss="modal">确定</button>
+                            <button type="button" class="btn btn-default"  data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 修改弹窗操作
+        $('#tablelist tbody tr td').on('click','.fa-pencil',function(){
+            var id = $(this).attr("data-id");
+            var name = $(this).parent().parent().find('td').eq(0).text();
+            var number = $(this).parent().parent().find('td').eq(1).text();
+            var bool = $(this).parent().parent().find('td').eq(2).text();
+            $('.styleid').val(id);
+            $('.style-input').val(name);
+            $('.number-input').val(number);
+//            $('.recommend-input').val(bool);
+            console.log(bool);
+//            return false;
+            if(bool == '是'){
+                $('.bool-input').prop('checked',true)
+            }else{
+                $('.bool-input').prop('checked',false)
+            }
+        });
+        // 新增弹窗操作
+        $('#add-style').on('click',function(){
+            $('#addstyle .style-input').val('');
+            $('#addstyle .number-input').val('');
+            $('.bool-input').prop('checked',false);
+        });
+
+        //添加/修改操作
+        $('.btn-add-ok').click(function (event) {
+            var styleid = $('#addstyle .styleid').val();
+            var stylename = $('#addstyle .stylename').val();
+            var stylesort = $('#addstyle .stylesort').val();
+            if($('#checkbox').is(':checked')) {
+                var stylerecommend = 1;
+            }else {
+                var stylerecommend = 2;
+
+            }
+            console.log(stylerecommend);
+//            return false;
+            $.ajax({
+                url: '/meitu/meituthreedimensionalstyleadd/',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: styleid,
+                    name: stylename,
+                    sort: stylesort,
+                    recommend: stylerecommend
+                }
+            })
+            setTimeout(function () {
+                window.location.href = window.location.href;
+            }, 2);
+        });
+
+        //删除弹窗
+        $('#tablelist ').on('click','.fa-trash',function(){
+            var id = $(this).attr("data-id");
+            $('.styleid').val(id);
+        });
+
+        //删除传值
+            $('.btn-delete-ok').click(function (event) {
+            var styleid = $('#deletestyle .styleid').val();
+                console.log(styleid);
+//                return false;
+            $.ajax({
+                url: '/meitu/meituthreedimensionalstyledelete/',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: styleid,
+                }
+            })
+            setTimeout(function () {
+                window.location.href = window.location.href;
+            }, 2);
+        });
+
+
+    </script>
+</block>

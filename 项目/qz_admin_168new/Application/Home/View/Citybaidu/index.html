@@ -1,0 +1,173 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>百度账户城市管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/js/plugins/listnav/listnav.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}">
+<style>
+.nav-tabs {border-bottom:none}
+.nav-tabs-custom > .nav-tabs {width:520px;margin: 0 auto;}
+.nav-tabs-custom > .tab-content {border-top: 1px solid #f4f4f4;}
+.nav-tabs-custom > .nav-tabs > li:first-of-type.active > a {border-left-color:#f4f4f4}
+.nav-tabs-custom > .nav-tabs > li {font-size:18px}
+</style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>百度账户城市管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body act-box" style="min-width:500px">
+            <form id="searchform" action="" method="get">
+                <div class="col-sm-2">
+                    账户：
+                    <select name="account" id="account" class="form-control">
+                        <option value="">请选择账户</option>
+                        <volist name="accounts" id="v">
+                        <if condition="$v.baidu_account NEQ '' ">
+                        <option value="{$v.baidu_account}">{$v.baidu_account}</option>
+                        </if>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    城市：
+                    <select name="city" id="city" class="select2">
+                        <option value="">请选择城市</option>
+                        <volist name="allCity" id="v">
+                        <option value="{$v.cid}">{$v.abc} {$v.cname}</option>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <br>
+                    <button type="submit" id="submitBtn" class="btn flat btn-primary"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                </div>
+                <div class="col-sm-1">
+                    <br>
+                    <a class="btn flat btn-success" href="/citybaidu/add"><i class="fa fa-plus-circle"></i>&nbsp;新增帐户</a>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header"><h3 class="box-title">账户列表</h3></div>
+                <div class="box-body">
+                    <volist name="list" id="v">
+                        <div class="box baidu-account-box">
+                            <div class="box-header with-border">
+                                <div class="col-md-10 pull-left">
+                                    <div class="pull-left">
+                                        <h3 class="box-title account-title">{$key}</h3>
+                                    </div>
+                                    <div class="pull-left">
+                                        <div class="abc-nav">
+                                            <volist name="v" id="vs" key="ks">
+                                                <a href="javascript:;" data-id="{$key}">{$key}</a>
+                                            </volist>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 pull-right text-right">
+                                    <i class="fa fa-pencil"></i>&nbsp;&nbsp;
+                                    <i class="fa fa-trash-o"></i>
+                                </div>
+                            </div>
+                            <div class="box-body bd-cList">
+                                <volist name="v" id="vs" key="ks">
+                                    <volist name="vs" id="vss" key="kss">
+                                        <li class="li-{$vss.abc}">{$vss.cname}</li>
+                                    </volist>
+                                </volist>
+                            </div>
+                        </div>
+                    </volist>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".select2").select2();
+    $(".select2").select2("val","{$Think.get.city}");
+    $('select[name=account]').val('{$Think.get.account}');
+
+
+    $('.abc-nav a').on('click', function(){
+        var id = $(this).attr('data-id');
+        var itmes = $(this).parent().parent().parent().parent().parent().find('.bd-cList');
+
+        $(this).parent().find('a').removeClass('selected');
+        $(this).addClass('selected');
+        itmes.find('li').hide();
+        itmes.find('.li-'+id).show();
+    });
+
+    $('.fa-pencil').on('click', function(){
+        var account = $(this).parent().parent().find('.account-title').html();
+        if(account == '#空账户'){
+            alert('空帐户无法编辑！');
+            return false;
+        }
+        window.location = '/citybaidu/edit?id='+account;
+    });
+
+    $('.fa-trash-o').on('click', function(){
+        if(!confirm('确认要删除此百度账户吗？')){
+            return false;
+        }
+
+        var account = $(this).parent().parent().find('.account-title').html();
+        if(account == '#空账户'){
+            alert('空帐户无法删除！');
+            return false;
+        }
+
+        var data = new Object();
+        data.account = account;
+
+        $.ajax({
+            url: '/citybaidu/remove',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if(data.status == '0'){
+                alert(data.info);
+            }else{
+                alert('删除帐号组成功！');
+                window.location = "/citybaidu/";
+            }
+            return false;
+        })
+        .fail(function(xhr) {
+            alert('操作失败！');
+            return false;
+        });
+    });
+
+});
+
+</script>
+</block>

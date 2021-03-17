@@ -1,0 +1,223 @@
+<extend name="Common:basic" />
+<block name="link">
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}{$basic.canonical}" />
+    <link href="/assets/mobile/meitu/css/m-xgt-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/css/top-sj-bj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.domain}/assets/sub/index/img/360search.png" />
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-tit"><h1>{$basic.body.title}</h1></div>
+</block>
+<block name="content">
+    <article>
+        <div class="m_box" id="box">
+            <div class="s_hd" id="m_hd">
+                <volist name="category_nav" id="vo">
+                    <span class="" data-type="{$vo['id']}">
+                        <if condition="!empty($category_map['parent']) && ($category_map['parent'] eq $vo['id'])">
+                            {$category_map['category_name']}
+                            <else/>
+                            {$vo['name']}
+                        </if>
+                        <i class="icon-down"></i></span>
+                </volist>
+            </div>
+            <div class="m_bd" id="ul">
+                <volist name="category_nav" id="vo">
+                    <ul class="ul{$vo.id}">
+
+                    </ul>
+                </volist>
+            </div>
+        </div>
+        <!-- 遮罩层-->
+        <div id="mask"></div>
+        <!--图片模块-->
+        <div class="m_case" style="display: block;">
+            <div class="wrapper">
+                <ul class="wall">
+                    <div class="wall-column">
+                        <!-- <div class="article" id="gongzuang">
+                            <img src="/assets/mobile/meitu/img/youku_new.png" />
+                            <p style="margin: 0;">{:C('APP_OPEN_TITLE')}，{:C('APP_OPEN_DESCRIPTION')}</p>
+                        </div> -->
+                        <volist name="list" id="v">
+                            <div class="article" id="">
+                                <if condition="$category_map.type eq 1">
+                                    <a href="/tu/g{$v.id}.html" rel='nofollow'>
+                                        <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.image_src}-w300.jpg"
+                                            alt="{$v.title}" />
+                                    </a>
+                                    <else />
+                                    <a href="/tu/j{$v.id}.html" rel='nofollow'>
+                                        <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$v.image_src}-w300.jpg"
+                                            alt="{$j.title}" />
+                                    </a>
+                                </if>
+                                <p>
+                                    <if condition="$category_map.type eq 1">
+                                        <a href="/tu/g{$v.id}.html">{$v.title}</a>
+                                        <else />
+                                        <a href="/tu/j{$v.id}.html">{$v.title}</a>
+                                    </if>
+                                </p>
+                            </div>
+                            <if condition="$key eq 3">
+                                <div class="article">
+                                    <a href="/bao"  rel='nofollow'>
+                                        <img src="//staticqn.qizuang.com/custom/20200703/FgLOK3AH4Sm9Btm-_2XLiGBRk7XH" alt="">
+                                        <p style="margin: 0;font-weight: bold;color: #c00;">装修保障服务</p>
+                                    </a>
+                                </div>
+                            </if>
+                        </volist>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <empty name="list">
+            <div class="notfind-more">
+                <span class="notfind">施主！这个类型的图片很有可能跟人私奔了</span>
+                <a href="/tu/">>>去看看其他美图</a>
+            </div>
+        <else />
+            {$page}
+        </empty>
+        <input name="pageid" id="pageid" type="hidden" value="{$info.pageid}">
+    </article>
+
+    <!-- 相关推荐 -->
+    <notempty name="wordsList">
+        <div class="thematic_words">
+            <span calss="thematic_word">相关推荐：</span>
+            <volist name="wordsList" id="item">
+                <a class="thematic_word" href="/tu/{$item.id}/">{$item.name}</a>
+            </volist>
+        </div>
+    </notempty>
+
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <input type="hidden" name="category" value='{$category|default=""}'>
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <include file="Common/footfadantc" />
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/mobile/meitu/js/jaliswall.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var category = JSON.parse($('input[name=category]').val())
+        for (k in category) {
+            $.each(category[k],function(index,item){
+                var tpl = '';
+                if(index == 'child'){
+                    for (var i = 0; i < item.length; i++) {
+                        tpl += ' <li><a href="/tu/'+ item[i].url +'/" class="'+ item[i].active +'">'+ item[i].name +'</a></li>'
+                    }
+                    $('.ul'+k).append(tpl)
+                }
+            })
+        }
+        $(function () {
+            tab("box"); //列表选项卡
+            $('.wall').jaliswall({
+                item: '.article'
+            });
+        });
+
+        var maskTop = 50;
+        // 置顶
+        $(window).on("scroll", function () {
+            if ($(document).scrollTop() >= "1000") {
+                $('#gotop').addClass('show');
+            } else {
+                $('#gotop').removeClass('show');
+            }
+            if($(document).scrollTop() >= maskTop){
+                $('#mask').css("top",0);
+            }else{
+                $('#mask').css("top",50);
+            }
+        });
+        $("#gotop").click(function(){
+            $('body,html').animate({scrollTop:0},500);
+            return false;
+        });
+        // 列表选项卡
+        function tab(id) {
+            var mask = document.getElementById('mask');
+            var eleId = document.getElementById(id) || false;
+            if (eleId != false) {
+                var span = eleId.getElementsByTagName("span");
+                var ul = eleId.getElementsByTagName("ul");
+                var li = eleId.getElementsByTagName('li');
+                var mhd = $('#m_hd');
+                var mbd = eleId.getElementsByClassName('m_bd')[0];
+
+                for (var i = 0; i < span.length; i++) {
+                    span[i].index = i;
+                    span[i].onclick = function () {
+                        if (this.className == 'active') {
+                            this.className = "";
+                            // ul[this.index].className = "";
+                            ul[this.index].classList.remove('show');
+                            mask.className = "";
+                        } else {
+                            for (var j = 0; j < ul.length; j++) {
+                                span[j].className = "";
+                                // ul[j].className = "";
+                                ul[j].classList.remove('show');
+                                mask.className = "";
+                            }
+                            this.className = "active";
+                            // ul[this.index].className = "show";
+                            ul[this.index].classList.add('show');
+                            maskTop = ul[this.index].offsetHeight;
+                            mbd.style.zIndex = '3'
+                            mask.className = "show";
+                            mhd.css({
+                                'z-index': 3,
+                                'position': 'absolute',
+                                'top': '50px'
+                            });
+
+                        }
+                    }
+                    mask.onclick = function () {
+                        for (var i = 0; i < span.length; i++) {
+                            span[i].className = ''
+                            ul[i].className = "";
+                        }
+                        mask.className = "";
+                    }
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <!--<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>-->
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        // 城市选择插件
+        /*selectQz.init({
+            province:$("input[name=province]").attr("data-id"),
+            city:$("input[name=city]").attr("data-id"),
+            area:$("input[name=area]").attr("data-id")
+        });*/
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

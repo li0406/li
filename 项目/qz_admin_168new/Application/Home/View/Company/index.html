@@ -1,0 +1,291 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>齐装网标签管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/company/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12 search-title">
+                                <h1 class="search-condition">非会员信息管理</h1>
+                            </div>
+                            <form class="search-condition" action="/company" method="get">
+                                <div class="col-xs-12 search-box">
+                                    <div class="col-xs-2">
+                                        <div class="little-title">所属站点：</div>
+                                        <select id="city" name="city" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}" {$_GET['city']==$vo['cid']?'selected':''}>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div class="little-title">公司名称/ID：</div>
+                                        <input type="text" name="company" class="form-control clear-target" placeholder="" value="{$Think.get.company}">
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div class="little-title">会员状态：</div>
+                                        <select name="member" id="member" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1" {$_GET['member']==1?'selected':''}>假会员</option>
+                                            <option value="2" {$_GET['member']==2?'selected':''}>注册会员</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div class="little-title">完善状态：</div>
+                                        <select name="state" id="state" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1" {$_GET['state']==1?'selected':''}>未修改</option>
+                                            <option value="2" {$_GET['state']==2?'selected':''}>修改中</option>
+                                            <option value="3" {$_GET['state']==3?'selected':''}>已完善</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div class="little-title">操作人：</div>
+                                        <select id="op" name="op" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="seolist" id="vo">
+                                                <option value="{$vo.id}" {$_GET['op']==$vo['id']?'selected':''}>{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 search-box">
+                                    <div class="col-xs-2">
+                                        <div class="little-title">创建时间：</div>
+                                        <input type="text" name="start" class="form-control datetimepicker start" autocomplete="off" placeholder="请选择日期" value="{$Think.get.start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <input type="text" name="end" class="form-control datetimepicker end" autocomplete="off" placeholder="请选择日期" value="{$Think.get.end}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div class="little-title">更新时间：</div>
+                                        <input type="text" name="upstart" class="form-control datetimepicker upstart" autocomplete="off" placeholder="请选择日期" value="{$Think.get.upstart}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <input type="text" name="upend" class="form-control datetimepicker upend" autocomplete="off" placeholder="请选择日期" value="{$Think.get.upend}">
+                                    </div>
+                                    <div class="col-xs-3 btn-box">
+                                        <button type="button" id="reset" class="btn btn-reset col-xs-3"><i class="fa fa-refresh"></i>重置</button>
+                                        <button type="submit" id="search" class="btn btn-search col-xs-3"><i class="fa fa-search"></i>查询</button>
+                                        <a id="export" target="_blank" class="btn btn-search col-xs-3" href="/company/exportCompanyInfo?{$query}"><i class="fa fa-download"></i>导出</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 ">
+                <div class="box">
+                    <div class="box-body no-padding" id="box-body">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>公司ID</th>
+                                <th style="width: 200px">公司LOGO</th>
+                                <th>公司全称</th>
+                                <th>公司简称</th>
+                                <th>所属站点</th>
+                                <th>城市+区县</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>完善状态</th>
+                                <th>操作人</th>
+                                <th>更新时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.id}</td>
+                                    <td class="logo-img"><img src="{$vo.logo|default='/assets/home/company/default.png'}" alt=""></td>
+                                    <td>{$vo.qc}</td>
+                                    <td>{$vo.jc}</td>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.cname}-{$vo.qz_area}</td>
+                                    <td><if condition="$vo.fake EQ 1">假会员<elseif condition="$vo.on eq 0"/>注册会员</if></td>
+                                    <td>{$vo.register_time|date='Y-m-d',###}</td>
+                                    <td><if condition="$vo.state eq 1 ">未修改<elseif condition="$vo.state eq 2"/>修改中<elseif condition="$vo.state eq 3"/>已完善</if></td>
+                                    <td>{$vo.op_info_name}</td>
+                                    <td>{$vo['op_info_last_time']!=0?date('Y-m-d',$vo['op_info_last_time']):''}</td>
+                                    <td>
+                                        <a href="javascript:void(0)" class="operator-btn operator-edit" data-id="{$vo.id}">编辑</a>
+                                        <a href="javascript:void(0)" class=" operator-btn operator-log" data-id="{$vo.id}" data-status="{$vo.state|default=1}">修改状态</a>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js"></script>
+    <script>
+        $(function () {
+            $('#city').select2();
+            $('#op').select2();
+
+            $('.datetimepicker').datetimepicker({
+                todayHighlight: 1,
+                format: 'yyyy-mm-dd',
+                todayBtn: true,
+                minView: 'month',
+                autoclose: true
+            }).on('change', function () {
+                var start = $('.start').val(),
+                    end = $('.end').val();
+
+                var upstart = $('.upstart').val(),
+                    upend = $('.upend').val();
+                var flag = diffDate(start, end);
+                var flag2 = diffDate(upstart, upend);
+                if (!flag || !flag2) {
+                    msg("开始时间不能大于结束时间", function () {
+                        $('.end-time').val('');
+                    });
+                }
+            });
+            $('.btn-search').on('click', function () {
+                if ($('.start').val() && !$('.end').val()) {
+                    msg('请选择创建结束日期');
+                    return false
+                }
+                if (!$('.start').val() && $('.end').val()) {
+                    msg('请选择创建开始日期');
+                    return false
+                }
+                if ($('.upstart').val() && !$('.upend').val()) {
+                    msg('请选择更新结束日期');
+                    return false
+                }
+                if (!$('.upstart').val() && $('.upend').val()) {
+                    msg('请选择更新开始日期');
+                    return false
+                }
+            });
+
+            /*重置*/
+            $('.btn-reset').on('click', function () {
+                $("#city").select2("val", '');
+                $("#op").select2("val", '');
+                $('input[type=text]').val('');
+                $('select').val('');
+            });
+
+            $('.operator-log').on('click', function () {
+                var html = '<div class="statu-item">' +
+                    '<h3>请选择状态</h3>' +
+                    '<div class="chose-statu">' +
+                    '<label for="noChange"><input type="radio" id="noChange" name="statu-option" value="1">未修改 </label>' +
+                    '<label for="Change"><input type="radio" id="Change" name="statu-option" value="2">修改中 </label>' +
+                    '<label for="done"><input type="radio" id="done" name="statu-option" value="3">已完善 </label>' +
+                    '</div>' +
+                    '<div class="chose-btns">' +
+                    '<button class="btns-cancel">取消</button>' +
+                    '<button class="btns-sure">确定</button>' +
+                    '</div>' +
+                    '</div>';
+                layerIndex = layer.open({
+                    type: 1,
+                    title: '修改状态',
+                    area: ['300px', '200px'],
+                    shadeClose: true,
+                    content: html
+                });
+                var $that = $(this);
+                current_state = $that.data('status');
+                $(".chose-statu input[name='statu-option']").removeAttr('checked');
+                if (current_state == 1) {
+                    $('#noChange').prop('checked', true);
+                }
+                if (current_state == 2) {
+                    $('#Change').prop('checked', true);
+                }
+                if (current_state == 3) {
+                    $('#done').prop('checked', true);
+                }
+                $('.btns-cancel').on('click', function () {
+                    layer.close(layerIndex);
+                });
+                $('.btns-sure').on('click', function () {
+                    var id = $that.attr("data-id");
+                    var state = $("input[name=statu-option]:checked").val();
+
+                    $.ajax({
+                        url: '/company/changeCompanyState/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id,
+                            state: state
+                        }
+                    }).done(function (res) {
+                        if (res.status == 1) {
+                            $that.data('status', state);
+                            msg(res.info,function () {
+                                layer.close(layerIndex);
+                                window.location.reload();
+                            });
+                        } else {
+                            msg(res.info,function () {
+                                layer.close(layerIndex);
+                            });
+                        }
+                    })
+                })
+            });
+
+            /*编辑*/
+            $('.operator-edit').on('click', function () {
+                var id = $(this).attr("data-id");
+                $.ajax({
+                    url: '/company/getInUser/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                }).done(function (res) {
+                    if (res.status == 1) {
+                        window.open("http://u.qizuang.com/backLogin?company_id="+res.data);
+                    }
+                })
+            })
+        });
+
+        function diffDate(startDate, endDate) {
+            var sDate = new Date(startDate), eDate = new Date(endDate);
+            return eDate <= sDate ? false : true;
+        }
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 1300},
+                fn || function () {}
+            )
+        }
+
+    </script>
+</block>

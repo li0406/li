@@ -1,0 +1,311 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>小程序视频管理-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+<style type="text/css">
+    .button-width {font-size: 20px;}
+</style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>小程序视频管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <form id="myForm" class="form-horizontal" method="GET" onsubmit="return false">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">标题<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input type="text" name="title" class="form-control" placeholder="文章标题" value="{$info.title}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">简介<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <textarea name="description" class="form-control" placeholder="描述" id="description">{$info.description}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-3">
+                                    <div class="col-xs-12">
+                                        <label  class="col-sm-12">主题分类<span style="color:red;">*</span></label>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <div class="col-sm-12">
+                                            <select id="theme" name="theme" class="form-control">
+                                                <option value="0">-请选择-</option>
+                                                <option value="1">装修前</option>
+                                                <option value="2">装修中</option>
+                                                <option value="3">装修后</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3">
+                                    <div class="col-xs-12">
+                                        <label  class="col-sm-12">选择讲师<span style="color:red;">*</span></label>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <div class="col-sm-12">
+                                            <select id="teacher" name="teacher" class="form-control">
+                                                <option value="0">-请选择-</option>
+                                                <volist name="teachers" id="v">
+                                                    <option value="{$v.id}">{$v.author}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">视频封面<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input id="bigImg"  type="file" class="form-control" />
+                                        <input type="hidden" name="bigimg" value="{$info.cover_img}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-3">视频地址<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input type="text" name="wxapp_url" class="form-control" placeholder="输入完整的视频地址" value="{$info.wxapp_url}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-2">
+                                    <label  class="col-sm-12">设为首页推荐<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-5">
+                                    <div class="col-sm-12">
+                                        <a href="javascript:void(0);" class="recommend">
+                                            <eq name="info.istop" value="0">
+                                                <span title="未推荐" class="fa fa-toggle-off all-recommend button-width" data-recommend="0"></span>
+                                                <input type="hidden" id="recommend" value="0">
+                                            <else/>
+                                                <span title="已推荐" class="fa fa-toggle-on all-recommend button-width" data-recommend="1"></span>
+                                                <input type="hidden" id="recommend" value="1">
+                                            </eq>
+                                        </a>
+                                        <span style="color:red;margin-left: 40px;">开启后视频推荐至首页，关闭则不推荐</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-2">
+                                    <label  class="col-sm-12">启用<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-5">
+                                    <div class="col-sm-9">
+                                        <a href="javascript:void(0);" class="allStatus">
+                                            <eq name="info.isdelete" value="1">
+                                                <span title="停用" class="fa fa-toggle-off all-status button-width" data-status="1"></span>
+                                                <input type="hidden" id="newStatus" value="1">
+                                            <else/>
+                                                <span title="启用" class="fa fa-toggle-on all-status button-width" data-status="0"></span>
+                                                <input type="hidden" id="newStatus" value="0">
+                                            </eq>
+                                        </a>
+                                        <span style="color:red;margin-left: 40px;">开启后在前台显示，关闭则不显示</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-1 col-sm-1">
+                                    <button id="btnSave" class="btn btn-block btn-info">保存</button>
+                                    <input type="hidden" value="{$info.id}" name="id" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <a href="/wxvideo/index/" class="btn btn-block btn-default">取消</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>封面图片尺寸：660px*360px</p>
+                        <p>提示：上传精美的封面会更加赢得用户的点击观看和喜欢哦！</p>
+                        <p>视频链接：微信小程序视频地址使用秒拍视频地址。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $('#theme').val('{$info.theme}' == '' ? 0 : '{$info.theme}');
+    $('#teacher').val('{$info.teacher}' == '' ? 0 : '{$info.teacher}');
+
+    $("#bigImg").fileinput({
+        language: 'zh', //设置语言,
+        uploadUrl:"/upload/uploadImg",
+        showCaption:false,
+        browseClass:"btn btn-primary",
+        allowedFileExtensions : ['jpg','png','gif'],
+        maxFileCount:1,
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        uploadAsync:true,
+        dropZoneEnabled:false,
+        previewSettings:{
+            image: {width: "660px", height: "360px"}
+        },
+        layoutTemplates:{
+            actionDelete:"",
+            actionUpload:""
+        },
+        uploadExtraData:{
+            prefix:"vedio"
+        },
+        minImageWidth: "660",
+        minImageHeight: "360",
+        maxImageWidth: "660",
+        maxImageHeight: "360",
+        initialPreview:{$info.bigimg|default="'' "}
+    }).on('fileuploaded', function(event, data) {
+        var _this = $(this);
+        if(data.response.status == 1){
+            var obj = data.response.data;
+            $("input[name=bigimg]").val(obj.name);
+        }else{
+            _this.Alert({
+                msg:data.response.info,
+                level:2
+            });
+        }
+    }).on("fileuploaderror",function(event, data){
+          var _this = $(this);
+          _this.Alert({
+              msg:"图片不符合要求!",
+              level:2
+          });
+        return false;
+    }).on("fileclear",function(){
+        $("input[name=bigimg]").val("");
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var data = $("#myForm").serializeArray();
+        var recommend = $("#recommend").val();
+        var newStatus = $("#newStatus").val();
+        data.push({name:"recommend",value:recommend});
+        data.push({name:"newStatus",value:newStatus});
+
+        var title = $("input[name=title]").val();
+        if(title == ''){
+            alert("标题不能为空");
+            return false;
+        }
+        var description = $("#description").val();
+        if(description == ''){
+            alert("简介不能为空");
+            return false;
+        }
+        var theme = $("#theme").val();
+        if(theme == 0){
+            alert("主题分类不能为空");
+            return false;
+        }
+        var teacher = $("#teacher").val();
+        if(teacher == 0){
+            alert("讲师不能为空");
+            return false;
+        }
+        var bigimg = $("input[name=bigimg]").val();
+        if(bigimg == ''){
+            alert("封面图片不能为空");
+            return false;
+        }
+        var wxapp_url = $("input[name=wxapp_url]").val();
+        if(wxapp_url == ''){
+            alert("视频地址不能为空");
+            return false;
+        }
+
+        $.ajax({
+            url: '/wxvideo/vedioup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:data
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                alert("发布成功！");
+                window.location.href = "/wxvideo/index/";
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+
+    $(".allStatus").on('click',function(){
+        var status = $('.all-status').attr("data-status");
+        if(status == 1){
+            $(".all-status").removeClass("fa-toggle-off").addClass("fa-toggle-on");
+            $(".all-status").attr("data-status",0);
+            $(".all-status").attr("title",'启用');
+            $("#newStatus").val(0);
+        }else{
+            $(".all-status").removeClass("fa-toggle-on").addClass("fa-toggle-off");
+            $(".all-status").attr("data-status",1);
+            $(".all-status").attr("title",'停用');
+            $("#newStatus").val(1);
+        }
+    });
+    $(".recommend").on('click',function(){
+        var recommend = $('.all-recommend').attr("data-recommend");
+        if(recommend == 0){
+            $(".all-recommend").removeClass("fa-toggle-off").addClass("fa-toggle-on");
+            $(".all-recommend").attr("data-recommend",1);
+            $(".all-recommend").attr("title",'已推荐');
+            $("#recommend").val(1);
+        }else{
+            $(".all-recommend").removeClass("fa-toggle-on").addClass("fa-toggle-off");
+            $(".all-recommend").attr("data-recommend",0);
+            $(".all-recommend").attr("title",'未推荐');
+            $("#recommend").val(0);
+        }
+    });
+</script>
+</block>

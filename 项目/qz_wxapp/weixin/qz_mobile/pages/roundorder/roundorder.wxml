@@ -1,0 +1,116 @@
+<view class='top-header'>
+	<view class='header'>
+		<view class='h_time'>
+			<view class='h_title'>申请日期</view>
+			<view class="seach-content">
+				<view class="input-span" data-time="{{date_begin}}">
+					<picker mode="date" value="{{date_begin}}" start="{{createTime}}" end="{{nowTime}}" data-time="date_begin" bindchange="dateChange">
+						<view class="picker">
+							{{date_begin?date_begin:"开始时间"}}
+						</view>
+					</picker>
+				</view>
+				<text class="em">至</text>
+				<view class="input-span" data-time="{{date_end}}">
+					<picker mode="date" value="{{date_end}}" start="{{date_begin||createTime}}" end="{{nowTime}}" data-time="date_end" bindchange="dateChange">
+						<view class="picker">
+							{{date_end?date_end:"结束时间"}}
+						</view>
+					</picker>
+				</view>
+			</view>
+		</view>
+		<view class='tab-back'>
+			<view class='tab'>
+				<view class="flex1">
+					<picker class="flex_text" value="{{examStatusIndex}}" data-selecthx="{{examStatusList[examStatusIndex].name}}" range="{{examStatusList}}" range-key="{{'name'}}" bindchange="bindPickerChange_es">
+						<view wx:if="{{examStatusIndex == 0}}">审核状态</view>
+						<view wx:else> {{examStatusList[examStatusIndex].name}}</view>
+					</picker>
+					<image src="../../img/jian.png"></image>
+				</view>
+			</view>
+		</view>
+	</view>
+	<view class="search-item">
+		<view class='h_site' bindtap='toCity'>
+			<image src='../../img/dingwei.png'></image>
+			<view class='dingwei'>{{curCity}}</view>
+		</view>
+		<view class="search-tab">
+			<picker class="flex_text" value="{{searchTypeIndex}}" data-selecthx="{{searchTypeList[searchTypeIndex].name}}" range="{{searchTypeList}}" range-key="{{'name'}}" bindchange="bindPickerChange_st">
+				<view> {{searchTypeList[searchTypeIndex].name}}</view>
+			</picker>
+			<image src="../../img/jian.png"></image>
+		</view>
+		<view class='search'>
+			<image src='../../img/search.png'></image>
+			<input placeholder='{{searchTypeIndex == 0? searchPlaceholder1 : searchPlaceholder2 }}' bindconfirm="searchWord" bindinput='watchPassWord' confirm-type="search"></input>
+		</view>
+	</view>
+</view>
+
+
+
+<view class='con-scoll'>
+	<block wx:for="{{list}}" wx:for-index='index' wx:key>
+		<view class='con'>
+			<view class='con-item name'>
+				<view class='item-x'>{{item.order_id}}</view>
+				<image src="../../img/fuzhi.png" data-id="{{item.order_id}}" catchtap='copyBtn'></image>
+				<block wx:if="{{item.can_exam == 1}}">
+					<view class='blue status' wx:if="{{item.exam_status == 1}}">预受理</view>
+					<view class='green status' wx:elif="{{item.exam_status == 2}}">已通过</view>
+					<view class='red status' wx:elif="{{item.exam_status == 3}}">未通过</view>
+					<view class='yellow status' wx:elif="{{item.exam_status == 11}}">待定单</view>
+				</block>
+			</view>
+			<view class='con-item'>
+				<view class="xq-title">小区名称：</view>
+				<view class="xq-name">{{item.xiaoqu}}</view>
+			</view>
+			<view class='con-item'>
+				城市/区县：<text>{{item.city_name}}-{{item.area_name}}</text>
+			</view>
+			<view class='con-item'>
+				<view class="btg-title">业主：</view>
+				<view class="red yz-name">{{item.yz_name}}</view>
+			</view>
+			<view class='con-item'>
+				订单金额（元）：<text>{{item.round_money}}</text>
+			</view>
+			<view class='con-item con-num'>
+				<view class="xq-title">申请公司：</view>
+				<view class="xq-name">{{item.company_name}}</view>
+			</view>
+			<view class='con-item con-num'>
+				申请时间：<text>{{item.apply_date}}</text>
+			</view>
+			<view class='con-item con-num' wx:if="{{item.exam_status === 3}}">
+				<view class="btg-title">不通过原因：</view>
+				<view class="red btg-name">{{item.exam_remark}}</view>
+			</view>
+		</view>
+	</block>
+	<view class='page' wx:if='{{page}}'>
+		<view class="pre {{pageCurrent =='1'?'active':''}}" bindtap='prevBtn'>上一页</view>
+		<view class='total'>
+			<picker bindchange="toPage" value="" range="{{pageNumber}}">
+				<view class="picker">
+					<view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+				</view>
+			</picker>
+		</view>
+		<view class="next {{pageCurrent == pageTotalNumber?'active':''}}" bindtap='nextBtn'>下一页</view>
+	</view>
+	<!-- <view class='no-result' wx:if='{{noResult}}'>
+		<image src='../../img/no_result.png'></image>
+		<view>暂无搜索结果</view>
+	</view>
+	<view class='no-result' wx:if='{{noInternet}}'>
+		<image src='../../img/no_internet.png'></image>
+		<view>网络开了小差~请稍等</view>
+		<button bindtap='toCustom'>重新加载</button>
+	</view> -->
+	<error-box noResult="{{noResult}}" noInternet="{{noInternet}}" url="../roundorder/roundorder" bindreload="onShow"></error-box>
+</view>

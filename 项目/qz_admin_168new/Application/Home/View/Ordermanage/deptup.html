@@ -1,0 +1,141 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>渠道权限管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/mulit-select/multi-select-metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/quanxianbiaos/css/quanxbs.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/ordermanage/">渠道权限管理</a> > 标识部门管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/ordermanage/">渠道权限管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                    <form id="myform" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">标识部门：</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" name="dept" placeholder="标识部门" value="{$info.name}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">所属部门：</label>
+                            <div class="col-sm-3">
+                                <select name="deptbelong" class="form-control">
+                                    <option value="">请选择</option>
+                                    <volist name="dept" id="vo">
+                                    <if condition="$info['dept_belong'] EQ $vo">
+                                    <option value="{$vo}" selected="selected">{$vo}</option>
+                                    <else/>
+                                    <option value="{$vo}">{$vo}</option>
+                                    </if>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">帐号权限设置：</label>
+                            <div class="col-sm-6">
+                                <select id="my_multi_select" multiple="multiple" >
+                                    <volist name="users" id="vo">
+                                    <optgroup label="{$vo.name}">
+                                        <volist name="vo.child" id="v">
+                                        <if condition="in_array($v['id'],$info['userid'])">
+                                        <option value="{$v.id}" selected="selected" class="ms-selected">{$v.name}</option>
+                                        <else/>
+                                        <option value="{$v.id}" class="ms-selected">{$v.name}</option>
+                                        </if>
+                                    </volist>
+                                    </volist>
+                                    </optgroup>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <div class="col-sm-2">
+                                <button id="btnSave" type="button" class="btn btn-success btn-block">确认</button>
+                                <input type="hidden" name="id" value="{$info.id}"/>
+                            </div>
+                            <div class="col-sm-2">
+                                <a href="/ordermanage/" class="btn btn-danger btn-block">取消</a>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/mulit-select/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $('#my_multi_select').multiSelect({
+        selectableOptgroup: true,
+        selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+        selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+        afterInit: function(ms){
+            var that = this;
+            $selectableSearch = that.$selectableUl.prev(),
+            $selectionSearch = that.$selectionUl.prev(),
+            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+            that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+            .on('keydown', function(e){
+                if (e.which === 40){
+                    that.$selectableUl.focus();
+                    return false;
+                }
+            });
+
+            that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+            .on('keydown', function(e){
+                if (e.which == 40){
+                    that.$selectionUl.focus();
+                    return false;
+                }
+            });
+        }
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var val = null;
+        $('#my_multi_select').multiSelect("getValue",function(args){ val = args;});
+        var data = $("#myform").serializeArray();
+        data.push({name:"ids",value:val});
+        $.ajax({
+            url: '/ordermanage/deptup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = "/ordermanage/";
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        });
+    });
+</script>
+</block>

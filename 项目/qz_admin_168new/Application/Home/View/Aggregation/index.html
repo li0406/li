@@ -1,0 +1,465 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>聚合页管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/css/aggregation.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">搜索条件</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <form id="searchForm" class="form-horizontal" action="/aggregation/" method="get">
+                        <div class="col-sm-2">
+                            查询关键字:
+                            <br/>
+                            <input type="text" class="form-control datepicker" id="begin" placeholder="输入关键词" name="code" value="{$Think.get.code}">
+                        </div>
+                        <div class="col-sm-2">
+                            关键字位置
+                            <br/>
+                            <select name="location" class="form-control istop" id="location">
+                                <option value="">全部</option>
+                                <option value="1">标签首部</option>
+                                <option value="2">标签尾部</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >查询时间-开始：</div>
+                            <input type="text" id="start" name="start" class="form-control datetimepicker" placeholder="开始时间" value="{$Think.get.start}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >查询时间-结束：</div>
+                            <input type="text" id="end" name="end" class="form-control datetimepicker" placeholder="结束时间" value="{$Think.get.end}">
+                        </div>
+                        <div class="col-sm-1">
+                            <br/>
+                            <button id="btnSearch" type="button" class="btn btn-primary"><i class="fa fa-search"></i>查询</button>
+                        </div>
+                        </form>
+                        <div class="col-sm-1 pull-right">
+                            <br/>
+                            <button id="upload" type="button" class="btn btn-info"><i class="fa fa-floppy-o"></i>导入</button>
+                        </div>
+                        <div class="col-sm-1 pull-right">
+                            <br/>
+                            <button id="btnAdd" type="button" class="btn btn-info"><i class="fa fa-plus"></i>新增关键词</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="" data-index="0">
+                            <a href="#home" role="tab" data-toggle="tab" >未匹配TDK</a>
+                        </li>
+                        <li role="presentation" data-index="1">
+                            <a href="#match" role="tab" data-toggle="tab" >已匹配TDK</a>
+                        </li>
+                        <li role="presentation"  data-index="2">
+                            <a href="#delete" role="tab" data-toggle="tab">已删除TDK</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <table class="table table-hover table-bordered">
+                                <caption>
+                                    <div class="col-sm-12">
+                                        <label class="all-label">
+                                          <input type="checkbox" class="all"> 全选
+                                        </label>
+                                        <div class="button-box pull-right">
+                                            <button id="btnDelete" type="button" class="btn btn-default">删除</button>
+                                            <button id="btnTDK" type="button" class="btn btn-primary">选择TDK</button>
+                                            <button id="export" type="button" class="btn btn-primary">导出</button>
+                                        </div>
+                                    </div>
+                                </caption>
+                                <tbody>
+                                    <volist name="list" id="vo">
+                                    <tr>
+                                    <volist name="vo" id="v">
+                                        <td title="分词:{$v.subwords}">
+                                            <span class="checkbox text-left">
+                                                <label>
+                                                  <input type="checkbox" class="check-item" value="{$v.id}">
+                                                  <a href="http://www.qizuang.com/biaoqian/tag{$v.id}" target="_blank"> {$v.words}</a>
+                                                </label>
+                                            </span>
+                                        </td>
+                                    </volist>
+                                    </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                    <div class="form-group">
+                        <label class=" control-label">选择文件:</label>
+                        <div class=" file-group">
+                             <input id="fileUp" name="fileup" type="file" />
+                        </div>
+                    </div>
+                    </form>
+                    <div class="form-group">
+                    <p>1.文件导入格式: 第一列：关键词      第二列：关键词分词</p>
+                    <p>2.关键词分词：以半角 , 分割</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="TDKModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                    TDK列表 <button id="btnAddTdk" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> 添加TDK</button>
+                    </h4>
+                </div>
+                <div class="modal-body" style="max-height: 700px;overflow-y:auto; ">
+                {$tdklist}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addTDKModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增TDK</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增关键词</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="myForm">
+                    <div class="form-group">
+                        <label class=" control-label">关键词:</label>
+                        <div class=" file-group">
+                             <input  name="words" class="form-control" type="text" placeholder="关键词" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class=" control-label">分词:</label>
+                        <div class=" file-group">
+                             <input  name="subwords" class="form-control datepicker" type="text" placeholder="分词" />
+                        </div>
+                    </div>
+                    </form>
+                    <div class="form-group">
+                        <p>1."关键词" 是需要添加的关键词,"分词" 是"关键词"的拆分词,分词符号使用英文半角逗号.</p>
+                        <p>2.关键词：150平米家庭豪华装修多少钱 分词：150平米，家庭豪华装修，装修多少钱</p>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btnSave" type="button" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var ids = sessionStorage.getItem("tdkWords{$Think.get.type|default=0}");
+
+    $(".check-item").each(function(){
+        if (ids != null && ids.indexOf(","+$(this).val()+ ",") >= 0)  {
+            $(this).prop("checked",true).attr('checked', 'checked');
+            $(".button-box").show();
+        }
+    });
+
+    $('#location').val('{$Think.get.location}');
+    $("#upload").click(function(event) {
+        $("#myModal").modal();
+    });
+
+    $(".datetimepicker").datetimepicker({
+        autoclose: true,
+        todayBtn: true,
+        todayHighlight: true,
+        pickerPosition: "bottom-left",
+        startView: 2,//月视图
+        endDate : new Date(),
+        minView: 1//日期时间选择器所能够提供的最精确的时间选择视图
+    });
+
+    $("#fileUp").fileinput({
+        language: 'zh', //设置语言,
+        allowedFileExtensions:['xls','xlsx'],
+        uploadUrl:"/export/aggregation/",
+        browseClass:"btn btn-primary",
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        showPreview:false,
+        uploadAsync:true,
+        showRemove:true,
+        showCancel:false,
+        showUpload:true,
+        maxFileCount:1,
+        dropZoneEnabled:false
+    }).on('fileuploaded', function(event, data) {
+        if(1 == data.response.status){
+            window.location.href =  window.location.href;
+        }else{
+            $("#myModal").Alert({
+                msg:'上传失败！',
+                level:2
+            });
+        }
+    });
+
+    $("#btnAdd").click(function(event) {
+        $("#addModal").modal();
+    });
+
+    $("#btnSave").click(function(event) {
+        $.ajax({
+            url: '/aggregation/addword',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $("#myForm").serializeArray()
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href =  window.location.href;
+            } else {
+                $(this).Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        });
+    });
+
+    $(".all").click(function(event) {
+        if ($(this).prop("checked")) {
+            $(".check-item").each(function(){
+                if (ids == null) {
+                    ids = "";
+                    ids = ","+$(this).val() + ",";
+                } else {
+                    if (ids.indexOf(","+$(this).val()+ ",") == -1) {
+                        ids += $(this).val() + ",";
+                    }
+                }
+            });
+            $(".check-item").prop("checked",true).attr('checked', 'checked');
+            $(".button-box").show();
+        } else {
+            $(".check-item").each(function(){
+                if (ids.indexOf(","+$(this).val()+ ",") != -1) {
+                    ids = ids.replace($(this).val() + ",","");
+                }
+            });
+            $(".check-item").prop("checked",false).attr('checked', false);
+            $(".button-box").hide();
+        }
+        sessionStorage.setItem("tdkWords{$Think.get.type|default=0}",ids);
+    });
+
+    $(".check-item").click(function(event) {
+        if ($(this).prop("checked")) {
+            if (ids == null) {
+                ids = "";
+                ids = ","+$(this).val() + ",";
+            } else {
+                if (ids.indexOf(","+$(this).val()+ ",") == -1) {
+                    ids += $(this).val() + ",";
+                }
+            }
+            $(this).attr('checked', 'checked');
+            $(".button-box").show();
+        } else {
+            if ($(".check-item:checked").length == 0) {
+                $(".button-box").hide();
+            }
+            ids = ids.replace($(this).val() + ",","");
+            $(this).attr('checked', false);
+        }
+
+        sessionStorage.setItem("tdkWords{$Think.get.type|default=0}",ids);
+    });
+
+    $("#btnTDK").click(function(event) {
+        $("#TDKModal").modal({backdrop:false});
+    });
+
+    $("#btnAddTdk").click(function(event) {
+        $.ajax({
+           url: '/aggregation/gettdkinfo',
+           type: 'get',
+           dataType: 'json',
+           data: {id:$(this).attr("data-id")}
+        })
+        .done(function(data) {
+            $("#addTDKModal .modal-body").html(data.data);
+            $("#addTDKModal").modal({backdrop:false});
+        });
+    });
+
+    $("body").on("click","#btnTdkSave",function(event) {
+        $.ajax({
+            url: '/aggregation/addtdk',
+            type: 'post',
+            dataType: 'json',
+            data: $("#tdkForm").serializeArray()
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("#addTDKModal .btn-default").trigger('click');
+                $("#TDKModal .modal-body").html(data.data);
+            } else {
+                $(this).Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        });
+    });
+
+    $("#btnDelete").click(function(event) {
+        if (confirm("确定删除吗？")) {
+            $.ajax({
+                url: '/aggregation/delword',
+                type: 'post',
+                dataType: 'json',
+                data: {ids: ids}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = window.location.href;
+                }
+            });
+        }
+    });
+
+    $("body").on("click",".fa-pencil-square-o",function(event) {
+        $.ajax({
+           url: '/aggregation/gettdkinfo',
+           type: 'get',
+           dataType: 'json',
+           data: {id:$(this).attr("data-id")}
+        })
+        .done(function(data) {
+            $("#addTDKModal .modal-body").html(data.data);
+            $("#addTDKModal").modal({backdrop:false});
+        });
+    });
+
+    $("body").on("click",".fa-trash",function(event) {
+        if (confirm("确定删除吗？")) {
+            $.ajax({
+               url: '/aggregation/deltdk',
+               type: 'post',
+               dataType: 'json',
+               data: {id:$(this).attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    $("#TDKModal .modal-body").html(data.data);
+                } else {
+                    $(this).Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            });
+        }
+    });
+
+    $("body").on("click",".btn-use",function(event) {
+        $.ajax({
+            url: '/aggregation/tdkrelete',
+            type: 'post',
+            dataType: 'json',
+            data: {
+                "ids":ids,
+                "id":$(this).attr("data-id")
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                sessionStorage.removeItem("tdkWords{$Think.get.type|default=0}");
+                window.location.href = window.location.href;
+            } else {
+                $(this).Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        });
+    });
+
+    $(".nav-tabs li").eq({$Think.get.type|default=0}).addClass('active');
+
+    $(".nav-tabs li").click(function(event) {
+        var type = $(this).attr("data-index");
+        sessionStorage.removeItem("tdkWords"+type);
+        window.location.href = "/aggregation?type="+type;
+    });
+
+    $("#btnSearch").click(function(event) {
+        var type = $(".nav-tabs li.active").attr("data-index");
+        var start = $("#start").val();
+        var end = $("#end").val();
+        if (start) {
+            if (!end) {
+                alert('请输入结束时间!');
+                return;
+            }
+        }
+        window.location.href = "/aggregation?type=" + type + "&&code=" + $("input[name=code]").val() + "&start=" + start + "&end=" + end + "&location=" + $("#location").val();
+    });
+
+    $("#export").on('click',function () {
+        var data = '';
+        $(".check-item:checked").each(function (k) {
+            data += $(this).val() + ',';
+        });
+        window.location.href = '/export/exportaggregation/?data=' + data;
+    });
+</script>
+</block>

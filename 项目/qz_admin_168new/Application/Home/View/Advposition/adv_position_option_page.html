@@ -1,0 +1,92 @@
+<style>
+    #add_adv_position table{ width: 100%; }
+    #add_adv_position table td{ padding: 5px 0;}
+    #add_adv_position table td p{ margin: 0; }
+</style>
+<div id="add_adv_position">
+    <table>
+        <tr>
+            <td style="width: 90px;"><p>位置名称：</p></td>
+            <td><div><input type="text" name="advName" class="form-control" value="{$info.name}"></div></td>
+        </tr>
+        <tr>
+            <td><p>位置标识：</p></td>
+            <td><div><input type="text" name="advTag" class="form-control" value="{$info.code}"></div></td>
+        </tr>
+        <tr>
+            <td><p>位置排序：</p></td>
+            <td><div><input type="text" name="advSort" class="form-control" value="{$info.sort}"></div></td>
+        </tr>
+    </table>
+    <div style="margin-top: 20px;">
+        <button class="btn btn-primary" id="save">保存</button>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        var Global_Add_Url = '/advposition/adv_position_option_save',
+            $addAdvPosition = $('#add_adv_position'),
+            $advName = $addAdvPosition.find('input[name="advName"]'),
+            $advTag = $addAdvPosition.find('input[name="advTag"]'),
+            $advSort = $addAdvPosition.find('input[name="advSort"]'),
+            $save = $addAdvPosition.find('#save');
+
+        $('input[type="text"]').on('keyup', function () {
+            $(this).val($(this).val().replace(/\s/g, ''))
+        })
+        $advName.on('keyup', function () {
+            $(this).val($(this).val().slice(0, 20))
+        })
+        $advSort.on('keyup', function () {
+            $(this).val($(this).val().replace(/\D/, ''))
+        })
+        $advTag.on('keyup', function () {
+            $(this).val($(this).val().replace(/[^A-Za-z]/, '').slice(0, 50))
+        })
+        $save.on('click', function () {
+            if(parseInt($advSort.val()) > 999) {
+                layer.msg('位置排序999以内')
+                return
+            }
+            $.ajax({
+                url: Global_Add_Url,
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    name: $advName.val(),
+                    code: $advTag.val(),
+                    sort: $advSort.val(),
+                    id: "{$info.id}",
+                    level: "{$info.level}",
+                    parentid: "{$info.parentid}"
+                }
+            })
+            .done(function (res) {
+                if(res.status == 1){
+                    layer.msg('保存成功')
+                    location.reload()
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: res.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function (res) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            });
+        });
+    });
+</script>

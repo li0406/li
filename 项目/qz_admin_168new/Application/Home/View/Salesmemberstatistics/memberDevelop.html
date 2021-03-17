@@ -1,0 +1,294 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员统计管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/sale.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>显示列表</h1>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/"><i class="fa fa-dashboard"></i> 会员统计概览</a>
+            </li>
+            <li class="active">
+                <a href="/homecase">会员发展</a>
+            </li>
+        </ol>
+    </section>
+
+    <section class="content-header">
+        <a href="/salesmemberstatistics/memberdevelop/" class="btn btn-primary">会员发展</a>
+        <a href="/pubmeitu/att?type=lx" class="btn btn-primary">会员合作</a>
+        <a href="/pubmeitu/att?type=fg" class="btn btn-primary">城市分单</a>
+        <a href="/pubmeitu/att?type=mj" class="btn btn-primary">会员续费</a>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" method="GET" action="/tongji/order_tel">
+                                <div class="col-xs-2">
+                                    部门：
+                                    <select id="type" name="cs" type="text" placeholder="所属城市" class="select2-offscreen" tabindex="-1">
+                                        <option value="0">全部部门</option>
+                                        <option value="1"> 商务</option>
+                                        <option value="2"> 外销</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    年份：
+                                    <select id="time" name="cs" type="text" placeholder="所属城市" class="select2-offscreen" tabindex="-1">
+                                        <option value="">全部年份</option>
+                                        <option value="2016"> 2016</option>
+                                        <option value="2015"> 2015</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <br>
+                                    <button id="btnSearch" type="button" class="btn btn-primary" data-loading-text="查询中....."><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <center>
+                        <h2>每月会员发展统计表</h2></center>
+                    <div class="sale-table">
+                        <table class="table table-bordered table-hover dataTable" style="margin:0;">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>会员指标</th>
+                                    <th>实际会员</th>
+                                    <th>普通会员</th>
+                                    <th>多倍会员</th>
+                                    <th>上会员数</th>
+                                    <th>下会员数</th>
+                                    <th>到期数</th>
+                                    <th>续费率</th>
+                                    <th>90天以下会员占比</th>
+                                    <th>90天以下会员占比</th>
+                                    <th>90天以下会员占比</th>
+                                    <th>A类会员累计</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="main.info" id="vo">
+                                    <tr>
+                                        <td>{$key}</td>
+                                        <td>{$vo.quota}</td>
+                                        <td>{$vo.actual}</td>
+                                        <td>{$vo.ordinary}</td>
+                                        <td>{$vo.multiple}</td>
+                                        <td>{$vo.up_vip}</td>
+                                        <td>{$vo.down_vip}</td>
+                                        <td>{$vo.expire}</td>
+                                        <td>{:round(($vo['renew'] / $vo['expire']),4) * 100}%</td>
+                                        <td>{:round(($vo['ninety'] / $vo['alltotal']),4) * 100}%</td>
+                                        <td>{:round(($vo['one_eighty'] / $vo['alltotal']),4) * 100}%</td>
+                                        <td>{:round(($vo['over_one_eighty'] / $vo['alltotal']),4) * 100}%</td>
+                                        <td>{$vo.atype}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <center>
+                        <h2>会员发展统计图</h2></center>
+                    <div id="chartWidth" class="detail-section">
+                        <div class="col-xs-12" style="padding-left: 0;" id="canvas">
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <center>
+                        <h2>会员续费统计图</h2></center>
+                    <div id="chartWidth" class="detail-section">
+                        <div class="col-xs-12" style="padding-left: 0;" id="canvas2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="http://g.tbcdn.cn/bui/acharts/1.0.32/acharts-min.js?v={:C('STATIC_VERSION')}"></script>
+    <!--图表1-->
+    <script type="text/javascript">
+
+        $(document).ready(function(){
+            $('#btnSearch').click(function(){
+                window.location.href = '/salesmemberstatistics/memberdevelop/?type=' + $('#type').val() + '&time=' + $('#time').val()
+            })
+        })
+
+        var chart = new AChart({
+            theme: AChart.Theme.SmoothBase,
+            id: 'canvas',
+            height: 500,
+            plotCfg: {
+                margin: [50, 50, 80] //画板的边距
+            },
+            xAxis : {
+                categories: ['01','02','03','04','05','06','07','08','09','10','11','12']
+             },
+            yAxis: [
+            {
+                position: 'left',
+            },
+            {
+                type: 'number',
+                position: 'right',
+                line: null,
+                tickLine: null,
+                labels: {
+                    label: {
+                        x: 12
+                    }
+                },
+                title: {
+                    text: '右边',
+                    x: 40,
+                    rotate: 90
+                }
+            }],
+            seriesOptions: { //设置多个序列共同的属性
+                lineCfg: { //不同类型的图对应不同的共用属性，lineCfg,areaCfg,columnCfg等，type + Cfg 标示
+                    smooth: true
+                }
+            },
+            series: [{
+                name: '实际会员',
+                color: '#00FF00',
+                type: 'column',
+                yAxis: 1,
+                data: {$main.sheets.develop.actual},
+                suffix: ' 个'
+
+            },{
+                name: '同比',
+                color: '#89A54E',
+                type: 'line',
+                data: {$main.sheets.develop.tongbi},
+                suffix: '%'
+            },{
+                name: '环比',
+                color: '#FF1493',
+                type: 'line',
+                data: {$main.sheets.develop.huangbi},
+                suffix: '%'
+            }]
+        });
+        chart.render();
+    </script>
+    <!--图表2-->
+    <script type="text/javascript">
+        var chart = new AChart({
+            theme: AChart.Theme.SmoothBase,
+            id: 'canvas2',
+            height: 500,
+            plotCfg: {
+                margin: [50, 50, 80] //画板的边距
+            },
+            xAxis : {
+                categories: ['01','02','03','04','05','06','07','08','09','10','11','12']
+            },
+            yAxis: [{
+                position: 'left',
+            }, {
+                type: 'number',
+                position: 'right',
+                line: null,
+                tickLine: null,
+                labels: {
+                    label: {
+                        x: 12
+                    }
+                },
+                title: {
+                    text: '右边',
+                    x: 40,
+                    rotate: 90
+                }
+            }],
+            seriesOptions: { //设置多个序列共同的属性
+                lineCfg: { //不同类型的图对应不同的共用属性，lineCfg,areaCfg,columnCfg等，type + Cfg 标示
+                    smooth: true
+                }
+            },
+            series: [{
+                name: '到期会员',
+                color: '#4572A7',
+                type: 'column',
+                yAxis: 1,
+                data: {$main.sheets.renews.expire},
+                suffix: ' 个'
+
+            },{
+                name: '续费会员',
+                color: '#00FF00',
+                type: 'column',
+                yAxis: 1,
+                data: {$main.sheets.renews.renew},
+                suffix: ' 个'
+
+            },{
+                name: '到期同比',
+                color: '#89A54E',
+                type: 'line',
+                data: {$main.sheets.renews.tongbi},
+                suffix: '%'
+            },{
+                name: '续费环比',
+                color: '#FF1493',
+                type: 'line',
+                data: {$main.sheets.renews.huangbi},
+                suffix: '%'
+            }]
+
+        });
+        chart.render();
+    </script>
+    <script type="text/javascript">
+        $("#type").select2({
+            allowClear: true,
+            placeholder: "选择部门"
+        });
+        $("#type").select2("val", "{$Think.get.type}");
+        $("#time").select2({
+            allowClear: true,
+            placeholder: "选择年份"
+        });
+        $("#time").select2("val", "{$Think.get.time}");
+        $(".datepicker").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0
+        });
+        $(function() {
+            $('#myTable').DataTable({
+                paging: false,
+                searching: false,
+                language: {
+                    zeroRecords: "没有内容",
+                    info: ""
+                }
+            });
+        });
+    </script>
+</block>

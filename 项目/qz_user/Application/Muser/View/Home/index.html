@@ -1,0 +1,281 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+    <meta content="telephone=no" name="format-detection" />
+    <meta name="applicable-device" content="mobile" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="full-screen" content="yes" />
+    <meta name="browsermode" content="application" />
+    <meta name="x5-orientation" content="portrait" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="x5-page-mode" content="app" />
+    <title>用户中心-齐装网</title>
+    <include file="Index:css_resources" />
+    <link rel="stylesheet" href="/assets/muser/css/index.css?v={:C('STATIC_VERSION')}">
+</head>
+
+<body class="m-bg" style="height: auto;">
+    <div class="m-wrap">
+        <div id="tab">
+            <div class="top-fixed">
+                <include file="Index:header" />
+                <div class="j-tab-nav"> 
+                    <a href="javascript:void(0);" class="current" style="width:20%;">已读订单</a>
+                    <a href="javascript:void(0);" style="width:30%;">未读订单<if condition="$unReadOrderCount NEQ null"><span>{$unReadOrderCount}</span></if></a>
+                    <a href="javascript:void(0);">抢分池</a>
+                    <a href="javascript:void(0);">抢赠池</a>
+                </div>
+            </div>
+            <div class="order-main j-tab-con">
+                <ul class="order-list">
+                    <if condition="$readOrder NEQ null">
+                    {$readOrder}
+                    <else/>
+                    <li class="no-order">暂时没有未读订单信息</li>
+                    </if>
+                </ul>
+                <ul class="order-list un-order-list" style='display: none;'>
+                    <if condition="$unReadOrderCount NEQ null">
+                    {$unReadOrder}
+                    <else/>
+                    <li class="no-order">暂时没有未读订单信息</li>
+                    </if>
+                </ul>
+                <ul class="order-list" style='display: none;'>
+                    <div>温馨提示：在本页面抢到的订单视为分单。</div>
+                    <if condition="$robOrder NEQ null">
+                        {$robOrder}
+                        <else/>
+                        <li class="no-order" style="margin-top:10em;">
+                            <img src="/assets/muser/img/rob-logo.png" />
+                            <p>暂无订单可抢哦~</p>
+                        </li>
+                    </if>
+                </ul>
+                <ul class="order-list" style='display: none;'>
+                    <div>温馨提示：在本页面抢到的订单视为赠单。</div>
+                    <if condition="$robzengOrder NEQ null">
+                        {$robzengOrder}
+                        <else/>
+                        <li class="no-order" style="margin-top:10em;">
+                            <img src="/assets/muser/img/rob-logo.png" />
+                            <p>暂无订单可抢哦~</p>
+                        </li>
+                    </if>
+                </ul>
+                <p class="no-data">我是有底线的</p>
+            </div>
+        </div>
+    </div>
+     <div class="tips-mask">
+        <div class="tips-win">
+            <div class="domain">提示</div>
+            <p class="alert-info">密码错误五次，您可以找回密码，或10分钟后再试</p>
+            <div class="okBtn">
+                OK
+            </div>
+        </div>
+    </div>
+    <div class="cover">
+        <div>
+            <span class="robdetail-close" style="float: right;margin-right: 5px;font-size: 24px;">×</span>
+            <div class="qiangdan-model">
+                <p>是否确定抢取该订单？抢单成功</p>
+                <p>后，可在“未读订单”查看哦~</p>
+            </div>
+            <div class="qiangdan-model-btn">
+                <button type="button" class="qiangdan-cancel-btn">不抢</button>
+                <button type="button" class="qiangdan-submit-btn">确定</button>
+            </div>
+        </div>
+    </div>
+    <div class="cover-c">
+       <p class="qiangdan-success-btn">恭喜，抢单成功~<br>请尽快联系业主哦~</p>
+    </div>
+
+<input type="hidden" class="rob_id">
+</body>
+<include file="Index:js_resources" />
+<script type="text/javascript" src="/assets/common/js/jQuery.rTabs.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+
+// 解析参数
+var parms = window.location.search.substring(1,window.location.search.length).split("&")
+var parmsData = {}
+for(var i in parms){
+    var str = parms[i].split('=')
+    parmsData[str[0]] = str[1]
+}
+
+$(function() {
+    // 选中tab栏
+    var active_index = parseInt(parmsData.type) - 1
+    $(".j-tab-nav a").eq(active_index).addClass("current").siblings().removeClass("current")
+    $(".j-tab-con ul").eq(active_index).fadeIn(0).siblings().fadeOut(0)
+
+
+    var check_alert = '{$check_alert}';
+    var user_id = '{$user_id}';
+    if(check_alert == 1){
+        $(".alert-info").text("为了您的订单信息安全 , 请每隔30天前往PC端修改一次订单查询密码");
+        $(".tips-mask").fadeIn();
+    }
+    $("#tab").rTabs({
+        bind: 'click',
+        auto: false
+    });
+    $(".okBtn").click(function(event) {
+        $(".tips-mask").fadeOut();
+    });
+    //点击抢单按钮
+    $(".qiangdan-btn").click(function () {
+        $(".rob_id").val($(this).attr('data-id'))
+        $(".cover").show();
+        $("htmnl,body").css({"overflow": "hidden", "height": "100%"})
+
+    });
+    //点击弹框取消按钮
+    $(".robdetail-close").click(function () {
+        $(".cover").hide();
+        $("html,body").css({"overflow": "inherit", "height": "100%"})
+    });
+
+    //不抢操作
+    $(".qiangdan-cancel-btn").on('click', function () {
+        var id = $('.rob_id').val();
+        $.ajax({
+            url: '/add_norob',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: id
+            }
+        })
+            .done(function (data) {
+                alert(data.errmsg)
+                setTimeout(function () {
+                    $(".cover-c").hide();
+                    window.location.href = window.location.href;
+                },1000)
+            })
+            .fail(function () {
+                alert("获取信息失败！");
+            });
+    });
+    //点击弹框确定按钮
+    $(".qiangdan-submit-btn").click(function () {
+        var id = $('.rob_id').val();
+        $.ajax({
+            url: '/getrob',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: id
+            }
+        })
+            .done(function (data) {
+                if (data.code == 200) {
+                    $(".cover").hide();
+                    $(".cover-c").show();
+                    $("html,body").css({"overflow":"inherit","height":"100%"})
+                    setTimeout(function () {
+                        $(".cover-c").hide();
+                        window.location.href = '/home?type=2';
+                    },3000)
+                } else {
+                    if(data == null || data == ''){
+                        alert("抱歉，该订单已抢完！\n 下次手速要更快哦~")
+                    }else {
+                        alert(data.errmsg)
+                    }
+                }
+            })
+            .fail(function () {
+                alert("获取信息失败！");
+            });
+    });
+
+    $(window).scroll(function(event) {
+        //浏览器到底部了
+        var flag = false;
+        var scrollTop = $(document).scrollTop();
+        if(navigator.userAgent.indexOf('Sogou') > -1){
+          scrollTop+=50
+        }
+        if(scrollTop >= ($(document).height()-$(window).height())){
+            flag = true;
+        }
+        var loading = "<div class='loading'><div class='bottom'></div></div>";
+
+        if(flag){
+            if($(".loading").length == 0){
+                $(".loading").remove();
+                $("body").append(loading);
+                var index = $(".j-tab-nav .current").index();
+                $.ajax({
+                    url: '/orderlist',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        index: index
+                    }
+                })
+                .done(function(data) {
+                    $(".loading").remove();
+                    if(data.status == 1){
+                       $(".order-list").eq(index).append(data.data);
+                    }else{
+                        if($(".order-list").eq(index).find('.no-order').length==0){
+                            $(".no-data").css("display",'block')
+                        }else{
+                            $(".no-data").css("display",'none')
+                        }
+                        // alert("没有订单数据了");
+                    }
+                })
+                .fail(function() {
+                    alert("获取列表失败！");
+                });
+            }
+        }
+    });
+    // var pageStarX = 0;
+    // var pageStarY = 0;
+    // var index ;
+    // $("body")[0].addEventListener("touchstart",function(event){
+    //     pageStarX = event.targetTouches[0].screenX;
+    //     pageStarY = event.targetTouches[0].screenY;
+    //     var _this = $('.j-tab-nav a.current');
+    //     index = $('.j-tab-nav a').index(_this);
+    // });
+  
+    // $("body")[0].addEventListener("touchmove",function(event){
+
+    //     var pageEndX = event.targetTouches[0].screenX - pageStarX;
+    //     var pageEndY = event.targetTouches[0].screenY - pageStarY;
+
+    //     if( pageEndY >=-5 && pageEndY <= 5){
+    //         //如果pageendY小于5，判断为左右滑动
+            
+    //         if(pageEndX >= 0){
+    //             $(".j-tab-nav a").eq(index-1).trigger('click');
+    //         }else{
+    //             $(".j-tab-nav a").eq(index+1).trigger('click');
+    //         }
+    //     }else{
+            
+    //     }
+
+    // });
+    $(".j-tab-nav a").click(function(){
+        var index = $(this).index()
+        window.history.pushState('','','/home?type='+(index+1))
+    })
+})
+</script>
+
+</html>

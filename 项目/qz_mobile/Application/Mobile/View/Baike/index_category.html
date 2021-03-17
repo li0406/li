@@ -1,0 +1,316 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/baike/" rel="canonical" />
+    <link href="/assets/common/js/tooltips/tooltips.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/red-packet.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/meitu/css/meitu-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/baike/css/baike-list.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$info.0.thumb}" />
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}"></a>
+    <div class="m-header-tit">{$basic.body.title}</div>
+</block>
+<block name="content">
+    <div id="position">
+        <div class="type-list">
+            <div class="parent-list" id="wrapper">
+                <ul id="parent-content">
+                    <volist name="category" id="v">
+                        <li id="{$v.url}"><a href="/baike/{$v.url}/">{$v.name}<span></span></a></li>
+                    </volist>
+                </ul>
+            </div>
+            <div class="children-list">
+                <volist name="subCate" id="v">
+                    <div class="list-box" id="wrapper1">
+                        <ul class="children-content clearfix">
+                            <li id="{$topUrl}"><a>全部</a></li>
+                            <volist name="v" id="val">
+                                <!--只取15个-->
+                                <if condition="$key lt 15">
+                                    <li id="{$val.url}"><a>{$val.name|mb_substr=0,5}</a></li>
+                                </if>
+                            </volist>
+                        </ul>
+                    </div>
+                </volist>
+            </div>
+        </div>
+    </div>
+    <!--C 百科列表 S-->
+    <div class="baike-list-box contentnr">
+        <ul class="contentnr_ul xiaogutou-list-wrap">
+            <include file="list-content" />
+        </ul>
+    </div>
+    <!--C 百科列表 E-->
+
+     <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <!--置顶-->
+    <div id="gotop" style="display: none"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <include file="Common/footfadantc"/>
+</block>
+
+<block name="script">
+    <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+    <!-- <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script> -->
+    <script type="text/javascript" src="/assets/mobile/common/js/red-packet.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/qzgold/js/qz_gold.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var cityId = "{$cityInfo.id}";
+        console.log(cityId)
+        // 调用广告
+        qzInsertGold('.xiaogutou-list-wrap li:first-child', 12, cityId)
+
+    $(document).ready(function() {
+        init();
+        $("#parent-content li").click(function(){
+            var index=0,
+                leftDistence=0;
+            index=$(this).index();
+            leftDistence=index*$(this).width();
+            sessionStorage.index=index;
+            sessionStorage.leftDistence=leftDistence;
+                $(this).addClass("chose-active");
+                $(this).siblings().removeClass('chose-active');
+                $($(".list-box")[index]).show();
+                $($(".list-box")[index]).siblings().hide();
+                $(".list-box ul li").removeClass('child-chose-active');
+                // getWidth($($(".list-box")[index]).children('ul'));
+                // $($(".list-box")[index]).attr("id","wrapper1");
+                $($(".list-box")[index]).siblings().attr("id","");
+                // $("#wrapper1 ul").css({
+                //     'transform':'translate(0px,0px) translateZ(0px) scale(1)',
+                //     '-ms-transform':'translate(0px,0px) translateZ(0px) scale(1)',    /* IE 9 */
+                //     '-moz-transform':'translate(0px,0px) translateZ(0px) scale(1)',   /* Firefox */
+                //     '-webkit-transform':'translate(0px,0px) translateZ(0px) scale(1)', /* Safari 和 Chrome */
+                //     '-o-transform':'translate(0px,0px) translateZ(0px) scale(1)',
+                // });
+               // new JRoll("#wrapper1",{scrollX:true,scrollY:false});
+        });
+        $(".foot-zan").click(function(){
+            var num=parseInt($(this))
+        });
+
+        // insertImg();
+
+        //定义固有变量
+        var loading = false;
+        var last_page = '{$totalpage|default=0}';
+        var this_page = '{$pageid}';
+        var alertinfo = false;
+        var list_sums = '{:count($info["cases"])}';
+        //下拉无限加载
+        window.onscroll=function(){
+            /*导航栏固定*/
+            var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+            if(top>103){
+                $("#tofixed").addClass('tofixed')
+            }else{
+                $("#tofixed").removeClass('tofixed')
+            }
+            /*下拉刷新加载*/
+            if ($(document).height() - $(this).scrollTop() - $(this).height() < 800){
+                if(this_page >= last_page){
+                    if (alertinfo == false && list_sums > 0) {
+                        $(".contentnr").append('<div class="wrapbt"><div class="spmore">没有更多了，看看别的吧..</div></div>');                        };
+                    alertinfo = true;
+                    return false;
+                }else{
+                    if (loading == true) {
+                        return false;
+                    };
+                    loading = true;
+                    var url = '?p=' + (parseInt(this_page) + 1);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        dataType: 'html',
+                    })
+                    .done(function(result) {
+                        loading = false;
+                        $(".xiaogutou-list-wrap").append($(result).fadeIn(2000));
+                        this_page++;
+                    })
+                    .fail(function(xhr) {
+                        loading = false;
+                        alert("加载失败,请刷新再试！");
+                    });
+                }
+            }
+
+            //回到顶部
+            $(window).on("scroll", function(){
+                      if($(document).scrollTop()>="1000"){
+                          $('#gotop').css('display',"block");
+                      }else{
+                          $('#gotop').css('display',"none");
+                      }
+                  });
+        }
+
+    });
+
+    window.onscroll=function(){
+        var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+        if(top>103){
+            $("#position").addClass('tofixed')
+        }else{
+            $("#position").removeClass('tofixed')
+        }
+    };
+    $(".list-box ul").on('click','li',function(){
+        var index=0,
+            href="",
+            leftDistence=0,
+            childrenLeft=0,
+            childrenIndex=0,
+            childPosi=[],
+            children=[];
+        children=changeString(sessionStorage.children);
+        childPosi=changeString(sessionStorage.childPosi);
+        index=$(this).parent().parent().index();
+        childrenIndex=$(this).index();
+        leftDistence=index*$("#wrapper ul li").width();
+        childrenLeft=$(this).index()*$(this).width();
+        children[index]=childrenLeft;
+        childPosi[index]=childrenIndex;
+        $(this).addClass('child-chose-active');
+        $(this).siblings().removeClass('child-chose-active');
+        sessionStorage.index=index;
+        sessionStorage.children=children;
+        sessionStorage.childPosi=childPosi;
+        sessionStorage.leftDistence=leftDistence;
+        sessionStorage.childrenLeft=childrenLeft;
+        sessionStorage.childrenIndex=childrenIndex;
+        href='/baike/'+$(this).attr("id");
+        location.href=href;
+    });
+    function changeString(str){
+        str=str.substring(0,str.length);
+        str=str.split(",");
+        for(var i=0;i<str.length;i++){
+            str[i]=parseInt(str[i])
+        }
+        return str;
+    }
+    function init() {
+        var thisIndex=0,
+            leftDistence=0,
+            childrenLeft=0,
+            childrenIndex=0,
+            children=[],
+            childPosi=[],
+            jroll1="",
+            jroll2="",
+            pid={$pid};
+        thisIndex=parseInt(sessionStorage.index);
+        leftDistence=-parseInt(sessionStorage.leftDistence);
+        leftDistence=leftDistence?leftDistence:0;
+        childrenLeft= -parseInt(sessionStorage.childrenLeft);
+        childrenIndex= parseInt(sessionStorage.childrenIndex);
+        childrenLeft=childrenLeft?childrenLeft:0;
+        //如果没有缓存,或者url是父级分类
+        if(sessionStorage.children==undefined||pid==0){
+            for(var i=0; i<$("#parent-content li").length;i++){
+                children[i]=0;
+                childPosi[i]=0;
+            }
+            childrenIndex=childPosi[0];
+            childrenLeft=children[0];
+            sessionStorage.children=children;
+            sessionStorage.childPosi=childPosi;
+        }else{
+            children=changeString(sessionStorage.children);
+            childPosi=changeString(sessionStorage.childPosi);
+            childrenLeft=children[thisIndex];
+            childrenIndex=childPosi[thisIndex];
+        }
+        $($("#parent-content").children()[thisIndex]).addClass("chose-active");
+        // $($(".list-box")[thisIndex]).attr('id','wrapper1');
+        $(".list-box").removeClass('child-chose-active');
+        $($($(".list-box")[thisIndex]).children('ul').children('li')[childrenIndex]).addClass('child-chose-active');
+        $($(".list-box")[thisIndex]).show();
+        $($(".list-box")[thisIndex]).siblings().hide();
+        $($(".list-box")[thisIndex]).siblings().attr('id','');
+        // getWidth($($(".list-box")[thisIndex]).children('ul'));
+        leftDistence=setJuli(leftDistence,$("#parent-content"));
+        childrenLeft=setJuli(childrenLeft,$("#wrapper1"));
+        getWidth($("#parent-content"));
+        jroll1=new JRoll("#wrapper",{scrollX:true,scrollY:false});
+        jroll1.scrollTo(-leftDistence, 0, 100, true);
+        // jroll2=new JRoll("#wrapper1",{scrollX:true,scrollY:false});
+        // jroll2.scrollTo(-childrenLeft,0,100,true);
+    }
+    function setJuli(distance,obj){
+        var width=screen.availWidth;
+        distance=Math.abs(distance);
+        if(distance<width){
+            return 0;
+        }else if(distance%width==0&&distance!=width){
+            return distance;
+        }else{
+            //算出一共有几屏
+            var pageNum=Math.ceil(obj.find("li").length/3);
+            // 得出当前处于第几屏
+            var currNum=Math.floor(distance/width)+1;
+            if(pageNum>currNum){
+                var num=Math.floor(distance/width);
+                return num*width;
+            }else{
+                var lingt=obj.find("li").length%3; //算出零头
+                if(lingt!=0){ // 如果有零头
+                    var num=Math.floor(distance/width);
+                    return num*width+(lingt-3)*width/3;
+                }else{
+                    var num=Math.floor(distance/width);
+                    return num*width;
+                }
+            }
+        }
+    }
+    function getWidth(obj){
+        var length=0,
+            width=0;
+        length=obj.children().length;
+        $(obj.children()).width(screen.availWidth/3);
+        width=$(obj.children()[0]).width();
+        obj.width(length*width+2);
+
+    }
+
+    function insertImg (argument) {
+        var freeDesign="<div class='free-design'><a href='/sheji/'><img src='/assets/mobile/baike/img/free-design.png' alt='免费获取设计' title='免费获取设计'></a></div>",
+            bkList=$(".baike-list-box ul li");
+        $(bkList[2]).after(freeDesign);
+    }
+
+    $('.foot-zan').click(function(){
+        var num = parseInt($(this).children('.zan-num').text());
+        num++;
+        $(this).children('.zan-num').text(num);
+        $(this).addClass('now');
+
+    });
+    $("#gotop").click(function(event) {
+        $(document).scrollTop(0)
+    });
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

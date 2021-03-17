@@ -1,0 +1,147 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>考核人员/渠道设置</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+    .pointer{ cursor: pointer; color: #0099FF; }
+    .item-span{ display:inline-block;cursor: pointer; background-color: #0099FF; color: #fff; font-size: 12px;margin: 2px 3px; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/newmedia/statistics_group">新媒体业绩统计</a> <i class="fa fa-angle-right"></i> 考核人员/渠道设置</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+               <div class="box">
+                   <div class="box-body act-box">
+                       <div class="row">
+                        <div class="col-xs-12">
+                           <form id="searchform" action="/newmedia/usersrc" method="get">
+                               <div class="col-xs-2">
+                                   <div>考核人员姓名：</div>
+                                   <select class="form-control" name="u_id" id="u_id">
+                                       <option value="">请选择</option>
+                                       <volist name="user" id="v">
+                                           <option value="{$v.assess_admin_id}" {:I('get.u_id')==$v['assess_admin_id']?'selected':''}>{$v.user}</option>
+                                       </volist>
+                                   </select>
+                               </div>
+                               <div class="col-xs-4">
+                                   <div>渠道：</div>
+                                   <select class="form-control" name="src" id="src">
+                                       <option value="">请选择渠道</option>
+                                       <volist name="source" id="v1">
+                                           <option value="{$v1.src}" {:I('get.src')==$v1['src']?'selected':''}>{$v1.dept_name}：{$v1.group_name}：{$v1.name}</option>
+                                       </volist>
+                                   </select>
+                               </div>
+                               <div class="col-sm-1">
+                                   <div>&nbsp;</div>
+                                   <div>
+                                       <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询</button>
+                                   </div>
+                               </div>
+                           </form>
+                       </div>
+                       </div>
+                   </div>
+               </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="box">
+              <div class="box-header">
+                <div class="l"><h4>考核人员/渠道设置</h4></div>
+                  <a href="/newmedia/common_src" type="button" class="btn btn-success" style="float: right">公摊渠道设置</a>
+              </div>
+              <div class="box-body table-responsive no-padding">
+                <table class="table table-hover table-bordered">
+                  <thead >
+                  <tr style="font-size:14px;color:#000">
+                    <th>序号</th>
+                    <th>考核人员</th>
+                    <th>所在组/团</th>
+                    <th width="60%">渠道</th>
+                    <th>操作</th>
+                  </tr>
+                  </thead>
+                  <tbody id="dataLists">
+                  <volist name='list' id="vo">
+                      <tr>
+                          <td>{:((I('get.p',1,'intval') - 1) * 10 ) + $key + 1}</td>
+                          <td>{$vo.user}</td>
+                          <td>{$vo.group_name}/{$vo.team_admin.user}</td>
+                          <td><foreach name="vo.source" item="v2"><span class="item-span">{$v2.name}</span></foreach></td>
+                          <td>
+                              <a class="pointer edit-row" href="/newmedia/usersrcset?id={$vo.id}">编辑</a>
+                              <span class="pointer del-row" data-id="{$vo.id}">清除</span>
+                              <span class="pointer log-row" data-user-id="{$vo.assess_admin_id}">操作日志</span>
+                          </td>
+                      </tr>
+                  </volist>
+                  </tbody>
+                </table>
+                  {$page}
+              </div>
+            </div>
+          </div>
+        </div>
+  </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#src,#u_id").select2();
+
+            $('.log-row').click(function () {
+                var user_id = $(this).attr('data-user-id');
+                layer.open({
+                    type: 2,
+                    title: '操作日志',
+                    area: ['1000px', '800px'], //宽高
+                    content: ["/newmedia/usersrclog/?user_id=" + user_id],
+                    success: function () {
+                        $(':focus').blur();
+                    }
+                });
+            });
+
+            $('.del-row').click(function () {
+                var id = $(this).attr('data-id');
+                if (!id) {
+                    layer.msg('参数错误', {time: 1000});
+                }
+                layer.confirm('是否清除人员渠道？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    $.ajax({
+                        url: '/newmedia/saveusersrc',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        },
+                        success: function (res) {
+                            layer.msg(res.error_msg, {time: 1000}, function () {
+                                if (res.error_code == 0) {
+                                    window.location.reload();
+                                }
+                            });
+                        },
+                        error: function (res) {
+                            layer.msg('服务器异常');
+                        }
+                    })
+                })
+            });
+        })
+    </script>
+</block>

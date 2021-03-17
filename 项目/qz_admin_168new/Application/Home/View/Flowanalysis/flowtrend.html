@@ -1,0 +1,659 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" >
+    <link rel="stylesheet" href="/assets/common/plugins/datatables/css/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}"/>
+    <style type="text/css" media="screen">
+        table{width: 100% !important;}
+        .show-yes {display:block;}
+        .show-not {display:none;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>流量趋势分析</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-header with-border">条件查询</div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-1">
+                            <label>终端：</label>
+                            <div class="form-group">
+                                <select id="type" name="type" class="form-control flat no-padding">
+                                    <option value="0">请选择</option>
+                                    <option value="1,2">全部</option>
+                                    <option value="1">PC端</option>
+                                    <option value="2">移动端</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>站点：</label>
+                            <div class="form-group">
+                                <select id="city" name="city" class="form-control flat">
+                                    <option value="0">请选择</option>
+                                    <volist name="vars.city" id="vo">
+                                        <option value="{$vo.cid}" data-name="{$vo.cname}">{$vo.char_name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>频道标签：</label>
+                            <div class="form-group">
+                                <select id="tag" name="tag" class="form-control flat">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>频道名称：</label>
+                            <div class="form-group">
+                                <select id="channel" name="channel" class="form-control flat channel"></select>
+                            </div>
+                        </div>
+                        <div class="col-xs-5">
+                            <div><label>时间选择：</label></div>
+                            <div class="col-xs-6 no-padding">
+                                <input id="timerange" class="form-control flat timer" value="{$Think.get.timerange}" />
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="btn-group dimension" role="group" aria-label="...">
+                                    <button data-dimension="1" type="button" class="btn btn-default">按日</button>
+                                    <button data-dimension="2" type="button" class="btn btn-default">按月</button>
+                                </div>
+                                <div class="btn btn-primary submit-search"><i class="fa fa-search"></i> 查询</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default {$vars.isShow}">
+            <div class="box-header with-border">
+                <div class="pull-left no-padding" style="line-height: 25px;"><label class="nav-name main-nav-name"></label></div>
+                <div class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModal">来源</div>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="canvas" style="width: 100%;height: 300px;border: 1px solid #ccc;background: #fff;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrap box box-default {$vars.isShow}">
+            <div class="box-header with-border">
+                <div class="no-padding" style="line-height: 30px;">自定义指标</div>
+                <div class="pull-left">
+                    <div class="" style="line-height: 30px;">
+                        <label><input class="table-checkbox" data-column="1" type="checkbox" checked="checked">PV&nbsp;&nbsp;</label>
+                        <label><input class="table-checkbox" data-column="2" type="checkbox" checked="checked">UV&nbsp;&nbsp;</label>
+                        <label><input class="table-checkbox" data-column="3" type="checkbox" checked="checked">跳出率&nbsp;&nbsp;</label>
+                        <label><input class="table-checkbox" data-column="4" type="checkbox" checked="checked">平均访问时长</label>
+                    </div>
+                </div>
+                <div class="pull-right btn btn-success btn-sm submit-export">导出报表</div>
+            </div>
+            <div class="box-body">
+                <div class="row dimension-day hidden">
+                    <div class="col-xs-12" id="tab1">
+                        <table class="table table-hover table-bordered table-normal" data-dimension="day" data-dimension-text="按日统计">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th class="table-pv">PV</th>
+                                    <th class="table-uv">UV</th>
+                                    <th class="table-bounce-rate">跳出率</th>
+                                    <th class="table-avg-visit-time">平均访问时长</th>
+                                    <th>发单量</th>
+                                    <th>分单量</th>
+                                    <th>实际分单量</th>
+                                    <th>发单转化率</th>
+                                    <th>分单转化率</th>
+                                    <th>实际分单转化率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="vars.preinstall.day" id="vi">
+                                    <tr>
+                                        <td>{$vi}</td>
+                                        <td class="table-pv">{$vars['stat']['day'][$vi]['pv']|default=0}</td>
+                                        <td class="table-uv">{$vars['stat']['day'][$vi]['uv']|default=0}</td>
+                                        <td class="table-bounce-rate">{:number_format($vars['stat']['day'][$vi]['bounce_count'] / $vars['stat']['day'][$vi]['pv'] * 100, 4)}%</td>
+                                        <td class="table-avg-visit-time">{:number_format($vars['stat']['day'][$vi]['visit_time'] / $vars['stat']['day'][$vi]['visit_count'], 2)}s</td>
+                                        <td>{$vars['stat']['day'][$vi]['order_count']|default=0}</td>
+                                        <td>{$vars['stat']['day'][$vi]['order_fen_count']|default=0}</td>
+                                        <td>{$vars['stat']['day'][$vi]['order_real_fen_count']|default=0}</td>
+                                        <td>{:number_format($vars['stat']['day'][$vi]['order_count'] / $vars['stat']['day'][$vi]['uv'] * 100, 4)}%</td>
+                                        <td>{:number_format($vars['stat']['day'][$vi]['order_fen_count'] / $vars['stat']['day'][$vi]['uv'] * 100, 4)}%</td>
+                                        <td>{:number_format($vars['stat']['day'][$vi]['order_real_fen_count'] / $vars['stat']['day'][$vi]['uv'] * 100, 4)}%</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row dimension-month hidden">
+                    <div class="col-xs-12" id="tab1">
+                        <table class="table table-hover table-bordered table-normal" data-dimension="month" data-dimension-text="按月统计">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th class="table-pv">PV</th>
+                                    <th class="table-uv">UV</th>
+                                    <th class="table-bounce-rate">跳出率</th>
+                                    <th class="table-avg-visit-time">平均访问时长</th>
+                                    <th>发单量</th>
+                                    <th>分单量</th>
+                                    <th>实际分单量</th>
+                                    <th>发单转化率</th>
+                                    <th>分单转化率</th>
+                                    <th>实际分单转化率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="vars.preinstall.month" id="vi">
+                                    <tr>
+                                        <td>{$vi}</td>
+                                        <td class="table-pv">{$vars['stat']['month'][$vi]['pv']|default=0}</td>
+                                        <td class="table-uv">{$vars['stat']['month'][$vi]['uv']|default=0}</td>
+                                        <td class="table-bounce-rate">{:number_format($vars['stat']['month'][$vi]['bounce_count'] / $vars['stat']['month'][$vi]['pv'] * 100, 4)}%</td>
+                                        <td class="table-avg-visit-time">{:number_format($vars['stat']['month'][$vi]['visit_time'] / $vars['stat']['month'][$vi]['visit_count'], 2)}s</td>
+                                        <td>{$vars['stat']['month'][$vi]['order_count']|default=0}</td>
+                                        <td>{$vars['stat']['month'][$vi]['order_fen_count']|default=0}</td>
+                                        <td>{$vars['stat']['month'][$vi]['order_real_fen_count']|default=0}</td>
+                                        <td>{:number_format($vars['stat']['month'][$vi]['order_count'] / $vars['stat']['month'][$vi]['uv'] * 100, 4)}%</td>
+                                        <td>{:number_format($vars['stat']['month'][$vi]['order_fen_count'] / $vars['stat']['month'][$vi]['uv'] * 100, 4)}%</td>
+                                        <td>{:number_format($vars['stat']['month'][$vi]['order_real_fen_count'] / $vars['stat']['month'][$vi]['uv'] * 100, 4)}%</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade {$vars.search}" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document" style="width: 1480px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title nav-name" id="myModalLabel"></h4>
+                    </div>
+                    <div class="modal-body" style="overflow: auto">
+                        <table class="table table-bordered table-hover col-xs-12 no-padding table-modal" style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th>渠道来源名称</th>
+                                    <th>渠道来源组</th>
+                                    <th>渠道所属部门</th>
+                                    <th>是否付费</th>
+                                    <th>PV</th>
+                                    <th>UV</th>
+                                    <th>跳出率</th>
+                                    <th>平均访问时长</th>
+                                    <th>发单量</th>
+                                    <th>分单量</th>
+                                    <th>实际分单量</th>
+                                    <th>发单转化率</th>
+                                    <th>分单转化率</th>
+                                    <th>实际分单转化率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="vars.stat.src" id="vi">
+                                    <present name="vars['srcArray'][$key]">
+                                        <tr>
+                                            <td>{$vars['srcArray'][$key]['name']}</td>
+                                            <td>{$vars['srcArray'][$key]['group_name']}</td>
+                                            <td>{$vars['srcArray'][$key]['department']}</td>
+                                            <td>
+                                                <if condition="$vars['srcArray'][$key]['charge'] EQ '0' "><span class="badge bg-blue">未知</span></if>
+                                                <if condition="$vars['srcArray'][$key]['charge'] EQ '1' "><span class="badge bg-green">免费</span></if>
+                                                <if condition="$vars['srcArray'][$key]['charge'] EQ '2' "><span class="badge bg-red">付费</span></if>
+                                            </td>
+                                            <td>{$vi.pv}</td>
+                                            <td>{$vi.uv}</td>
+                                            <td>{:number_format($vi['bounce_count'] / $vi['pv'] * 100, 4)}%</td>
+                                            <td>{:number_format($vi['visit_time'] / $vi['visit_count'], 2)}s</td>
+                                            <td>{$vi.order_count}</td>
+                                            <td>{$vi.order_fen_count}</td>
+                                            <td>{$vi.order_real_fen_count}</td>
+                                            <td>{:number_format($vi['order_count'] / $vi['uv'] * 100, 4)}%</td>
+                                            <td>{:number_format($vi['order_fen_count'] / $vi['uv'] * 100, 4)}%</td>
+                                            <td>{:number_format($vi['order_real_fen_count'] / $vi['uv'] * 100, 4)}%</td>
+                                        </tr>
+                                    </present>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/datatables/js/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/datatables/js/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/datatables/js/dataTables.second.sort.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/i18n/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            /*S-频道标签和频道名称初始化*/
+            //频道和频道标签相互关联设置
+            var relation     = JSON.parse('{$vars.relation}');
+            var tagType      = '{$vars.query.tagType|default=0}';
+            var tagChose     = '{$vars.query.tagChose|default=0}';
+            var channelType  = '{$vars.query.channelType|default=0}';
+            var channelChose = '{$vars.query.channelChose|default=0}';
+            //初始化
+            if ("0" == tagType) {
+                var content = getOptionList(relation.reorder.tag)
+                $("#tag").html(content);
+            } else {
+                var content = getOptionList(relation.original.channel[tagType].relation)
+                $("#tag").html(content);
+            }
+            if ("0" != tagChose) {
+                $("#tag").val(tagChose);
+            };
+            if ("0" == channelType) {
+                var content = getOptionList(relation.reorder.channel)
+                $("#channel").html(content);
+            } else {
+                var content = getOptionList(relation.original.tag[channelType].relation)
+                $("#channel").html(content);
+            }
+            if ("0" != channelChose) {
+                $("#channel").val(channelChose);
+            };
+            //获取选项列表
+            function getOptionList(options){
+                var html = '';
+                $.each(options, function(index, val) {
+                    html = html + '<option value="'+val.id+'">'+val.text+'</option>';
+                });
+                return html;
+            }
+            //标签绑定
+            function tagBindChange(){
+                $("#tag").change(function(event) {
+                    var channelSelected = $("#channel").val();
+                    var _this = $(this);
+                    var content = '';
+                    if ("0" == _this.val()) {
+                        content = getOptionList(relation.reorder.channel);
+                    } else {
+                        channelType = _this.val();
+                        content = getOptionList(relation.original.tag[_this.val()].relation)
+                    }
+                    $("#channel").html(content);
+                    $("#channel").unbind('change');
+                    $("#channel").val(channelSelected);
+                    channelBindChange();
+                });
+                $("#tag").select2({language: "zh-CN"});
+            }
+            //频道绑定
+            function channelBindChange(){
+                $("#channel").change(function(event) {
+                    var tagSelected = $("#tag").val();
+                    var _this = $(this);
+                    var content = '';
+                    if ("0" == _this.val()) {
+                        content = getOptionList(relation.reorder.tag);
+                    } else {
+                        tagType = _this.val();
+                        content = getOptionList(relation.original.channel[_this.val()].relation)
+                    }
+                    $("#tag").html(content);
+                    $("#tag").unbind('change');
+                    $("#tag").val(tagSelected);
+                    tagBindChange();
+                });
+                $("#channel").select2({language: "zh-CN"});
+            }
+            //初始化
+            tagBindChange();
+            channelBindChange();
+            /*E-频道标签和频道名称初始化*/
+
+            //搜索
+            $('.submit-search').click(function(event) {
+                window.location.href = "/flowanalysis/flowtrend/?tagType="+tagType+"&tagChose="+$("#tag").val()+"&channelType="+channelType+"&channelChose="+$("#channel").val()+"&type="+$("#type").val()+"&city="+$('#city').val()+"&channel="+$("#channel").val()+"&tag="+$("#tag").val()+"&timerange="+$('#timerange').val();
+            });
+
+            $('#type').val("{$Think.get.type|default=0}")
+            $('#city').val("{$Think.get.city|default=0}")
+            $('#city').select2({language: "zh-CN"});
+
+            /*S-时间初始化*/
+            $('#timerange').daterangepicker({
+                format: 'YYYY/MM/DD',
+                timePicker12Hour: false,
+                opens:'left'
+            }, function(start, end, label) {
+                console.log(start.toISOString(), end.toISOString(), label);
+            });
+            var time = "{$vars.timerange}";
+            if(time != ''){
+                $('.timer').prop('value',time);
+            }
+            /*E-时间初始化*/
+
+            /*S-按日按月查询表格对应变化*/
+            var option = {
+                legend: {
+                    orient: 'horizontal',
+                    y: 'bottom',
+                    selectedMode:'single',
+                    data:['PV','UV','发单量','分单量','实际分单量']
+                },
+                tooltip : {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                grid: {
+                    left: '1%',
+                    right: '3%',
+                    bottom: '9%',
+                    containLabel: true
+                },
+                xAxis : [
+                    {
+                        type : 'category',
+                        boundaryGap : false,
+                        data : []
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                series : []
+            };
+
+            var chart = echarts.init($('.canvas').get(0));
+            chart.setOption(option);
+            var xAxis = {$vars.xAxis};
+            var series = {$vars.series};
+            var chart = echarts.init($('.canvas').get(0));
+            var flowanalysisdimension = localStorage.flowanalysisdimension;
+
+            if ("2" == flowanalysisdimension) {
+                $('.dimension button[data-dimension=2]').addClass('btn-success');
+                $('.dimension-month').removeClass('hidden').addClass('show');
+                $('.dimension-day').removeClass('show').addClass('hidden');
+                option.xAxis[0].data = xAxis.month;
+                option.series = series.month;
+                chart.setOption(option);
+            } else {
+                $('.dimension button[data-dimension=1]').addClass('btn-success');
+                $('.dimension-day').removeClass('hidden').addClass('show');
+                $('.dimension-month').removeClass('show').addClass('hidden');
+                option.xAxis[0].data = xAxis.day;
+                option.series = series.day;
+                chart.setOption(option);
+            }
+            $('.dimension button').click(function(event) {
+                $('.dimension button').removeClass('btn-success');
+                $(this).addClass('btn-success');
+                var flowanalysisdimension = $(this).attr('data-dimension');
+                if ("2" == flowanalysisdimension) {
+                    $('.dimension-month').removeClass('hidden').addClass('show');
+                    $('.dimension-day').removeClass('show').addClass('hidden');
+                    localStorage.flowanalysisdimension = 2;
+                    option.xAxis[0].data = xAxis.month;
+                    option.series = series.month;
+                    chart.setOption(option);
+                } else {
+                    $('.dimension-day').removeClass('hidden').addClass('show');
+                    $('.dimension-month').removeClass('show').addClass('hidden');
+                    localStorage.flowanalysisdimension = 1;
+                    option.xAxis[0].data = xAxis.day;
+                    option.series = series.day;
+                    chart.setOption(option);
+                }
+            });
+            /*E-按日按月查询*/
+
+            /*S-表格*/
+            //按日按月统计表格初始化
+            var dayTableObject = $('.dimension-day table').DataTable({
+                paging:true,
+                pageLength: 20,
+                searching:false,
+                bLengthChange:false,
+                language:{
+                    zeroRecords: "没有内容",
+                    info:""
+                },
+                aoColumnDefs: [
+                    { "sType": "html-second", "aTargets": [4] },    //指定列号使用自定义排序
+                ],
+                bSort:true,
+                language: {
+                    "sProcessing": "处理中...",
+                    "sLengthMenu": "显示 _MENU_ 项结果",
+                    "sZeroRecords": "没有匹配结果",
+                    "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "sInfoPostFix": "",
+                    "sSearch": "搜索:",
+                    "sUrl": "",
+                    "sEmptyTable": "抱歉，条件查询结果下暂无数据，请重新选择！",
+                    "sLoadingRecords": "载入中...",
+                    "sInfoThousands": ",",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "上页",
+                        "sNext": "下页",
+                        "sLast": "末页"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": 以升序排列此列",
+                        "sSortDescending": ": 以降序排列此列"
+                    }
+                }
+            });
+            var monthTableObject = $('.dimension-month table').DataTable({
+                paging:true,
+                pageLength: 20,
+                searching:false,
+                bLengthChange:false,
+                language:{
+                    zeroRecords: "没有内容",
+                    info:""
+                },
+                aoColumnDefs: [
+                    { "sType": "html-second", "aTargets": [4] },    //指定列号使用自定义排序
+                ],
+                bSort:true,
+                language: {
+                    "sProcessing": "处理中...",
+                    "sLengthMenu": "显示 _MENU_ 项结果",
+                    "sZeroRecords": "没有匹配结果",
+                    "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "sInfoPostFix": "",
+                    "sSearch": "搜索:",
+                    "sUrl": "",
+                    "sEmptyTable": "抱歉，条件查询结果下暂无数据，请重新选择！",
+                    "sLoadingRecords": "载入中...",
+                    "sInfoThousands": ",",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "上页",
+                        "sNext": "下页",
+                        "sLast": "末页"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": 以升序排列此列",
+                        "sSortDescending": ": 以降序排列此列"
+                    }
+                }
+            });
+            //列的显示与隐藏绑定
+            $('.table-checkbox').click(function(event) {
+                var column = $(this).attr('data-column');
+                var dayColumn = dayTableObject.column(column);
+                var monthColumn = monthTableObject.column(column);
+                if ($(this).prop("checked")) {
+                    dayColumn.visible(true);
+                    monthColumn.visible(true);
+                    localStorage["flowanalysisFlowtrendColumn" + column] = "1";
+                } else {
+                    dayColumn.visible(false);
+                    monthColumn.visible(false);
+                    localStorage["flowanalysisFlowtrendColumn" + column] = "2";
+                }
+            });
+            //列的显示与隐藏初始化
+            $('.table-checkbox').each(function(index, el) {
+                var _this = $(this);
+                var column = _this.attr('data-column');
+                var flowanalysisFlowtrendColumn = localStorage["flowanalysisFlowtrendColumn" + column];
+                var dayColumn = dayTableObject.column(column);
+                var monthColumn = monthTableObject.column(column);
+                if ("2" == flowanalysisFlowtrendColumn) {
+                    dayColumn.visible(false);
+                    monthColumn.visible(false);
+                    _this.prop("checked", false);
+                } else {
+                    dayColumn.visible(true);
+                    monthColumn.visible(true);
+                    _this.prop("checked", true);
+                }
+            });
+            //模态框，渠道来源表格初始化
+            $('.table-modal').DataTable({
+                paging:true,
+                pageLength: 20,
+                searching:false,
+                bLengthChange:false,
+                language:{
+                    zeroRecords: "没有内容",
+                    info:""
+                },
+                aoColumnDefs: [
+                    { "sType": "html-second", "aTargets": [7] },    //指定列号使用自定义排序
+                ],
+                bSort:true,
+                language: {
+                    "sProcessing": "处理中...",
+                    "sLengthMenu": "显示 _MENU_ 项结果",
+                    "sZeroRecords": "没有匹配结果",
+                    "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "sInfoPostFix": "",
+                    "sSearch": "搜索:",
+                    "sUrl": "",
+                    "sEmptyTable": "抱歉，条件查询结果下暂无数据，请重新选择！",
+                    "sLoadingRecords": "载入中...",
+                    "sInfoThousands": ",",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "上页",
+                        "sNext": "下页",
+                        "sLast": "末页"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": 以升序排列此列",
+                        "sSortDescending": ": 以降序排列此列"
+                    }
+                }
+            });
+            /*E-表格*/
+
+            //导出报表
+            $(".submit-export").click(function(event) {
+                //获取表头
+                var target = $(this).parent().parent().find('.show table');
+                var tableName = $('.main-nav-name').text().trim() + " " + target.attr('data-dimension-text');
+                var colums = [];
+                var data = [];
+                target.find("th").each(function() {
+                    var text = $(this).text().trim();
+                    var sub = [];
+                    sub["text"] = text;
+                    colums.push(sub);
+                });
+                data.push(colums);
+                //获取内容
+                var object = {};
+                var dimension = $(this).parent().parent().find('.show table').attr('data-dimension');
+                if ('day' == dimension) {
+                    object = dayTableObject;
+                } else {
+                    object = monthTableObject;
+                }
+                var nTrs = object.data();
+                var visible = object.columns().visible();
+                for(var i = 0; i < nTrs.length; i++){
+                    var sub = [];
+                    $.each(nTrs[i], function(index, val) {
+                        if (true == visible[index]) {
+                            var _td = {
+                                text: val
+                            }
+                            sub.push(_td);
+                        };
+                    });
+                    data.push(sub);
+                }
+                $(this).exportExcel({
+                    data: data,
+                    title: tableName,
+                    url: "/export/download",
+                    show:true
+                });
+            });
+
+            /*S-绑定表格标题，放到最后*/
+            var tableName = '';
+            if ('0' != $("#type").val()) {
+                tableName = $("#type").find("option:selected").text() + '-';
+            };
+            if ('0' != $("#city").val()) {
+                tableName = tableName + $("#city").find("option:selected").attr('data-name') + '-';
+            };
+            if ('0' != $("#tag").val()) {
+                tableName = tableName + $("#tag").find("option:selected").text() + '-';
+            };
+            if ('0' != $("#channel").val()) {
+                tableName = tableName + $("#channel").find("option:selected").text() + '-';
+            };
+            tableName = tableName.substring(0,tableName.lastIndexOf('-'));
+            if ("" != tableName) {
+                $('.nav-name').html(tableName + "&nbsp;&nbsp;");
+            };
+            /*E-绑定表格标题*/
+        })
+    </script>
+</block>

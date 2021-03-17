@@ -1,0 +1,162 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>装修攻略-专题分类-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/jstree/themes/default/style.min.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/home/css/specialarticle.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>装修攻略-专题分类</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="row">
+                        <div class="col-sm-2 tree-menu">
+                            <div id="jstree">
+                                <ul>
+                                    <li id="0" level="0">装修攻略专题分类
+                                        <ul>
+                                            <volist name="list" id="vo">
+                                                <li id="{$vo.id}" level="{$vo.level}">
+                                                    {$vo.classname}
+                                                    <if condition="isset($vo['child'])">
+                                                        <ul>
+                                                        <volist name="vo.child" id="v">
+                                                        <li id="{$v.id}" level="{$v.level}">{$v.classname}</li>
+                                                        </volist>
+                                                        </ul>
+                                                        </if>
+                                                    </if>
+                                                </li>
+                                            </volist>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-9 content-menu">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/jstree/jstree.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$('#jstree').jstree({
+    "plugins" : ["contextmenu","state" ],
+    "core" : {
+        "themes" : {
+          "variant" : "large"
+        },
+        "multiple" : false
+    },
+    "contextmenu":{
+        "items":{
+            "create":null,
+            "rename":null,
+            "remove":null,
+            "ccp":null,
+            "add":{
+                "label":"新建分类",
+                "action":function(data){
+                    var inst = jQuery.jstree.reference(data.reference),
+                    obj = inst.get_node(data.reference);
+                    var _this = this;
+                    $.ajax({
+                        url: '/specialarticle/classinfo',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data:{
+                            level:obj.li_attr.level,
+                            parentid:obj.li_attr.id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            $(".content-menu").html(data.data);
+                        };
+                    })
+                    .fail(function() {
+                        _this.Alert({
+                            msg:"操作失败,请联系技术部门！",
+                            level:2
+                        });
+                    });
+                }
+            },
+            "edit":{
+                "label":"编辑分类",
+                "action":function(data){
+                    var inst = jQuery.jstree.reference(data.reference),
+                    obj = inst.get_node(data.reference);
+                    if (obj.li_attr.id != false) {
+                        $.ajax({
+                            url: '/specialarticle/classinfo',
+                            type: 'GET',
+                            dataType: 'JSON',
+                            data:{
+                                id:obj.li_attr.id
+                            }
+                        })
+                        .done(function(data) {
+                            if (data.status == 1) {
+                                $(".content-menu").html(data.data);
+                            };
+                        })
+                        .fail(function() {
+                            _this.Alert({
+                                msg:"操作失败,请联系技术部门！",
+                                level:2
+                            });
+                        });
+                    }
+                }
+            }
+        }
+    }
+}).bind("loaded.jstree", function (e, data) {
+    data.inst.open_all(-1);
+});
+
+$(document).on("click","#btnSave",function(){
+    var _this = $(this);
+    $.ajax({
+        url: '/specialarticle/classinfo',
+        type: 'POST',
+        dataType: 'JSON',
+        data: $("#myForm").serialize()
+    })
+    .done(function(data) {
+        if (data.status == 1) {
+            window.location.href = window.location.href;
+        }else{
+            _this.Alert({
+                msg:data.info,
+                level:2
+            });
+        };
+    })
+    .fail(function() {
+        _this.Alert({
+            msg:"操作失败,请联系技术部门！",
+            level:2
+        });
+    });
+})
+</script>
+</block>

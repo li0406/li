@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>登录-齐装网</title>
+    <include file="Index:resource" />
+    <link href="{$static_host}/assets/common/css/font/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="{$static_host}/assets/user/index/css/default.css?V=201808151115" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+  <include file="Index:header" />
+    <div class="wrap">
+        <div class="loginlogo">
+             <a class="logo" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo-r.png" alt="齐装网" /></a>
+        </div>
+    </div>
+
+    <style>
+    .tab-nav {margin-bottom:15px;}
+    </style>
+    <div class="loginbg ">
+        <div class="wrap">
+        <div class="loginbgby">
+        <img src="{$static_host}/assets/common/img/0918105202.jpg" width="540" height="340" alt="登录齐装网">
+        <div class="zhezhao"></div>
+        </div>
+            <div class="loginbox">
+            <div class="tab" id="tab">
+                <div class="tab-nav j-tab-nav">
+                    <a href="javascript:void(0);" class="current">帐号登录</a>
+                    <!--<a href="javascript:void(0);"></a>-->
+                </div>
+                <div class="tab-con">
+                <div class="j-tab-con">
+                    <div class="tab-con-item reg-user" style="display:block;">
+                        <div class="loginput">
+                            <input name="name" type="text" class="log" placeholder="手机/邮箱/用户名" value="">
+                            <div class="tips"></div>
+                        </div>
+                        <div class="loginput">
+                            <input name="password" type="password" class="res" placeholder="密码" value="">
+                            <div class="tips times-tip password—tip"></div>
+                        </div>
+                        <div class="control-group verity" style="display: none">
+                            {$verify}
+                        </div>
+                        <div class="control-group clearfix is_show" style="display: none">
+                            <div class="pull-left">
+                                <input type="text" placeholder="手机验证码" value="" class="yzm-input code" name="code">
+                            </div>
+                            <div class="pull-left">
+                                <div class="btn-yzm" id="sendCode">获取验证码</div>
+                            </div>
+                            <div class="tips times-tip"></div>
+                        </div>
+                        <p class="yzm-tips"><i class="fa fa-check-square"></i>验证码已发送手机，有效时间为30分钟，请及时查收</p>
+                        <div class="logintit">
+                            <i>还没有齐装帐号？<a href="/reg/" target="_blank">点击注册»</a></i>
+                        </div>
+                        <div class="login-info">
+                            <i><a href="/getpassword/" target="_blank">忘记密码？</a></i>
+                        </div>
+                        <div class="btn">
+                            <button class="logbtn" id="login_show_verifysmscode">点击验证</button>
+                            <button class="logbtn" id="login_show_login" style="display: none">登录</button>
+                            <input type="hidden" id="but_style" value="1">
+                        </div>
+                        <div class="other">
+                            <i>第三方帐号登录：</i>
+                            <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromqq" id="qqLoginBtn" title="QQ登录" class="qqlogin"></a>
+                            <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromsina" title="新浪微博登录" class="weibologin"></a>
+                            <a href="{:C('QZ_YUMING_SCHEME')}://oauthtmp.qizuang.com/loginfromwechat" title="微信登录" class="tblogin"></a>
+                        </div>
+                    </div>
+                    <div class="tab-con-item  reg-company">
+                    </div>
+                    <input type="hidden" name="send_code" value="0">
+                    <input type="hidden" name="tel">
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+
+
+    <div class="tips-mask">
+        <div class="tips-container">
+            <div class="tips-header"><i class="fa fa-close"></i></div>
+            <p>为了您的账号安全,请每隔30天修改一次密码</p>
+            <div class="btn-box">
+                <span href="" class="btn-item btn-danger"><a href="/getpassword/">立即修改</a></span>
+                <span href="" class="btn-item btn-default" id="ignore">忽略</span>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $(function () {
+        var islogincheck = "{$islogincheck}";
+        var blocking = "{$blocking}";
+        if (islogincheck == 1) {
+            $(".verity").show();
+        }
+        //验证是否需要 发手机短信
+        $("#login_show_verifysmscode").on('click', function () {
+            $(".yzm-tips").hide();
+            var user = $("input[name=name]").val();
+            $(".logbtn").text("验证中...请稍等");
+            $(".logbtn").attr("disabled", 'disabled');
+            if (user) {
+                //验证是否弹短信认证操作
+                $.ajax({
+                    type: "POST",
+                    url: "/login_userinfo/",
+                    dataType: "json",
+                    data: {'user':user},
+                    success: function (data) {
+                        if (data.status == 0) {
+                            $("input[name=send_code]").val('1');
+                            $("input[name=tel]").val(data.tel);
+                            $(".is_show").show();
+                        }else if(data.status == 1){
+                            $("input[name=send_code]").val('0');
+                            $(".is_show").hide();
+                            $(".yzm-tips").html("<i class='fa fa-check-square'></i>" + data.info);
+                            $(".yzm-tips").show();
+                        }else if (data.status == 2) {
+                            $("input[name=send_code]").val('0');
+                            $(".is_show").hide();
+                             $(".password—tip").text(data.info);
+                            // $(".yzm-tips").show();
+                        }
+                        $("input[name=name]").parent().find(".tips").html("");
+                        //显示登录按钮
+                        $("#login_show_verifysmscode").hide();
+                        $("#login_show_login").show();
+
+                        //设置按钮类型 , 作用来 按键盘enter键
+                        $("#but_style").val(2);
+
+                        $(".logbtn").text("登录");
+                        $(".logbtn").removeAttr("disabled");
+                    }
+                })
+            } else {
+                $("input[name=name]").parent().find(".tips").html("无效的用户帐号！");
+                $("input[name=name]").focus();
+                $(".logbtn").text("点击验证");
+                $(".logbtn").removeAttr("disabled");
+                return false;
+            }
+        });
+        //如果修改了用户名 需要重新验证是否要发短信
+        $("input[name=name]").on('click input',function () {
+            //设置按钮类型 , 作用来 按键盘enter键
+            $("#but_style").val(1);
+            //显示验证按钮
+            $(".logbtn").text("点击验证");
+            $(".password—tip").text("");
+            $("#login_show_verifysmscode").show();
+            $("#login_show_login").hide();
+        });
+        $("#tab").rTabs({
+            bind: 'click',
+            animation: 'fadein',
+            auto: false
+        });
+        $(document).keydown(function (e) {
+            if (e.keyCode == 13) {
+                if($("#but_style").val() == 1){
+                    $("#login_show_verifysmscode").trigger('click');
+                }else if($("#but_style").val() == 2){
+                    $("#login_show_login").trigger('click');
+                }
+            }
+        });
+
+        $("#ignore, .fa-close").click(function (event) {
+            $(".tips-mask").fadeOut();
+        });
+        //登录按钮
+        $("#login_show_login").on('click', function () {
+            $(".yzm-tips").hide();
+            //登录操作
+            $(".logbtn").text("登录中...请稍等");
+            $(".logbtn").attr("disabled", 'disabled');
+
+            if ($("input[name=name]").val() == "") {
+                $("input[name=name]").parent().find(".tips").html("无效的用户帐号！");
+                $("input[name=name]").focus();
+                $(".logbtn").text("登录");
+                $(".logbtn").removeAttr("disabled");
+                return false;
+            }
+            $("input[name=name]").parent().find(".tips").html("");
+
+            if ($("input[name=password]").val() == "" || $("input[name=password]").val().length < 0) {
+                $("input[name=password]").parent().find(".tips").html("无效的用户密码！");
+                $("input[name=password]").focus();
+                $(".logbtn").text("登录");
+                $(".logbtn").removeAttr("disabled");
+                return false;
+            }
+            $("input[name=password]").parent().find(".tips").html("");
+
+            //判断是够要发送验证码 , 需要才验证
+            if ($("input[name=send_code]").val() == 1) {
+                if ($(".code").val() == "" || $(".code").length < 0) {
+                    $(".yzm-tips").html("<span style='color: red'>请输入验证码！</span>");
+                    $(".yzm-tips").show();
+                    $(".code").focus();
+                    $(".logbtn").text("登录");
+                    $(".logbtn").removeAttr("disabled");
+                    return false;
+                }
+            }
+            $(".yzm-tips").hide();
+            //判断是否需要验证短信
+            if ($("input[name=send_code]").val() == 1) {
+                //验证短信, 才能登录操作
+                verifysmscode();
+            } else {
+                //登录操作
+                login();
+            }
+        });
+
+        var flag = true;
+        $("#sendCode").click(function (event) {
+            if (flag) {
+                //验证码
+                sendSms($("input[name=tel]").val());
+                $(".yzm-tips").show();
+                countDown($(this), 60);
+                flag = false;
+            }
+        });
+
+        //倒计时
+        function countDown(obj, num) {
+            if (num > 0) {
+                obj.text(num + " 秒后重新发送");
+                num--;
+                setTimeout(function (obj, num) {
+                    countDown(obj, num);
+                }, 1000, obj, num);
+            } else {
+                obj.text("获取验证码");
+                flag = true;
+            }
+        }
+
+        //发送验证码
+        function sendSms(tel) {
+            var data = {
+                tel: tel,
+                save: 0,
+                check_verify: false,
+            }
+            $.ajax({
+                type: "POST",
+                url: "/login_sendsms/",
+                dataType: "json",
+                data: data,
+                success: function (data) {
+                    $(".logbtn").text("登录");
+                    $(".logbtn").removeAttr("disabled");
+                    if (data.status == 0) {
+                        $(".yzm-tips").html("<span style='color: red'>" + data.info + "</span>");
+                        $(".yzm-tips").show();
+                    }
+                    if (data.status == 9) {
+                        $(".yzm-tips").html("<span style='color: red'>" + data.info + "</span>");
+                        $(".yzm-tips").show();
+                    }
+                    if (data.status == 1) {
+                        $(".yzm-tips").html('<i class="fa fa-check-square"></i>验证码已发送手机，有效时间为30分钟，请及时查收');
+                        $(".yzm-tips").show();
+                    }
+                },
+                error: function (xhr) {
+                    $(".yzm-tips").html("<span style='color: red'>发送失败,请稍后再试！</span>");
+                    $(".yzm-tips").show();
+                }
+            });
+        }
+
+        //验证操作
+        function verifysmscode() {
+            $.ajax({
+                url: "/login_verifysmscode/",
+                type: 'POST',
+                dataType: "JSON",
+                data: {
+                    code: $("input[name=code]").val(),
+                    tel: $("input[name=tel]").val()
+                },
+                success: function (data) {
+                    if (data.status == 1) {
+                        //登录操作
+                        login()
+                    } else {
+                        //显示提示
+                        $(".yzm-tips").html("<span style='color: red'>" + data.info + "</span>");
+                        $(".yzm-tips").show();
+                        $(".logbtn").text("登录");
+                        $(".logbtn").removeAttr("disabled");
+                    }
+                }
+            })
+        }
+
+        function login() {
+            $.ajax({
+                url: '/login',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    name: $("input[name=name]").val(),
+                    password: $("input[name=password]").val(),
+                    verify: $("input[name=verify]").val(),
+                    safecode: "{$safecode}",
+                    ssid: "{$ssid}"
+                }
+            })
+                .done(function (data) {
+                    if (data.status == 1) {
+                        window.location.href = "/home/";
+                    } else {
+                        $("input[name=password]").parent().find(".tips").html(data.info);
+                        $(".logbtn").text("登录");
+                        $(".logbtn").removeAttr("disabled");
+                        if (data.islogincheck == 1) {
+                            //显示验证码
+                            $(".verity").show();
+                        }
+                    }
+                })
+                .fail(function (xhr) {
+                    $(".logbtn").text("登录");
+                    $(".logbtn").removeAttr("disabled");
+                    $("input[name=password]").parent().find(".tips").html("登录失败,请稍后再试！");
+                });
+        }
+
+    })
+</script>
+</html>

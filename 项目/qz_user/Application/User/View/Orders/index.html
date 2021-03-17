@@ -1,0 +1,967 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-remind.css?v={:C('STATIC_VERSION')}">
+    <link href="//assets.qizuang.com/plugins/layDate-v5.0.9/theme/default/laydate.css" rel="stylesheet" >
+</head>
+<body>
+<input type="hidden" value="{$remind}" id="unmeasure-house">
+<include file="Home:header"/>
+<div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft"/>
+    <include file="Orders:header"/>
+    <div class="ht-main maindw">
+        <!--订单列表-->
+        <if condition="$info['user']['orderpass']">
+            <div class="ht-order-check ht-order-check625 clearfix">
+                <div class="status status-read">
+                    <strong>读取状态:</strong>
+                    <select name="read">
+                        <volist name="info.orderInfo.readStatus" id="vo">
+                            <if condition="$info['orderInfo']['isread'] EQ $vo['value']">
+                                <option value="{$vo.value}" selected="selected">{$vo.name}</option>
+                                <else/>
+                                <option value="{$vo.value}">{$vo.name}</option>
+                            </if>
+                        </volist>
+                    </select>
+                </div>
+                <div class="status status-order">
+                    <strong>订单状态:</strong>
+                    <select name="state">
+                        <option value="0">全部</option>
+                        <option value="1" {$info['orderInfo']["state"]==1?'selected':'1'}>已量房</option>
+                        <option value="2" {$info['orderInfo']["state"]==2?'selected':'2'}>已到店/见面</option>
+                        <option value="3" {$info['orderInfo']["state"]==3?'selected':'3'}>未量房</option>
+                        <option value="4" {$info['orderInfo']["state"]==4?'selected':'4'}>已签约</option>
+                    </select>
+                </div>
+                <div class="status status-order">
+                    <strong>开始时间:</strong>
+                    <input type="text" name="time" class="layui-input" id="begin-time" autocomplete="off" placeholder="选择开始时间" value="{$info.orderInfo.begin}">
+                </div>
+                <div class="status status-order">
+                    <strong>结束时间:</strong>
+                    <input type="text" name="time" class="layui-input" id="end-time" autocomplete="off" placeholder="选择结束时间" value="{$info.orderInfo.end}">
+                </div>
+                <div class="search">
+                    <strong>订单:</strong>
+                    <input name="text" type="text" placeholder="订单号/小区/电话号" value="{$info.orderInfo.keyword}">
+                    <input name="btnSearch" type="button" value="查找订单">
+                    <input name="btnExport" type="button" value="导出" data-status="{$info.orderInfo.is_can_export}">
+                </div>
+            </div>
+            <if condition="$need_to_do_num GT 0">
+            <p class="unmark-tips"><img src="{$static_host}/assets/user/orders/img/tips.png" alt="">您有{$need_to_do_num}条订单未标记状态，请及时标记，齐装网后台会根据您标记的订单状态，进行及时回访，以提高您对齐装网的满意度。</p>
+            </if>
+            <table border="0" cellpadding="0" cellspacing="0" class="ht-order-list">
+                <tr class="order-title">
+                    <td>读取状态</td>
+                    <td style="width: 70px;">发布日期</td>
+                    <td>业主</td>
+                    <td>所在区域</td>
+                    <td>小区名称</td>
+                    <td>建筑面积</td>
+                    <td>装修预算</td>
+                    <td>订单类型</td>
+                    <td style="position: relative;">
+                        订单状态
+                        <span class="ques-mark" data-type="ques-mark">?</span>
+                        <div class="status-intro" data-type="ques-intro">
+                            <p>未量房 : 未能成功预约到业主进行量房。</p>
+                            <p>已到店/已见面：已与业主当面沟通。</p>
+                            <p>已量房：已与业主预约好量房时间，并成功对场地进行量房。</p>
+                            <p>已签约：已与业主沟通好可以签约。已签约且通过审核的订单，将作为施工订单展示给公司授权的施工人员进行工地直播。</p>
+                        </div>
+                    </td>
+                    <td>签单审核</td>
+                    <td style="width: 72px">订单详情</td>
+                    <td style="width: 72px">订单跟进</td>
+                </tr>
+                <volist name="info.orderInfo.orderlist" id="vo">
+                    <if condition="!$vo['isread']">
+                        <tr class="order-list unknow">
+                            <td><span class="green"><i class="icon-folder-close icon-large mr10"></i>未读</span></td>
+                            <td>{$vo.ordertime|date="Y-m-d",###}</td>
+                            <td>{$vo.ordername|default=""}{$vo.sex}</td>
+                            <td>{$vo.qx}</td>
+                            <td>{$vo.xiaoqu}</td>
+                            <td>{$vo.mianji}㎡</td>
+                            <td>{$vo.jiage}</td>
+                            <td><if condition="$vo['type_fw'] EQ 1">分<else/>赠送</if><if condition="$vo['allot_source'] EQ 3">(抢)</if></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><a href="/orderdetails?id={$vo.order}" class="order-look" data-id="{$vo.order}" target="_blank">订单详情</a></td>
+                        </tr>
+                        <else/>
+                        <tr class="order-list">
+                            <td><span class="gray"><i class="icon-folder-open icon-large mr10"></i>已读</span></td>
+                            <td>{$vo.ordertime|date="Y-m-d",###}</td>
+                            <td>{$vo.ordername|default=""}{$vo.sex}</td>
+                            <td>{$vo.qx}</td>
+                            <td>{$vo.xiaoqu}</td>
+                            <td>{$vo.mianji}㎡</td>
+                            <td>{$vo.jiage}</td>
+                            <td><if condition="$vo['type_fw'] EQ 1">分<else/>赠送</if></td>
+                            <td>
+                                <select class="state" data-id="{$vo.order}" data-hook="{$vo['status']|default='0'}" {$vo['qiandan_status']==1?'disabled':''}>
+                                    <option value="0">请选择</option>
+                                    <if condition="!empty($vo['qiandan_companyid']) && $vo['qiandan_companyid'] != $user['id']">
+                                    <option value="1" {$vo['status']==1?'selected':''}>已量房</option>
+                                    <option value="2" {$vo['status']==2?'selected':''}>已到店/见面</option>
+                                    <option value="3" {$vo['status']==3?'selected':''}>未量房</option>
+                                    <else />
+                                    <option value="1" {$vo['status']==1?'selected':''}>已量房</option>
+                                    <option value="2" {$vo['status']==2?'selected':''}>已到店/见面</option>
+                                    <option value="3" {$vo['status']==3?'selected':''}>未量房</option>
+                                    <option value="4" {$vo['status']==4?'selected':''}>已签约</option>
+                                    </if>
+                                </select>
+                            </td>
+                            <td>
+                                {$vo['qiandan_status']==1?'已签约':''}{:(in_array($vo['qiandan_status'],[0,2])&& ($vo['qiandan_companyid']==$user['id']))?'签约确认中':''}
+                            </td>
+                            <td>
+                                <a href="/orderdetails?id={$vo.order}" class="order-look" data-id="{$vo.order}" target="_blank">订单详情</a>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" class="order-subtotal" data-id="{$vo.order}">跟单小计</a>
+                                <gt name="vo.visit_noread_count" value="0"><b></b></gt>
+                            </td>
+                        </tr>
+                    </if>
+                </volist>
+            </table>
+            {$info.orderInfo.page}
+
+        <else/>
+            <if condition="$info['passinit']">
+                <div class="ht-order-login">订单密码：
+                    <input name="pass" type="password" placeholder="订单密码"><i class="red error vtop"></i>
+                </div>
+                <div class="ht-order-login">重复密码：
+                    <input name="confirmpass" type="password" placeholder="重复密码"><i class="red error vtop"></i>
+                </div>
+                <div class="ht-order-login">
+                    <p><i class="red  ml10">
+                        <i class="icon-info-sign mr10"></i>请妥善保管好您的查询密码,请勿泄漏给无相关人员,谢谢！
+                    </i></p>
+                </div>
+                <div class="ht-yes btn-seting"><a href="javascript:void(0)"><i class="icon-copy mr10"></i>设置</a></div>
+
+                <script type="text/javascript">
+                    $(".btn-seting a").click(function (event) {
+                        var _this = $(this);
+                        if (_this.hasClass('disabled') == true) {
+                            return false;
+                        }
+                        var input = $("input[name=pass]");
+                        var confirminput = $("input[name=confirmpass]");
+                        var mypass = input.val();
+                        if (!App.validate.run(mypass)) {
+                            input.focus();
+                            input.addClass('focus');
+                            input.parent().find(".error").html("请输入查看订单密码");
+                            return false;
+                        }
+
+                        if (!App.validate.run(mypass, "blend")) {
+                            input.focus();
+                            input.addClass('focus');
+                            input.parent().find(".error").html("请不要填写纯数字/纯字母");
+                            return false;
+                        }
+
+                        if (mypass != confirminput.val()) {
+                            confirminput.focus();
+                            confirminput.addClass('focus');
+                            confirminput.parent().find(".error").html("二次密码不一致");
+                            return false;
+                        }
+                        _this.addClass('disabled').html('<i class="icon-copy mr10"></i>设置中...');
+                        $.ajax({
+                            url: '/saveorderpass/',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                pass: mypass
+                            }
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                window.location.href = window.location.href;
+                            } else {
+                                setTimeout(function(){
+                                    _this.removeClass('disabled').html('<i class="icon-copy mr10"></i>设置');
+                                    $(".error").html(data.info);
+                                },500);
+                            }
+                        }).fail(function (xhr) {
+                            $.pt({
+                                target: _this,
+                                content: "发生了未知不到的错误,请刷新页面",
+                                width: 'auto'
+                            });
+                        });
+                    });
+
+                </script>
+            <else/>
+                <!--输入订单密码-->
+                <div class="ht-order-login">
+                    <div class="shuruyzm">
+                        <span class="spantitle">查看订单密码：</span>
+                        <input class="orderpassword" name="pass" type="password" placeholder="请输入订单密码">
+                        <div class="weixinma">
+                            <img src="/assets/user/orders/img/userma.png">
+                        </div>
+                        <i class="red error vtop tishi passtishi"></i>
+                    </div>
+                    <p class="topjvli">
+                        <i class="red  ml10">
+                            <i class="icon-info-sign mr10"></i>提醒：此订单密码极为重要,请不要将密码透露给他人（包括齐装网的工作人员），谢谢！
+                        </i>
+                    </p>
+                    <p><i class="red ml10"><i class="icon-info-sign mr10"></i>连续输错3次密码,查看订单将冻结10分钟,如有问题请联系客服</i></p>
+                    <p><i class="red ml10"><i class="icon-info-sign mr10"></i>订单是贵公司宝贵的财产，请不要随意泄漏订单信息。</i></p>
+                </div>
+                <div class="ht-yes btn-look btn_jianjv"><a class="lookorder" href="javascript:void(0)">查看订单</a></div>
+
+                <!-- 微信二维码弹窗 -->
+                <div class="weixinmatc">
+                    <div class="weixinmatc-title">扫码进入<span class="closema">X</span></div>
+                    <div class="erweimawk">
+                        <img src="{$qrLoginImg}">
+                    </div>
+                    <div class="lunxuntip">正在等待扫描</div>
+                </div>
+                <script type="text/javascript">
+                    $(function () {
+                        $(".btn-look a").click(function (event) {
+                            var _this = $(this);
+                            if (_this.hasClass('disabled') == true) {
+                                return false;
+                            }
+                            var passdom = $("input[name=pass]");
+                            $(".focus").removeClass('focus');
+                            $(".tishi").html('');
+                            if (!App.validate.run(passdom.val())) {
+                                passdom.focus();
+                                passdom.addClass('focus');
+                                $(".passtishi").html("亲,请输入查看订单密码");
+                                return false;
+                            }
+                            _this.addClass('disabled').text('验证中...');
+                            var data = {};
+                            data.pass = passdom.val();
+                            $.ajax({
+                                url: '/orders/',
+                                type: 'POST',
+                                dataType: 'JSON',
+                                data: data
+                            }).done(function (data) {
+                                if (data.status == 1) {
+                                    window.location.href = window.location.href;
+                                } else if (data.status == 3){
+                                    alert(data.info)
+                                    window.location.href = "/orderchange/";
+                                } else {
+                                    setTimeout(function () {
+                                        _this.removeClass('disabled').text('查看订单');
+                                        $(".tishi").html('');
+                                        $(".passtishi").html(data.info);
+                                    }, 500);
+                                }
+                            }).fail(function (xhr) {
+                                $.pt({
+                                    target: _this,
+                                    content: "发生了未知不到的错误,请刷新页面",
+                                    width: 'auto'
+                                });
+                            });
+                        });
+
+                        //扫描二维码查看订单
+                        var flag = true;
+                        var getEwm = function () {
+                            $.ajax({
+                                url: '/orders/wechatlogin/',
+                                dataType: 'json',
+                                success: function (res) {
+                                    if (res.status == 1) {
+                                         if(res.info=="用户微信未绑定"){
+                                            $('.weixinmatc .lunxuntip').addClass('redgaoliang');
+                                          }else{
+                                            $('.weixinmatc .lunxuntip').removeClass('redgaoliang');
+                                          }
+                                        $('.weixinmatc .lunxuntip').text(res.info);
+                                        if (aa) {
+                                          setTimeout(function(){aa()},3000);
+                                        }
+                                    } else {
+                                        $('.weixinmatc .lunxuntip').removeClass('redgaoliang');
+                                        $('.weixinmatc .lunxuntip').text(res.info);
+                                        aa = null;
+                                        window.location.reload();
+                                    }
+                                },
+                                error: function (xhr) {
+                                    if (xhr.readyState != 0) {
+                                        alert("网络错误请稍后再试")
+                                    }
+                                }
+                            })
+                        };
+                        var aa = getEwm;
+                        $('.shuruyzm .weixinma').click(function () {
+                            if (flag == true) {
+                                flag = false;
+                                $('.weixinmatc').show();
+                                aa = getEwm;
+                                aa()
+                            }
+                        });
+                        $('.weixinmatc-title .closema').click(function () {
+                            flag = true;
+                            aa = null;
+                            $('.weixinmatc').hide();
+                        });
+
+                        $(document).click(function () {
+                            flag = true;
+                            aa = null;
+                            $(".weixinmatc").hide();
+                        });
+
+                        $('.shuruyzm .weixinma').click(function (event) {
+                            event.stopPropagation();
+                        });
+
+                        $('.weixinmatc').click(function (event) {
+                            event.stopPropagation();
+                        })
+                    })
+                </script>
+          </if>
+        </if>
+    </div>
+</div>
+<include file="Index:footer"/>
+<div class="tips-mask">
+    <div class="tips-container">
+        <div class="tips-header"><i class="fa fa-close"></i></div>
+        <p>为了您的账号安全,请每隔30天修改一次查询密码</p>
+        <div class="btn-box">
+            <span class="btn-item btn-danger"><a href="/getpassword/">立即修改</a></span>
+            <span class="btn-item btn-default" id="ignore">忽略</span>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var check_alert = '{$check_alert}';
+        if (check_alert == 1) {
+            $(".tips-mask").fadeIn();
+        }
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+
+            //开始时间
+            laydate.render({
+                elem: '#begin-time'
+            });
+            //结束时间
+            laydate.render({
+                elem: '#end-time'
+            });
+        })
+
+        $("#ignore,.fa-close").click(function (event) {
+            $(".tips-mask").fadeOut();
+        });
+
+        $("input[name=btnSearch]").click(function (event) {
+            var beginTime = $("#begin-time").val()
+            var endTime = $("#end-time").val()
+            var text = $("input[name=text]").val();
+            var state = $("select[name=state]").val();
+            var isread = $("select[name=read]").val();
+            var url = "/orders";
+            if(text ||  beginTime || endTime){
+                if (isread != "") {
+                    url += "/" + isread;
+                }
+                if (state != "") {
+                    url += "/" + state;
+                }
+                if (text != "") {
+                    url += "/" + text;
+                }
+                if(!beginTime && endTime){
+                    alert('请先选择开始时间')
+                    return false
+                }
+                if(beginTime && !endTime){
+                    alert('请先选择结束时间')
+                    return false
+                }
+                if(beginTime && endTime && beginTime > endTime){
+                    alert("开始时间不能大于结束时间")
+                    return false
+                }
+            }else {
+                alert('请输入订单号或时间段后，再进行查询')
+                return false
+            }
+            
+            window.location.href = url+'?begin='+beginTime+'&end='+endTime;
+        });
+
+        $("input[name=btnExport]").click(function(){
+            if ($(this).data("status") == "1") {
+                window.location.href = "/export/ordersExport?isread={$info.orderInfo.isread}&state={$info.orderInfo.state}&keyword={$info.orderInfo.keyword}&begin={$info.orderInfo.begin}&end={$info.orderInfo.end}";
+            } else {
+                alert("请先按照筛选条件查询后，再导出数据");
+            }
+        });
+        
+        $(".qd_sq").click(function (event) {
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/applyorder',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            }).done(function (data) {
+                if (data.status == 1) {
+                    $("body").append(data.data);
+                }
+            }).fail(function (xhr) {
+                $.pt({
+                    target: _this,
+                    content: "发生了未知不到的错误,请刷新页面！",
+                    width: 'auto'
+                });
+            });
+        });
+
+        $(".order-list .cancel").click(function (event) {
+            if (confirm("确定取消申请")) {
+                var id = $(this).attr("data-id");
+                var _this = $(this);
+                $.ajax({
+                    url: '/unapplyorder',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        window.location.href = window.location.href;
+                    }
+                }).fail(function (xhr) {
+                    $.pt({
+                        target: _this,
+                        content: "发生了未知不到的错误,请刷新页面！",
+                        width: 'auto'
+                    });
+                });
+            }
+        });
+
+        //取消已签单
+        $(".cancel-qd").click(function (event) {
+            var id = $(this).attr("data-id");
+            var _this = $(this);
+            $.ajax({
+                url: '/unqiandanorder',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            }).done(function (data) {
+                if (data.status == 1) {
+                    $("body").append(data.data);
+                }
+            }).fail(function (xhr) {
+                $.pt({
+                    target: _this,
+                    content: "发生了未知不到的错误,请刷新页面！",
+                    width: 'auto'
+                });
+            });
+        });
+    });
+</script>
+<!--未处理订单提醒部分-->
+<iframe class="order-mask" src="about:blank" allowtransparency="true" marginheight="0" marginwidth="0"
+        frameborder="0"></iframe>
+<iframe class="sign-box-mask" src="about:blank" allowtransparency="true" marginheight="0" marginwidth="0"
+        frameborder="0"></iframe>
+<div class="order-remind-box" data-type="order-remind-box">
+    <h3 class="caption">尊敬的<span class="red">{$user.qc}</span>，您好</h3>
+    <p class="order-remind-msg">您的装修订单页面存在未标记状态的订单，为了更好地为您服务，请根据订单的实际跟进情况，在下面列表中，对未标记状态的订单进行标记。</p>
+    <div class="order-remind-reason">
+        <p class="title"><span data-type="show-reason">为什么标记订单状态？>></span></p>
+        <div class="simulation-table reason-item" data-type="reason-item">
+            <div class="c-blue"><img src="/assets/user/home/img/circle-blue.png" alt=""><span>提高签约率</span></div>
+            <div><p>二次回访 及时跟进 不漏一单 共赢创收</p></div>
+            <div class="c-purple"><img src="/assets/user/home/img/circle-purple.png" alt=""><span>口碑排名</span></div>
+            <div><p>量房签单 口碑排行 科学排名 有理有据</p></div>
+            <div class="c-red"><img src="/assets/user/home/img/circle-red.png" alt=""><span>知名度</span></div>
+            <div><p>企业曝光 榜单排名 签单优势 分单导向</p></div>
+        </div>
+    </div>
+    <div class="order-remind-items">
+        <if condition="!empty($remind_order)">
+        <volist name="remind_order" id="vo">
+            <div class="orders">
+                <div class="head clearfix">
+                    <div class="l">订单日期：{$vo.addtime|date="Y-m-d",###}</div>
+                    <div class="r">
+                        <span class="ques-mark" data-type="ques-mark">?</span>
+                        <div class="intro" data-type="ques-intro">
+                            <p>未量房 : 未能成功预约到业主进行量房。</p>
+                            <p>已到店/已见面：已与业主当面沟通。</p>
+                            <p>已量房：已与业主预约好量房时间，并成功对场地进行量房。</p>
+                            <p>已签约：已与业主沟通好可以签约。</p>
+                            <div class="rectangle-rotate"></div>
+                            <div class="cover"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 30px 24px;">
+                    <div class="simulation-table orders-info">
+                        <div style="width: 70%">
+                            <p class="owner">业主：{$vo.name}{$vo.sex}</p>
+                            <p class="house-info">
+                                <span>小区名称：{$vo.xiaoqu}</span>
+                                <span>
+                                    所在区域：
+                                          <if condition="!empty($vo['cname']) and ($vo['name'] !='总站')">
+                                              {$vo.cname}
+                                              <else />
+                                              全国
+                                          </if>
+                                    -{$vo.qx|default="-"}
+                                </span>
+                                <span>建筑面积：{$vo.mianji}m²</span>
+                            </p>
+                        </div>
+                        <div style="width: 30%;text-align: right">
+                            <select name="order-status" data-company-id="{$vo.order}">
+                                <if condition="$vo.qiandan_status != null ">
+                                    <option value="0">请选择</option>
+                                    <option value="1">已量房</option>
+                                    <option value="2">已到店/见面</option>
+                                    <option value="3">未量房</option>
+                                    <else />
+                                    <option value="0">请选择</option>
+                                    <option value="1">已量房</option>
+                                    <option value="2">已到店/见面</option>
+                                    <option value="3">未量房</option>
+                                    <option value="4">已签约</option>
+                                </if>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </volist>
+        </if>
+    </div>
+    <div class="order-btn-box">
+        <button class="later-again" data-type="later-again">暂不处理</button>
+    </div>
+</div>
+<!--量房状态为未量房时选择原因弹窗-->
+<div class="unmeasure-box">
+    <div class="close">×</div>
+    <div class="head">请选择未量房原因(可选1-3个)：</div>
+    <ul class="rs clearfix" data-type="unmeasure-reason">
+        <li data-id="1">业主无法联系 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+        <li data-id="2">业主无装修需求 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+        <li data-id="3">业主已经签约 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+        <li data-id="4">业主无法量房 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+        <li data-id="5">业主仅咨询了解 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+        <li data-id="6">业主有户型图 <img src="{$static_host}/assets/user/orders/img/chosed.png" alt=""></li>
+    </ul>
+    <div class="note-detail">
+        <textarea name="note" id="note" rows="5" placeholder="详细备注"></textarea>
+    </div>
+    <div class="btn-box">
+        <button class="reset">重置</button>
+        <button class="confirm">确认</button>
+    </div>
+</div>
+<!--量房状态选择为已签约时的价格和备注输入弹窗-->
+<div class="sign-price-box" data-type="sign-box">
+    <div class="head">申请签单<span class="close" data-type="close">×</span></div>
+    <div class="main">
+        <div class="simulation-table price">
+            <div style="width: 20%">签单金额</div>
+            <div style="width: 60%"><input type="text" data-type="s-price"></div>
+            <div>元</div>
+            <span class="wan">万</span>
+            <br>
+        </div>
+        <p class="text">注：签单金额单位为“万元”，填写时请注意哦！</p>
+        <div class="simulation-table note">
+            <div style="width: 20%">签单备注</div>
+            <div><textarea name="" id="" cols="30" rows="4" data-type="s-note"></textarea></div>
+        </div>
+        <div class="action-area">
+            <button data-type="confirm" class="confirm">确定</button>
+            <button data-type="cancel" class="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 跟单小计 -->
+<div id="trackorders">
+<div class="trackorders_main">
+    <h4 class="title">跟单小计</h4>
+    <div class="trackorders_conent"> </div>
+    <div class="close"></div>
+</div>
+</div>
+<script src="//assets.qizuang.com/plugins/layDate-v5.0.9/laydate.js" type="text/javascript"></script>
+<script type="text/javascript">
+    /**
+     * ajax请求，所有的请求都通过这里发送
+     * @param options
+     */
+    function ajaxAction(options) {
+        var defalutOptions = {
+            url: "",
+            method: "get",
+            data: null,
+            successCallback: null,
+            failCallback: null
+        };
+        options = $.extend({}, defalutOptions, options);
+        console.log(options);
+        $.ajax({
+            url: options.url,
+            data: options.data,
+            method: options.method,
+            success: function (res) {
+                options.successCallback && options.successCallback(res);
+
+            },
+            fail: function (res) {
+                options.failCallback && options.failCallback(res);
+            }
+        });
+    }
+
+    // 已签约价格弹窗公用部分
+    var $orderReminaBox = $("div[data-type='order-remind-box']"),
+        $signBox = $("div[data-type='sign-box']"),
+        $signBoxMask = $(".sign-box-mask"),
+        $orderMask = $(".order-mask"),
+        $currentEle = null;
+    $signBox.find(".close").on("click", closeSignBox);
+    $signBox.find("button[data-type='cancel']").on("click", closeSignBox);
+    $signBox.find("button[data-type='confirm']").on("click", validSignInfo);
+    // 关闭已签约价格输入弹窗
+    function closeSignBox() {
+        $signBox.find("input").val("");
+        $signBox.find("textarea").val("");
+        var $target = $(this);
+        // 处理未填写签约价格直接关闭的情况
+        if ($currentEle[0].nodeName.toLowerCase() == "select") {
+            if ($target.attr("data-type") && $target.attr("data-type") != "confirm") {
+                $currentEle.val($currentEle.attr('data-hook'))
+            }
+        } else {
+            $currentEle.find("select").val(0);
+        }
+        $currentEle = null;
+        $signBox.fadeOut(0);
+        $signBoxMask.fadeOut(0);
+    }
+    // 验证已签约弹窗输入信息是否正确及保存相关信息
+    function validSignInfo(event) {
+        var $signPriceInput = $signBox.find("input[data-type='s-price']"),
+            $signPriceTextarea = $signBox.find("textarea[data-type='s-note']");
+        if (!$signPriceInput.val()) {
+            alert("请输入签单金额");
+            return
+        }
+        if (parseFloat($signPriceInput.val()) != $signPriceInput.val() || $signPriceInput.val() <= 0) {
+            alert("签单金额不正确");
+            return
+        }
+        if ($currentEle[0].nodeName.toLowerCase() == "select") {
+            submitOrderStatus({
+                id: $currentEle.attr("data-id"),
+                qiandan_jine: $signPriceInput.val(),
+                qiandan_info: $signPriceTextarea.val(),
+                state: $currentEle[0].value
+            }, closeSignBox.bind($signBox.find("button[data-type='confirm']")[0]));
+        } else {
+            changeUnsignOrder($currentEle, {
+                id: $currentEle.find("select").attr("data-company-id"),
+                qiandan_jine: $signPriceInput.val(),
+                qiandan_info: $signPriceTextarea.val(),
+                state: $currentEle.find("select")[0].value
+            }, closeSignBox);
+        }
+
+    }
+    // 向后台发送修改未标记订单数据
+    function changeUnsignOrder($target, data, callback) {
+        ajaxAction({
+            url: "/orders/changestate",
+            method: "post",
+            data: data,
+            successCallback: function (res) {
+                if (res.status == 1) {
+                    $target.remove();
+                    callback && callback();
+                    if ($orderReminaBox.find(".orders").length <= 0) {
+                        $orderReminaBox.fadeOut(0);
+                        $orderMask.fadeOut(0);
+                        window.location.reload();
+                    }
+                }
+            }
+        });
+    }
+    // 列表页修改订单状态ajax请求
+    function submitOrderStatus(data, callback) {
+        ajaxAction({
+            url: '/orders/change/state/complete',
+            method: 'POST',
+            data: data,
+            successCallback: function (res) {
+                if (res.status == 1) {
+                    window.location.href = window.location.href;
+                } else {
+                    alert(res.info);
+                    callback && callback();
+                }
+            }
+        });
+    }
+
+    // 未标记订单提醒弹窗
+    $(function () {
+        var $showReason = $("span[data-type='show-reason']"),
+            $reasonItem = $("div[data-type='reason-item']"),
+            $quesMark = $("span[data-type='ques-mark']"),
+            $quesIntro = $("div[data-type='ques-intro']"),
+            $laterDeal = $("button[data-type='later-again']"),
+            $orderSelect = $("select[name='order-status']");
+        $showReason.on("click", function () {
+            $reasonItem.toggle();
+        });
+        $quesMark.on("click", function (event) {
+            event.stopPropagation();
+            $(this).parent().find("div[data-type='ques-intro']").toggle();
+        });
+        $("html,body").on("click", function () {
+            $quesIntro.fadeOut();
+        });
+        $laterDeal.on("click", function () {
+            var $orders = $orderReminaBox.find(".orders");
+            var laterDealIds = [];
+            if ($orders.length > 0) {
+                $orders.each(function (index, item) {
+                    laterDealIds.push($(item).find("select").attr("data-company-id"))
+                })
+            }
+            ajaxAction({
+                url: "/orders/ignore ",
+                method: "post",
+                data: {
+                    order_id: laterDealIds,
+                },
+                successCallback: function (res) {
+                    console.log(res);
+                    window.location.reload();
+                    if (res.status == 1) {
+
+                    }
+                }
+            });
+            $orderReminaBox.fadeOut();
+            $orderMask.fadeOut();
+        });
+        $orderSelect.each(function (index, item) {
+            $(item).on("change", function () {
+                var selectValue = this.value
+                if (selectValue <= 0) {
+                    return;
+                }
+                $currentEle = $(this).closest(".orders");
+                if (selectValue == 4) {
+                    $signBoxMask.width($orderReminaBox.outerWidth(true)).height($orderReminaBox.outerHeight(true)).fadeIn(0);
+                    $signBox.fadeIn(0);
+                    return
+                }
+                var that = $(this);
+                setTimeout(function () {
+                    if (confirm("是否提交？")) {
+                        changeUnsignOrder($currentEle, {
+                            id: that.attr("data-company-id"),
+                            state: selectValue
+                        })
+
+                    } else {
+                        $(item).val(0);
+                    }
+                }, 500)
+            });
+        });
+        $orderReminaBox.on("click", function () {
+            $quesIntro.fadeOut();
+        });
+        showRemindBox();
+
+        function showRemindBox() {
+            if ($("#unmeasure-house").val() == 1) {
+                $orderReminaBox.fadeIn();
+                $orderMask.fadeIn();
+            }
+        }
+    });
+
+    // 订单状态原因选择框及未量房原因选择事件
+    $(function () {
+        var $unmeasureBox = $(".unmeasure-box"),
+            $reasons = $unmeasureBox.find("ul.rs>li"),
+            $closeBtn = $unmeasureBox.find(".close"),
+            $orderMask = $(".order-mask"),
+            $resetBtn = $unmeasureBox.find("button.reset"),
+            $confirmBtn = $unmeasureBox.find("button.confirm"),
+            $currentSelect = null,
+            reasonArr = [], id, state;
+        $reasons.on('click', function () {
+            var id = $(this).attr('data-id'), index;
+            $(this).find("img").toggle();
+            if ((index = reasonArr.indexOf(id)) > -1) {
+                reasonArr.splice(index, 1);
+            } else {
+                reasonArr.push(id);
+            }
+        });
+        $closeBtn.on('click', function () {
+            $orderMask.fadeOut();
+            $unmeasureBox.fadeOut();
+            $currentSelect.val(0);
+        });
+        $(".state").change(function (event) {
+            id = $(this).attr("data-id");
+            state = $(this).val();
+            if (this.value == 3) {
+                $currentSelect = $(this);
+                $orderMask.fadeIn();
+                $unmeasureBox.fadeIn();
+                return;
+            }
+            if (this.value == 4) {
+                $currentEle = $(this);
+                $signBoxMask.width("100%").height("100%").fadeIn();
+                $signBox.fadeIn(0);
+                return;
+            }
+            submitOrderStatus({
+                id: id,
+                state: state
+            }, function () {
+                $(this).attr('data-hook', state);
+            }.bind(this));
+        });
+        $resetBtn.on("click", function () {
+            $reasons.each(function (index, item) {
+                $(item).find("img").fadeOut(0);
+                reasonArr = [];
+            });
+        });
+        $confirmBtn.on("click", function () {
+            if (reasonArr.length <= 0) {
+                alert("请选择原因");
+                return;
+            }
+            if (reasonArr.length > 3) {
+                alert("最多只能选择3个");
+                return;
+            }
+            submitOrderStatus({
+                id: id,
+                state: state,
+                reason: reasonArr,
+                remark: $unmeasureBox.find("textarea").val()
+            }, function () {
+                location.reload()
+            })
+        });
+    })
+
+    // 跟单小计
+    $(function() {
+        var trackUrl = '/orders/track'
+        $('.order-subtotal').on('click', function(evt) {
+            evt.preventDefault()
+            $('body').css('overflow','hidden');//禁止滚动
+            var that = this;
+            var orderId = $(this).attr('data-id');
+            ordersTrack(orderId, function(){
+                $(that).next("b").remove();
+            });
+        });
+
+        window.ordersTrack = function(orderId, callback){
+            $.ajax({
+                url: trackUrl,
+                method: 'get',
+                data: {
+                    order_id: orderId
+                }
+            })
+            .done(function(res) {
+                if(parseInt(res.error_code) === 0) {
+                    $("#trackorders").find('.trackorders_conent').html(res.data)
+                    if(!$.trim($("#trackorders").find('.trackorders_conent .trackorders_list').html())) {
+                        $('.trackorders_main').height('315px')
+                    }else{
+                        $('.trackorders_main').height('650px')
+                    }
+                    $("#trackorders").fadeIn(0);
+
+                    // 回调
+                    typeof(callback) == "function" && callback.call()
+                }else{
+                    alert('请刷新再试')
+                }
+            });
+        }
+    });
+
+    // 点击close隐藏
+    $(document).ready(function(){
+        $("#trackorders .close").click(function(){
+            $("#trackorders").find('.trackorders_conent').html('')
+            $(this).parents("#trackorders").hide("slow");
+            $('body').css('overflow','auto');//禁止滚动
+        });
+    });
+
+</script>
+</body>
+</html>

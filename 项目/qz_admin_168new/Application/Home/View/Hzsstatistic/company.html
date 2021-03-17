@@ -1,0 +1,129 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title></title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/hzsstatistic/css/index.css?v={:C('STATIC_VERSION')}"/>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>{$info.name}合作商 > 详情</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form action="" method="get">
+                                <input type="hidden" name="companyid" value="{$info.id}">
+                                <input type="hidden" name="begin" value="{$input.begin}">
+                                <input type="hidden" name="end" value="{$input.end}">
+                                <div class="col-xs-2">
+                                    <span>渠道标识：</span>
+                                    <input type="text" name="src" class="form-control" placeholder="请输入渠道标识" value="{$input.src}" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <span>渠道名称：</span>
+                                    <input type="text" name="sname" class="form-control" autocomplete="off" placeholder="请输入渠道名称" value="{$input.sname}" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <br/>
+                                    <button type="submit" id="search" class="btn  btn-primary normal btn-small">查询</button>
+                                    <button type="button" id="explode" class="btn btn-primary normal btn-small">导出</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <table id="myTable" class="table table-hover dataTable">
+                            <thead>
+                            <tr>
+                                <th>渠道标识</th>
+                                <th>来源名称</th>
+                                <th>来源组</th>
+                                <th>是否付费</th>
+                                <th>发单</th>
+                                <th>分单</th>
+                                <th>实际有效注册量</th>
+                                <th>量房量</th>
+                                <th>量房率</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="data.list" id="item">
+                                <tr>
+                                    <td>{$item.src}</td>
+                                    <td>{$item.sname}</td>
+                                    <td>{$item.group_name}</td>
+                                    <td>{:($item["charge"] == 2 ? "是" : "否")}</td>
+                                    <td>{$item.order_count}</td>
+                                    <td>{$item.order_fen_count}</td>
+                                    <td>{$item.order_now_real_fen}</td>
+                                    <td>{$item.order_lf_count}</td>
+                                    <td>{$item.lf_ratio_text}</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(function () {
+            // 导出
+            $("#explode").click(function(){
+                var data = getFormData("form");
+                var urlparam = urlencode(data);
+
+                window.location.href = "/hzsstatistic/companyExplode?" + urlparam;
+            });
+        });
+
+        function getFormData(targetElement) {
+            var o = {};
+            var a = $(targetElement).serializeArray();
+            $.each(a, function () {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+
+            return o;
+        }
+
+        // url转化
+        function urlencode(data){
+            var _result = [];
+            for (var key in data){
+                var value = data[key];
+                if (value.constructor == Array){
+                    value.forEach(function(_value){
+                        _result.push(key + "=" + _value);
+                    });
+                }else{
+                    _result.push(key + '=' + value);
+                }
+            }
+
+            return _result.join('&');
+        }
+    </script>
+</block>

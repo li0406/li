@@ -1,0 +1,280 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>讲师管理 - 控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>讲师管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body col-xs-10">
+                        <form class="form-horizontal" method="GET" action="/vedio/adduser/">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <input type="text" name="keyword" class="form-control"  placeholder="输入讲师姓名/ID" value="{$keyword}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-block btn-info" id="importAct"><i class="fa fa-plus-square"></i> 新增讲师</button>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th class="col-sm-1">序号</th>
+                            <th class="col-sm-2">头像</th>
+                            <th class="col-sm-2">讲师姓名</th>
+                            <th class="col-sm-1">ID</th>
+                            <th class="col-sm-2">添加时间</th>
+                            <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="list" id="v">
+                        <tr>
+                            <td>{$v.count}</td>
+                            <td ><img src="{$v.url}" style="width: 20%;" id="logo" data-uri="{$v.logo}"></td>
+                            <td class="col-sm-1">{$v.author}</td>
+                            <td class="col-sm-2">{$v.id}</td>
+                            <td class="col-sm-1">{$v.time}</td>
+                            <td class="col-sm-1">
+                                <if condition="$v['status'] EQ 1">
+                                    <a href="javascript:void(0)" class="fa fa-pencil btn-edit" title="编辑" data-id="{$v.id}"></a>
+                                    <a href="javascript:void(0)" data-id="{$v.id}" class="fa fa-trash" title="删除"></a>
+                                <else/>
+                                    -
+                                </if>
+                            </td>
+                        </tr>
+                        </volist>
+                    </table>
+                    {$list.page}
+                </div>
+                <div class="modal fade in" id="importExcel" tabindex="-1" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="post" action="" id="uploadForm" enctype="multipart/form-data">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                                <h4 class="modal-title">编辑讲师</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-horizontal .control-label">
+                                    <div style="overflow: hidden;margin-top: 15px;">
+                                        <div class="col-xs-3 no-padding">
+                                            <span>讲师姓名：</span> 
+                                        </div>
+                                        <div class="col-xs-7 no-padding">
+                                            <input  type="text" name="author" value="" style="width: 100%;"/>
+                                        </div>
+                                    </div>
+                                    <div style="overflow: hidden;margin-top: 15px;">
+                                        <div class="col-xs-3 no-padding">
+                                            <span>头像：</span> 
+                                        </div>
+                                        <div class="col-xs-7 no-padding">
+                                            <div class="col-sm10">
+                                                <input id="img"  type="file" class="form-control" />
+                                                <input type="hidden" name="logo" value=""/>
+                                            </div>
+                                            <p>只支持 JPGg 、PNG ，头像尺寸：135px*135px</p>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="t_id" value="">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" id="upload">保存</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".fa-trash").click(function(event) {
+        var _this = $(this);
+        if (confirm("确定删除吗？")) {
+            $.ajax({
+                url: '/vedio/deluser/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: _this.attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                   window.location.href = window.location.href;
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            })
+            .fail(function() {
+                _this.Alert({
+                    msg:"操作失败,请联系技术部门！",
+                    level:2
+                });
+            });
+        };
+    });
+    $("a[class*='fa-toggle']").click(function(event) {
+            var _this = $(this);
+            $.ajax({
+                url: '/vedio/editvedio/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: _this.attr("data-id"),value:_this.attr("data-value")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                   window.location.href = window.location.href;
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            })
+            .fail(function() {
+                _this.Alert({
+                    msg:"操作失败,请联系技术部门！",
+                    level:2
+                });
+            });
+    });
+
+    $(function() {
+        //上传
+        $('#importAct').click(function(event){
+            $('input[name=author]').val('');
+            $('input[name=logo]').val('');
+            $('input[name=t_id]').val('');
+            $('#importExcel').modal('show');
+        });
+
+        $("body").on("click",".btn-edit",function(event) {
+            //编辑时赋值姓名，头像
+            var logo = $(this).parent().prev().prev().prev().prev().find('#logo').attr("data-uri");
+            var author = $(this).parent().prev().prev().prev().text();
+            var t_id = $(this).attr('data-id');
+            $('input[name=author]').val(author);
+            $('input[name=logo]').val('');
+            $('input[name=t_id]').val(t_id);
+            $('#importExcel').modal('show');
+        });
+    })
+
+    $("#img").fileinput({
+        language: 'zh', //设置语言,
+        uploadUrl:"/upload/uploadImg",
+        showCaption:false,
+        browseClass:"btn btn-primary",
+        allowedFileExtensions : ['jpg','png','gif'],
+        maxFileCount:1,
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        uploadAsync:true,
+        dropZoneEnabled:false,
+        previewSettings:{
+            image: {width: "135px", height: "135px"}
+        },
+        layoutTemplates:{
+            actionDelete:"",
+            actionUpload:""
+        },
+        uploadExtraData:{
+            prefix:"author"
+        },
+        minImageWidth: "135",
+        minImageHeight: "135",
+        maxImageWidth: "135",
+        maxImageHeight: "135",
+        initialPreview:{$info.img|default="'' "},
+    }).on('fileuploaded', function(event, data) {
+        var _this = $(this);
+        if(data.response.status == 1){
+            var obj = data.response.data;
+            $("input[name=logo]").val(obj.name);
+        }else{
+          console.log(data);
+            _this.Alert({
+                msg:data.response.info,
+                level:2
+            });
+        }
+    }).on("fileuploaderror",function(event, data){
+          var _this = $(this);
+          _this.Alert({
+              msg:"图片不符合要求!",
+              level:2
+          });
+        return false;
+    }).on("fileclear",function(){
+        $("input[name=img]").val("");
+    });
+
+    //保存
+    $("#upload").click(function(){
+        var author = $('input[name=author]').val();
+        var logo = $('input[name=logo]').val();
+        var t_id = $('input[name=t_id]').val();
+        if(author == ''){
+            alert("请填写讲师姓名！");
+            return false;
+        }
+        if(logo == ''){
+            alert("请上传讲师头像！");
+            return false;
+        }
+        $.ajax({
+            url: '/vedio/adduser/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                author: author,
+                logo: logo,
+                tid: t_id
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+               window.location.href = window.location.href;
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+</script>
+</block>

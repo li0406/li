@@ -1,0 +1,96 @@
+<extend name="baseTemplate" />
+<block name="style">
+<link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+<div class="box no-border">
+    <div class="box-body">
+        <div class="row">
+            <form id="searchForm" action="" method="GET">
+            <div class="col-xs-1">
+                公司名称：
+                <input class="form-control" name="company" type="text" value="{$Think.get.company}">
+            </div>
+            <div class="col-xs-1">
+                设计师名：
+                <input class="form-control" name="designer" type="text" value="{$Think.get.designer}">
+            </div>
+            <div class="col-xs-1">
+                选取状态：
+                <select name="is_choice" id="is_choice" class="form-control">
+                    <option value="0">请选择</option>
+                    <option value="1">已选取</option>
+                    <option value="2">未选取</option>
+                </select>
+            </div>
+            <div class="col-xs-1">
+                <br/>
+                <button type="submit" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                    <i class="fa fa-search"></i>查询
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="clear-float"></div>
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>公司名称</th>
+                <th>设计师名</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+            <volist name="info.list" id="vo">
+                <tr>
+                    <td>
+                        <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/company_home/{$vo.comid}" target="_blank">
+                            {$vo.comname}
+                        </a>
+                    </td>
+                    <td><a href="http://{$vo.bm}.{:C('QZ_YUMING')}/blog/{$vo.uid}" target="_blank">{$vo.name}</a></td>
+                    <td>{$vo.time|date='Y-m-d',###}</td>
+                    <td><span class="fa {$vo.toggleIcon} choice" data-id="{$vo.id}"></span></td>
+                </tr>
+            </volist>
+        </table>
+        {$info.page}
+    </div>
+</div>
+</block>
+<block name="script">
+<script src="/assets/common/js/js.cookie.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#is_choice').val('{$Think.get.is_choice|default=0}');
+
+    //选取操作
+    $('.choice').click(function(){
+        var id = $(this).attr('data-id');
+        var result = Cookies.getJSON('{$info.module}');
+
+        if($(this).hasClass('fa-toggle-off') == true){
+            if(result == undefined){
+                var idList = new Array();
+                idList[0] = id;
+            }else{
+                if(result.length >= 8){
+                    alert('选取数量已达上限');
+                    return false;
+                }
+                var idList = arrayQueue(result,id,9);
+            }
+            Cookies.set('{$info.module}',JSON.stringify(idList));
+            $(this).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+
+        }else{
+            arrayRemove(result,id);
+            Cookies.set('{$info.module}',JSON.stringify(result));
+            $(this).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+        }
+        console.log(Cookies.get('{$info.module}'));
+    });
+
+})
+</script>
+</block>

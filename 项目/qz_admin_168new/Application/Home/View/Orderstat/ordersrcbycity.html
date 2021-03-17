@@ -1,0 +1,118 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+<title>城市数据详情</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content-header">
+	<h1><small class="ftjz" style="font-weight: 800;">城市数据详情</small></h1>
+</section>
+<section class="content">
+	<div class="box">
+		<div class="box-header">
+			<div class="col-xs-12 no-padding">
+				<form id="searchform" action="" method="get" class="form-inline">
+				<input name="src" value="{$info.src}" type="hidden">
+				<span class="pull-left" style="line-height: 34px;">选择时间：</span>
+				<div class="col-xs-2">
+					<input name="start" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}" value="{$info.start}">
+				</div>
+				<div class="col-xs-2">
+					<input name="end" type="text" class="form-control datepicker" placeholder="{:date('Y-m-d')}"  value="{$info.end}">
+				</div>
+				<div class="col-xs-2">
+                    <input type="hidden" value="0" name="dl">
+					<button id="search" data-triger="#search"  class="form-control btn btn-flat btn-primary"><i class="fa fa-fw fa-search"></i>查询</button>
+                    <button type="button" id="exportExcel" class="btn btn-flat btn-success hideLoading"><i class="fa fa-download"></i>&nbsp;导出 Excel</button>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="box">
+		<div class="box-body">
+			<h4 class="sjlb"><small style="font-weight: 790;">{$info.srcName}</small></h4>
+			<table class="table table-hover table-bordered" id="all_list">
+                    <thead id="dataListTitle">
+					<tr role="row" style="font-size:14px;">
+						<th class="" tabindex="0">序号</th>
+						<th class="" tabindex="0">城市</th>
+						<th class="" tabindex="0">发单量</th>
+						<th class="" tabindex="0">有效订单量</th>
+						<th class="" tabindex="0">实际有效订单量</th>
+						<th class="" tabindex="0">分单量</th>
+						<th class="" tabindex="0">分单率</th>
+						<th class="" tabindex="0">实际分单量</th>
+						<th class="" tabindex="0">实际分单率</th>
+					</tr>
+				</thead>
+				<tbody id="dataLists">
+					<volist name="list" id="v">
+					<tr class="itemList">
+						<td>{$i}</td>
+                        <td style="text-align:left;color:#000;font-size:15px;">{$v.cname}</td>
+                        <td>{$v.num}</td>
+                        <td>{$v.youxiao} </td>
+                        <td>{$v.real_youxiao} </td>
+                        <td>{$v.fendan}</td>
+                        <td>{$v.fendan_lv} %</td>
+                        <td>{$v.real_fendan}</td>
+                        <td>{$v.real_fendan_lv} %</td>
+                    </tr>
+                    </volist>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+$(function(){
+	// 时间选择
+	$(".datepicker").datetimepicker({
+		startView:2,
+		minView:'decade',
+		format:"yyyy-mm-dd",
+		autoclose:true,
+		pickerPosition: "bottom-left"
+	});
+
+    var insDom = '<tbody><tr class="itemList" style="font-weight: bold;font-size:15px;color:#000"><td>#</td><td style="text-align:left;">{$count.allCity}个</td><td>{$count.ddl|number_format}</td><td>{$count.youxiao|number_format}</td><td>{$count.real_youxiao|number_format}</td><td>{$count.fendan|number_format}</td><td>{$count.fendan_lv} %</td><td>{$count.real_fendan|number_format}</td><td>{$count.real_fendan_lv} %</td></tr></tbody>';
+
+    $(insDom).insertBefore("#dataLists");
+
+});
+
+//排序表格设置
+$('#all_list').DataTable({
+    "info":false,
+    responsive: true,
+    searching:false,
+    "lengthChange": false,
+    "pageLength": 100,
+	"language": {
+		"paginate": {
+			"previous": "上一页",
+			"next": "下一页",
+
+		}
+	}
+});
+
+$('#exportExcel').on('click', function(){
+    $('input[name="dl"]').val('1');
+    $('#searchform').submit();
+    $('input[name="dl"]').val('0');
+});
+
+</script>
+</block>

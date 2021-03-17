@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="用户中心">
+  <meta name="description" content="用户中心">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <title>用户中心-齐装网</title>
+  <include file="Index:resource" />
+  <include file="User:resource" />
+  <link rel="stylesheet" href="{$static_host}/assets/user/user/css/yh-dairy.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+  <include file="User:header" />
+  <div class="ht-wrap oflow">
+    <include file="User:usernavleft" />
+    <div class="yh-main">
+      <h1 class="yh-tit">我的装修日记</h1>
+      <a href="/add_diary/" class="newdairy-btn"><i class="icon-pencil mr10"></i>创建新日记</a>
+      <if condition="$info['diaries']">
+        <ul class="dairy-list">
+        <volist name="info.diaries" id="vo">
+          <li>
+            <dl>
+              <dd>
+              <a href="/diary_edit_list/{$vo.id}">{$vo.title|mbstr=0,25}</a>
+
+            <if condition="$vo.review EQ '0' ">
+                <span class="label review"><i>待审核</i></span>
+            <else />
+                <if condition="$vo.stat EQ '2' ">
+                    <if condition="$vo.review EQ '1' ">
+                        <span class="label stat0"><i>不通过</i></span>
+                    <else />
+                        <span class="label stat0 reasoninfo"><i class="icon-info-sign"></i> <i>不通过</i></span>
+                        <span class="reasonBox">{$vo.review}</span>
+                    </if>
+                </if>
+                <if condition="$vo.stat EQ '1' "><span class="label stat1"><i>通过</i></span></if>
+                <if condition="$vo.stat EQ '0' "><span class="label del"><i>已删除</i></span></if>
+            </if>
+
+
+              </dd>
+              <dt>
+                <switch name="vo.son_stage">
+                    <case value="1"><span class="active">准备阶段<i class="icon-ok ml10"></i></span></case>
+                    <case value="2"><span class="active">施工阶段<i class="icon-ok ml10"></i></span></case>
+                    <case value="3"><span class="active">入住阶段<i class="icon-ok ml10"></i></span></case>
+                    <default ><span>入住阶段<i class="icon-retweet ml10"></i></span></default>
+                </switch>
+              </dt>
+            </dl>
+            <ul>
+              <li>户型：
+                <volist name="huxing" id="hx">
+                  <if condition="$vo['huxing'] eq $hx['id']">{$hx.name}</if>
+                </volist>
+              </li>
+              <li>面积：{$vo.mianji}m²</li>
+              <li>
+              风格：
+              <?php
+              $vo['fengge']=array_filter(explode(',',$vo['fengge']));//拆分风格
+              ?>
+              <volist name="vo.fengge" id="li">
+                <volist name="fengge" id="fg">
+                  <if condition="$fg['id'] eq $li">
+                  {$fg.name}&nbsp;
+                  </if>
+                </volist>
+              </volist>
+              </li>
+              <li>装修方式：<if condition="$vo['decorate_type'] eq 30">全包<else/>半包</if></li>
+            </ul>
+            <a href="/diary_edit_list/{$vo.id}"><span class="btn">查看详情>></span></a>
+
+          </li>
+        </volist>
+        {$page}
+        </ul>
+      <else/>
+        <div class="order-none">
+          <p>您还没有晒过装修日记哦</p>
+        </div>
+      </if>
+    </div>
+  </div>
+  <include file="Index:footer" />
+
+<script type="text/javascript">
+
+//显示原因
+$('.reasoninfo').click(function(){
+    var reason = $(this).parent().find('.reasonBox').html();
+    modal(reason,'审核不通过原因');
+})
+</script>
+
+
+
+</body>
+</html>

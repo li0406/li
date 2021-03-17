@@ -1,0 +1,133 @@
+<div class="windowbg win-lfbox lfhide"></div>
+<div class="windowbg win-lfbox" id="quchujicheng">
+    <div class="order-window big-order-window liangfang">
+        <div class="tit">高效率免费量房验房</div>
+        <p>
+                造好房 从量房做起
+                专业测量仪器 将误差减到最小
+            </p>
+        <div class="shutdown"><i class="lfguanbi"></i></div>
+        <div class="order-info">
+
+            <div class=""><br></div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">您的称呼</div>
+                <input type="text" name="name" class="edit-half-right" placeholder="请输入您的称呼" />
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">手机号码</div>
+                <input type="text" name="tel" class="edit-half-right" placeholder="请输入您的手机号" maxlength="11" />
+                <input type="hidden" name="fb_type" value="sheji">
+            </div>
+            <div class="box-line edit-text">
+                <div class="edit-half-left">所在地区</div>
+                <select class="selectbox_two" style="float:left;position:relative;left:4px;" name="city_box"></select>
+                <select class="selectbox_two" name="quyu_box"></select>
+            </div>
+            <div class="box-line">
+                <div class="err"></div>
+            </div>
+            <button type="button">马上获取</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+
+        var ip_cityid = '{$Think.cookie.iplookup}';
+        var city_id = '{$theCityId}';
+
+        (city_id == '') ? cityId = ip_cityid : cityId = city_id;
+        if(cityId == ''){
+            getLocation();
+        }else{
+            initCity(cityId);
+        }
+
+        function initCity(cityId){
+            App.citys.init(".windowbg select[name='city_box']",".windowbg select[name='quyu_box']",shen,shi,cityId);
+        }
+
+        $(".windowbg .lfguanbi").click(function(event) {
+            $(".windowbg").remove();
+        });
+
+        $(".big-order-window button").click(function(event) {
+            var container = $(".win-lfbox .big-order-window");
+            $(".err").html('');
+            $(".windowbg").find('.focus').removeClass('focus');
+
+            var name = $("input[name=name]", container).val();
+            var tel = $("input[name=tel]", container).val();
+            var city = $("select[name=city_box]", container).val();
+            var quyu = $("select[name=quyu_box]", container).val();
+
+            if (name == '') {
+                $(".err").html("请输入您的称呼 ^_^!");
+                $("input[name=name]", container).addClass('focus').focus();
+                return false;
+            } else {
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if (!reg.test(name)) {
+                    $(".err").html("请输入正确的名称，只支持中文和英文");
+                    $("input[name=name]", container).addClass('focus').focus();
+                    //$("input[name=name]", container).val('');
+                    return false;
+                }
+            }
+
+            if (!App.validate.run(tel)) {
+                $(".err").html("请输入正确的手机号码 ^_^!");
+                $("input[name=tel]", container).addClass('focus').focus();
+                return false;
+            } else {
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if (!reg.test(tel)) {
+                    $(".err").html("请输入正确的手机号码 ^_^!");
+                    $("input[name=tel]", container).addClass('focus').focus();
+                    //$("input[name=tel]", container).val('');
+                    return false;
+                }
+            }
+
+            if (city == '') {
+                $(".err").html("您还没有选择城市哦 ^_^!");
+                $("select[name=city_box]", container).addClass('focus').focus();
+                return false;
+            }
+
+            window.order({
+                extra:{
+                    cs: city,
+                    qx: quyu,
+                    name: name,
+                    tel: tel,
+                    fb_type: $("input[name=fb_type]", container).val(),
+                    source: "{$source}" || 1,
+                    safecode:'{$safecode}',
+                    ssid:"{$ssid}",
+                    safekey:"{$safekey}",
+                    step:2,
+                    select_desid : "{$select_desid}" || 0,
+                    select_comid : "{$select_comid}" || 0,
+                    display_type : "{$display_type}" || 0,
+                    des:"{$des}"
+                },
+                error:function(){
+                    container.remove();
+                },
+                success:function(data, status, xhr){
+                    container.remove();
+                    if (data.status == 1) {
+                        $('.lfhide').hide();
+
+                        $("body").append(data.data.tmp);
+                    }
+                },
+                validate:function(item, value, method, info){
+                    return true;
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,167 @@
+<view class="container">
+    <view>
+        <view class="hl_body">
+            <view class="hl_top">
+                <view class="hl_content" s-if="part_one">
+                    <view class="sm_one">
+                        <view class="sm_title">
+                            开工<span>吉</span><span>日</span>拿不准？
+                        </view>
+                        <view class="sm-by">
+                            <view class="clound pull-left"></view>
+                            <view class="pull-left by_nr"> 10秒测算最佳装修吉日</view>
+                            <view class="clound pull-right"></view>
+                        </view>
+                    </view>
+                    <view class="sm_two">
+                        <view s-for="item in steps" class="step {{item.content==step?'active':''}}">
+                            <view class="step_radius">{{item.content}}</view>
+                        </view>
+                    </view>
+                    <view class="sm-three">
+                        <view id="question_list">
+                            <!--time-->
+                            <view s-if="time_dialog">
+                                <view class="question_title">您家准备什么时候开始装修</view>
+                                <view class="question_chose one">
+                                    <radio-group bindchange="checkHandle">
+                                        <view class="question_item {{item.checked==true?'hasChose':''}}"
+                                              s-for="item in zxTime">
+                                            <radio class="inputCheck" checked="{{item.checked}}"
+                                                   id="{{item.id}}" value="{{item.id}}"></radio>
+                                            <text>{{item.content}}</text>
+                                        </view>
+                                    </radio-group>
+                                </view>
+                            </view>
+                            <!--朝向-->
+                            <view s-if="house_dialog">
+                                <view class="question_title">您家房屋的朝向</view>
+                                <radio-group bindchange="fwCheckHandle">
+                                    <view class="question_chose two">
+                                        <view class="question_item  {{item.checked==true?'hasChose':''}}"
+                                              s-for="item in fwcx">
+                                            <image src="{{item.image_1}}" alt="" s-if="!item.checked"
+                                                   class="one_img"></image>
+                                            <image src="{{item.image_2}}" alt="" s-if="item.checked"
+                                                   class="two_img"></image>
+                                            <radio class="inputCheck" checked="{{item.checked}}" id="{{item.id}}"
+                                                   value="{{item.id}}"
+                                            ></radio>
+                                            <text>{{item.content}}</text>
+                                        </view>
+                                    </view>
+                                </radio-group>
+                            </view>
+                            <!--年龄-->
+                            <view class="age" s-if="age_dialog">
+                                <view class="question_title">您的姓氏和年龄</view>
+                                <radio-group bindchange="ageCheckhandle">
+                                    <view class="question_chose three">
+                                        <view class="input_box family">
+                                            <input placeholder="请输入您的姓氏" bindinput="inputHandle"
+                                                   value="{{inputContent}}" maxlength="10"/>
+                                        </view>
+
+                                        <view class="question_item {{item.checked==true?'hasChose':''}}"
+                                              s-for="item in ages">
+                                            <image src="{{item.image_1}}" alt="" s-if="!item.checked"
+                                                   class="one_img"></image>
+                                            <image src="{{item.image_2}}" alt="" s-if="item.checked"
+                                                   class="two_img"></image>
+                                            <view>
+                                                <radio class="inputCheck" checked="{{item.checked}}" id="{{item.id}}"
+                                                       value="{{item.id}}"></radio>
+                                                <text>{{item.content}}</text>
+                                            </view>
+                                        </view>
+                                    </view>
+                                </radio-group>
+                            </view>
+                            <!--城市-->
+                            <view class="contain-box" s-if="city_dialog">
+                                <view class="question_title four">选择房屋所在的城市</view>
+                                <form bindsubmit="SubmitHandle">
+                                    <view class="city">
+                                        <text class="iconfont iconsite2 map-icon"></text>
+                                        <button name="city" class="citybtn" bindtap="onSelectCityHandle">{{cityName}}</button>
+                                    </view>
+                                    <view class="phone">
+                                        <input placeholder="输入手机号码，获取测算吉日" name="tel" type="number"
+                                               bindinput="telHandle" value="{{tel}}" maxlength="11"/>
+                                    </view>
+                                    <view class="item">
+                                        <checkbox class="check-box" checked="{{isChecked}}"
+                                                  bindtap="onChangeHandle"></checkbox>
+                                        <text>我已阅读并同意齐装网的</text>
+                                        <navigator class="sm" url='/pages/gonglue/declare/declare'>《免责声明》</navigator>
+                                    </view>
+                                </form>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+                <view id="resultSet" s-if="!part_one">
+                    <view class="cs_result">您的装修吉日</view>
+                    <view class="result_container">
+                        <view class="pull-left result-date">
+                            <view class="date-default">{{result.n_year}}年{{result.m}}月{{result.d}}日</view>
+                            <view class="big-num">{{result.d}}</view>
+                            <view class="big-han">{{result.n_month}} {{result.n_day}}</view>
+                            <view class="suggest">
+                                <view class="pull-left yi">宜：</view>
+                                <view class="pull-left yi-content">{{result.yi}}</view>
+                            </view>
+                        </view>
+                        <view class="pull-right result-fen">
+                            <view class="result-fen-box">
+                                <text>吉日评分</text>
+                                <text>{{result.fens}}分</text>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="other-jiri ">
+                        <text class="result_container">其他装修吉日：</text>
+                        <view class="other-list result_container">
+                            <view class="pull-left">
+                                <view class="other-content">
+                                    <text class="sub_content">{{others[0].n_month}} {{others[0].n_day}}</text>
+                                    <text class="sub_content">{{others[0].n_year}}年{{others[0].m}}月{{others[0].d}}日
+                                    </text>
+                                    <view class="sub_content">吉日评分：
+                                        <text class="score">{{others[0].fens}}分</text>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="pull-left">
+                                <view class="other-content" style="float: right;">
+                                    <text class="sub_content">{{others[1].n_month}} {{others[1].n_day}}</text>
+                                    <text class="sub_content">{{others[1].n_year}}年{{others[1].m}}月{{others[1].d}}日
+                                    </text>
+                                    <view class="sub_content">吉日评分：
+                                        <text class="score">{{others[1].fens}}分</text>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="hl_bottom">
+                <view id="prev" class="bottom_item" data-index="0" s-if="{{prePage}}" bindtap="preHandle">
+                    &lt;上一页
+                </view>
+                <view id="next" class="current_page bottom_item" data-index="1" s-if="{{nextPage}}"
+                      bindtap="getNextPageHandle">下一页&gt;
+                </view>
+                <view id="cesuan" class="bottom_item" data-index="2" s-if="{{getResult}}">立即测算</view>
+                <view id="resuan" class="bottom_item" data-index="3" s-if="{{resetResult}}" bindtap="resetCountHandle">
+                    重新测算
+                </view>
+            </view>
+        </view>
+
+    </view>
+</view>
+<!--城市选择  -->
+<city-select isHide="{{isHide}}" bindcloseSelect="closeSelect"></city-select>

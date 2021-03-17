@@ -1,0 +1,82 @@
+
+<form action="" id="relatedForm">
+    <p>渠道账户名称：{$account_name}</p>
+
+    <div class="selectbox">
+        <span>渠道标识：</span>
+        <select class="form-control order_source" multiple="multiple">
+        </select>
+    </div>
+
+    <div class="row btn-center">
+        <button type='button' class="btn btn-success add">确认</button>
+        <button type='button' class="btn cancel" style="margin-left: 50px;">取消</button>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function(){
+        $(".order_source").select2({
+            placeholder: "输入关键词搜索",
+            minimumInputLength: 2,
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text || repo.name;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.name + "(" + repo.src + ")</div>";
+                return markup;
+            },
+            templateSelection: function(repo) {
+                return repo.text || repo.name;
+            },
+            ajax: {
+                url: "/ordersource/search_account_related_src",
+                dataType: "json",
+                type: "post",
+                data: function(params) {
+                    return {
+                        keyword: params.term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data["data"]["items"]
+                    };
+                }
+            }
+        });
+
+        // 提交
+        $("#relatedForm").on("click", ".add", function(){
+            var data = $(".order_source").select2("data");
+            if (data.length == 0) {
+                alert("请先选择渠道标识");
+                return false;
+            }
+
+            var orderSourceIds = [];
+            for (var i in data) {
+                orderSourceIds.push(data[i]["id"]);
+            }
+
+            $.post("/ordersource/accountrelated", {
+                account_id: "{$account_id}",
+                order_source_ids: orderSourceIds
+            }, function(ret){
+                if (ret.error_code == 0){
+                    window.location.reload();
+                } else {
+                    alert(ret.error_msg);
+                }
+            });
+        });
+
+        // 取消
+        $("#relatedForm").on("click", ".cancel", function(){
+            $("#relatedModal").modal("hide");
+        });
+    });
+</script>

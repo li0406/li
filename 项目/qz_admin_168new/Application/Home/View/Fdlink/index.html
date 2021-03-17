@@ -1,0 +1,647 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网百科管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <style type="text/css">
+        #mainContent{width: 960px;}
+        .tablebg{background: #F3F3F3;}
+        .table .tableRow{display: table-row;}
+        .table .tableth {display:table-cell; font-weight: bold; font-size:14px; text-align: center; vertical-align: middle; background: #F3F3F3; padding: 5px 0px;}
+        .table .tableth{text-align: left;}
+        .table .tableCell .input{float: left; margin:0 5px;}
+        .table .tableCell .input input[type=text]{width: 100px;height: 30px; border: 1px solid #c6c6c6;  padding-left: 5px; border-radius: 3px;}
+        .table .tableCell .input input[type=radio]{margin-top:8px;}
+        .table .tableCell .input select{border: 1px solid #c6c6c6;width: 100px; padding:5px; border-radius: 3px;}
+        .table .rowSpan .tableCell{border-top: 0;}
+        .table .tableCell .input textarea{width:455px; border:1px solid #c6c6c6; border-radius:3px; padding-left:2px; height:60px; resize:none;}
+        .table .tableth .span,.table .tableCell .span{font-size: 14px; font-weight: bold; float: left; margin-top:5px;cursor:pointer;}
+        .table .tableCell:after{content: ""; clear:both; display: block;}
+        .table .tableCell .button{float: left; margin-left: 10px; width: 100px;padding:4px 12px; }
+        .table .link_index{margin-right: 5px;}
+        .table .link_index:first-child{margin-left:5px;}
+        .table .tableCell .link_citys{font-weight: normal;font-size: 12px;margin-right: 5px;}
+        .table .tableCell .link_input{margin:0;}
+        .table .tableCell .link_input .span{white-space: nowrap;}
+        .table .tableCell .link_input .span:hover{color: #ff0000;}
+        .table .tableCell .link_active{background: #f1f1f1;}
+        .linkTable{width: 100%;bottom: 1px solid #DDD;}
+        .linkTable th,.linkTable td{ text-align: center; border-top:1px solid #DDD;padding: 5px 10px; border-left: 1px solid #DDD;}
+        .linkTable th:first-child,.linkTable td:first-child{border-left: 0;}
+        .linkTable th span,.linkTable td span{font-size:14px; cursor: pointer; margin-right:5px;}
+        .linkTable img{width: 100px; height: 60px; cursor: pointer;}
+        .table .tableCell .link_current{font-weight: bold; color: #ff0000;}
+        .input .button{float: left; margin-bottom: 10px;}
+        .link-error{color: #ff0000; font-weight: bold; padding:5px; float: left;}
+        .tab{font-size: 12px;}
+        #myForm .span{float: left; margin-top:5px;}
+        #myForm .link-error{margin-top:3px;}
+        .btn-qzbc1.btn-qzbc1-shadow {box-shadow:inset 0 -2px 0 #A09E9E;-webkit-box-shadow:inset 0 -2px 0 #A09E9E; border:0px;}
+        .btn-qzbc1 {
+            color: #1d4572;
+            font-weight: bold;
+            background-color: #E6Ebee;
+            border-color: #D3DFE9;
+        }
+        textarea{resize:none;}
+        .header_error{color: red}
+    </style>
+    <link href="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugins/bootstrap/css/bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>友情链接</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/fdlink/">友情链接</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row" style="margin-bottom:8px;">
+                            <div class="col-xs-6">
+                                <a href="javascript:;">
+                                    <button class="btn btn-success normal" id="btnImport"><i class="fa fa-plus-circle fa-lg"></i>添加</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="table">
+                            <div class="tableRow">
+                                <div class="tableth">
+                                    <span class="span">拼音检索</span>
+                                    <div class="input ">
+                                        <volist name="cs" id="vo">
+                                            <a href="#{$vo.key}" class="span link_index">{$vo.key}</a>
+                                        </volist>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tableRow">
+                                <div class="tableCell">
+                                <volist name="cs" id="vo">
+                                    <div id="{$vo.key}" class="input link_input">
+                                        <volist name="vo.child" id="v">
+                                            <if condition="$v['cid'] EQ $city">
+                                                <span class="span link_citys link_current" data-id="{$v.cid}">{$v.cname}</span>
+                                            <else/>
+                                                <span class="span link_citys" data-id="{$v.cid}">{$v.cname}</span>
+                                            </if>
+                                        </volist>
+                                    </div>
+                                </volist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="table">
+                            <div class="tableRow">
+                                <div class="tableth">
+                                    <span class="span">搜索条件</span>
+                                </div>
+                            </div>
+                            <div class="tableRow">
+                                <div class="tableCell">
+                                    <span class="span">链接类型:</span>
+                                    <div class="input">
+                                        <select name="type">
+                                            <option value="" selected>请选择</option>
+                                            <option value="1">友情链接</option>
+                                            <option value="2">热门城市</option>
+                                            <option value="3">热门标签</option>
+                                            <option value="4">附近城市</option>
+                                            <option value="5">区域装修公司</option>
+                                        </select>
+                                    </div>
+
+                                    <span class="span">链接页面:</span>
+                                    <div class="input">
+                                        <select name="linkpage">
+                                            <option value="" selected>请选择</option>
+                                            <volist name="linktype" id="vo">
+                                                <option value="{$key}">{$vo}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+
+                                    <span class="span">推荐状态:</span>
+                                    <div class="input">
+                                        <select name="status">
+                                            <option value="" selected>请选择</option>
+                                            <option value="1">有效</option>
+                                            <option value="0">无效</option>
+                                        </select>
+                                    </div>
+
+                                    <span class="span">每页显示:</span>
+                                    <div class="input">
+                                        <select name="count">
+                                            <option value="10" selected>10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input">
+                                        <input type="text" name="url" value="{$Think.get.url}" placeholder="链接地址">
+                                    </div>
+                                    <button id="btnSearch" type="button" class="btn btn-success button ">
+                                        <i class="icon-search icon-large"></i>搜索
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="">
+                            <a class="btn btn-qzbc1 btn-qzbc1-shadow btn-sm" href="/fdlink/batch/">批量添加</a>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <a id="deleteall" class="btn btn-qzbc1 btn-qzbc1-shadow btn-sm">批量禁用</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a id="removeall" class="btn btn-qzbc1 btn-qzbc1-shadow btn-sm">批量删除</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <button id="export" type="button" class="btn btn-qzbc1 btn-qzbc1-shadow btn-sm btn-success">
+                                <i class="fa fa-share-square-o"></i>导出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="table">
+                            <div class="tableRow">
+                                <div class="tableth">
+                                    <span class="span">友情链接列表</span>
+                                    <div class="input link-error link-list-error">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="">
+                                <table class="linkTable">
+                                    <tr>
+                                        <th width="50"><a href="javascript:;" class="checkall">全选</a></th>
+                                        <th width="60">
+                                            城市名称
+                                        </th>
+                                        <th width="60">
+                                            链接页面
+                                        </th>
+                                        <th width="60">
+                                            推荐类型
+                                        </th>
+                                        <th width="80">
+                                            链接名称
+                                        </th>
+                                        <th width="160">
+                                            链接地址
+                                        </th>
+                                        <th width="50">
+                                            推荐状态
+                                        </th>
+                                        <th width="90">
+                                            添加用户
+                                        </th>
+                                        <th width="90">
+                                            添加时间
+                                        </th>
+                                        <th width="80">
+                                            操作
+                                        </th>
+                                    </tr>
+                                    <volist name="links.list" id="vo">
+                                    <tr>
+                                        <td><input name="ids[]" type="checkbox" class="uid" lang="{$vo.link_id}"></td>
+                                        <td><a href="http://{$vo.bm}.{:C('QZ_YUMING')}" target="_blank">{$vo.cname|default="-"}</a></td>
+                                        <td>{$linktype[$vo['link_page']]}</td>
+                                        <td>
+                                            <if condition="$vo['show_class'] EQ 1">
+                                                友情链接
+                                            <elseif condition="$vo['show_class'] EQ 2" />
+                                                热门城市
+                                            <elseif condition="$vo['show_class'] EQ 3" />
+                                                热门标签
+                                            <elseif condition="$vo['show_class'] EQ 4" />
+                                                附近城市
+                                            <elseif condition="$vo['show_class'] EQ 5" />
+                                                区域装修公司
+                                            <else />
+                                                未知类型
+                                            </if>
+                                        </td>
+                                        <td>{$vo.link_name|default="-"}</td>
+                                        <td>{$vo.link_url|default="-"}</td>
+                                        <td>
+                                            <if condition="$vo['show_on'] EQ 1">
+                                                <span style="color:#f0f; font-size:12px; ">有效</span>
+                                            <else/>
+                                                <span style="color:red; font-size:12px;">无效</span>
+                                            </if>
+                                        </td>
+                                        <td>{$vo.adminuser_name}</td>
+                                        <td>{$vo.addtime}</td>
+                                        <td>
+                                            <span title="编辑链接" class="fa fa-pencil" data-id="{$vo.link_id}"></span>
+                                            <if condition="$vo['show_on'] EQ 1">
+                                                <span title="停用推荐" class="fa fa-times-circle" data-id="{$vo.link_id}"></span>
+                                            <else/>
+                                                <span title="启用推荐" class="fa fa fa-check-circle" data-id="{$vo.link_id}"></span>
+                                            </if>
+                                            <!--<span title="停用推荐" class="fa fa-times-circle" data-id="{$vo.link_id}"></span>-->
+                                            <!--<span title="删除" class="fa fa-trash" data-id="{$vo.link_id}"></span>-->
+                                            <if condition="$vo['show_class'] EQ 2">
+                                            <span title="查看城市列表" class="fa fa-search-plus recommend-city" data-id="{$vo.link_id}" data-info="{$vo.gname}"></span>
+                                            </if>
+                                            <if condition="$vo['show_class'] EQ 4">
+                                            <span title="查看城市列表" class="fa fa-search-plus recommend-city" data-id="{$vo.link_id}" data-info="{$vo.gname}"></span>
+                                            </if>
+                                            <span title="删除链接" class="fa fa-minus-square del-city" data-id="{$vo.link_id}"></span>
+                                        </td>
+                                    </tr>
+                                    </volist>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page">
+                {$links.page}
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <label></label>
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加链接</h4>
+                        <span class="tag header_error"></span>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="showModal" tabindex="-1" role="dialog" aria-labelledby="showModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <label></label>
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="showModalLabel">添加链接</h4>
+                        <span class="tag header_error"></span>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <!--<script src="/assets/common/js/jquery-1.11.0.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>-->
+    <script src="/assets/common/plugins/bootstrap/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+    <script charset="utf-8" src="/assets/common/plugins/bootstrap/js/bootstrap.autocomplete.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="/assets/common/plugins/bootstrap/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        //搜索反绑定
+        $("select[name=type]").val("{$Think.get.type}" || "");
+        $("select[name=linkpage]").val("{$Think.get.linkpage}" || "");
+        $("select[name=status]").val("{$Think.get.status}" || "");
+        $("select[name=count]").val("{$Think.get.count}" || 10);
+
+        //添加弹窗
+        $("#btnImport").click(function(event) {
+            $("#myModal .modal-body").html('');
+            $(".adv-error").html("");
+            $.ajax({
+                url: '/fdlink/add',
+                type: 'GET',
+                dataType: 'JSON'
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    $("#myModal .modal-dialog").removeClass('modal-lg').removeClass('modal-sm');
+                    $("#myModal .modal-dialog").addClass('modal-lg');
+                    $("#myModalLabel").html(data.data.title);
+                    $("#myModal .modal-body").html(data.data.tmp);
+                    $("#myModal").modal();
+                }else{
+                    $(".link-error").html(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $(".link-error").html("程序出错,请联系技术部门！");
+            });
+        });
+        //全选
+        $(".checkall").click(function(){
+            $("input[class='uid']").each(function() {
+                var flag = $(this).prop("checked");
+                $(this).prop("checked", !flag);
+            })
+        });
+        //停用推荐
+        $(".fa-times-circle").click(function(event) {
+            if(confirm("您确定要禁用所选吗?")){
+                var id = $(this).attr("data-id");
+                $.ajax({
+                    url: '/fdlink/delete/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href = window.location.href;
+                        //alert(data.data.show_on);
+                    }else{
+                        $(".link-list-error").html(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    $(".link-list-error").html("操作失败,请联系技术部门！");
+                });
+            }
+        });
+        //启用推荐
+        $(".fa-check-circle").click(function(event) {
+            if(confirm("您确定要启用所选吗?")){
+                var id = $(this).attr("data-id");
+                $.ajax({
+                    url: '/fdlink/shownow/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href = window.location.href;
+                        //alert(data.data.show_on);
+                    }else{
+                        $(".link-list-error").html(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    $(".link-list-error").html("操作失败,请联系技术部门！");
+                });
+            }
+        });
+        //删除
+        /*$('.fa-trash').click(function(){
+            if(confirm("您确定要删除/恢复吗？不可恢复")){
+                var id = $(this).attr('data-id');
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                location.href="/fdlink/remove?id="+id;
+            }
+        });*/
+
+        //禁用全部选中
+        $('#deleteall').click(function(){
+            var delids="";
+            $("[type=checkbox]:checked").each(function(){
+                if($(this).attr('lang')!=''){
+                    delids += $(this).attr('lang')+",";
+                }
+            })
+            if(delids==''){
+                alert('请选择要禁用的链接！');
+                return false;
+            }else{
+                if(confirm("您确定要禁用所选吗?")){
+                    $.ajax({
+                        url: '/fdlink/deleteall/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data:{
+                            ids:delids
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            window.location.href=window.location.href;
+                        }else{
+                            alert('禁用失败，请联系技术部~~')
+                        }
+                    })
+                    .fail(function(xhr) {
+                        alert("程序出错,请联系技术部门！");
+                    });
+                }
+            }
+        });
+
+        //禁用单条
+        $('.del-city').click(function(){
+            var delids = $(this).attr('data-id');
+            if(confirm("您确定要删除所选吗? 删除后不可恢复！")){
+                $.ajax({
+                    url: '/fdlink/removeall/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:{
+                        ids:delids
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href=window.location.href;
+                    }else{
+                        alert('删除失败，请联系技术部~~');
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("程序出错,请联系技术部门！");
+                });
+            }
+        });
+
+        //删除全部选中
+        $('#removeall').click(function(){
+            var delids="";
+            $("[type=checkbox]:checked").each(function(){
+                if($(this).attr('lang')!=''){
+                    delids += $(this).attr('lang')+",";
+                }
+            })
+            if(delids==''){
+                alert('请选择要删除的链接！');
+                return false;
+            }else{
+                if(confirm("您确定要删除所选吗? 删除后不可恢复！")){
+                    $.ajax({
+                        url: '/fdlink/removeall/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data:{
+                            ids:delids
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            window.location.href=window.location.href;
+                        }else{
+                            alert('删除失败，请联系技术部~~');
+                        }
+                    })
+                    .fail(function(xhr) {
+                        alert("程序出错,请联系技术部门！");
+                    });
+                }
+            }
+        });
+
+        //查看推荐城市
+        $(".recommend-city").click(function(event) {
+            var id = $(this).attr("data-id");
+            $("#showModal .modal-dialog").removeClass('modal-lg').removeClass('modal-sm');
+            $("#showModal .modal-dialog").addClass('modal-sm');
+            $("#showModalLabel").html('查看推荐城市');
+            $("#showModal .modal-body").html($(this).attr("data-info"));
+            $("#showModal").modal();
+        });
+    </script>
+    <script type="text/javascript">
+        $('input[name=city]').autocomplete({
+            items:10,
+            source:function(query,process){
+                var matchCount = this.options.items;//返回结果集最大数量
+                if(typeof $(".city").attr("readonly") == "undefined"){
+                    $.ajax({
+                        url: '/fdlink/findCityInfo',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            matchCount: matchCount,
+                            query:query
+                        },
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            return process(data.data);
+                        }
+                    }).fail(function(xhr){
+                        $(".header_error").html("查询失败");
+                    });
+                }
+            },
+            formatItem:function(item){
+               return item["cname"]+"( "+item["cid"]+" )";
+            },
+            setValue:function(item){
+                return {"data-value":item["cname"],"real-value":item["cid"]}
+            }
+        });
+
+        $("input[name=enabled]").bootstrapSwitch().on("switchChange.bootstrapSwitch",function(e, data){
+            if(data){
+                $(this).attr("checked","checked");
+            }else{
+                $(this).attr("checked",false);
+            }
+        });
+
+        $("select[name=type]").change(function(event) {
+            $(".tab").hide();
+            if(2 == $(this).val() || 4 == $(this).val()){
+                $(".tab").eq(1).show();
+            }else{
+                $(".tab").eq(0).show();
+            }
+        });
+        $("select[name=type]").trigger('change');
+        //开始编辑
+        $(".fa-pencil").click(function(event) {
+            $("#myModal .modal-body").html('');
+            $(".adv-error").html("");
+            var id = $(this).attr("data-id");
+            $.ajax({
+                url: '/fdlink/edit',
+                type: 'GET',
+                dataType: 'JSON',
+                data:{
+                    id:id
+                }
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    $("#myModal .modal-dialog").removeClass('modal-lg').removeClass('modal-sm');
+                    $("#myModal .modal-dialog").addClass('modal-lg');
+                    $("#myModalLabel").html(data.data.title);
+                    $("#myModal .modal-body").html(data.data.tmp);
+                    $("#myModal").modal();
+                }else{
+                    $(".link-list-error").html(data.info);
+                }
+            })
+            .fail(function(xhr) {
+                $(".link-list-error").html("程序出错,请联系技术部门！");
+            });
+        });
+        //区域搜索
+        $(".link_citys").click(function(event) {
+            var cid = $(this).attr("data-id");
+            window.location.href = "/fdlink/?city="+cid;
+        });
+        $("#btnSearch").click(function(event) {
+            var cid = $(".link_current").attr("data-id");
+            if(typeof(cid) == 'undefined'){
+                cid = '';
+            }
+            window.location.href = "/fdlink?city="+cid+"&type="+$("select[name=type]").val()+"&status="+$("select[name=status]").val()+"&count="+$("select[name=count]").val()+"&url="+$("input[name=url]").val()+"&linkpage="+$("select[name=linkpage]").val();
+        });
+        // 导出
+        $("#export").click(function(event) {
+            var cid = $(".link_current").attr("data-id");
+            if(typeof(cid) == 'undefined'){
+                cid = '';
+            }
+            window.location.href = "/fdlink?city="+cid+"&type="
+                                   +$("select[name=type]").val()+"&status="+$("select[name=status]").val()
+                                   +"&count="+$("select[name=count]").val()+"&url="+$("input[name=url]").val()
+                                   +"&linkpage="+$("select[name=linkpage]").val()+"&export=1";
+        });
+    </script>
+</block>

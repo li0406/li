@@ -1,0 +1,187 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}{:C('QZ_YUMINGWWW')}{$_SERVER['REQUEST_URI']}" />
+    <link rel="stylesheet" href="{$static_host}/assets/mobile/meitu/css/meitu.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="{$static_host}/assets/mobile/common/css/img-zoom.css?v={:C('STATIC_VERSION')}" />
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$data.img_path}-s5.jpg" />
+</block>
+<block name="content">
+    <article>
+        <!--轮播-->
+        <div id="xgt-info">
+            <div class="pageState">
+                <h1>{$data.title}</h1>
+            </div>
+
+            <div id="imgswrap" class="bd mui-content">
+                <ul class="mui-content-padded">
+                    <li>
+                        <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$data.img_path}-s5.jpg" alt="{$data.title}" data-preview-src=""
+                             data-preview-group="1"/>
+                        <div class="img_desc" style="display: none;">{$data.image_title}</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </article>
+    <include file="Common/footfadantc"/>
+</block>
+<block name="footer"></block>
+<block name="script">
+    <script type="text/javascript" src="{$static_host}/assets/common/js/jquery.cookie-min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/mobile/common/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="{$static_host}/assets/mobile/common/js/mui.previewimage.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        mui.previewImage();
+        var ahref=document.getElementsByTagName("a");
+        for(var i=0;i<ahref.length;i++){
+            ahref[i].addEventListener("tap",function(){
+                mui.openWindow({
+                    url: this.href
+                })
+            })
+        }
+
+        window.onload = function(){
+            //初始化
+            var init = false;
+            var prev = false;
+            var next = false;
+            TouchSlide({
+                slideCell:"#xgt-info",
+                mainCell:".bd ul",
+                effect:"left",
+                autoPlay:false,//自动播放
+                pageStateCell:".pageState span", //自动分页
+                endFun:function(i, c){
+                    i = i + 1;
+                    if ((i == 1) && (c > 1)) {
+                        next = false;
+                    };
+                    if(init == false){
+                        init = true;
+                        prev = true;
+                        if(c == 1){
+                            next = true;
+                        }
+                    }else{
+                        if(i == 1){
+                            prev = true
+                        }else{
+                            prev = false;
+                            next = false;
+                            if(i == c){
+                                next = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            var prevUrl=document.referrer;
+            var romainUrl=new RegExp("{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}");
+            $(".m-header-his").click(function(){
+
+                if($(this).length>0){
+                    if(!romainUrl.test(prevUrl)){
+                        window.location.href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}";
+                    }else{
+                        window.history.back();
+                    }
+                }
+            });
+
+            // 监听左右滑动事件
+            //定义变量，用于记录坐标和角度
+            var startx,starty,movex,movey,endx,endy,nx,ny,angle;
+
+            var pre_id = '{$info["pre"]["id"]|default=0}';
+            var next_id = '{$info["next"]["id"]|default=0}';
+            var tu_type = '{$info["type"]|default=1}';
+            var tu_uri = 'g';
+            if(tu_type == 2){
+                tu_uri = 'j';
+            }
+            //开始触摸函数，event为触摸对象
+            function touchs(event){
+
+                //阻止浏览器默认滚动事件
+                event.preventDefault();
+                event.stopPropagation();
+                //获取DOM标签
+
+
+                //通过if语句判断event.type执行了哪个触摸事件
+                if(event.type=="touchstart"){
+
+                    //获取开始的位置数组的第一个触摸位置
+                    var touch = event.originalEvent.targetTouches[0];
+
+                    //获取第一个坐标的X轴
+                    startx = Math.floor(touch.pageX);
+
+                    //获取第一个坐标的Y轴
+                    starty = Math.floor(touch.pageY);
+                    return false;
+                }else if(event.type=="touchmove"){
+                    var touch = event.originalEvent.targetTouches[0];
+                    movex = Math.floor(touch.pageX);
+                    movey = Math.floor(touch.pageY);
+                    return false;
+                    //当手指离开屏幕或系统取消触摸事件的时候
+                }else if(event.type == "touchend" || event.type == "touchcancel"){
+
+                    //获取最后的坐标位置
+                    endx = Math.floor(event.originalEvent.changedTouches[0].pageX);
+                    endy = Math.floor(event.originalEvent.changedTouches[0].pageY);
+
+                    //获取开始位置和离开位置的距离
+                    nx = endx-startx;
+                    ny = endy-starty;
+
+                    //通过坐标计算角度公式 Math.atan2(y,x)*180/Math.PI
+                    angle = Math.atan2(ny, nx) * 180 / Math.PI;
+
+                    if(Math.abs(nx)<=1 ||Math.abs(ny)<=1){
+                        return false;
+                        console.log('滑动距离太小');
+                    }
+
+                    //通过滑动的角度判断触摸的方向
+                    if (angle < 45 && angle >= -45) {
+                        // 右滑动 上一张
+                        if (pre_id != 0) {
+                            window.location.href = '/tu/' + tu_uri + pre_id + '.html';
+                        }
+                        return false;
+                    }else if(angle<135 && angle>=45){
+                        // 下滑动
+                        console.log('下滑动');
+                        return false;
+                    }else if((angle<=180 && angle>=135) || (angle>=-180 && angle<-135 )){
+                        // 左滑动  下一张
+                        if (next_id != 0) {
+                            window.location.href = '/tu/' + tu_uri + next_id + '.html';
+                        }
+                        return false;
+                    }else if(angle<=-45 && angle >=-135){
+                        // 上滑动
+                        console.log('上滑动');
+                        return false;
+                    }
+                }
+                return false;
+            }
+            function addMoveItem(){
+                //添加触摸事件的监听，并直行自定义触摸函数
+                var calendarid = $(".mui-content-padded");
+                calendarid.off("touchstart").on('touchstart',touchs);
+                calendarid.off("touchmove").on('touchmove',touchs);
+                calendarid.off("touchend").on('touchend',touchs);
+            }
+            addMoveItem();
+        }
+    </script>
+</block>

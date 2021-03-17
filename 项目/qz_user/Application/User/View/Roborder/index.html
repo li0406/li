@@ -1,0 +1,385 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>抢单池-齐装网</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/home/css/ht-common-p21414.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/roborder/css/roborder.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="{$static_host}/assets/user/home/js/goalProgress.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="{$static_host}/assets/common/js/jquery.queue.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+<include file="Home:header" />
+<div class="cover"></div>
+<div class="ht-wrap oflow">
+    <include file="Home:comnavleft" />
+    <div class="roborder-right">
+        <a class="roborder-tit {:!$_GET['type']?'current-active':''}" href="/roborder/">抢分池</a>
+        <a class="roborder-tit {$_GET['type']?'current-active':''}" href="/roborder/?type=1">抢赠池</a>
+        <div class="roborder-content">
+            <form>
+                <div class="roborder-content-top">
+                    <if condition="isset($_GET['type'])">
+                        <input type="hidden" name="type" value="{$_GET['type']}">
+                    </if>
+                    <div class="roborder-l">
+                        <label>装修预算：</label>
+                        <select class="zx-budget" name="yusuan">
+                            <option selected="" value="">请选择</option>
+                            <volist name="yusuan" id="vo">
+                                <if condition="$_GET['yusuan'] EQ $vo['id']">
+                                    <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                    <else/>
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="roborder-l">
+                        <label>装修类型：</label>
+                        <select class="zx-type" name="lx">
+                            <option value="">全部</option>
+                            <option value="1" <if condition="1 EQ $_GET['lx']">selected</if>>家装</option>
+                            <option value="2" <if condition="2 EQ $_GET['lx']">selected</if>>公装</option>
+                        </select>
+                    </div>
+                    <div class="roborder-l">
+                        <label>装修方式：</label>
+                        <select class="zx-style" name="fangshi">
+                            <option value="">全部</option>
+                            <volist name="fangshi" id="vo">
+                                <if condition="$_GET['fangshi'] EQ $vo['id']">
+                                    <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                    <else/>
+                                    <option value="{$vo.id}">{$vo.name}</option>
+                                </if>
+                            </volist>
+                        </select>
+                    </div>
+                    <button type="submit" class="research-order">查找订单</button>
+                </div>
+            </form>
+            <div class="roborder-content-result">
+                <table id="tablelist">
+                    <thead>
+                        <tr>
+                            <th>发布日期</th>
+                            <th>所在区域</th>
+                            <th>小区名称</th>
+                            <th>建筑面积</th>
+                            <th>装修类型</th>
+                            <th>装修方式</th>
+                            <th>装修预算</th>
+                            <th>剩余时间</th>
+                            <th class="width_170">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="info.list" id="vo">
+                        <tr>
+                            <td>{$vo.time|date='Y-m-d H:i:s',###}</td>
+                            <td>{$vo.cname|default=''}{$vo.qz_area|default=''}</td>
+                            <td>{$vo.xiaoqu|default=''}</td>
+                            <td>{$vo.mianji|default=''}㎡</td>
+                            <td>
+                                <if condition="1 eq $vo['lx']">家装<elseif condition="2 eq $vo['lx']"/>公装<elseif condition="3 eq $vo['lx']"/>公装/家装<else/>--</if>
+                            </td>
+                            <td>
+                                <volist name="fangshi" id="v">
+                                    <if condition="$v['id'] eq $vo['fangshi']">{$v['name']}</if>
+                                </volist>
+                            </td>
+                            <td>
+                                {$vo['yusuan']|default=''}
+                            </td>
+                            <td class="red"><?php echo secToTime(($vo['add_time'] + 60*60*3) - time()) ?></td>
+                            <td><span class="order-detail" data-id="{$vo.id|default=''}">订单详情</span><span class="qiangdan" data-id="{$vo.id|default=''}">抢单</span></td>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+                {$info.page}
+            </div>
+        </div>
+    </div>
+</div>
+<!--订单详情模态框-->
+<div class="order-detail-model">
+    <div class="order-model-tit">
+        <span>订单详情</span>
+        <span class="order-close">×</span>
+    </div>
+    <div class="order-model-content">
+        <table id="order-tablelist">
+
+        </table>
+    </div>
+    <div class="btns clearfix">
+        <button class="order-no-rob-btn btn1">不抢</button>
+        <button class="order-model-btn">抢单</button>
+    </div>
+</div>
+<input type="hidden" name="rob_id">
+<!--抢单成功模态框-->
+<div class="qiangdan-success">
+    <span class="order-close">×</span>
+    <p class="success-p1">恭喜您，抢单成功。</p>
+    <p class="success-p2">立即到“<a href="/orders/">我的订单</a>”查看。</p>
+</div>
+<!--抢单模态框-->
+<div class="qiangdan-model">
+    <p>是否确定抢取该订单？抢单成功后，可在"我的订单"查看哦~</p>
+    <span class="roborder-close">×</span>
+    <div>
+        <button type="button" class="qiangdan-cancel">不抢</button>
+        <button type="button" class="qiangdan-submit">确定</button>
+    </div>
+</div>
+<div class="spinner">
+  <div class="bounce1"></div>
+  <div class="bounce2"></div>
+  <div class="bounce3"></div>
+</div>
+{$BusinessLicenceTips}
+<include file="Index:footer" />
+{$urgentNotice}
+</body>
+<script type="text/javascript">
+    $(function () {
+        //查看详情
+        $(".order-detail").click(function () {
+            $(".cover").show();
+            $(".spinner").show();
+            $("body").css({"overflow":"hidden","height":"100%"})
+            $.ajax({
+                url: '/roborder/detail/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: $(this).attr('data-id')
+                }
+            })
+                .done(function (data) {
+                    if (data.code == 200) {
+                        $(".spinner").hide();
+                        var html = getDetailHtml(data.info);
+                        $("input[name=rob_id]").val(data.info.id)
+                        $("#order-tablelist").html(html);
+                        $(".order-detail-model").show();
+                    } else {
+                        alert(data.errmsg);
+                        $(".cover").hide();
+                        $(".spinner").hide();
+                    }
+                })
+                .fail(function (xhr) {
+                    alert("请稍后操作!")
+                })
+        });
+        $(".order-close").click(function () {
+            $(".cover").hide();
+            $(".qiangdan-success").hide();
+            $(".order-detail-model").hide();
+            $("body").css({"overflow":"inherit","height":"100%"})
+            window.location.href = window.location.href;
+        });
+        $(".order-model-btn").click(function () {
+            $(".order-model-btn").attr("disabled",true);
+            var id = $("input[name=rob_id]").val();
+            $.ajax({
+                url: '/roborder/getRobOrder/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+                .done(function (data) {
+                    $(".order-model-btn").attr("disabled",false);
+                    if (data.code == 200) {
+                        $(".success-p1").html("恭喜，抢单成功~ \n请尽快联系业主哦~")
+                        $(".order-detail-model").hide();
+                        $(".qiangdan-success").show();
+                    } else if(data.code == 405){
+                        $('.success-p1').html("您已抢过该订单。")
+                        $(".order-detail-model").hide();
+                        $(".qiangdan-success").show();
+                    }
+                    else{
+                        if(data == null || data == ''){
+                            alert("抱歉，该订单已抢完！\n 下次手速要更快哦~")
+                        }else {
+                            alert(data.errmsg)
+                        }
+                    }
+                })
+                .fail(function (xhr) {
+                    $(".order-model-btn").attr("disabled",false);
+                    alert("暂时无法操作!")
+                })
+        });
+        /*点击抢单按钮*/
+        $(".qiangdan").click(function () {
+            $("input[name=rob_id]").val($(this).attr('data-id'));
+            $(".cover").show();
+            $(".qiangdan-model").show();
+            $("body").css({"overflow":"hidden","height":"100%"})
+        });
+        //不抢操作
+        $(".qiangdan-cancel").click(function () {
+            var id = $("input[name=rob_id]").val();
+            $.ajax({
+                url: '/add_norob',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+                .done(function (data) {
+                    alert(data.errmsg)
+                    setTimeout(function () {
+                        $(".cover-c").hide();
+                        window.location.href = window.location.href;
+                    },1000)
+                })
+                .fail(function () {
+                    alert("获取信息失败！");
+                });
+        });
+
+        //关闭
+        $("body").on("click",".roborder-close",function () {
+            $(".cover").hide();
+            $(".qiangdan-model").hide();
+        })
+
+        $(".btn1").click(function () {
+            var id = $("input[name=rob_id]").val();
+            $.ajax({
+                url: '/add_norob',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+                .done(function (data) {
+                    alert(data.errmsg)
+                    setTimeout(function () {
+                        $(".cover-c").hide();
+                        window.location.href = window.location.href;
+                    },1000)
+                })
+                .fail(function () {
+                    alert("获取信息失败！");
+                });
+        });
+        //确定操作
+        $(".qiangdan-submit").click(function () {
+            var id = $("input[name=rob_id]").val();
+            $.ajax({
+                url: '/roborder/getRobOrder/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: id
+                }
+            })
+                .done(function (data) {
+                  if (data.code == 200) {
+                      $(".success-p1").html("恭喜您，抢单成功。")
+                      $(".qiangdan-model").hide();
+                      $(".qiangdan-success").show();
+                  } else if(data.code == 405){
+                      $(".success-p1").html("您已抢过该订单。")
+                      $(".qiangdan-model").hide();
+                      $(".qiangdan-success").show();
+                  }
+                  else{
+                      if(data == null || data == ''){
+                          alert("抱歉，该订单已抢完！\n 下次手速要更快哦~")
+                      }else {
+                          alert(data.errmsg)
+                      }
+                  }
+                })
+                .fail(function (xhr) {
+                    alert("暂时无法操作!")
+                })
+        })
+    })
+
+    function getDetailHtml(data) {
+        var lx = data.lx;
+        if (lx == 1) {
+            lx = '家装';
+        } else if (lx == 2) {
+            lx = '公装';
+        } else {
+            lx = '';
+        }
+        if(data.hxname == null){
+            data.hxname = '';
+        }
+        if(data.yusuan == null){
+            data.yusuan = '';
+        }
+        if(data.fangshi == null){
+            data.fangshi = ''
+        }
+        if(data.fengge == null){
+            data.fengge = ''
+        }
+        if(data.start == null){
+            data.start = '';
+        }
+        if(data.lftime == null){
+            data.lftime = '';
+        }
+        return '<tr>' +
+            '<td>订单编号：</td>' +
+            '<td>' + data.id + '</td>' +
+            '<td>发布时间：</td>' +
+            '<td>' + data.time + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>所在区域：</td>' +
+            '<td>' + data.cname + data.qz_area + '</td>' +
+            '<td>小区名称：</td>' +
+            '<td>' + data.xiaoqu + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>房屋面积（㎡）：</td>' +
+            '<td>' + data.mianji + '</td>' +
+            '<td>房屋户型</td>' +
+            '<td>' + data.hxname + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>装修类型：</td>' +
+            '<td>' + lx +
+            '</td>' +
+            '<td>预算：</td>' +
+            '<td>' + data.yusuan + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>装修方式：</td>' +
+            '<td>' + data.fangshi + '</td>' +
+            '<td>装修风格：</td>' +
+            '<td>' + data.fengge + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>开工时间：</td>' +
+            '<td>' + data.start + '</td>' +
+            '<td>量房时间：</td>' +
+            '<td>' + data.lftime + '</td>' +
+            '</tr>' +
+            '</tr>' +
+            '<td>装修要求：</td>' +
+            '<td colspan="3"><textarea style="width:100%;font-size:12px;resize:none;min-height:150px;border:none;outline:none;" readonly="false;">' + data.text + '</textarea></td>' +
+            '</tr>';
+    }
+</script>
+</html>

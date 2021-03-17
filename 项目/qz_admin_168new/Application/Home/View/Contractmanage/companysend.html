@@ -1,0 +1,230 @@
+<div class="step_item_box">
+    <div class="step_item_name">
+        <span class="pull-left">公司寄出</span>
+    </div>
+    <div class="drag_handle">
+        <span class="center_line"></span>
+    </div>
+    <div class="step2 step-container owf">
+        <div class="pull-left step_leftPart">
+            <div class="input_box_line">
+                <form action="" id="step2_contract_code">
+                    <span class="pull-left bianhaotx" style="color:red;">重要提示：输入格式为7位有效数字</span>
+                </form>
+            </div>
+            <!--寄出合同编号-->
+            <div class="input_box_line">
+                <form action="" id="step2_contract_code">
+                    <span class="pull-left label_name">输出合同编号：</span>
+                    <!-- <select class="daoruhetxz pull-left upload-document-select-wrap upload-document-select-contract" id="contractCode">
+                        <option value="">--请选择--</option>
+                        <option value="QZ">QZ</option>
+                        <option value="QZW">QZW</option>
+                    </select> -->
+                    <span class="pull-left"><input type="text"  name="step2_hetong_inCode1" placeholder="请输入合同编号" value=""></span>
+                    <span class="pull-left middle_line">—</span>
+                    <span class="pull-left"><input type="text"  name="step2_hetong_inCode2" placeholder="请输入合同编号" value=""></span>
+                </form>
+            </div>
+            <!--寄出票据编号-->
+            <div class="input_box_line">
+                <form action="" id="step2_piaoju_code">
+                    <span class="pull-left label_name">输出票据编号：</span>
+                    <!-- <select class="daoruhetxz pull-left upload-document-select-wrap upload-document-select-contract" id="ticketCode">
+                        <option value="">--请选择--</option>
+                        <option value="SJYWT">SJYWT</option>
+                    </select> -->
+                    <span class="pull-left"><input type="text"  name="step2_piaoju_inCode1" placeholder="请输入票据编号" value=""></span>
+                    <span class="pull-left middle_line">—</span>
+                    <span class="pull-left"><input type="text"  name="step2_piaoju_inCode2" placeholder="请输入票据编号" value=""></span>
+                </form>
+            </div>
+            <!--寄出对象（销售/助理）-->
+            <div class="input_box_line">
+                <form action="" id="step2_duixiang">
+                    <span class="pull-left label_name">收货人：</span>
+                    <span class="pull-left">
+                        <input type="text" id="ck_object"  name="piaoju_inCode1" placeholder="请输入销售名称" value="" data-id="">
+                        <div id="ts_box">
+                            <ul id="getResult">
+                            </ul>
+                        </div>
+                    </span>
+                    <span class="pull-left middle_line redColor">*</span>
+                </form>
+            </div>
+        </div>
+        <div class="pull-right step_rightPart">
+            <div class="jichu">
+               <div class="pull-left way_title">寄出方式 : </div>
+               <div class="pull-left way_chose">
+                    <button class="button hasBg jichu_way beChosed" data-sendType='1'>快递配送</button>
+                    <div class="peisong_box owf">
+                        <span class="pull-left">输入快递单号 ：</span>
+                        <input type="text" class="pull-left" name="step2_danhao">
+                        <button class="button pull-left" id="save_way">保存</button>
+                    </div>
+                    <div class="update_peisong_box owf">
+                        <span class="pull-left">快递单号 ：</span>
+                        <span id="kd_number" class="pull-left"></span>
+                        <span class="pull-left change_number">修改</span>
+                    </div>
+                    <button class="button noChose jichu_way"  data-sendType='2'>其他送达方式</button>
+               </div>
+            </div>
+        </div>
+    </div>
+    <center><button class="button" id="companySendNow">确认寄出</button></center>
+</div>
+<script type="text/javascript">
+    /*出库对象提示*/
+    $('#ck_object').on('keyup paste', function(){
+        //根据输入内容查询用户
+        var saler = $(this).val();
+        $.ajax({
+            url: '/contractmanage/findusers/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                query:saler
+            }
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                if(data.data != ''){
+                    $("#getResult").html('');
+                    for(var i in data.data){
+                        var contentStr = "<li data-id="+ data.data[i].id +">"+ data.data[i].user +"</li>";
+                        $("#getResult").append(contentStr);
+                    }
+                }else{
+                    $("#getResult").html('');
+                    $("#getResult").append('没有搜索到~');
+                }
+
+            } else {
+                $("#getResult").append('没有搜索到~');
+            }
+        })
+        .fail(function(xhr) {
+            alert('发生未知错误，请联系技术部门~');
+            return false;
+        })
+
+        $("#ts_box").css("display","block");
+    });
+    $("#ts_box ul").on("click","li",function(){
+        var text=$(this).text();
+        $('#ck_object').val(text);
+        $('#ck_object').attr('data-id',$(this).attr('data-id'));
+        $("#ts_box").css("display","none");
+    });
+    $(document).click(function(event){
+        $("#ts_box").css("display","none");
+    })
+
+    /*公司寄出：配送方式选择*/
+    $(".way_chose .jichu_way").click(function(event) {
+        var index=$(this).index();
+        $(this).removeClass('noChose');
+        $(this).siblings('.jichu_way').addClass('noChose');
+        $(this).siblings('.jichu_way').removeClass('beChosed');
+        $(this).addClass('hasBg');
+        $(this).addClass('beChosed');
+        if(index==0){
+            $(".peisong_box").animate({
+                height:"30px"
+            }, 500)
+        }else{
+            $(".peisong_box").animate({
+                height:"0px"
+            }, 500)
+        }
+    });
+    $("#save_way").click(function(){
+        var number=$("input[name='step2_danhao']").val();
+        if(number!=""){
+            $(".peisong_box").fadeOut(0);
+            $("#kd_number").text(number);
+            $(".update_peisong_box").fadeIn(0);
+        }
+    });
+    $(".change_number").click(function(){
+        $(".update_peisong_box").fadeOut(0);
+        $(".peisong_box").fadeIn(0);
+    });
+
+    //输入公司寄出内容
+    $("#companySendNow").on('click',function(){
+        
+        //合同编号
+        //var contractCode = $('#contractCode').val();
+        var contractStart = $('input[name=step2_hetong_inCode1]').val();
+        var contractEnd = $('input[name=step2_hetong_inCode2]').val();
+        //票据编号
+        //var ticketCode = $('#ticketCode').val();
+        var ticketStart = $('input[name=step2_piaoju_inCode1]').val();
+        var ticketEnd = $('input[name=step2_piaoju_inCode2]').val();
+        //if(contractCode == '' && ticketCode == ''){
+        //    alert_info_x150('请选择合同/票据编码！~');
+        //    return false;
+        //}else{
+        if(contractStart == '' && ticketStart == ''){
+            alert_info_x150('请输入正确的合同/票据编号！~');
+            return false;
+        }
+        //}
+        //出库对象
+        var userId = $('#ck_object').attr('data-id');
+        if(userId == ''){
+            alert_info_x150('请输入一个出库对象！~');
+            return false;
+        }
+        var sendType = $('.beChosed').attr('data-sendType');//快递方式 1为默认快递， 2为其他配送方式
+        var danhao = $('input[name=step2_danhao]').val();
+        if(sendType == 1){
+            if(danhao == ''){
+                alert_info_x150('请输入快递单号！');
+                return false;
+            }
+
+            var kd_number=$("#kd_number").text();
+            if(kd_number==""){
+                alert_info_x150('请保存快递单号');
+                return false
+            }
+        }
+
+        $.ajax({
+            url: '/contractmanage/sendcontract/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                //contractCode:contractCode,
+                contractStart:contractStart,
+                contractEnd:contractEnd,
+                //ticketCode:ticketCode,
+                ticketStart:ticketStart,
+                ticketEnd:ticketEnd,
+                userId:userId,
+                sendType:sendType,
+                danhao:danhao,
+                status:{$expressstatus}
+            }
+        })
+        .done(function(data) {
+            if (data.status == '1') {
+                alert_info_x150(data.info);
+                window.location.href = window.location.href;
+            } else {
+                alert_info_x150(data.info);
+            }
+        })
+        .fail(function(xhr) {
+             alert_info_x150();
+            return false;
+        })
+
+    });
+
+</script>

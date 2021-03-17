@@ -1,0 +1,411 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市缺单统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/orderstat/css/citygeneralization.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .dataTables_filter {display:none}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市缺单统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" method="GET" action="?">
+                                <div class="col-xs-10">
+                                    <div class="col-xs-2">
+                                        <div>城市</div>
+                                        <select id="city" name="city" type="text" placeholder="选择城市" class="form-control">
+                                            <option value="">选择城市</option>
+                                            <volist name="citylist" id="vo">
+                                                <option value="{$vo.cid}">{$vo.first_abc} {$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市类别</div>
+                                        <select id="city-category" name="level" type="text" placeholder="请选择" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1">A类</option>
+                                            <option value="2">B类</option>
+                                            <option value="3">C类</option>
+                                            <option value="5">S1类</option>
+                                            <option value="6">S2类</option>
+                                        </select>
+                                    </div>
+                                    <!-- <div class="col-xs-2">
+                                        <div>城市类型</div>
+                                        <select id="city-type" name="whole" type="text" placeholder="请选择" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1">整月</option>
+                                            <option value="2">非整月</option>
+                                        </select>
+                                    </div> -->
+                                    <div class="col-xs-2">
+                                        <div>查询时间</div>
+                                        <input  id="begin" name="begin" type="text" placeholder="请选择" class="datetimepicker form-control" value="{$input.begin}" disabled autocomplete="off" />
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>&nbsp;</div>
+                                        <input  id="end" name="end" type="text" placeholder="请选择" class="datetimepicker form-control" value="{$input.end}" autocomplete="off" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-2" style="margin-left:-130px;">
+                                    <button type="submit" class="research">查询</button>
+                                    <button id="export" type="button" class="export">导出EXCEL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="col-xs-12">
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>实际总所需分单</span>
+                                <label>{$all.actual_orders|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>实际总缺单</span>
+                                <label>{$all.real_miss_order|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-2 text-center well-bg">
+                                <span>预估当月总需分单</span>
+                                <label>{$all.month_demand_order|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>当月总缺单</span>
+                                <label>{$all.month_miss_order|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>发单量</span>
+                                <label>{$all.all_count|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>实际分单</span>
+                                <label>{$all.fen_real_count|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>当前总需分单</span>
+                                <label>{$all.now_demand_order|default=0}</label>
+                            </div>
+                            <div class="well well-sm col-sm-1 text-center well-bg">
+                                <span>当前总缺单</span>
+                                <label>{$all.now_miss_order|default=0}</label>
+                            </div>
+                        </div>
+                        <div class="explan">
+                            <img src="/assets/home/orderstat/img/zhushi.jpg" />
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding" style="padding-bottom: 10px !important;">
+                        <h5 class="tips-red">提示：预估当月所需分单数据在每天12点进行更新，当天12点前显示昨天的数据，12点后显示今天的数据。</h5>
+                        <table id="myTable" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th style="width:70px">城市</th>
+                                <th>城市<br />类别</th>
+                                <th>城市类型</th>
+                                <th>实际所需分单</th>
+                                <th>实际缺单</th>
+                                <th>实际<br />缺单率</th>
+                                <th>预估当月<br />所需分单</th>
+                                <th>预估<br />当月缺单</th>
+                                <th>预估<br />缺单率</th>
+                                <th>当前<br />所需分单</th>
+                                <th>当前缺单</th>
+                                <th>发单量</th>
+                                <th>分单量</th>
+                                <th>实际<br />分单量</th>
+                                <th>相邻城市<br />分单</th>
+                                <th>总实际<br />分单量</th>
+                                <th>会员数</th>
+                                <th>城市<br />承诺量</th>
+                                <th>平均<br />分几家</th>
+                                <th style="width:50px">几天没分单</th>
+                                <th>签返<br />会员数</th>
+                                <th>会员动态</th>
+                                <th>渠道详情</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr data-fen="{$vo.order_fen_num}" data-allot="{$vo.order_allot_num}" class="{:($vo['vip_total_num'] == 0 ? 'table-bj' : '')}">
+                                    <td>{$vo.city_name}</td>
+                                    <td>
+                                        <switch name="vo.city_level">
+                                            <case value="1">A类</case>
+                                            <case value="2">B类</case>
+                                            <case value="3">C类</case>
+                                            <case value="5">S1类</case>
+                                            <case value="6">S2类</case>
+                                        </switch>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['whole_month'] EQ 1">整月<else/>非整月</if>
+                                    </td>
+                                    <td>
+                                        <span class="edit-btn">
+                                            <eq name="vo.has_actual_orders" value="1">
+                                                <span class="table-green">{$vo.actual_orders|default=0}</span>
+                                            <else />
+                                                <span>{$vo.actual_orders|default=0}</span>
+                                            </eq>
+                                            <i class="fa fa-edit"></i>
+                                        </span>
+                                        
+                                        <input type="text" class="edit-input" value="{$vo.actual_orders|default=0}">
+                                        <span class="edit-save-btn" data-id="{$vo.city_id}"><i class="fa fa-save"></i></span>
+                                    </td>
+                                    <td>{$vo.real_miss_order|default=0}</td>
+                                    <td>{$vo.real_miss_order_rate|default=0}%</td>
+                                    <td>{$vo.month_demand_order|default=0}</td>
+                                    <td>{$vo.month_miss_order|default=0}</td>
+                                    <td>{$vo.month_miss_order_rate|default=0}%</td>
+                                    <td>{$vo.now_demand_order|default=0}</td>
+                                    <td>{$vo.now_miss_order|default=0}</td>
+                                    <td>{$vo.all_count|default=0}</td>
+                                    <td>{$vo.fen_count|default=0}</td>
+                                    <td>{$vo.fen_real_count|default=0}</td>
+                                    <td data-orders="{$vo.near_order_allots}">{$vo.near_fen_orders|default=0}</td>
+                                    <td>{$vo.fen_real_total_count|default=0}</td>
+                                    <td>{$vo.vip_total_num|default=0}</td>
+                                    <td>{$vo.promise_orders|default=0}</td>
+                                    <td data-dynamic-date="{$vo.dynamic_date}">{$vo.fen_avg|default=0}</td>
+                                    <td>
+                                        <if condition="$vo['no_order_days'] egt 8">
+                                            <span class="red">{$vo.no_order_days|default="-"}</span>
+                                        <elseif condition="$vo['vip_total_count'] egt 2 and $vo['no_order_days'] egt 5" />
+                                            <span class="red">{$vo.no_order_days|default="-"}</span>
+                                        <else />
+                                            {$vo.no_order_days|default="-"}
+                                        </if>
+                                    </td>
+                                    <td>{$vo.vip_signback_num|default=0}</td>
+                                    <td>{$vo.vip_dynamic|default="-"}</td>
+                                    
+                                    <if condition="$detail_power == true">
+                                        <td class="city-color">
+                                            <a href="/orderstat/contractpandect?id={$vo.city_id}&begin={$input.begin}&end={$input.end}" target="_blank">详情</a>
+                                        </td>
+                                    <else />
+                                        <td>-</td>
+                                    </if>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="zhushi">
+                    <h4 style="font-weight:700;">名词解释：</h4>
+                    <span class="m-close">×</span>
+                    <p>城市：显示所有已开站城市；</p>
+                    <p>预估当月所需分单=累加1号到T-1的所需分单+按照当天需求分单预测的所需分单；其中，每天的所需分单=每天的会员数*承诺单量*（1/31）/平均分几家；按照当天预测的所需分单=承诺单量*当天会员数*【（31-当天日期+1）/当月自然天数】/平均分几家；</p>
+                    <p>当月缺单：显示查询时间内该城市的缺单情况；默认显示当月该城市的缺单情况；当月缺单=预估当月所需分单-实际分单量-按照当前城市会员折算的相邻城市分单；</p>
+                    <p>缺单率：缺单率=缺单量/预估当月所需分单；</p>
+                    <p>当前所需分单：当前所需分单=累加1号到当前的所需分单；</p>
+                    <p>当前缺单：当前缺单=当前所需分单-实际分单-相邻城市分单；</p>
+                    <p>发单量：查询时间内的发单量；默认显示当月的总发单量；</p>
+                    <p>分单量：客服在查询时间内的发单拨打出的分单；默认显示当月的总分单量；</p>
+                    <p>实际分单量：查询时间内客服拨打出来的实际分单；默认显示当月的实际分单；</p>
+                    <p>相邻城市分单：显示相邻城市分给当前城市会员的订单数量（按照当前城市会员折算）。</p>
+                    <p>总实际分单量：总实际分单量=实际分单量+相邻城市分单；</p>
+                    <p>城市承诺单量：</p>
+                    <p>其中，x为1个订单平均分几家，y为订单量</p>
+                    <p>A类(城市最低承诺单量：13)</p>
+                    <p>当1&lt;=x&lt;=1.9时，y=12；</p>
+                    <p>当1.9&lt;x&lt;=2.8时，y=13.5；</p>
+                    <p>当2.8&lt;x&lt;=3.5时，y=15；</p>
+                    <p>当x&gt;3.5时，y=17；</p>
+                    <p>B类(城市最低承诺单量：9.5)</p>
+                    <p>当1&lt;=x&lt;=1.9时，y=9.5*12/13；</p>
+                    <p>当1.9&lt;x&lt;=2.8时，y=9.5*13.5/13；</p>
+                    <p>当2.8&lt;x&lt;=3.5时，y=9.5*15/13；</p>
+                    <p>当x&gt;3.5时，y=9.5*17/13；</p>
+                    <p>C类(城市最低承诺单量：6)</p>
+                    <p>当1&lt;=x&lt;=1.9时，y=6*12/13；</p>
+                    <p>当1.9&lt;x&lt;=2.8时，y=6*13.5/13；</p>
+                    <p>当2.8&lt;x&lt;=3.5时，y=6*15/13；</p>
+                    <p>当x&gt;3.5时，y=6*17/13；</p>
+                    <p>PS：S1，S2城市按照A类城市进行计算。</p>
+                    <p>会员数：查询时间内最后一天的平均会员；默认显示当天的会员数；</p>
+                    <p>平均分几家：最近1次会员波动时，所有分单平均分给几家会员；</p>
+                    <p>计算公式：平均分几家=分配分单量/分单量；其中，订单分配数量：只取当前城市会员的分配量，分给相邻城市会员的不计算。</p>
+                    <p>计算时间：如果当天12点前会员数增/减，则当天重新计算“实际平均分几家”；如果当天12点后会员数增/减，则当天不重新计算“实际平均分几家”</p>
+                    <p>会员动态：查询时间内最后一天的会员动态；默认显示当天的会员动态。</p>
+                    <p>几天没分单：统计城市当月连续没有分单的天数。如果城市连续（不跨月）8天以上没有分单显示红色。或连续进入≥2家公司，并且连续≥5天没有分单，显示红色。</p>
+                        
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#city").select2();
+        $("#city").select2("val", "{$Think.get.city}");
+        $("#city-category").val("{$Think.get.level}");
+        $("#city-type").val("{$Think.get.whole}");
+        $("#coefficient").val("{$Think.get.coefficient}");
+
+        $('#begin').datepicker({
+            format:"yyyy-mm-dd",
+            autoclose: true,
+            // startDate:beginDate,
+            // endDate:new Date(),
+            // todayBtn:false
+        });
+
+        $('#end').datepicker({
+            format:"yyyy-mm-dd",
+            autoclose: true,
+            startDate: "{:date('Y-m-01', strtotime('-1 years'))}",
+            endDate: "{$maxdate}",
+            // todayBtn:false
+        }).on("change", function() {
+            var beginDate = new Date($('#end').val())
+            var beginYear = beginDate.getFullYear()
+            var beginMonth = beginDate.getMonth()+1
+            var beginTime = beginYear + '-' + beginMonth + '-1'
+            $('#begin').val(beginTime)
+        });
+
+        $(".box-header .explan").click(function () {
+            $(".zhushi").show();
+        });
+        $(".zhushi span").click(function () {
+            $(".zhushi").hide();
+        });
+        //排序表格设置
+        localStorage.removeItem('DataTables_myTable_/orderstat/citylackorder') // 清除默认排序缓存
+        $('#myTable').DataTable({
+            "paging":false,
+            "info":false,
+            responsive: true,
+            stateSave: true,
+            scrollY:"600px",
+            "order": [[ 16, "desc" ]],
+            scrollCollapse:true
+        });
+
+        setTimeout( function(){
+            $('#myTable').DataTable().search( '' ).draw();
+        }, 10 );
+
+       $("#export").click(function(event) {
+            var colums = [];
+            var data =[];
+            var vipIndex = -1; // 会员数所在位置
+            var addIndex = 0; // 会员数为0所在位置
+            var isFindIndex = true; // 查找第一个会员数为0的所在位置
+            var actualOrdersIndex = -1; // 实际所需分单所在位置
+            $('#myTable thead th').each(function(j){
+                var sub = [];
+                if (j < $('#myTable thead th').length-1) {
+                    if($(this).text().trim() === '会员数' && $(this).hasClass('sorting_desc')){
+                        vipIndex = j;
+                    }
+                    if($(this).text().trim() === '实际所需分单'){
+                        actualOrdersIndex = j;
+                    }
+                    sub["text"] = $(this).text().trim();
+                    colums.push(sub);
+                }else{
+                    sub["text"] = '是否指定';
+                    colums.push(sub);
+                }
+            });
+            data.push(colums);
+            $('#myTable tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                var lastText = ''
+                tr.find("td").each(function(j){
+                    if (j < tr.find("td").length-1) {
+                        if(vipIndex>-1 && j === vipIndex && isFindIndex){
+                            if($(this).text().trim() === 0 || $(this).text().trim() === '0'){
+                                isFindIndex = false
+                                addIndex = i+1
+                            }
+                        }
+                        if(j === actualOrdersIndex){
+                            if($(this).find('.edit-btn span').hasClass('table-green')){
+                                lastText = '指定'
+                            }
+                        }
+                        var _td = {
+                            text:$(this).text().trim()
+                        }
+                        sub.push(_td);
+                    }
+                });
+                sub.push({text:lastText})
+                data.push(sub);
+            });
+            if(vipIndex>-1){
+                data.splice(addIndex,0,[])
+                data.splice(addIndex,0,[])
+            }
+            $(this).exportExcel({
+                data:data,
+                title:'城市缺单统计',
+                url:'/export/download/',
+                show:false
+            });
+        });
+        // 实际所需分单
+        $(".edit-btn").click(function(){
+            $(this).hide()
+            $(this).siblings().show()
+        })
+        $(".edit-save-btn").click(function(){
+            var val = $(this).prev().val();
+            var city_id = $(this).data("id");
+
+            $.ajax({
+                url: "/orderstat/cityorder_actual",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    city_id: city_id,
+                    actual_orders: val,
+                    datetime: "{:strtotime($input['begin'])}"
+                }
+            }).done(function (data) {
+                if (data.error_code == 0) {
+                    window.location.reload();
+                }else {
+                    alert(data.error_msg);
+                }
+            });
+        })
+        $(document).keyup(function(event){
+            if(event.keyCode === 27){
+                $(".edit-btn").show();
+                $(".edit-input").hide();
+                $(".edit-save-btn").hide();
+            }
+        });
+    </script>
+</block>

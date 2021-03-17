@@ -1,0 +1,117 @@
+<div class="zb_footer_box">
+    <div class="zb_footer_bg">
+    </div>
+    <div class="wrap">
+        <div class="zb_l_bg">
+        </div>
+        <div class="zb_m_container">
+            <div class="zb_m_tit">
+                最新行情价,这报价才靠谱
+            </div>
+            <form class="secbox_form" onsubmit="return false;">
+            <div class="zb_m_input">
+                <input type="text" name="tel" placeholder="请正确填写您的手机号"/>
+                <button class="btn-add" type="button">获取报价</button>
+            </div>
+            </form>
+            <div class="zb_m_info">
+                今日已有<em class="red">{:releaseCount("fbrs")}</em>人获取装修报价
+            </div>
+        </div>
+        <div class="zb_r_qrcode">
+            <div class="zb_qrcode">
+                <img src="/assets/common/img/wechat.jpg" width="130" height="130" />
+                <p>
+                    微信扫一扫,省半年工资
+                </p>
+            </div>
+        </div>
+        <div class="zb_close">
+        </div>
+    </div>
+</div>
+<div class="zb_footer_box_little">
+    <img src="/assets/common/img/zb_little_bj.png"/>
+</div>
+
+<script type="text/javascript">
+    $(window).scroll(function(){
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop ;
+        var height = $(".nav1,.nav").offset().top + $(".nav1").outerHeight()+10;
+        if(scrollTop > height){
+            $(".zb_footer_box").show();
+            $(".zb_footer_box_little").show();
+        }else{
+            $(".zb_footer_box").hide();
+            $(".zb_footer_box_little").hide();
+        }
+    });
+
+
+    $(".zb_footer_box .zb_close").click(function(event) {
+        animate($(".zb_footer_box"),$(".zb_footer_box_little"));
+    });
+
+    function animate(from,to){
+        var length = from.outerWidth();
+        from.animate({"left":"-="+length},800,function(){
+            to.animate({"left":"0"},800);
+        });
+    }
+
+    $(".zb_footer_box_little").click(function(event) {
+        animate($(".zb_footer_box_little"),$(".zb_footer_box"));
+    });
+
+    $(".zb_footer_box .btn-add").click(function(event) {
+        var _this = $(this);
+        var tel = $(".zb_footer_box input[name=tel]");
+        if (!App.validate.run(tel.val(),"moblie")) {
+            tel.addClass('secbox_focus');
+            tel.focus();
+            //显示提示
+            $.pt({
+                target: tel,
+                content: '请输入正确的手机号码!',
+                width: 'auto'
+            });
+            return false;
+        }
+
+        $.ajax({
+            url: "/fb_order/",
+            type: 'POST',
+            dataType : "JSON",
+            data: {
+                tel: tel.val(),
+                source: '103',
+                safecode:$("#safecode").val(),
+                ssid:"{$ssid}",
+                safekey: $("#safekey").val(),
+                step:1
+            }
+        })
+        .done(function(data) {
+            $("#safecode").val(data.data.safecode);
+            $("#safekey").val(data.data.safekey);
+            if (data.status == 1) {
+                animate($(".zb_footer_box"),$(".zb_footer_box_little"));
+                $("body").append(data.data.tmp);
+            }else{
+               $.pt({
+                target: _this,
+                content: data.info,
+                width: 'auto'
+            });
+            }
+        })
+        .fail(function(xhr) {
+            $.pt({
+                target:_this,
+                content: '发生了未知的错误,请刷新页面',
+                width: 'auto'
+            });
+        });
+    });
+
+</script>

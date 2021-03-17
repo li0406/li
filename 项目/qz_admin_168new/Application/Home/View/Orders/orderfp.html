@@ -1,0 +1,197 @@
+<extend name="Main:baseTemplate" />
+<block name="title"><title>会员分单统计</title></block>
+<block name="style">
+  <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" href="/assets/home/orders/css/orderfp.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+  <section class="content-header">
+    <h1>会员分单统计</h1>
+  </section>
+  <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-default">
+                <div class="box-body">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="col-xs-9">
+                                <div class="col-xs-2">
+                                    <div>城市：</div>
+                                    <select id="city" name="cs" class="form-control select2">
+                                        <option value="">请选择</option>
+                                        <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}" {$_GET['cs'] == $vo['cid'] ? 'selected': ''}>{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>公司名称：</div>
+                                    <input type="text" name="comid" class="form-control clear-target" placeholder="请输入公司名称或ID" value="{$_GET['comid']}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>开始时间：</div>
+                                    <input type="text" name="start" class="form-control datepicker clear-target" autocomplete="off" placeholder="请选择开始时间" value="{$_GET['start']|default=date('Y-m-01')}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>结束时间：</div>
+                                    <input type="text" name="end" class="form-control datepicker clear-target" autocomplete="off" placeholder="请选择结束时间" value="{$_GET['end']|default=date('Y-m-d')}">
+                                </div>
+                                <div class="col-xs-3" style="margin-top:18px;">
+                                    <button type="button" id="search" class="btn research-btn">查询</button>
+                                    <button type="button" id="export" class="btn daochu-btn">导出</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="box" style="padding-top: 20px;padding-bottom: 20px;">
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th>城市</th>
+                            <th>公司名称</th>
+                            <th>会员状态</th>
+                            <th>分单</th>
+                            <th>抢单</th>
+                            <th>赠单</th>
+                            <th>签单</th>
+                            <th>签单金额（万）</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.cname}</td>
+                                <td>{$vo.jc}</td>
+                                <td>
+                                    <if condition="$vo['on'] eq 2">
+                                    会员
+                                    <elseif condition="$vo['on'] eq -1"/>
+                                    过期会员
+                                    <elseif condition="$vo['on'] eq -4"/>
+                                    暂停会员
+                                    <else/>
+                                    </if>
+                                </td>
+                                <td>{$vo.cntf}</td>
+                                <td>{$vo.cntqf}</td>
+                                <td>{$vo.cntw}</td>
+                                <td>
+                                    <if condition="$vo['qiandancount'] eq '' || $vo['qiandancount'] eq 0 ">
+                                        <else/>
+                                        {$vo.qiandancount}
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['qiandanjine'] gt 0">
+                                        {$vo.qiandanjine}
+                                        <else/>
+                                    </if>
+                                </td>
+                                <td>
+                                    <a href="/orders/com_order?start={$_GET['start']}&end={$_GET['end']}&comid={$vo.com}">查看详情</a>
+                                </td>
+                            </tr>
+                        </volist>
+                        <if condition="$countvip gt 0">
+                            <tr>
+                                <td></td>
+                                <td>总计</td>
+                                <td>{$countvip}</td>
+                                <td>{$countfen}</td>
+                                <td>{$countfenqiang}</td>
+                                <td>{$countzeng}</td>
+                                <td>{$countqian}</td>
+                                <td>{$countqianjine}</td>
+                                <td></td>
+                            </tr>
+                        </if>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+</block>
+<block name="script">
+  <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script>
+    $(function () {
+        // var geturlstartime = "{$_GET['startime']}";
+        // var geturlendtime = "{$_GET['endtime']}";
+
+
+
+      $(".select2").select2();
+      $('.datepicker').datepicker({
+        autoclose: true,
+        todayBtn:'linked',
+        format: 'yyyy-mm-dd'
+      });
+      $("body").on("click",".research-btn",function () {
+          var start = $("input[name=start]").val();
+          var end = $("input[name=end]").val();
+          var cs = $("select[name=cs]").val();
+          var comid = $("input[name=comid]").val();
+
+          var starthm = new Date(start.replace(/-/g,"/")).getTime();
+          var endhm = new Date(end.replace(/-/g,"/")).getTime();
+
+          if((endhm-starthm) > (1000*3600*24*366)){
+              alert('时间间隔不能超过一年');return false;
+          }
+          if((cs == undefined || cs == 0 || cs == '')&& (comid == undefined || comid == 0 || comid == '') ){
+              alert('请先选择城市或装修公司再进行查询');
+              return false;
+          }
+          window.location.href = '/orders/orderfp/?cs='+cs+'&comid='+comid+'&start='+start+'&end='+end;
+      });
+
+      function toTimeStamp(time){
+        if(time!=undefined){
+          var date = time;
+          date = date.substring(0,19);
+          date = date.replace(/-/g,'/');
+          var timestamp = new Date(date).getTime();
+          return timestamp;
+        }
+      }
+
+      $('#export').on('click',function(){
+          var startime = '{$_GET["start"]}';
+          var endtime = '{$_GET["end"]}';
+          var comid = "{$_GET['comid']}";
+          var city = "{$_GET['cs']}";
+          var starthm = new Date(startime.replace(/-/g,"/")).getTime();
+          var endhm = new Date(endtime.replace(/-/g,"/")).getTime();
+
+          if((endhm-starthm) > (1000*3600*24*366)){
+              alert('时间间隔不能超过一年');
+              return false;
+          }
+
+          if((comid == undefined || comid == 0 || comid == '')&& (city == undefined || city == 0 || city == '') ){
+              alert('请先选择城市或装修公司再进行导出');
+              return false;
+          }
+
+          var href = '/orders/exportordertongji/?city='+city+'&comid='+comid+'&startime='+startime+'&endtime='+endtime;
+          window.location.href= href;
+      });
+    })
+  </script>
+
+</block>
+

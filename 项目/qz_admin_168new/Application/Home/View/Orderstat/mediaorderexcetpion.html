@@ -1,0 +1,138 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>媒介发单预测</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/mideum.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>媒介发单预测</h1>
+    </section>
+    <section class="content-header">
+        <div class="box box-body">
+            <table class="table">
+                <tr>
+                    <td>
+                     <div class="line-box">
+                        <h4><b>新单需求量</b><i class="fa fa-question-circle" id="zhushi" ></i></h4>
+                        <table style="width:100%;margin-top: -10px;">
+                            <tr>
+                                <td>
+                                    <h2>{$info.min|default=0}</h2>
+                                    <p class="red">本次更新：{$info.now_hour}:00</p>
+                                </td>
+                                <td>
+                                    <h2>{$info.max|default=0}</h2>
+                                    <p class="red">下次更新：{$info.after_hour}:00</p>
+                                </td>
+                            </tr>
+                        </table>
+                      </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="box box-body">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="col-xs-6">
+                        <div id="oneWeek">
+
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div id="sixHours">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="parm_box">
+                 <div class="parm_list">
+                    <div class="parm_title">
+                        参数说明
+                    </div>
+                    <ol>
+                        <li>新单需求量：<br/>需求量最小值 = 下一时段个人发单量 * 今日客服数 - 下一时段预测发单<br/>
+                            需求量最大值 = 今日客服数 * 人均新单标准 - 今日已有新单</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        //过去一周媒介供给情况统计图
+        var oneWeekChart = echarts.init(document.getElementById('oneWeek'));
+        var weekOption = {
+            title: {
+                text: '过去一周媒介供给情况'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:{$info.weekLegend|json_encode}
+            },
+            grid: {
+                left: '2%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: {$info.weekDate|json_encode}
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series:{$info.weekData|json_encode}
+        };
+        oneWeekChart.setOption(weekOption);
+
+        //最近6小时媒介供给情况
+        var sixHourChart= echarts.init(document.getElementById('sixHours'));
+        var hoursOption = {
+            title: {
+                text: '最近6小时媒介供给情况'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:{$info.hourLegend|json_encode}
+            },
+            grid: {
+                left: '2%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: {$info.hour|json_encode}
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: {$info.hourData|json_encode}
+        };
+        sixHourChart.setOption(hoursOption);
+
+        $('#zhushi').popover({
+            content:"媒介供给需要的最小值和最大值",
+            trigger:"hover"
+        });
+
+    </script>
+</block>

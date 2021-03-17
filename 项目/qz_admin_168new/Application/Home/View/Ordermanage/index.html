@@ -1,0 +1,88 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>渠道权限管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/quanxianbiaos/css/quanxbs.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>渠道权限管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitu/">渠道权限管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="col-sm-2">
+                            <a href="/ordermanage/deptup/" class="btn btn-success btn-block"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;添加标识部门</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>标识部门</th>
+                                    <th>所属部门</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                    <tr id="{vo.id}">
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.dept_belong}</td>
+                                        <td>
+                                            <a href="/ordermanage/deptup?id={$vo.id}" class="edibj">编辑</a>
+                                            <a href="javascript:void(0)" class="delsc" data-id={$vo.id}>删除</a>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".delsc").click(function(event) {
+        var _this = $(this);
+        if (confirm("确认删除该标识部门？请确认此标识部门下无所属的渠道标识才可删除，否则渠道来源统计将会受到影响！")) {
+            $.ajax({
+                url: '/ordermanage/delete/',
+                type: 'POST',
+                dataType: 'json',
+                data: {id:$(this).attr("data-id")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    _this.Alert({
+                        msg:'删除成功',
+                        level:2
+                    });
+                    window.location.href = window.location.href;
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            });
+        }
+    });
+</script>
+</block>

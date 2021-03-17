@@ -1,0 +1,508 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>活动设置 - 控制台</title>
+
+</block>
+<!-- /Activity/index -->
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/activity/css/activity.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>活动设置</h1>
+    </section>
+    <section class="content-header">
+        <div class="box no-border">
+            <div class="box-body">
+                <form id="myform" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">活动名称设置</label>
+                        <div class="col-sm-2">
+                            <if condition="$info['name'] EQ ''">
+                            <input type="text" name="name" value="{$info.name}" placeholder="活动名称" class="form-control">
+                            <else/>
+                            <input type="text" name="name" value="{$info.name}" placeholder="活动名称" class="form-control" readonly="readonly">
+                            </if>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">移动端活动链接 </label>
+                        <div class="col-sm-4">
+                           <input type="text" name="mobile_url" class="form-control" placeholder="移动端活动链接" value="{$info.mobile_url}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">上传移动端图片 </label>
+                        <div class="col-sm-4">
+                            <input id="uploadMobileInput" type="file" multiple/>
+                            <input type="hidden" name="mobile_cover_url" value="{$info.mobile_cover_url}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">报名人数设置 </label>
+                        <div class="col-sm-2">
+                           <input type="text" name="enrollment" class="form-control" placeholder="报名人数基数设置" value="{$info.enrollment}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">渠道来源标识 </label>
+                        <div class="col-sm-2">
+                            <input type="text" name="src" class="form-control" placeholder="渠道来源标识,如有多个用,分隔" value="{$info.src}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">发单位标识 </label>
+                        <div class="col-sm-4">
+                            <select id="source" class="combox" name="source[]" multiple>
+                                <option value="">请选择</option>
+                                <volist name="source" id="vo">
+                                <if condition="array_key_exists($vo['src'] ,$info['source_id'])">
+                                <option value="{$vo.src}" selected="selected">{$vo.name}</option>
+                                <else/>
+                                <option value="{$vo.src}">{$vo.name}</option>
+                                </if>
+                                </volist>
+                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label" style="min-height: 46px;line-height: 38px">活动时间设置</label>
+                        <div class="col-sm-2">
+                            <div>活动时间-开始：</div>
+                            <eq name="activity_isbegin" value="1">
+                                <input type="text" name="start" placeholder="开始时间" class="form-control" readonly value="{$info.start}">
+                            <else />
+                                <input type="text" name="start" placeholder="开始时间" class="datetimepicker form-control" value="{$info.start}">
+                            </eq>
+                        </div>
+                        <div class="col-sm-2">
+                          <div>活动时间-结束：</div>
+                          <input type="text" name="end"  value="{$info.end}" placeholder="结束时间" class="datetimepicker form-control" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">兑奖期限</label>
+                        <div class="col-xs-2">
+                            <input  name="prize_start" type="text" class="form-control datetimepicker" placeholder="兑奖开始时间" value="{$info.prize_start}">
+                        </div>
+                        <div class="col-xs-2">
+                            <input  name="prize_end" type="text" class="form-control datetimepicker" placeholder="兑奖结束时间"  value="{$info.prize_end}">
+                        </div>
+                    </div>
+                    <!--<div class="form-group">
+                        <label class="col-sm-1 control-label">活动状态</label>
+                        <if condition="$info['status'] EQ 1">
+                        <div class="radiobox" style="display: inline;">
+                            <label style="width: auto;">
+                                <input name="status" type="radio" value="1" checked="checked"> 进行中
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="2" > 已失效
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="0"  > 未开始
+                            </label>
+                        </div>
+                        <elseif condition="$info['status'] EQ 2"/>
+                        <div class="radiobox" style="display: inline;">
+                            <label style="width: auto;">
+                                <input name="status" type="radio" value="1"> 进行中
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="2"  checked="checked"> 已失效
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="0"  > 未开始
+                            </label>
+                        </div>
+                        <else/>
+                        <div class="radiobox" style="display: inline;">
+                            <label style="width: auto;">
+                                <input name="status" type="radio" value="1"> 进行中
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="2" > 已失效
+                            </label>
+                            <label style=" width: auto;">
+                                <input name="status" type="radio" value="0"  checked="checked"> 未开始
+                            </label>
+                        </div>
+                        </if>
+                    </div>-->
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">活动端口 </label>
+                        <div class="col-sm-2">
+                            <select name="activity_location" class="form-control">
+                                <option value="">请选择</option>
+                                <option value="1" {$info['activity_location']==1?'selected':''}>移动端</option>
+                                <option value="2" {$info['activity_location']==2?'selected':''}>pc端</option>
+                                <option value="3" {$info['activity_location']==3?'selected':''}>APP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">参与最大次数</label>
+                        <div class="col-sm-2">
+                            <input name="max_participation" type="text" class="form-control" placeholder="" value="{$info.max_participation}" <eq name="activity_isbegin" value="1">readonly</eq> />
+                        </div>
+                        <div class="col-sm-2 ac-tips">
+                            * 用户最大参数次数：0为不限制
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">参与默认次数</label>
+                        <div class="col-sm-2">
+                            <input name="default_participation" type="text" class="form-control" placeholder="" value="{$info.default_participation}" <eq name="activity_isbegin" value="1">readonly</eq> />
+                        </div>
+                        <div class="col-sm-2 ac-tips">
+                            * 用户默认参加次数：不限设置足够大
+                        </div>
+                    </div>
+                    <input type="hidden" value="{$info.id}" name="id" />
+                </form>
+            </div>
+        </div>
+    </section>
+    <section class="content-header">
+        <h1 class="fl">活动奖项设置</h1>
+        <button class="excel fr" style="width:150px;" id="addprize" <eq name="activity_isbegin" value="1">disabled</eq> ><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;新增奖项</button>
+        <div style="clear: both"></div>
+    </section>
+    <section class="content-header">
+      <div class="box no-border item-list">
+            <if condition="count($info['child']) GT 0">
+            <volist name="info.child" id="v">
+            <div class="jx-item" id="jx_{$key+1}">
+                <form id="jx_form_{$key+1}">
+                    <input type="hidden" name="id" value="{$v.id}" />
+                    <div class="jx-nubmer">
+                        <span class="fl">奖项{$key+1}</span>
+                        <eq name="activity_isbegin" value="0">
+                            <span class="fr"><i class="fa fa-trash-o"></i></span>
+                        </eq>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="activity-name">活动奖品等级</div>
+                            <select type="text" class="form-control prize_level" disabled>
+                                <option value="">请选择</option>
+                                <volist name="level" id="vo">
+                                <option value="{$key}" {$v['prize_level']==$key?'selected':''}>{$vo}</option>
+                                </volist>
+                            </select>
+                            <input type="hidden" name="prize_level" value="{$v.prize_level}" />
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品类型</div>
+                            <select type="text" class="form-control prize_type" disabled>
+                                <option value="0">请选择</option>
+                                <volist name="type" id="vo">
+                                <option value="{$key}" {$v['prize_type']==$key?'selected':''}>{$vo}</option>
+                                </volist>
+                            </select>
+                            <input type="hidden" name="prize_type" value="{$v.prize_type}" />
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品名称</div>
+                            <input name="prize_name" type="text" class="form-control" placeholder="奖品名称" value="{$v.prize_name}" readonly />
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品数量</div>
+                            <input name="prize_count" type="text" class="form-control" placeholder="奖品数量" value="{$v.prize_count}" readonly />
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">中奖率</div>
+                            <input name="prize_rate" type="text" class="form-control" placeholder="中奖率例如：0.004" value="{$v.prize_rate}">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="activity-name">操作提示</div>
+                            <input type="text" class="form-control" name="prize_tips" placeholder="操作提示" value="{$v.prize_tips}">
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">兑奖地址</div>
+                            <input type="text" class="form-control" name="prize_address" placeholder="兑奖地址" value="{$v.prize_address}">
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">兑奖方式</div>
+                            <select name="prize_model" type="text" class="form-control">
+                                <option value="">请选择兑奖方式</option>
+                                <volist name="model" id="vo">
+                                <option value="{$key}" {$v['prize_mode']==$key?'selected':''}>{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">每日奖品上限</div>
+                            <input name="prize_day_count" type="text" class="form-control" placeholder="每日奖品上限" value="{$v.prize_day_count}">
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">当前奖品剩余数量</div>
+                            <input name="prize_residue" type="text" class="form-control" value="{$v.prize_residue}" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            </volist>
+            <else/>
+            <div class="jx-item" id="jx_1">
+                <form id="jx_form_1">
+                    <input type="hidden" name="id" value="" />
+                    <div class="jx-nubmer">
+                        <span class="fl">奖项1</span> <span class="fr"><i class="fa fa-trash-o"></i></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="activity-name">活动奖品等级</div>
+                            <select name="prize_level" type="text" class="form-control">
+                                <option value="">请选择</option>
+                                <volist name="level" id="vo">
+                                <option value="{$key}">{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品类型</div>
+                            <select name="prize_type" type="text" class="form-control">
+                                <option value="0">请选择</option>
+                                <volist name="type" id="vo">
+                                <option value="{$key}">{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品名称</div>
+                            <input name="prize_name" type="text" class="form-control" placeholder="奖品名称" >
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">奖品数量</div>
+                            <input name="prize_count" type="text" class="form-control" placeholder="奖品数量" >
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">中奖率</div>
+                            <input name="prize_rate" type="text" class="form-control" placeholder="中奖率例如：0.004">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="activity-name">操作提示</div>
+                            <input type="text" class="form-control" name="prize_tips" placeholder="操作提示" >
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">兑奖地址</div>
+                            <input type="text" class="form-control" name="prize_address" placeholder="兑奖地址">
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">兑奖方式</div>
+                            <select name="prize_model" type="text" class="form-control">
+                                <option value="">请选择兑奖方式</option>
+                                <volist name="model" id="vo">
+                                <option value="{$key}">{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">每日奖品上限</div>
+                            <input name="prize_day_count" type="text" class="form-control" placeholder="每日奖品上限" value="">
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="activity-name">当前奖品剩余数量</div>
+                            <span class="form-control" readonly>-</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            </if>
+       </div>
+       <button id="btnSave" type="button" class="btn btn-block btn-primary normal" style="width:100px;margin:50px auto">保存</button>
+    </section>
+
+    <div class="box">
+        <div class="box-header width-border">
+            <h3 class="box-title">帮助说明</h3>
+        </div>
+        <div class="box-body manunal-info">
+            <blockquote>
+                <p>1. 活动一旦添加成功，活动名称不能再更改。</p>
+                <p>2. 奖项设置一旦添加成功，活动奖品等级、奖品类型、奖品名称、奖品数量便不能再更改。</p>
+                <p>3. 活动一旦开始，活动开始时间不能再更改，活动结束时间只能向后延长，参与次数不能再更改，活动奖项不能再进行新增和删除操作。</p>
+            </blockquote>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var prizeNum = "{$info['itemCount']|default=1}";
+        $(".datetimepicker").datetimepicker({
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            pickerPosition: "bottom-left",
+            startView: 2,//月视图
+            minView: 0//日期时间选择器所能够提供的最精确的时间选择视图
+        });
+
+        $('#source').select2({
+            placeholder: "请选择发单位标识",
+            createTag:function (decorated, params) {
+                return null;
+            }
+        });
+
+        $("#addprize").click(function(){
+            prizeNum++;
+            var prizeItem=$(".jx-item").clone();
+
+            prizeItem[0].setAttribute("id","jx_"+prizeNum);
+            $(prizeItem[0]).find(".jx-nubmer .fl").text("奖项"+prizeNum)
+            $(prizeItem[0]).find("form").attr("id","jx_form_"+prizeNum);
+
+            $(prizeItem[0]).find("form").find("input[name=prize_level]").remove();
+            $(prizeItem[0]).find("form").find("input[name=prize_type]").remove();
+            $(prizeItem[0]).find("form").find(".prize_level").attr("name", "prize_level");
+            $(prizeItem[0]).find("form").find(".prize_type").attr("name", "prize_type");
+
+            $(prizeItem[0]).find("form")[0].reset();
+            reset($(prizeItem[0]).find("form"));
+            $(".item-list").append(prizeItem[0]);
+
+        });
+
+        $('#sel_productTag').select2({
+            placeholder: "请选择发单位标识",
+            createTag:function (decorated, params) {
+                return null;
+            }
+        });
+
+        $(".item-list").on("click",".jx-nubmer .fr",function(){
+            //删除奖项
+            if(prizeNum>1){
+                prizeNum--;
+                var jxItem= $(this).parents(".jx-item");
+                var nexItems=jxItem.nextAll();
+                var index=parseInt(jxItem.index())+1;
+
+                if(nexItems.length>0){
+                    for(var i=0;i<nexItems.length;i++){
+                        var jxnum=index+i;
+                        $(nexItems[i]).find(".jx-nubmer .fl").text("奖项"+jxnum);
+                    }
+                }
+                if(prizeNum>0){
+                    jxItem.remove();
+                }
+            }
+        });
+
+        $("#uploadInput").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/uploadimg/",
+            showCaption:false,
+            browseClass:"btn btn-primary",
+            allowedFileExtensions : ['jpg','png','gif'],
+            maxFileCount:1,
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            uploadAsync:true,
+            dropZoneEnabled:false,
+            previewSettings:{
+                image: {width: "auto", height: "100px"}
+            },
+            uploadExtraData:{
+                prefix:'activity'
+            },
+            initialPreview:[{$coverPreview}],
+        }).on('fileuploaded', function(event, data) {
+            if(1 == data.response.status){
+                $('input[name=cover]').val(data.response.data.name);
+            }else{
+                alert(data.response.info);
+                return false;
+            }
+        }).on("fileuploaderror",function(event, data){
+            alert('文件上传失败,请检查文件格式，规格是否符合要求');
+            return false;
+        }).on("fileclear",function(){
+            $("input[name=cover]").val("");
+            $(".img-upload .fileinput-upload-button").removeClass('disabled');
+        });
+
+        $("#uploadMobileInput").fileinput({
+            language: 'zh', //设置语言,
+            uploadUrl:"/upload/uploadimg/",
+            showCaption:false,
+            browseClass:"btn btn-primary",
+            allowedFileExtensions : ['jpg','png','gif'],
+            maxFileCount:1,
+            uploadClass:"btn btn-info",
+            removeClass:"btn btn-danger",
+            uploadAsync:true,
+            dropZoneEnabled:false,
+            previewSettings:{
+                image: {width: "auto", height: "100px"}
+            },
+            uploadExtraData:{
+                prefix:'activity'
+            },
+            initialPreview:[{$mobileCoverPreview}],
+        }).on('fileuploaded', function(event, data) {
+            if(1 == data.response.status){
+                $('input[name=mobile_cover_url]').val(data.response.data.name);
+            }else{
+                alert(data.response.info);
+                return false;
+            }
+        }).on("fileuploaderror",function(event, data){
+            alert('文件上传失败,请检查文件格式，规格是否符合要求');
+            return false;
+        }).on("fileclear",function(){
+            $("input[name=mobile_cover_url]").val("");
+            $(".img-upload .fileinput-upload-button").removeClass('disabled');
+        });
+
+        $("#btnSave").click(function(event) {
+            var _this = $(this);
+            var data = $("#myform").serializeArray();
+            var item = new Array();
+            $(".jx-item").each(function(i){
+                var sub = $(this).find("form").serializeArray();
+                item.push(sub);
+            });
+            data.push({"name":"item","value":JSON.stringify(item)});
+            $.ajax({
+                url: '/activity/setActivity',
+                type: 'POST',
+                dataType: 'JSON',
+                data: data
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                    window.location.href = "/activity/";
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            });
+        });
+
+        function reset(form){
+            form.find("input").val("").attr("disabled",false).attr("readonly",false);
+            form.find("select").val("").attr("disabled",false).attr("readonly",false);
+        }
+    </script>
+</block>

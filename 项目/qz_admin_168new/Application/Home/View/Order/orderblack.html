@@ -1,0 +1,109 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单转移黑名单</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">转移黑名单</h3>
+                </div>
+                <div class="box-body">
+                    <form id="myForm" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">请输入订单号:</label>
+                            <div class="col-sm-4">
+                                <textarea name="orderid" class="form-control"></textarea>
+                                <label class="control-label">批量转移订单中间用英文“,”隔开即可</label>
+                            </div>
+                            <div class="col-sm-1">
+                                <button id="btnSave" type="button" class="btn btn-primary btn-block">确定</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">恢复订单</h3>
+                </div>
+                <div class="box-body">
+                    <form id="myForm" class="form-horizontal" action="/order/orderblack/">
+                        <div class="form-group">
+                            <label class="col-sm-1 control-label">请输入订单号:</label>
+                            <div class="col-sm-4">
+                                <textarea name="restore" class="form-control">{$Think.get.restore}</textarea>
+                                <label class="control-label">批量查询订单中间用英文“,”隔开即可</label>
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="submit" class="btn btn-primary btn-block">查询</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="box-body">
+                    <table class="table table-striped table-bordered table-hover text-center">
+                    <tr>
+                        <th >序号</th>
+                        <th>订单号</th>
+                        <th>删除时间</th>
+                        <th>删除人</th>
+                        <th>操作</th>
+                    </tr>
+                    <volist name="list" id="vo">
+                    <tr>
+                        <td>{$key+1}</td>
+                        <td>{$vo.id}</td>
+                        <td>{$vo.time}</td>
+                        <td>{$vo.username}</td>
+                        <td><a href="javascript:void(0)" data-id="{$vo.id}">恢复</a></td>
+                    </tr>
+                    </volist>
+                </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript">
+    $("#btnSave").click(function(event) {
+        $.ajax({
+            url: '/order/orderblack/',
+            type: 'post',
+            dataType: 'json',
+            data: {
+                id:$("textarea[name=orderid]").val()
+            }
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                alert("操作成功！");
+                $("textarea[name=orderid]").val("");
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    });
+
+    $("a").click(function(event) {
+        $.ajax({
+            url: '/order/orderrestore/',
+            type: 'post',
+            dataType: 'json',
+            data: {id:$(this).attr("data-id")}
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                alert("操作成功！");
+                window.location.href = window.location.href;
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    });
+</script>
+</block>

@@ -1,0 +1,131 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link href="/assets/common/js/plugins/bootstrapswitch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link href="/assets/common/js/plugins/listnav/listnav.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link href="/assets/home/css/orderadjoincity.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>订单相邻城市设置</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/city/orderadjoincity/">订单相邻城市</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <h3 class="box-title">{$info.city.cname}-订单分配相邻城市设置</h3>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <form id="brandcheck">
+                            <table class="table table-hover table-bordered text-center" id="brandlist">
+                                <tbody>
+                                    <tr>
+                                        <th>城市</th>
+                                        <th>相邻城市一</th>
+                                        <th>相邻城市二</th>
+                                        <th>相邻城市三</th>
+                                        <th>相邻城市四</th>
+                                        <th>相邻城市五</th>
+                                        <th>相邻城市六</th>
+                                        <th>相邻城市七</th>
+                                        <th>相邻城市八</th>
+                                        <th>相邻城市九</th>
+                                        <th>相邻城市十</th>
+                                        <th>相邻城市十一</th>
+                                        <th>相邻城市十二</th>
+                                        <th>相邻城市十三</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="info.info" id="vo">
+                                        <tr class="main-table">
+                                            <td class="main-city">{$vo.cname}</td>
+                                            <for start="0" end="13">
+                                                <td>
+                                                    <empty name="vo['relation'][$i]">
+                                                        <input class="relation" value="0">
+                                                    <else />
+                                                        <input class="relation" value="{$vo['relation'][$i]}">
+                                                    </empty>
+                                                </td>
+                                            </for>
+                                            <td>
+                                                <button data-id="{$vo.cid}" type="button"class="BtnSave btn btn-block btn-success">保存</button>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(document).ready(function(){
+        var data = {$info.citys};
+        console.log(data)
+        $(".relation").select2({
+            data: data
+        });
+
+        $('.BtnSave').click(function(){
+            var cid = $(this).attr('data-id');
+            var ids = [];
+            $(this).parent().parent().find('.relation').each(function($key){
+                var _this =  $(this);
+                var id = _this.select2("val");
+                ids.push(id);
+            })
+
+            console.log(ids);
+
+            $.ajax({
+                url: '/city/uporderadjoincity/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    cid:cid,
+                    ids:ids
+                }
+            })
+            .done(function(data) {
+                if(data.status == '1'){
+                    window.location.href = window.location.href;
+                }else{
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                }
+            })
+            .fail(function(xhr) {
+                var e = dialog({
+                    title: '消息',
+                    content: '操作失败,请联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+            })
+        })
+    })
+</script>
+</block>

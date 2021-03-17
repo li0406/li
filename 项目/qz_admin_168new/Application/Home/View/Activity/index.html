@@ -1,0 +1,134 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>活动列表 - 控制台</title>
+
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/activity/css/activity.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>活动列表</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">条件查询</h3>
+            </div>
+            <div class="box-body">
+
+                    <div class="row">
+                    <form action="/activity" method="get">
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >活动名称：</div>
+                            <input type="text" name="name" class="form-control" placeholder="活动名称" value="{$Think.get.name}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >查询时间-开始：</div>
+                            <input type="text" id="start" name="start" class="form-control datetimepicker" placeholder="开始时间" value="{$Think.get.start}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >查询时间-结束：</div>
+                            <input type="text" id="end" name="end" class="form-control datetimepicker" placeholder="结束时间" value="{$Think.get.end}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34" >活动状态：</div>
+                            <select id="status" name="status" type="text">
+                            <option value="">请选择活动状态</option>
+                            <volist name="status" id="vo">
+                            <if condition="$_GET['status'] EQ $key">
+                            <option value="{$key}" selected="selected">{$vo}</option>
+                            <else/>
+                            <option value="{$key}">{$vo}</option>
+                            </if>
+                            </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <div>&nbsp;</div>
+                            <button type="submit" class="btn btn-info" style="width:80%;"> 查询 </button>
+                        </div>
+                        </form>
+                        <div class="col-xs-2">
+                            <div>&nbsp;</div>
+                            <a class="btn btn-success" href="/activity/setActivity"> <i class="fa fa-plus-circle"></i>&nbsp;&nbsp;新增活动 </a>
+                        </div>
+
+                    </div>
+                     <br>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-body " style="padding:0px;">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <th>活动名称</th>
+                            <th>活动状态</th>
+                            <th>活动时间</th>
+                            <th>报名人数</th>
+                            <th>渠道来源标识</th>
+                            <th>发单位置标识</th>
+                            <th>兑奖期限</th>
+                            <th>操作</th>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.name}</td>
+                                <td>
+                                    <switch name="vo.status">
+                                        <case value="0" break="1">未开始</case>
+                                        <case value="1" break="1">进行中</case>
+                                        <case value="2" break="1">已失效</case>
+                                    </switch>
+                                </td>
+                                <td>{$vo.start} - {$vo.end}</td>
+                                <td>{$vo.enrollment}</td>
+                                <td>
+                                    {$vo.src}
+                                </td>
+                                <td>{$vo.source_id}</td>
+                                <td>{$vo.prize_start} - {$vo.prize_end}</td>
+                                <td>
+                                    <a class="edit" href="/activity/setactivity?id={$vo.id}">编辑</a>
+                                    <a class="details" href="/activity/activitydetail?id={$vo.id}">查看详情</a>
+                                    <a class="details" target="_blank" href="/activitystat/?activity_id={$vo.id}&activity_location={$vo.activity_location}">活动统计</a>
+                                </td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#status").select2({
+            allowClear: true,
+            placeholder: "选择活动状态"
+        });
+        $("#status").select2("val","{$Think.get.status}");
+
+        $(".datetimepicker").datetimepicker({
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            pickerPosition: "bottom-left",
+            startView: 2,//月视图
+            endDate : new Date(),
+            minView: 1//日期时间选择器所能够提供的最精确的时间选择视图
+        });
+</script>
+</block>

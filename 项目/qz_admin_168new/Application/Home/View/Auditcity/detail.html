@@ -1,0 +1,124 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+  <title>齐装网用户角色管理后台 - 控制台</title>
+</block>
+<block name="style">
+  <link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+  <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+  <link rel="stylesheet" href="/assets/home/css/addmanagecity.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+  <section class="content-header">
+    <h1>稽核操作分配订单->城市设置</h1>
+  </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box box-default">
+          <div class="box-body">
+            <div class="row">
+              <form class="col-sm-12 form-horizontal">
+                <div class="col-sm-12 form-group">
+                  <label  class="col-sm-1 control-label" for="admin_id">账号名称：</label>
+                  <div class="col-sm-1">
+                    <select name="admin_id" id="admin_id" class="form-control">
+                      <option value='{$user.id}' class="citynum">{$user.name}</option>
+                    </select>
+                    <input type="hidden" name="admin_id" value="{$user.id}">
+                  </div>
+                </div>
+                <div class="col-sm-12 form-group">
+                  <label  class="col-sm-1 control-label" for="citys">分单城市：</label>
+                  <div class="col-sm-7">
+                    <div class="ms-container citys-container">
+                      <select id='citys' multiple='multiple' name="city[]">
+                        <volist name="citys" id="vo">
+                          <option value='{$vo.cid}' class="citynum" {:in_array($vo['cid'],$user['audit_city_ids'])?'selected':''}>{$vo.px_abc} {$vo.cname} ( {$vo.vip_num} )</option>
+                        </volist>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-3 form-group">
+                  <button type="button" id="btnsave" class="btn btn-info normal pull-right">&nbsp;&nbsp;保存&nbsp;&nbsp;</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            /*城市列表*/
+            $('#citys').multiSelect({
+                selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+                selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+                afterInit: function (ms) {
+                    var that = this,
+                        $selectableSearch = that.$selectableUl.prev(),
+                        $selectionSearch = that.$selectionUl.prev(),
+                        selectableSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selectable:not(.ms-selected)',
+                        selectionSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selection.ms-selected';
+
+                    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                        .on('keydown', function (e) {
+                            if (e.which === 40) {
+                                that.$selectableUl.focus();
+                                return false;
+                            }
+                        });
+
+                    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                        .on('keydown', function (e) {
+                            if (e.which == 40) {
+                                that.$selectionUl.focus();
+                                return false;
+                            }
+                        });
+                },
+                afterSelect: function () {
+                    this.qs1.cache();
+                    this.qs2.cache();
+                },
+                afterDeselect: function () {
+                    this.qs1.cache();
+                    this.qs2.cache();
+                }
+            });
+
+            /*保存按钮*/
+            $("#btnsave").click(function () {
+                var data = {};
+                data.city = $('#citys').val();
+                if (data.city == null) {
+                    alert('请选择城市');
+                    return false;
+                }
+                data.admin_id = $('input[name=admin_id]').val();
+                $.ajax({
+                    url: '/auditcity/save',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                }).done(function (data) {
+                    if (data.error_code == 1) {
+                        alert(data.error_msg);
+                        window.location.reload();
+                    } else {
+                        alert('保存成功');
+                        window.location.href = '/auditcity/';
+                    }
+                }).fail(function () {
+                    alert('保存失败，请稍后重试');
+                    window.location.reload();
+                });
+            });
+        })
+    </script>
+</block>

@@ -1,0 +1,188 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+  <title>编辑组</title>
+</block>
+<block name="style">
+  <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .pointer {  cursor: pointer;  color: #0099FF;  }
+        .edit-row {  margin-right: 10px;  }
+        #form {  margin: 35px 15px;  }
+        span.mustWrite {  color: red;  font-weight: bold;  }
+        .btn-box {  text-align: center  }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/newmedia/statistics_group">新媒体业绩统计</a> <i class="fa fa-angle-right"></i> 设置组</h1>
+    </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-header">
+              <div class="l"><h4>设置组</h4></div>
+            <div class="r"><button type="button" class="btn btn-success add-target" id="add-group">新增组</button></div>
+          </div>
+          <div class="box-body table-responsive no-padding">
+            <table class="table table-hover table-bordered">
+              <thead >
+              <tr style="font-size:14px;color:#000">
+                <th>序号</th>
+                <th>组名</th>
+                <th>所在团</th>
+                <th>添加人</th>
+                <th>添加时间</th>
+                <th>操作</th>
+              </tr>
+              </thead>
+              <tbody id="dataLists">
+              <volist name='list' id='vo'>
+              <tr>
+                <td>{:((I('get.p',1,'intval') - 1) * 20 ) + $key + 1}</td>
+                <td>{$vo.name}</td>
+                <td>{$vo.team_admin.user}</td>
+                <td>{$vo.op_admin.user}</td>
+                <td>{:date("Y-m-d H:i:s",$vo['create_time'])}</td>
+                <td>
+                  <span class="pointer edit-row" style="" data-id="{$vo.id}" data-team-id="{$vo.team_admin_id}" data-name="{$vo.name}">编辑</span>
+                  <span class="pointer del-row" data-id="{$vo.id}">删除</span>
+                </td>
+              </tr>
+              </volist>
+              </tbody>
+            </table>
+              {$page}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        var form_str = "<form  class=\"form-horizontal modal-form\" id=\"form\"><div class=\"form-group\"><label for=\"name\" class=\"col-sm-2 control-label\"><span class=\"mustWrite\">* </span>组名:</label><div class=\"col-sm-9\"><input type=\"hidden\" id=\"id\" name=\"id\" value=\"\"><input type=\"text\" id=\"name\" name=\"name\"  class=\"form-control\"></div></div><div class=\"form-group\"><label for=\"team_admin_id\" class=\"col-sm-2 control-label\"><span class=\"mustWrite\">* </span>所在团:</label><div class=\"col-sm-9\"><select type=\"text\" id=\"team_admin_id\" name=\"team_admin_id\"  class=\"form-control\">" + "<volist name='team' id='vo'><option value='{$vo.id}'>{$vo.user}</option></volist></select></div></div><div class=\"form-group\"><div class=\"btn-box\"><input type=\"button\" class=\"btn btn-primary\" id=\"submitBtn\"  value=\"保存\"></div></div></form>";
+        $(function () {
+
+            $('#add-group').click(function () {
+                layer.open({
+                    type: 1,
+                    area: ['600px', '245px'], //宽高
+                    title: '新增组',
+                    content: form_str
+                });
+                $('#submitBtn').click(function () {
+                    var selfObj = $(this);
+                    var data = {};
+                    $.each($('#form').serializeArray(),function (key, val) {
+                        data[val.name] = val.value;
+                    });
+                    if (!data.name){
+                        layer.msg('组名称不能为空');
+                        return false;
+                    }
+                    if (!data.team_admin_id){
+                        layer.msg('请选择团长');
+                        return false;
+                    }
+                    selfObj.attr('disabled', 'disabled');
+                    $.ajax({
+                        url: "/newmedia/addusergroup",
+                        type: 'post',
+                        dataType: 'json',
+                        data: data,
+                        success: function (res) {
+                            layer.msg(res.error_msg, {time: 1000}, function () {
+                                selfObj.removeAttr('disabled');
+                                if (res.error_code == 0) {
+                                    window.location.reload();
+                                }
+                            });
+                        },
+                        error: function () {
+                            layer.msg('服务器异常', {time: 1000});
+                            selfObj.removeAttr('disabled');
+                        }
+                    });
+                })
+            });
+
+
+            $('.edit-row').click(function () {
+                layer.open({
+                    type: 1,
+                    area: ['600px', '245px'], //宽高
+                    title: '编辑组',
+                    content: form_str
+                });
+
+                $('#team_admin_id').val($(this).attr('data-team-id'));
+                $('#id').val($(this).attr('data-id'));
+                $('#name').val($(this).attr('data-name'));
+
+                $('#submitBtn').click(function () {
+                    var selfObj = $(this);
+                    var data = {};
+                    $.each($('#form').serializeArray(),function (key, val) {
+                        data[val.name] = val.value;
+                    });
+                    selfObj.attr('disabled', 'disabled');
+                    $.ajax({
+                        url: "/newmedia/addusergroup",
+                        type: 'post',
+                        dataType: 'json',
+                        data: data,
+                        success: function (res) {
+                            layer.msg(res.error_msg, {time: 1000}, function () {
+                                selfObj.removeAttr('disabled');
+                                if (res.error_code == 0) {
+                                    window.location.reload();
+                                }
+                            });
+                        },
+                        error: function () {
+                            layer.msg('服务器异常', {time: 1000});
+                            selfObj.removeAttr('disabled');
+                        }
+                    });
+                })
+            });
+
+
+            $('.del-row').click(function () {
+                var id = $(this).attr('data-id');
+                if (!id) {
+                    layer.msg('参数错误', {time: 1000});
+                }
+                layer.confirm(
+                    '跟组相关的信息（该组的月目标、组与用户的关联关系）将同时被删除，请谨慎操作',
+                    {
+                        title: '提示',
+                        area: ['575px', '165px'], //宽高
+                        btn: ['确认', '取消']
+                    },
+                    function () {
+                    $.ajax({
+                        url: '/newmedia/delusergroup',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        },
+                        success: function (res) {
+                            layer.msg(res.error_msg, {time: 1000}, function () {
+                                if (res.error_code == 0) {
+                                    window.location.reload();
+                                }
+                            });
+                        },
+                        error: function (res) {
+                            layer.msg('服务器异常');
+                        }
+                    })
+                })
+            });
+        })
+    </script>
+</block>

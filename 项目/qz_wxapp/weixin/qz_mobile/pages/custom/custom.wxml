@@ -1,0 +1,210 @@
+<!--pages/custom/custom.wxml-->
+<view class='header'>
+  <view class='iconfont icon-location dingwei' bindtap='toCity'>{{curCity}}</view>
+  <view class='search'>
+    <view class='icon'><image src='../../img/search.png'></image></view>
+    <input placeholder='公司名称' bindconfirm="searchWord" confirm-type="search"></input>
+  </view>
+  <view class='select' bindtap='toShaixuan'>
+    <image src='../../img/shaixuan.png'></image>
+  </view>
+</view>
+<view class='add' bindtap='toJournal'>  
+  <image src='../../img/add-big.png'></image>
+</view>
+<view class='tab'>
+  <view class='tab-item' bindtap='changeType' data-type='true' data-order='1'>
+    <text class='{{tabActive?"tab-active":""}}'>按录入时间</text>
+  </view>
+  <view class='tab-item' bindtap='changeType' data-type='false' data-order='2'>
+    <text class='{{!tabActive?"tab-active":""}}' >按下次联系时间</text>
+  </view>
+</view>
+<block wx:if="{{tabActive}}">
+  <view class='list'>
+    <view class='ul'>
+      <view class='li clearfix' wx:for="{{list}}" wx:for-index='index' wx:key>
+        <view class="new-old {{item.is_new =='1'?'new':'old'}}" catchtap='toDetail' data-id='{{item.id}}'>{{item.is_new =='1'?'新客户':'老客户'}}</view>
+        <view class='company-name' catchtap='toDetail' data-id='{{item.id}}'>
+          <text class='jianchen'>{{item.company_name}}</text>
+          <text class="quyu">{{item.cname}}{{item.area}}</text>
+        </view>
+        <view class='info clearfix' catchtap='toDetail' data-id='{{item.id}}'>
+          <view class='w50 name'>
+            <text class='t1'>报备人：</text>
+            <text class='t2'>{{item.admin_name}}</text>
+          </view>
+          <view class='w50 way'>
+            <text class='t1'>谈判方式：</text>
+            <text class='t2'>{{item.style}}</text>
+          </view>
+          <view class='w50 status'>
+            <text class='t1'>签约状态：</text>
+            <text class='t2'>{{item.sign_status}}</text>
+          </view>
+          <view class='w50 level'>
+            <text class='t1'>意向等级：</text>
+            <text class='t2'>{{item.intention_level}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>拜访时间：</text>
+            <text class='t2'>{{item.sTime}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>录入时间：</text>
+            <text class='t2'>{{item.visit_time}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>下次联系：</text>
+            <text class='t2'>{{item.next_time}}</text>
+          </view>
+          <view class='d-u' catchtap='moreInfo' data-index="{{index}}" data-info="{{moreInfo[index]}}">
+            <text class='iconfont {{moreInfo[index]? "icon-angle-down":"icon-angle-up"}}'></text>
+          </view>
+        </view>
+        <view class='more-info clearfix' catchtap='toDetail' data-id='{{item.id}}' wx:if="{{!moreInfo[index]}}">
+          <view class='w50'>
+            <text class='t1'>联系人：</text>
+            <text class='t2 c-name'>{{item.name}}</text>
+          </view>
+          <view class='w50 tel'>
+            <text class='t1'>联系电话：</text>
+            <text class='t2'>{{item.tel}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1 fl'>公司地址：</text>
+            <text class='t2 address'>{{item.addr}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>联系次数：</text>
+            <text class='t2'>{{item.contact_num}}</text>
+          </view>
+        </view>
+        <view class='log-report clearfix'>
+          <view class='journal' data-id='{{item.id}}' catchtap='toJournalLog'>
+            <image src='../../img/rizhi.png'></image>
+            <text>日志记录</text>
+          </view>
+          <view class='report' data-id='{{item.id}}' catchtap='toReport'>
+            <image src='../../img/add.png'></image>
+            <text>再次报备</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class='page' wx:if='{{page}}'>
+      <view class="pre {{pageCurrent==1?'disabled':''}}" bindtap='prevBtn'>上一页</view>
+      <view class='total'>
+        <picker bindchange="toPage" value="" range="{{pageNumber}}">
+          <view class="picker">
+            <view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+          </view>
+        </picker>
+      </view>
+      <view class="next {{pageCurrent == pageTotalNumber?'disabled':''}}" bindtap='nextBtn'>下一页</view>
+    </view>
+    <view class='no-result' wx:if='{{noResult}}'>
+      <image src='../../img/no_result.png'></image>
+      <view>暂无搜索结果</view>
+    </view>
+    <view class='no-result' wx:if='{{noInternet}}'>
+      <image src='../../img/no_internet.png'></image>
+      <view>网络开了小差~请稍等</view>
+      <button bindtap='toCustom'>重新加载</button>
+    </view>
+  </view>
+</block>
+<block wx:if="{{!tabActive}}">
+  <view class='list'>
+    <view class='ul'>
+      <view class='li clearfix' wx:for="{{list}}" wx:for-index='index' wx:key>
+        <view class="new-old {{item.is_new =='1'?'new':'old'}}" catchtap='toDetail' data-id='{{item.id}}'>{{item.is_new =='1'?'新客户':'老客户'}}</view>
+        <view class='company-name' catchtap='toDetail' data-id='{{item.id}}'>
+          <text class='jianchen'>{{item.company_name}}</text>
+          <text>{{item.cname}}{{item.area}}</text>
+        </view>
+        <view class='info clearfix' catchtap='toDetail' data-id='{{item.id}}'>
+          <view class='w50 name'>
+            <text class='t1'>报备人：</text>
+            <text class='t2'>{{item.admin_name}}</text>
+          </view>
+          <view class='w50 way'>
+            <text class='t1'>谈判方式：</text>
+            <text class='t2'>{{item.style}}</text>
+          </view>
+          <view class='w50 status'>
+            <text class='t1'>签约状态：</text>
+            <text class='t2'>{{item.sign_status}}</text>
+          </view>
+          <view class='w50 level'>
+            <text class='t1'>意向等级：</text>
+            <text class='t2'>{{item.intention_level}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>拜访时间：</text>
+            <text class='t2'>{{item.visit_start_time}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>录入时间：</text>
+            <text class='t2'>{{item.visit_time}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>下次联系：</text>
+            <text class='t2'>{{item.next_time}}</text>
+          </view>
+          <view class='d-u' catchtap='moreInfo' data-index="{{index}}" data-info="{{moreInfo[index]}}">
+            <text class='iconfont {{moreInfo[index]? "icon-angle-down":"icon-angle-up"}}'></text>
+          </view>
+        </view>
+        <view class='more-info clearfix' catchtap='toDetail' data-id='{{item.id}}' wx:if="{{!moreInfo[index]}}">
+          <view class='w50'>
+            <text class='t1'>联系人：</text>
+            <text class='t2 c-name'>{{item.name}}</text>
+          </view>
+          <view class='w50 tel'>
+            <text class='t1'>联系电话：</text>
+            <text class='t2'>{{item.tel}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>公司地址：</text>
+            <text class='t2'>{{item.addr}}</text>
+          </view>
+          <view class='w100'>
+            <text class='t1'>联系次数：</text>
+            <text class='t2'>{{item.contact_num}}</text>
+          </view>
+        </view>
+        <view class='log-report clearfix'>
+          <view class='journal' data-id='{{item.id}}' catchtap='toJournalLog'>
+            <image src='../../img/rizhi.png'></image>
+            <text>日志记录</text>
+          </view>
+          <view class='report' data-id='{{item.id}}' catchtap='toReport'>
+            <image src='../../img/add.png'></image>
+            <text>再次报备</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class='page' wx:if='{{page}}'>
+      <view class="pre {{pageCurrent==1?'disabled':''}}" bindtap='prevBtn'>上一页</view>
+      <view class='total'>
+        <picker bindchange="toPage" value="" range="{{pageNumber}}">
+          <view class="picker">
+            <view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+          </view>
+        </picker>
+      </view>
+      <view class="next {{pageCurrent == pageTotalNumber?'disabled':''}}" bindtap='nextBtn'>下一页</view>
+    </view>
+    <view class='no-result' wx:if='{{noResult}}'>
+      <image src='../../img/no_result.png'></image>
+      <view>暂无搜索结果</view>
+    </view>
+    <view class='no-result' wx:if='{{noInternet}}'>
+      <image src='../../img/no_internet.png'></image>
+      <view>网络开了小差~请稍等</view>
+      <button bindtap='toCustom'>重新加载</button>
+    </view>
+  </view>
+</block>

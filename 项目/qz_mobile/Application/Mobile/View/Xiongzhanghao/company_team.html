@@ -1,0 +1,201 @@
+<extend name="Common:basic"/>
+<block name="link">
+<notempty name="info.canonical">
+    <link href="{$info.canonical}" rel="canonical" />
+</notempty>
+<link href="/assets/mobile/companyhome/css/m-public-ch.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/companyhome/css/m-sheji.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/zixun/css/redbox.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+<link href="/assets/mobile/css/top-sj-bj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-tit">{$basic.body.title}</div>
+</block>
+<block name="content">
+    <article class="under-line">
+        <include file="header" />
+        <notempty name="info.team">
+        <volist name="info.team" id="vo">
+            <div class="plan_box">
+                <div class="plan_img">
+                    <img src="{$vo.caseimg.url|default='/assets/mobile/companyhome/img/pic.gif'}" alt="{$vo.caseimg.alt|default='默认设计图片'}">
+                    <a rel="nofollow" class="mask-a" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$cityInfo.bm}/blog/{$vo.uid}/">
+                        <div class="mask_box">
+                            <a rel="nofollow" class="mask_box_sj" href="/xzh/baojia/">免费报价</a>
+                            <div class="head">
+                                <a rel="nofollow" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$cityInfo.bm}/blog/{$vo.uid}">
+                                    <img src="{$vo.logo}" alt="{$vo.name}">
+                                </a>
+                            </div>
+                            <div class="pre">
+                                <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/{$cityInfo.bm}/blog/{$vo.uid}/">{$vo.name}</a> <br>
+                                <em>从业时间：{$vo.jobtime} &nbsp; {$vo.zw}</em>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="dase"></div>
+                </div>
+            </div>
+        </volist>
+        {$info.page}
+        <else />
+            <img class="ch-blank" src="/assets/mobile/common/img/blank.png" alt="暂无相关数据">
+            <p class="ch-blank-text">该公司还没有注册设计师哦~</p>
+        </notempty>
+    </article>
+
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <div id="gotop"><i class="fa fa-angle-up fa-lg"></i><br>置顶</div>
+    <!--<include file="Common:float-sj" />-->
+    <include file="Common/footfadantc"/>
+</block>
+<block name="script">
+    <script>
+        $(document).ready(function(){
+            udpage(".page-change");
+        })
+    </script>
+    <script language="javascript">
+        $(function(){
+            var hongbao = localStorage.hongbao;
+            if(hongbao == 1){
+                $('.red_box').css('display','none');
+            }
+        });
+        // 置顶
+        $(window).on("scroll", function(){
+            if($(document).scrollTop()>="1000"){
+                $('#gotop').addClass('show');
+            }else{
+                $('#gotop').removeClass('show');
+            }
+        });
+
+        // 红包部分
+        /*(function(){
+            var timer = setTimeout(function(){
+                $('.red_box').addClass('animated wobble show');
+
+                var timer1 = setTimeout(function(){
+                    //$('.red_box').removeClass('animated wobble');
+                    clearTimeout(timer1);
+                },1000)
+                clearTimeout(timer);
+            },800);
+        })();
+        $('.red_box').on('touchend', function(){
+            $('.red_box_pop').addClass('show').find('.start_box').addClass('show')
+
+        });
+        $('.close_red_box').on('touchend', function(e){
+            $('.red_box').hide();
+            return false;
+        });
+        $('.start_box .close_start').on('touchend', function(){
+            $('.start_box').removeClass('show').parent().removeClass('show');
+            return false;
+        });
+
+        $('.end_box .close_start,.close_ok').on('touchend', function(){
+            $('.end_box').removeClass('show').parent().removeClass('show');
+            $('.red_box').css('display','none');
+            return false;
+        });*/
+        //发单
+        $(function() {
+            $(".home-zb .get_free").click(function(event) {
+                var container = $(this).parents(".home-zb");
+                var name = $(".m-bj-edit input[name=name]").val();
+                var tel = $(".m-bj-edit input[name=tel]").val();
+                var cs = $('input[name=city]').attr('data-id');
+                var qx = $('input[name=area]').attr('data-id');
+
+
+                if (!App.validate.run(name)) {
+                    $(".m-bj-edit input[name=name]").focus();
+                    alert("请输入您的称呼");
+                    return false;
+                } else {
+                    var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                    if (!reg.test(name)) {
+                        $(".m-bj-edit input[name=name]").focus();
+                        alert("请输入正确的名称，只支持中文和英文");
+                        return false;
+                    }
+                }
+                if (!App.validate.run(tel)) {
+                    $(".m-bj-edit input[name=tel]").focus();
+                    alert("请填写正确的手机号码 ^_^!");
+                    return false;
+                } else {
+                    var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                    if (!reg.test(tel)) {
+                        $(".m-bj-edit input[name=tel]").focus();
+                        $(".m-bj-edit input[name=tel]").val('');
+                        alert("请填写正确的手机号码 ^_^!");
+                        return false;
+                    }
+                }
+                if ('' == cs || '' == qx) {
+                    alert('请选择您所在的区域 ≧▽≦');
+                    return false;
+                }
+
+                window.order({
+                    extra:{
+                        cs: cs,
+                        qx: qx,
+                        name: $("input[name=name]", container).val(),
+                        tel: $("input[name=tel]", container).val(),
+                        fb_type: $("input[name=fb_type]", container).val(),
+                        source: '318'
+                    },
+                    submitBtn:{
+                        className:$(this),
+                        type:'btn'
+                    },
+                    error:function(){
+
+                    },
+                    success:function(data, status, xhr){
+
+                        if (data.status == 1) {
+                            localStorage.hongbao = 1;
+                            $('.start_box').removeClass('show');
+                            $('.end_box').addClass('show bounceIn animated')
+                            var timer2 = setTimeout(function(){
+                                $('.end_box').removeClass('bounceIn animated');
+                                clearTimeout(timer2)
+                            },800)
+                        } else {
+                            alert(data.info);
+                        }
+                    },
+                    validate:function(item, value, method, info){
+                        return true;
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script> -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+
+</block>

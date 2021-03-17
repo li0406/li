@@ -1,0 +1,140 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/CityOrders/css/cityxiangqing.css?v={:C('STATIC_VERSION')}">
+</block>
+
+
+<block name="content">
+    <section class="content-header">
+        <h4>城市渠道分单明细</h4>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2 inpuwk">
+                                <span class="inputtitle">订单状态：</span>
+                                <select class="form-control change_select" name="orders_type">
+                                    <option value="">全部</option>
+                                    <option value="1">分单</option>
+                                    <option value="2">赠单</option>
+                                    <option value="3">签单</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2 inpuwk">
+                                <span class="inputtitle">是否显号：</span>
+                                <select class="form-control change_select" name="openeye_st" id="">
+                                    <option value="">全部</option>
+                                    <option value="1">是</option>
+                                    <option value="2">否</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-header">
+                        <h5 class="chaxun_title">订单列表</h5>
+                    </div>
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>渠道标识</th>
+                            <th>订单号</th>
+                            <th>订单状态</th>
+                            <th>呼叫次数</th>
+                            <th>呼通次数</th>
+                            <th>是否显号</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.time_real}</td>
+                                <td>{$vo.src}</td>
+                                <td>{$vo.id}</td>
+                                <td>{$vo.orders_type}</td>
+                                <td>{$vo.boda_count|default=0}</td>
+                                <td>{$vo.botong_count|default=0}</td>
+                                <td>{$vo.openeye_st}</td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/select2/js/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+        $(".datepicker").datepicker({
+            startView: 3,
+            minView: 'decade',
+            format: "yyyy-mm",
+            autoclose: true,
+            pickerPosition: "bottom-left",
+            todayHighlight: 1,
+            todayBtn: true
+        });
+
+        $('.select2').select2({
+            language: "zh-CN"
+        })
+
+
+        $(function () {
+            $('.table .paixupic').click(function (event) {
+                if ($(this).hasClass('paixupic2')) {
+                    $(this).removeClass('paixupic2');
+                } else {
+                    $(this).addClass('paixupic2');
+                }
+            });
+            $(".change_select").on('change', function () {
+                //将页面原有参数作为默认参数
+                var data = {
+                    'src': '{$Think.get.src}',
+                    'start': '{$Think.get.start}',
+                    'end': '{$Think.get.end}',
+                    'city': '{$Think.get.city}'
+                };
+                var orders_type = $("select[name=orders_type]").val();
+                var openeye_st = $("select[name=openeye_st]").val();
+                data.orders_type = orders_type;
+                data.openeye_st = openeye_st;
+                $.ajax({
+                    url: '/CityOrders/ajaxDetail',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: data
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            var html = '';
+                            console.log($("tbody").html());
+                            $.each(data.info, function (k, v) {
+                                html += '<tr><td>' + v.time_real + '</td>' +
+                                    '<td>' + v.src + '</td>' +
+                                    '<td>' + v.id + '</td>' +
+                                    '<td>' + v.orders_type + '</td>' +
+                                    '<td>' + v.boda_count + '</td>' +
+                                    '<td>' + v.botong_count + '</td>' +
+                                    '<td>' + v.openeye_st + '</td></tr>';
+                            });
+                            $("tbody").html(html);
+                        }
+                    });
+            });
+        })
+    </script>
+</block>

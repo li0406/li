@@ -1,0 +1,330 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>推广转化统计-家具转化装修</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/ordersrcstats/jiaju-transfor.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-body no-border">
+                    <div class="row">
+                        <form action="/ordersrcstats/converttonormal/" id="search_form">
+                            <div class="col-xs-2">
+                                <div>开始时间</div>
+                                <input class="form-control datepicker fix-readonly" readonly type="text" name="begin" placeholder="开始时间"
+                                       autocomplete="off" value="{$Think.get.begin|getToday}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>结束时间</div>
+                                <input class="form-control datepicker fix-readonly" readonly type="text" name="end" placeholder="结束时间"
+                                       autocomplete="off" value="{$Think.get.end|getToday}">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>所属部门</div>
+                                <select id="department" class="form-control" name="department">
+                                    <option value="">所有部门</option>
+                                    <volist name="depts" id="vo">
+                                        <optgroup label="{$key}">
+                                            <volist name="vo.child" id="v">
+                                                <option value="{$v.id}">{$v.name}</option>
+                                            </volist>
+                                        </optgroup>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>所属渠道</div>
+                                <select id="charge" class="form-control" name="charge">
+                                    <option value="">全部渠道</option>
+                                    <option value="2">付费</option>
+                                    <option value="1">免费</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>&nbsp;</div>
+                                <div class="clearfix">
+                                    <button type="submit" class="btn  btn-primary normal">搜索</button>
+                                    <button type="reset" class="btn  btn-default normal">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                        <input type="hidden" name="dpt" value="{$Think.get.department}">
+                        <input type="hidden" name="channel" value="{$Think.get.charge}">
+                    </div>
+                </div>
+                <div class="box box-body no-border">
+                    <div class="tab-box">
+                        <a href="javascript:;" class="active">家具转化装修</a>
+                        <a href="/ordersrcstats/converttojiaju" >装修转化家具</a>
+                        <a href="/ordersrcstats/transfertonormal">家具渠道发单至装修</a>
+                    </div>
+                    <table class="table table-bordered overview">
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div>转化单量</div>
+                                <div>{$list.all.all_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>已拨打转化单量</div>
+                                <div>{$list.all.tel_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>未拨打转化单量</div>
+                                <div>{$list.all.un_tel_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>有效转化单量</div>
+                                <div>{$list.all.yx_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>实际有效转化单量</div>
+                                <div>{$list.all.real_yx_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>分单量</div>
+                                <div>{$list.all.fen_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>分单率</div>
+                                <div>{$list.all.fen_rate|default=0}%</div>
+                            </td>
+                            <td>
+                                <div>实际分单量</div>
+                                <div>{$list.all.real_fen_count|default=0}</div>
+                            </td>
+                            <td>
+                                <div>实际分单率</div>
+                                <div>{$list.all.real_fen_rate|default=0}%</div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%;">订单来源</th>
+                            <th style="width: 10%">转化单量</th>
+                            <th style="width: 10%">已拨打的转化单量</th>
+                            <th style="width: 10%">未拨打的转化单量</th>
+                            <th style="width: 10%">有效转化单量</th>
+                            <th style="width: 10%;">实际有效转化单量</th>
+                            <th style="width: 10%;">分单量</th>
+                            <th style="width: 10%;">分单率</th>
+                            <th style="width: 10%;">实际分单量</th>
+                            <th style="width: 10%;">实际分单率</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>总数</td>
+                            <td>{$list.all.all_count|default=0}</td>
+                            <td>{$list.all.tel_count|default=0}</td>
+                            <td>{$list.all.un_tel_count|default=0}</td>
+                            <td>{$list.all.yx_count|default=0}</td>
+                            <td>{$list.all.real_yx_count|default=0}</td>
+                            <td>{$list.all.fen_count|default=0}</td>
+                            <td>{$list.all.fen_rate|default=0}%</td>
+                            <td>{$list.all.real_fen_count|default=0}</td>
+                            <td>{$list.all.real_fen_rate|default=0}%</td>
+                        </tr>
+                        <volist name="list.list" id="vo">
+                        <tr class="one-leveltop" data-id="{$vo.id}">
+                            <td>
+                                <i class="fa fa-plus-square-o sub one-level" data-id="{$vo.id}"></i>
+                                {$vo.name}
+                            </td>
+                            <td>{$vo.all_count|default=0}</td>
+                            <td>{$vo.tel_count|default=0}</td>
+                            <td>{$vo.un_tel_count|default=0}</td>
+                            <td>{$vo.yx_count|default=0}</td>
+                            <td>{$vo.real_yx_count|default=0}</td>
+                            <td>{$vo.fen_count|default=0}</td>
+                            <td>{$vo.fen_rate|default=0}%</td>
+                            <td>{$vo.real_fen_count|default=0}</td>
+                            <td>{$vo.real_fen_rate|default=0}%</td>
+                        </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/orderstat/js/jiaju-transform.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            var Global_Level_one = '/ordersrcstats/getsourcedetailswithconvert/',
+                Global_level_two = '/ordersrcstats/getsourcedetailswithconvert/';
+            $("#department").val("{$Think.get.department}").trigger("change");
+            $("#charge").val("{$Think.get.charge}").trigger("change");
+            /*初始化插件*/
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd'
+            }).on("change", function () {
+                if (toTimeStamp($("input[name=begin]").val()) > toTimeStamp($("input[name=end]").val())) {
+                    msg("结束时间不得早于开始时间", function () {
+                        $("input[name=end]").val("");
+                    });
+                }
+            });
+
+            //点击一级
+            $(".one-level").click(function () {
+                var one_gid = $(this).attr('data-id');
+                var _this = $(this)
+                if ($(this).hasClass("fa-plus-square-o")) {
+                    $(".one-leveltop").each(function (index, item) {
+                        if($(item).find(".fa-minus-square-o").length <= 0) {
+                            $(item).removeClass("one-leveltop-active")
+                        }
+                    })
+                    $(this).closest('.one-leveltop').addClass('one-leveltop-active')
+                    //获取二级数据
+                    $.ajax({
+                        url: Global_Level_one,
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            level: 1,
+                            gid: one_gid,
+                            begin: "{$_GET['begin']|default=''}",
+                            end: "{$_GET['end']|default=''}",
+                            department: "{$_GET['department']|default=''}",
+                            charge: "{$_GET['charge']|default=''}",
+                            category:2,
+                            tab:1
+                        }
+                    }).done(function (data) {
+                        console.log(data);
+                        if (data.error_code == 0) {
+                            var html = '';
+                            $.each(data.data.list, function (k, v) {
+                                html += '<tr class="two-leveltop">' +
+                                    '<td><i class="fa fa-plus-square-o sub two-level" data-id=' + v.id + '></i>' + v.name + '</td>' +
+                                    '<td>' +  (typeof v.all_count == "undefined"?0:v.all_count) + '</td>' +
+                                    '<td>' + (typeof v.tel_count == "undefined"?0:v.tel_count) + '</td>' +
+                                    '<td>' + (typeof v.un_tel_count == "undefined"?0:v.un_tel_count) + '</td>' +
+                                    '<td>' + (typeof v.yx_count == "undefined"?0:v.yx_count) + '</td>' +
+                                    '<td>' + (typeof v.real_yx_count == "undefined"?0:v.real_yx_count) + '</td>' +
+                                    '<td>' + (typeof v.fen_count == "undefined"?0:v.fen_count) + '</td>' +
+                                    '<td>' + (typeof v.fen_rate == "undefined"?0:v.fen_rate) + '%</td>' +
+                                    '<td>' + (typeof v.real_fen_count == "undefined"?0:v.real_fen_count) + '</td>' +
+                                    '<td>' + (typeof v.real_fen_rate == "undefined"?0:v.real_fen_rate) + '%</td>' +
+                                    '</tr>';
+                            });
+                            $(html).insertAfter(_this.parents(".one-leveltop"));
+                            _this.removeClass('fa-plus-square-o');
+                            _this.addClass('fa-minus-square-o');
+                            _this.parents(".one-leveltop").next().show();
+                        } else {
+                            layer.msg(data.error_msg);
+                            return
+                        }
+                    })
+                } else {
+                    _this.removeClass('fa-minus-square-o');
+                    $(this).parents('.one-leveltop').nextUntil ('.one-leveltop').remove();
+                    $(this).parents('.two-leveltop').nextUntil ('.two-leveltop').remove();
+                    _this.addClass('fa-plus-square-o');
+                    _this.parents(".one-leveltop").next().find(".two-level").addClass('fa-plus-square-o');
+                    _this.parents(".one-leveltop").next().find(".two-level").removeClass('fa-minus-square-o');
+                }
+            })
+
+            //点击二级
+            $('body').on('click', '.two-level', function () {
+                if ($(this).hasClass("fa-plus-square-o")) {
+                    var _this = $(this);
+                    var two_gid = $(this).attr('data-id')
+                    //获取二级数据
+                    $.ajax({
+                        url: Global_level_two,
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            level: 2,
+                            gid: two_gid,
+                            begin: "{$_GET['begin']|default=''}",
+                            end: "{$_GET['end']|default=''}",
+                            department: "{$_GET['department']|default=''}",
+                            charge: "{$_GET['charge']|default=''}",
+                            category:2,
+                            tab:1
+                        }
+                    }).done(function (data) {
+                        if (data.error_code == 0) {
+                            var html = '';
+                            $.each(data.data.src, function (k, v) {
+                                html += '<tr class="three-leveltop">' +
+                                    '<td>' + v.name + '</td>' +
+                                    '<td><a href="/ordersrcstats/convertorderdetails?src='+k+'&begin={$Think.get.begin}&end={$Think.get.end}&tab=1" target="_blank">' + (typeof v.all_count == "undefined"?0:v.all_count) + '</a></td>' +
+                                    '<td>' + (typeof v.tel_count == "undefined"?0:v.tel_count) + '</td>' +
+                                    '<td>' + (typeof v.un_tel_count == "undefined"?0:v.un_tel_count) + '</td>' +
+                                    '<td>' + (typeof v.yx_count == "undefined"?0:v.yx_count) + '</td>' +
+                                    '<td>' + (typeof v.real_yx_count == "undefined"?0:v.real_yx_count) + '</td>' +
+                                    '<td>' + (typeof v.fen_count == "undefined"?0:v.fen_count) + '</td>' +
+                                    '<td>' + (typeof v.fen_rate == "undefined"?0:v.fen_rate) + '%</td>' +
+                                    '<td>' + (typeof v.real_fen_count == "undefined"?0:v.real_fen_count) + '</td>' +
+                                    '<td>' + (typeof v.real_fen_rate == "undefined"?0:v.real_fen_rate) + '%</td>' +
+                                    '</tr>';
+                            });
+                            $(html).insertAfter(_this.parents(".two-leveltop"));
+                            _this.parents(".two-leveltop").nextUntil('.one-leveltop').css("background", "#fcf8e3");
+                            _this.removeClass('fa-plus-square-o');
+                            _this.addClass('fa-minus-square-o');
+                        } else {
+                            layer.msg(data.error_msg);
+                            return
+                        }
+                    })
+                } else {
+                    $(this).removeClass('fa-minus-square-o');
+                    $(this).addClass('fa-plus-square-o');
+                    $(this).parents('.two-leveltop').nextAll('.three-leveltop').remove();
+                    $(this).addClass('fa-plus-square-o');
+                }
+            })
+
+            function delnext(dom){
+                var classname=dom.attr("class")
+                if(classname=="two-leveltop"){
+                    if(dom.next().attr("class")=="three-leveltop"){
+                        dom.next().remove();
+                        delnext(dom)
+                    }
+                }
+            }
+
+        });
+        /**
+         * 手动重置表单内所有数据
+         */
+        $(function () {
+            var $resetBtn = $("button[type='reset']");
+            $resetBtn.on("click", function () {
+                $('input[name="begin"]').attr('value', '')
+                $('input[name="end"]').attr('value', '')
+                $('select[name="department"]').find("option").attr("selected",false);
+                $('select[name="channel"]').find("option").attr("selected",false);
+            })
+        })
+    </script>
+</block>

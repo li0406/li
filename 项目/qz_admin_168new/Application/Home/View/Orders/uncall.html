@@ -1,0 +1,162 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+  <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+  <link rel="stylesheet" href="/assets/home/orders/css/uncall.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+  <section class="content-header">
+    <h1>未接通订单导出</h1>
+  </section>
+  <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+          <div class="box box-default">
+                <div class="box-body">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="col-xs-12">
+                                <div class="col-xs-2">
+                                    <div>开始时间</div>
+                                    <input type="text" name="start" class="form-control datepicker clear-target start" placeholder="请输入开始时间" value="{$Think.get.start|default=date('Y-m-d',strtotime('-90 day'))}" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>结束时间</div>
+                                    <input type="text" name="end" class="form-control datepicker clear-target end" placeholder="请输入结束时间" value="{$Think.get.end|default=date('Y-m-d')}" autocomplete="off">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>城市：</div>
+                                    <select id="city" name="cs" type="text" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}" {$_GET['cs'] == $vo['cid']?'selected':''}>{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>归属人：</div>
+                                    <select id="belonger" name="user" type="text" placeholder="" class="form-control">
+                                        <option value="">请选择</option>
+                                        <volist name="kflist" id="vo">
+                                        <option value="{$vo.id}" {$_GET['user']==$vo['id']?'selected':''}>{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <br>
+                                    <button type="submit" id="search" class="btn btn-primary col-xs-4">搜索</button>
+                                    <button type="reset" id="reset" class="btn btn-default col-xs-4">重置</button>
+                                </div>
+                                <div class="col-xs-2">
+                                    <br>
+                                    <button type="button" id="export" class="btn btn-success col-xs-4" onclick="location.href='/orders/exportOrderUncall?{$query}'">导出数据</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body b-mt10">
+                    <table class="table table-hover table-bordered" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th>发布日期</th>
+                                <th>订单号</th>
+                                <th>最后修改时间</th>
+                                <th>城市区县</th>
+                                <th>手机号</th>
+                                <th>订单状态</th>
+                                <th>订单归属人</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list.list" id="v2">
+                            <tr>
+                                <td>{$v2.time|date='Y-m-d H:i:s',###}</td>
+                                <td>{$v2.id}</td>
+                                <td>{$v2.lasttime|date='Y-m-d H:i:s',###}</td>
+                                <td>{$v2.cname}{$v2.area}</td>
+                                <td>{$v2.tel}</td>
+
+                                <!-- 新单、次新单、扫单、暂时无效、撤回单为绿色 类名green -->
+                                <!-- 待定单为红色 类名red -->
+                                <!-- 有效单为粉色 类名pink -->
+                                <!-- 无效单为浅蓝色 类名blue -->
+                                <td  class="<switch name='v2.on'><case value='0'>green</case><case value='2'>red</case><case value='3'>black-blue</case><case value='4'>pink</case><case value='5'>blue</case><case value='8'>blue</case><case value='9'>blue</case><default />green</switch> ">
+                                    {:getOrderStatus($v2['on'], $v2['on_sub'], $v2['type_fw'])}</td>
+                                <td>{$v2.op_name}</td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    {$list.page}
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(".datepicker").datetimepicker({
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            pickerPosition: "bottom-left",
+            startView: 2,//月视图
+            endDate : new Date(),
+            format: "yyyy-mm-dd",
+            minView: 2
+        }).on("change", function () {
+            if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+                msg("结束时间不能小于开始时间", function () {
+                    $("input[name=end]").val("");
+                });
+            }
+            if(toTimeStamp($("input[name=end]").val()) - toTimeStamp($("input[name=start]").val()) > 7776000000){
+                msg("开始时间至结束时间不能大于90天", function () {
+                    $("input[name=end]").val("");
+                });
+            }
+        });
+        $('#city').select2();
+        $('#belonger').select2();
+
+        /**
+         * 手动重置表单内所有数据
+         */
+         $(function () {
+            var $resetBtn = $("button[type='reset']");
+            $resetBtn.on("click", function () {
+                $(".datepicker").attr('value', '')
+                $('#city').find("option").attr("selected",false);
+                $('#city').select2("val", "");
+                $('#belonger').find("option").attr("selected",false);
+                $('#belonger').select2("val", "");
+            })
+        })
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

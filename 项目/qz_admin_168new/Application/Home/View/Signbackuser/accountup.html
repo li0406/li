@@ -1,0 +1,466 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>会员操作管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">签返会员管理/添加会员</h3>
+                </div>
+                <div class="box-body">
+                    <div class="col-sm-12">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <form id="myForm" class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">会员ID:</label>
+                                        <div class="col-sm-3">
+                                            <select id="search_company" class="form-control"></select>
+                                        </div>
+                                        <label class="col-sm-2 control-label">公司名称:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="name" disabled="disabled" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">所在城市:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="city" class="form-control" disabled="disabled" />
+                                        </div>
+                                        <label class="col-sm-2 control-label">所属销售:</label>
+                                        <div class="col-sm-3">
+                                            <select id="search_seller" class="form-control" disabled="disabled">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">接单人:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="jd_name1" class="form-control" />
+                                        </div>
+                                        <label class="col-sm-2 control-label">手机:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="jd_tel1" class="form-control" maxlength="11"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">接单人:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="jd_name2" class="form-control" />
+                                        </div>
+                                        <label class="col-sm-2 control-label">手机:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="jd_tel2" class="form-control" maxlength="11"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">会员上传执照:</label>
+                                        <div class="col-sm-3" style="position: relative;">
+                                            <input type="text" name="yyzz"  class="form-control" disabled value="未上传" />
+                                            <button id="btnYYzz" type="button" class="btn btn-primary btn-xs show" disabled
+                                                    style="position: absolute; right: -30px; top: 6px;z-index: 99;">查看</button>
+                                        </div>
+                                        <label class="col-sm-2 control-label">工商总局查询:</label>
+                                        <div class="col-sm-3" style="position: relative;">
+                                            <input type="text" name="gszj" class="form-control" disabled value="未查询"/>
+                                            <button id="btnGszj" type="button" class="btn btn-primary btn-xs show" disabled
+                                                    style="position: absolute; right: -30px; top:6px; z-index: 99;">查看</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-2 col-sm-offset-2">
+                                            <button id="btnSave" type="button" class="btn btn-success">
+                                                <i class="fa fa-floppy-o"></i> 保存
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-6 err-msg"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box contract_box" style="display: none;">
+                <!-- 合同 -->
+            </div>
+
+            <div class="box package_box" style="display: none;">
+                <!-- 订单包 -->
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="preview-businesslicence" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header no-border text-center">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="businessCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
+                        <!-- 轮播（Carousel）项目 -->
+                        <div class="carousel-inner text-center">
+                        </div>
+                        <!-- 轮播（Carousel）导航 -->
+                        <a class="carousel-control left" href="#businessCarousel"
+                           data-slide="prev" style="font-size: 60px; color: #333;">&lsaquo;
+                        </a>
+                        <a class="carousel-control right" href="#businessCarousel"
+                           data-slide="next" style="font-size: 60px; color: #333;">&rsaquo;
+                        </a>
+                        <div class="all-index text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout_contract" style="display: none;">
+        <div class="layout_bg" style="position: fixed; top:0;right:0;bottom:0;left:0;background:#000;z-index: 1100;opacity: 0.6;"></div>
+        <div class="layout_content" style="position: fixed;top: 120px; width: 1200px; left: calc(50% - 600px); z-index: 1200;"></div>
+    </div>
+</block>
+
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+            var img = [];
+
+            // 会员公司选择
+            $("#search_company").select2({
+                ajax: {
+                    url: "/signbackuser/findcomnapnyinfo/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.items
+                        };
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                minimumInputLength: 3,
+                templateResult: function(repo) {
+                    if (repo.loading) return repo.text;
+                    var markup = "<div class='select2-result-repository clearfix'>" +
+                        "<div class='select2-result-repository__meta'>" +
+                        "<div class='select2-result-repository__title'>" + repo.id + " " + repo.jc + " (" + repo.cname + ")</div>";
+
+                    return markup;
+                },
+                templateSelection: function(repo) {
+                    $("input[name=name]").val(repo.jc);
+                    $("input[name=city]").val(repo.cname);
+                    $("input[name=jd_tel1]").val(repo.jd_tel_1);
+                    $("input[name=jd_name1]").val(repo.jd_tel_name_1);
+                    $("input[name=jd_tel2]").val(repo.jd_tel_2);
+                    $("input[name=jd_name2]").val(repo.jd_tel_name_2);
+                    $("input[name=fake]").attr("checked",false);
+
+                    $txt = "未上传";
+                    switch(repo.state) {
+                        case "1":
+                        case "2":
+                        case "3":
+                            $txt = "审核中";
+                            $disabled = false;
+                            break;
+                        case "4":
+                            $txt = "审核通过";
+                            $disabled = false;
+                            break;
+                        case "5":
+                            $txt = "审核未通过";
+                            $disabled = false;
+                            break;
+                        default:
+                            $disabled = "disabled";
+                            break;
+                    }
+                    $("#btnYYzz").attr("data-type",1);
+                    $("#btnYYzz").attr("data-id",repo.id);
+                    $("#btnYYzz").attr("disabled",$disabled);
+                    $("input[name=yyzz]").val($txt);
+
+                    $("#btnGszj").attr("data-type",2);
+                    $("#btnGszj").attr("data-id",repo.id);
+                    $("#btnGszj").attr("disabled","disabled");
+                    $txt = "未上传";
+                    if (repo.img1 != "") {
+                        switch(repo.state) {
+                            case "1":
+                            case "2":
+                            case "3":
+                                $txt = "审核中";
+                                $disabled = false;
+                                break;
+                            case "4":
+                                $txt = "审核通过";
+                                $disabled = false;
+                                break;
+                            case "5":
+                                $txt = "审核未通过";
+                                $disabled = false;
+                                break;
+                        }
+                        $("#btnGszj").attr("disabled",false);
+                    }
+
+                    if (repo.gx_img == null) {
+                        $txt = "未查询";
+                        $("#btnGszj").attr("disabled","disabled");
+                    }
+
+                    $("input[name=gszj]").val($txt);
+
+                    img[1] = new Array();
+                    if (repo.img1 != "") {
+                        img[1].push(repo.img1);
+                    }
+
+                    if (repo.img2 != "") {
+                        img[1].push(repo.img2);
+                    }
+                    if (repo.img3 != "") {
+                        img[1].push(repo.img3);
+                    }
+                    if (repo.img4 != "") {
+                        img[1].push(repo.img4);
+                    }
+
+                    img[2] = new Array();
+                    if (repo.gx_img != "") {
+                        img[2].push(repo.gx_img);
+                    }
+
+                    $("#search_seller").removeAttr('disabled');
+                    if (repo.mark == 1) {
+                        $("#search_seller").attr("disabled","disabled").select2({
+                            data: [
+                                {
+                                    id: repo.saler_id,
+                                    text: repo.saler,
+                                    name: repo.saler
+                                }
+                            ]
+                        });
+                    }
+                    return repo.id;
+                }
+            });
+
+            // 销售选择
+            $("#search_seller").select2({
+                ajax: {
+                    url: "/vip/findsellerinfo/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.items
+                        };
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                minimumInputLength: 1,
+                templateResult: function(repo) {
+                    if (repo.loading) return repo.text;
+                    var markup = "<div class='select2-result-repository clearfix'>" +
+                        "<div class='select2-result-repository__meta'>" +
+                        "<div class='select2-result-repository__title'>" + repo.name + "(" + repo.department + ")</div>";
+                    return markup;
+                },
+                templateSelection: function(repo) {
+                    return repo.text || repo.name;
+                }
+            });
+
+            // 会员公司基础信息提交
+            $("#btnSave").click(function(event) {
+                var _this = $(this);
+                var data = $("#myForm").serializeArray();
+                var json = $("#search_company").select2("data");
+                $("#myForm .err-msg").html("");
+
+                if(json.length > 0){
+                    if(typeof $("#search_company").select2("data") == "string"){
+                        json = JSON.parse($("#search_company").select2("data"));
+                    }
+
+                    var company_id = json[0].id;
+                    signBackActive.param["company_id"] = company_id
+                    signBackActive.param["company_name"] = json[0].jc
+                    data.push({name:"company_id",value:company_id});
+                    data.push({name:"company_name",value:json[0].jc});
+                };
+
+                json = $("#search_seller").select2("data");
+                if(json.length > 0){
+                    if(typeof $("#search_seller").select2("data") == "string"){
+                        json = JSON.parse($("#search_seller").select2("data"));
+                    }
+
+                    signBackActive.param["saler_id"] = json[0].id
+                    signBackActive.param["saler_name"] = json[0].text || json[0].name
+                    data.push({name:"saler_id",value:json[0].id});
+                    data.push({name:"saler_name",value:json[0].text || json[0].name});
+                }
+
+                $.ajax({
+                    url: '/signbackuser/extendinfo',
+                    type: 'post',
+                    dataType: 'json',
+                    data: data
+                })
+                .done(function(response) {
+                    if (response.code == 200) {
+                        _this.attr("disabled","disabled");
+                        $("#myForm *").attr("disabled","disabled");
+
+                        signBackActive.get_contact_temp();
+                        signBackActive.get_package_temp();
+                    } else {
+                        $("#myForm .err-msg").html(response.errmsg);
+                    }
+                })
+                .fail(function() {
+                    $("#myForm .err-msg").html("发生异常,请稍后再试！");
+                });
+            });
+
+            // 营业执照查看
+            $(".show").click(function(event) {
+                var type = $(this).attr("data-type");
+                var data = img[type];
+                var tmp = '<div class="item"><img src="%s" style="margin:auto;" alt="First slide"></div>';
+                $("#preview-businesslicence .carousel-inner").html('');
+                for(var i in data) {
+                    var t = tmp.replace("%s","//{:C('QINIU_DOMAIN')}/" + data[i]);
+                    if (i == 0) {
+                        t = t.replace("item","item active");
+                    }
+                    $("#preview-businesslicence .carousel-inner").append(t);
+                }
+                $("#preview-businesslicence").modal();
+            });
+        });
+
+        window.signBackActive = {
+            // 参数
+            param: {
+                company_id: 0,
+                company_name: "",
+                saler_id: 0,
+                saler_name: ""
+            },
+
+            // 获取装修公司合同
+            get_contact_temp: function(){
+                this.post_contact_temp(0, function(response){
+                    $(".contract_box").html(response.temp);
+                    $(".contract_box").show();
+                });
+            },
+
+            // 新增本次合同
+            get_contact_new_temp: function(){
+                $("body").css("overflow","hidden")
+                this.post_contact_temp(2, function(response){
+                    $(".layout_contract").find(".layout_content").html(response.temp);
+                    $(".layout_contract").fadeIn(200);
+                });
+            },
+
+            // 新增总合同
+            get_contact_newall_temp: function(){
+                $("body").css("overflow","hidden")
+                this.post_contact_temp(1, function(response){
+                    $(".layout_contract").find(".layout_content").html(response.temp);
+                    $(".layout_contract").fadeIn(200);
+                });
+            },
+
+            // 合同弹窗关闭
+            close_contact_layout: function(){
+                $("body").css("overflow","auto")
+                $(".layout_contract").find(".layout_content").html("");
+                $(".layout_contract").fadeOut(0);
+            },
+
+            // 合同模板请求
+            post_contact_temp: function(action, callback){
+                var that = this;
+
+                $.ajax({
+                    url: '/signbackuser/findcontract/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        action: action,
+                        company_id: that["param"]["company_id"]
+                    }
+                })
+                .done(function(response) {
+                    callback(response);
+                });
+            },
+
+            // 请求订单包模板
+            get_package_temp: function(action, callback){
+                this.post_package_temp(0, function(response){
+                    $(".package_box").html(response.temp);
+                    $(".package_box").show();
+                });
+            },
+
+            // 新增新订单包
+            get_package_new_temp: function(){
+                this.post_package_temp(1, function(response){
+                    $(".layout_contract").find(".layout_content").html(response.temp);
+                    $(".layout_contract").fadeIn(200);
+                });
+            },
+
+            // 请求订单包模板
+            post_package_temp: function(action, callback){
+                var that = this;
+
+                $.ajax({
+                    url: '/signbackuser/findpackage/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        action: action,
+                        company_id: that["param"]["company_id"]
+                    }
+                })
+                .done(function(response) {
+                    callback(response);
+                });
+            },
+        };
+    </script>
+</block>

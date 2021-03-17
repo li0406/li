@@ -1,0 +1,75 @@
+<form id="myFormDate" class="form-horizontal">
+    <div class="panel-body">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group now">
+                    <label class="col-sm-2 control-label">本次合同时间:</label>
+                    <div class="col-sm-2">
+                        <input id="begin" type="text" class="form-control datepicker" placeholder="本次合同开始时间" autocomplete="off" name="begin" value="{$info.start}"  />
+                    </div>
+                    <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                    <div class="col-sm-2">
+                        <input id="end" type="text" class="form-control datepicker" placeholder="本次合同结束时间" autocomplete="off" name="end" value="{$info.end}"   />
+                    </div>
+                    <label class="col-sm-1 control-label" style="text-align: left;" id="day">0天</label>
+                    <div class="col-sm-2">
+                        <button id="btnAdd" title="保存本次合同" type="button" class="btn  btn-success btn-sm"><i class="fa fa-floppy-o"></i> 保存</button>
+                    </div>
+                </div>
+                <br style="clear: both; display: none;" />
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $("#begin").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $("#end").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var start = $("#begin").datepicker("getDate");
+        if (start == null) {
+            alert("请输入本次合同开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("本次合同结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days=Math.floor(offset/(24*3600*1000))+1;
+        $("#day").html(days+"天");
+    });
+
+    $("#btnAdd").click(function(event) {
+        var data = $("#myFormDate").serializeArray();
+        data.push({name:"id",value:{$info.id}});
+        $.ajax({
+            url: '/vip/vipfake/',
+            type: 'post',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                alert("操作成功！");
+                window.location.href = "/vip/vipaccount/";
+            } else {
+                alert(data.errmsg);
+            }
+        })
+        .fail(function() {
+            alert("发生异常,请稍后再试！");
+        });
+    });
+</script>

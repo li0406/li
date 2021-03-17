@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="用户中心">
+  <meta name="description" content="用户中心">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <title>用户中心-齐装网</title>
+  <include file="Index:resource" />
+  <include file="Designer:resource" />
+  <link href="{$static_host}/assets/user/designer/css/de-info.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+  <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+  <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/ueditor/lang/zh-cn/zh-cn.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+  <include file="Designer:header" />
+  <div class="ht-wrap oflow">
+    <include file="Designer:desnavleft" />
+    <div class="yh-main">
+      <h1 class="yh-tit">发布文章</h1>
+      <ul class="ht-aticle-change">
+        <li>
+          <span>文章分类：</span>
+          <select name="type" class="chouse">
+            <option value="家居风水" <if condition="$blog['type'] eq '家居风水'">selectd="selected"</if>>家居风水</option>
+            <option value="设计创意" <if condition="$blog['type'] eq '设计创意'">selectd="selected"</if>>设计创意</option>
+            <option value="经验技巧" <if condition="$blog['type'] eq '经验技巧'">selectd="selected"</if>>经验技巧</option>
+            <option value="色彩搭配" <if condition="$blog['type'] eq '色彩搭配'">selectd="selected"</if>>色彩搭配</option>
+            <option value="设计创意" <if condition="$blog['type'] eq '设计创意'">selectd="selected"</if>>设计创意</option>
+         </select>
+        </li>
+        <li>
+          <span>文章标题：</span>
+          <input name="title" type="text" value="{$blog.title}" placeholder="文章标题">
+          <em class="red err-tips"></em>
+        </li>
+        <li>
+          <span>关键字：</span>
+          <input name="keys" type="text" value="{$blog.keys}"  placeholder="关键字">
+          <em class="red ml20">
+          <i class="mr10 icon-exclamation-sign"></i>多个关键字请用空格隔开
+          <em class="red err-tips"></em>
+          </em>
+        </li>
+        <li>
+          <textarea name="text" id="editor" cols="30" rows="10"></textarea>
+          <!--富文本编辑器-->
+        </li>
+      </ul>
+      <div class="ht-yes">
+        <a href="javascript:void(0)" style="display: inline-block;"><i class="icon-ok mr10"></i>确认发布</a>
+        <em class="red err-tips"></em>
+        <input name="id" type="hidden" value="{$blog.id}" />
+      </div>
+    </div>
+  </div>
+<include file="Index:footer" />
+<script type="text/javascript">
+  var ue = UE.getEditor('editor');
+      ue.addListener("ready", function () {
+          // editor准备好之后才可以使用
+          ue.setContent('{$blog.text}');
+      });
+      //点击确认后触发的事件
+      $(".ht-yes a").click(function(event) {
+          $(".err-tips").html("");
+          $(".focus").removeClass('focus');
+          var _this = $(this);
+          var type_val=$("select[name=type]").val();
+          var title_val=$("input[name=title]").val();
+          var keys_val=$("input[name=keys]").val();
+          //验证分类
+          if(!App.validate.run(type_val)){
+              $("select[name=type]").focus();
+              $("select[name=type]").addClass('focus');
+              $("select[name=type]").parent().find(".err-tips").html("请选择分类");
+              return false;
+          }
+          //验证标题
+          if(!App.validate.run(title_val)){
+              $("input[name=title]").focus();
+              $("input[name=title]").addClass('focus');
+              $("input[name=title]").parent().find(".err-tips").html("请填写标题");
+              return false;
+          }
+          //验证关键字
+          if(!App.validate.run(keys_val)){
+              $("input[name=keys]").focus();
+              $("input[name=keys]").addClass('focus');
+              $("input[name=keys]").parent().find(".err-tips").html("请填写关键字");
+              return false;
+          }
+          //验证文章内容
+          var content = ue.getContent();
+          if(!App.validate.run(content)){
+              _this.parent().find(".err-tips").html("亲,您的博客内容总得写点什么吧！");
+              return false;
+          }
+          //验证通过发送请求
+          $.ajax({
+                url: '/save_blog',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    type:type_val,
+                    title:title_val,
+                    keys:keys_val,
+                    text:content,
+                    id:$("input[name=id]").val()
+                }
+            })
+            .done(function(res) {
+                if(res.status == 1){
+                    window.location.href="/success/des_article/"+res.data;
+                }else{
+                    _this.parent().find(".err-tips").html(res.data);
+                }
+            })
+            .fail(function() {
+                 _this.parent().find(".err-tips").html("发生了未知的错误,请刷新重试！");
+            });
+      });
+</script>
+</body>
+</html>

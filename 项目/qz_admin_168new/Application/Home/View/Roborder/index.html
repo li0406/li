@@ -1,0 +1,336 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/roborder.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="cover"></div>
+    <section class="content-header">
+        <h1>抢单池</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-10">
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>订单查询：</div>
+                                        <input type="text" name="condition" class="form-control condition"
+                                               placeholder="订单号、小区名称" value="{$_GET['condition']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>所属区域：</div>
+                                        <select id="order-area" name="cs" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="city" id="vo">
+                                                <option value="{$vo.cid}"
+                                                <if condition="$_GET['cs'] eq $vo.cid">selected</if>
+                                                >{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单状态：</div>
+                                        <select name="status" class="form-control" type="text">
+                                            <option value="">请选择</option>
+                                            <volist name="status" id="vo">
+                                                <option value="{$key}"
+                                                <if condition="$_GET['status'] eq $key">selected</if>
+                                                >{$vo}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>推送时间开始-结束：</div>
+                                        <input type="text" name="start" class="form-control datepicker"
+                                               placeholder="开始时间" autocomplete="off" value="{$_GET['start']}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <input type="text" name="end" class="form-control datepicker" placeholder="结束时间"
+                                               autocomplete="off" style="margin-top: 18px;" value="{$_GET['end']}">
+                                    </div>
+                                </div>
+                                <div class="col-xs-2" style="margin-left: -200px;margin-top: 18px;">
+                                    <div id="btnSearch" class="btn btn-primary btn-sm btn-flat"
+                                         style="margin-right:15px;"><i class="fa fa-search"></i>&nbsp;搜索
+                                    </div>
+                                    <div id="btnreact" class="btn btn-primary btn-sm btn-flat"><i
+                                            class="fa fa-wrench"></i>&nbsp;重置
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist" style="margin:10px 0;">
+                            <thead>
+                            <tr>
+                                <th>发布日期</th>
+                                <th>小区名称</th>
+                                <th>城市区县</th>
+                                <th>业主姓名</th>
+                                <th>预算</th>
+                                <th>面积㎡</th>
+                                <th>量房时间</th>
+                                <th>订单状态</th>
+                                <th>订单推送时间</th>
+                                <th>剩余名额</th>
+                                <th>已抢会员数</th>
+                                <th>剩余时间</th>
+                                <th>抢单类型</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="info.list" id="vo">
+                                <tr>
+                                    <td>{$vo.time_real|date="Y-m-d H:i:s",###}</td>
+                                    <td>{$vo.xiaoqu|default=''}</td>
+                                    <td>{$vo.cname|default=''}</td>
+                                    <td>{$vo.name|default=''}</td>
+                                    <td>{$vo.yusuan|default=''}</td>
+                                    <td>{$vo.mianji|default=''}</td>
+                                    <td>{$vo.lftime}</td>
+                                    <td>
+                                        <switch name="vo.type_fw">
+                                            <case value="1">分单</case>
+                                            <case value="2">赠单</case>
+                                            <default/>
+                                            -
+                                        </switch>
+                                    </td>
+                                    <td>{$vo.rob_time|date="Y-m-d H:i:s",###}</td>
+                                    <td><?php echo ($vo['allot_num']-$vo['rob_num']) ?></td>
+                                    <td>{$vo.already_allot_num}</td>
+                                    <td>
+                                        <if condition="$vo['order_status'] eq 1">
+                                            {:secToTime(($vo['rob_time'] + 60*60*2) - time())}
+                                            <else/>
+                                            {:secToTime(($vo['rob_time'] + 60*60*1) - time())}
+                                        </if>
+                                    </td>
+                                    <td><if condition="$vo['order_status'] eq 1">抢分<else/>抢赠</if></td>
+                                    <td><span class="order-view" data-id="{$vo.id|default=''}">查看订单</span></td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$info.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--查看订单模态框-->
+    <div class="order-model">
+
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(document).ready(function () {
+            //初始化插件
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+            $("#order-area").select2();
+            //点击搜索
+            $("#btnSearch").click(function () {
+                var begin = $("input[name=start]").val();
+                var end = $("input[name=end]").val();
+                if ((end == "" && begin != "") || toTimeStamp(begin) > toTimeStamp(end)) {
+                    alert("结束时间不能小于开始时间");
+                    return false;
+                }
+                $(".form-horizontal").submit();
+            });
+            //点击重置
+            $("#btnreact").click(function () {
+                $("input").val("");
+                $("select").val("");
+                $("#order-area").val("").trigger("change");
+            });
+            //点击查看订单
+            $(".order-view").click(function () {
+                //查看详情
+                $.ajax({
+                    url: '/roborder/detail/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id: $(this).attr('data-id')
+                    }
+                })
+                    .done(function (data) {
+                        if (data.code == 200) {
+                            var html = getDetailHtml(data);
+                            $(".order-model").html(html);
+                            $(".cover").show();
+                            $(".order-model").show();
+                            $("body").css({"overflow": "hidden", "height": "100%"})
+                        } else {
+                            alert(data.errmsg)
+                        }
+                    })
+                    .fail(function (xhr) {
+                        alert("请稍后操作!")
+                    })
+            });
+        });
+        //关闭弹框
+        $(document).on("click", ".order-close", function () {
+            $(".cover").hide();
+            $(".order-model").hide();
+            $("body").css({"overflow": "inherit", "height": "100%"});
+        })
+
+        function toTimeStamp(time) {
+            if (time != undefined) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        }
+
+        function getDetailHtml(info) {
+            var data = info.info
+            var lx = data.lx;
+            if (lx == 1) {
+                lx = '家装';
+            } else if (lx == 2) {
+                lx = '公装';
+            }
+            var fen_company = '';//分配公司
+            var rob_company = '';//抢单公司
+            var op_name = '';//分单人
+            var allot_num = '';//分配上限
+            var com = info.fen_company;
+            var index = Object.values(com);
+            if (index.length > 0) {
+                for (var i in com) {
+                    for (var k in com[i]) {
+                        if (i == 3) {
+                            allot_num = com[i][k]['allot_num'];
+                            rob_company += com[i][k]['jc'] + ',';
+                        }
+                        if (i == 1) {
+                            allot_num = com[i][k]['allot_num'];
+                            op_name = com[i][k]['opname'];
+                            fen_company += com[i][k]['jc'] + ',';
+                        }
+                    }
+                }
+            }
+            var yt = data.yt;
+            if (yt == null) {
+                yt = ''
+            }
+            return '<div class="order-model-top">' +
+                '<span>订单编号：</span>' +
+                '<span>' + data.id + '</span>' +
+                '<span class="order-close">×</span>' +
+                '</div>' +
+                '<div class="order-model-center">' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>发布时间：</span>' +
+                '<span>' + data.time + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>面积：</span>' +
+                '<span>' + data.mianji + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>业主：</span>' +
+                '<span>' + data.name + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>房屋用途：</span>' +
+                '<span>' + yt + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>电话：</span>' +
+                '<span>' + data.tel + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>方式：</span>' +
+                '<span>' + data.fangshi + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>所属区域：</span>' +
+                '<span>' + data.cname + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>风格：</span>' +
+                '<span>' + data.fengge + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>装修类型：</span>' +
+                '<span>' + lx + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>预算：</span>' +
+                '<span>' + data.yusuan + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>小区名称：</span>' +
+                '<span>' + data.xiaoqu + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>房屋户型：</span>' +
+                '<span>' + data.hxname + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>已分配公司：</span>' +
+                '<span>' + fen_company + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>已抢公司：</span>' +
+                '<span>' + rob_company + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 no-padding">' +
+                '<div class="col-xs-6">' +
+                '<span>分配上限：</span>' +
+                '<span>' + allot_num + '</span>' +
+                '</div>' +
+                '<div class="col-xs-6">' +
+                '<span>分单人：</span>' +
+                '<span>' + op_name + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="order-model-bottom">' +
+                '<span style="float:left;">装修要求：</span>' +
+                '<span><textarea style="width:90%;border:none;min-height:170px;outline:none;" readonly="false;">' + data.text + ' </textarea></span>' +
+                '</div>';
+        }
+    </script>
+</block>

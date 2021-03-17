@@ -1,0 +1,221 @@
+<div class="account_template">
+    <p class="deduction-top">
+        <span>充值会员：{$userinfo.jc}</span>
+        <span class="amount_item amount_1">轮单余额：<label>{$userinfo.account_amount}</label></span>
+        <span class="amount_item amount_2" style="display: none;">保证金：<label>{$userinfo.deposit_money}</label></span>
+    </p>
+    <p>会员ID：{$userinfo.id}</p>
+    <div class="deduction_details">
+        <div class="deduction-tab">
+            <ul>
+                <li class="active" data-id="1">扣款金额</li>
+                <li data-id="2">保证金</li>
+            </ul>
+        </div>
+        <div class="tablist-detail">
+            <div class="deductiontable1">
+                <form action="" id="deductionForm1">
+                    <div class="common-list">
+                        <label>扣款金额：</label>
+                        <input type="text" class="form-control" name="trade_amount" autocomplete="off" placeholder="请输入">
+                        <input type="hidden" name="account_type" value="1">
+                        <input type="hidden" name="trade_type" value="2">
+                    </div>
+                    <div class="common-list">
+                        <label>扣款类型：</label>
+                        <input type="radio" name="deduction_type" value="6"> 补轮主动告知扣费
+                        <input type="radio" name="deduction_type" value="7"> 补轮违规扣费
+                    </div>
+                    <div class="common-list">
+                        <label class="fl">备注：</label>
+                        <textarea name="trade_remark" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="deductiontable2">
+                <form action="" id="deductionForm2">
+                    <div class="common-list">
+                        <label>保证金：</label>
+                        <input type="text" class="form-control" name="trade_amount" autocomplete="off" placeholder="请输入">
+                        <input type="hidden" name="account_type" value="2">
+                    </div>
+                    <div class="common-list">
+                        <label style="float: left;">扣款原因：</label>
+                        <div style="margin-left: 80px;">
+                        <input type="radio" value="12" name="trade_type" checked id="koukuan1" /><label class="deduction_reason" for="koukuan1">保证金扣费</label>
+                        <input type="radio" value="15" name="trade_type" id="koukuan4" /><label class="deduction_reason" for="koukuan4">保证金转轮单费</label>
+                        <input type="radio" value="16" name="trade_type" id="koukuan5" /><label class="deduction_reason" for="koukuan5">保证金转平台使用费</label>
+                        <br/>
+                        <input type="radio" value="17" name="trade_type" id="koukuan6" /><label class="deduction_reason" for="koukuan6">保证金扣返点</label>
+                        <input type="radio" value="13" name="trade_type" id="koukuan2" /><label class="deduction_reason" for="koukuan2">保证金部分返还</label>
+                        <input type="radio" value="14" name="trade_type" id="koukuan3" /><label class="deduction_reason" for="koukuan3">保证金返还</label>
+                        </div>
+                    </div>
+                    <div class="common-list">
+                        <label class="fl">备注：</label>
+                        <textarea name="trade_remark" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="account-btn">
+        <button type="button" class="btn btn_cancel">取消</button>
+        <button type="button" class="btn btn_deduction">保存</button>
+    </div>
+</div>
+
+<!-- 扣款确认提示 -->
+<div id="deductionTip" style="display: none;">
+    <div class="layui-form-item">
+        <p class="money">
+            <span>扣款金额：</span>
+            <span style="float: right">-¥<span class="tip_trade_amount">0</span></span>
+        </p>
+        <div>
+            <p>备注：</p>
+            <p class="tip_trade_remark"></p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var switch_id = "1";
+        $(".account_template").on("click", ".deduction-tab ul li" , function(){
+            switch_id = $(this).data("id");
+
+            $(".amount_item").hide();
+            $(".amount_" + switch_id).show();
+
+            $(".deduction-tab ul li").removeClass("active");
+            $(this).addClass("active");
+            $(".tablist-detail>div").hide();
+            $(".deductiontable"+ switch_id).show();
+        });
+
+        // 金额改变事件
+        $("input[name=trade_amount]").change(function(){
+            this.value = this.value.replace(/[^\d.]/g,""); //清除"数字"和"."以外的字符
+            this.value = this.value.replace(/^\./g,""); //验证第一个字符是数字
+            this.value = this.value.replace(/\.{2,}/g,"."); //只保留第一个, 清除多余的
+            this.value = this.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+            this.value = this.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3'); //只能输入两个小数
+        });
+
+        //扣款类型选中与取消
+        $("input[name=deduction_type]").click(function () {
+            var domName = $(this).attr('name');
+            var $radio = $(this);
+            if ($radio.data('kong') == true){
+                $radio.prop('checked', false);
+                $("input:radio[name='" + domName + "']").data('kong',false);
+            } else {
+                $radio.prop('checked', true);
+                $("input:radio[name='" + domName + "']").data('kong',false);
+                $radio.data('kong', true);
+            }
+            console.log("选中状态:",$(this).prop("checked"));
+            console.log($("input:radio[name='" + domName + "']:checked").val());
+        });
+
+        // 交易类型切换
+        $("input[name=trade_type]").change(function(){
+            var tradeAmountElement = $("#deductionForm2").find("input[name=trade_amount]");
+            if (this.value == "14") {
+                tradeAmountElement.attr("disabled", "disabled");
+            } else {
+                tradeAmountElement.removeAttr("disabled");
+            }
+        });
+
+        // 取消
+        $(".account_template").on("click", ".btn_cancel" , function(){
+            $("#accountModal .modal-body").html("");
+            $("#accountModal").modal("hide");
+        });
+        // 确定
+        $(".account_template").on("click", ".btn_deduction" , function(){
+            var that = this;
+            var dataForm = getFormData("#deductionForm" + switch_id);
+            if (switch_id == "1" && dataForm["trade_amount"] == "") {
+                alert("请输入扣款金额");
+                return false;
+            } else if (switch_id == "2" && dataForm["trade_type"] != "14" && dataForm["trade_amount"] == "") {
+                alert("请输入扣款金额");
+                return false;
+            } else if (dataForm["trade_type"] == "") {
+                alert("请选择扣款原因");
+                return false;
+            }
+
+            // 保证金全部返还
+            if (dataForm["trade_type"] == "14") {
+                dataForm["trade_amount"] = "{$userinfo.deposit_money}";
+            }
+
+            //变更扣费trade_type值
+            var deduction_type = $("input:radio[name='deduction_type']:checked").val();
+            if (deduction_type == "6" || deduction_type == "7") {
+                dataForm["trade_type"] = deduction_type;
+                if (trim(dataForm["trade_remark"]) == "") {
+                    alert("请填写备注");
+                    return false;
+                }
+            }
+
+            // 获取扣款确认提示内容
+            $("#deductionTip").find(".tip_trade_amount").html(dataForm["trade_amount"]);
+            $("#deductionTip").find(".tip_trade_remark").html(dataForm["trade_remark"]);
+            var content = $("#deductionTip").html();
+            var switchTitle = switch_id == 1 ? '扣款提示' : '保证金扣款提示'
+            layer.open({
+                title: switchTitle,
+                btn: ["确定扣款", "取消"],
+                btnAlign: "r",
+                area: "300px",
+                content: content,
+                // 确定按钮的回调
+                yes: function(index, layero){
+                    $(that).attr("disabled", "disabled");
+                    $.post("/signbacknew/account_deduction", {
+                        user_id: "{$userinfo.id}",
+                        account_type: dataForm["account_type"],
+                        trade_type: dataForm["trade_type"],
+                        trade_amount: dataForm["trade_amount"],
+                        trade_remark: dataForm["trade_remark"]
+                    }, function(response){
+                        if (response.error_code == 0) {
+                            layer.msg('扣款成功');
+                            setTimeout(function (){
+                                layer.closeAll();
+                                window.location.reload();
+                            },2000)
+                        } else {
+                            $(that).removeAttr("disabled");
+                            alert(response.error_msg);
+                        }
+                    }).fail(function(){
+                        $(that).removeAttr("disabled");
+                    });
+
+                },
+                // 取消按钮的回调
+                btn2: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                },
+                cancel: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                }
+            });
+        });
+    });
+</script>

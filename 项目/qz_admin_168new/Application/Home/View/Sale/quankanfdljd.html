@@ -1,0 +1,310 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+	<title>全瞰-分单量进度</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+	<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+	<link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+	<section class="content-header">
+		<h1><i class="xs-icon logogb quankanfdljd-icon"></i> 全瞰-分单量进度</h1>
+	</section>
+	<section class="content section2">
+		<form class="form-horizontal">
+			<div class="from-list">
+				<div class="from-item">
+					<span class="width-auto">部门：</span>
+					<select>
+						<option value="">请选择</option>
+						<option value="商务">营销中心</option>
+						<option value="商务">商务</option>
+						<option value="外销">外销</option>
+					</select>
+				</div>
+				<div class="from-item" >
+					<span class="timer-tit">年份：</span>
+					<input type="text" name="date" class="form-control datepicker timer-input" placeholder="选择年份" value="">
+
+				</div>
+				<button class="search-btn xs-btn">查询</button>
+			</div>
+		</form>
+    </section>
+    <section class="content section3 oflow">
+		<div class="section3-sel">
+			<div class="todo-item">
+				<div class="pull-right position-relative">
+					<i class="xs-icon zhushi-icon"></i>
+					<div class="zhushi-info">
+						<p>输入人注意事项：本页数据以部门及月份为唯一标识，其他数据均为部门及月份附属信息,</p>
+						<p>默认显示数据为：部门=“营销中心”的记录（每年的2月到次年1月）</p>
+						<p>名词解释：（当月的数据：当月1日凌晨0.10到当日凌晨0:10，之前月数据：统计当月1日凌</p>
+						<p>晨0.10到次月1日凌晨0：10）</p>
+						<p>数值为小数点后1位的（四舍五入）：所有分单数均值，比如：90.17%取值90.2%,</p>
+						<p>90.14%取值90.1%四舍五入，90%取值90.0%。</p>
+						<p>全月会员：当月合作天数≥20天。</p>
+						<p>1、部门：读取《岗位城市权限》中城市对应的部门</p>
+						<p>2、计划月分单数均值：读取《计划月分单数》设置中的所有城市下的会员“计划月分单数”合计的均值，比如：外销部=（外销所有城市下会员的“计划月分单数”合计）/外销所有城市下会员数合计</p>
+						<p>3、15日分单数均值（全月会员）：当月1-15日实际累计月分单数均值，比如：外销部=（外销所有城市内会员的“实际月分单数”合计）/外销所有城市内会员数合计；会员分单量按客服实际分单时间为准。</p>
+						<p>4、所有统计数值，取次月1日凌晨0：10的数值定格保存。</p>
+					</div>
+				</div>
+			</div>
+			<table id="" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                <thead>
+                    <tr role="row">
+                    	<th class="" tabindex="0" >月份</th>
+                    	<th class="" tabindex="0" >部门</th>
+                    	<th class="" tabindex="0" >实际总会员数</th>
+                    	<th class="" tabindex="0" >计划月分单数均值</th>
+                    	<th class="" tabindex="0" >5日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >10日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >15日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >20日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >25日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >30日分单数均值(全月会员)</th>
+                    	<th class="" tabindex="0" >不足分单城市数(全月会员)</th>
+                    	<th class="" tabindex="0" >不足分单会员数(全月会员)</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr role="row" class="odd">
+                        <td><span>2017-06</span></td>
+						<td><span>营销中心</span></td>
+						<td><span>3</span></td>
+						<td><span>4</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+						<td><span>80%</span></td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-12 no-padding max-width-1352">
+        	<div id="canvas" class="col-xs-6 no-padding canvas-height-300"></div>
+			<div id="canvas1" class="col-xs-6 no-padding canvas-height-300"></div>
+        </div>
+    </section>
+</block>
+<block name="script">
+	<script src="/assets/common/js/echarts/3.5.4/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$(function() {
+
+			// canvas
+			var dom = document.getElementById("canvas");
+			var dom1 = document.getElementById("canvas1");
+			var myChart = echarts.init(dom);
+			var myChart1 = echarts.init(dom1);
+			var option = {
+			    title : {
+			        text: '分单量环比',
+			        // subtext: '会员数',
+			        x:'left',
+			        itemGap:50,
+			        textStyle: {
+                     color: '#369beb',          // 主标题文字颜色
+                           },
+			    },
+
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['201702','201703','201704'],
+			        y:'bottom',
+			        align:'left',
+			        // itemGap:15,
+
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['5日','10日','15日','20日','25日','30日']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}',
+			            },
+			            splitArea:{
+                         show:true
+			                  },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'201702',
+			            type:'line',
+			            smooth:true,
+			            data:[200,400,600,800,600,400],
+			            itemStyle : {
+                                normal : {
+                                        color:'#369beb',
+
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'201703',
+			            type:'line',
+			            smooth:true,
+			            data:[100,200,300, 400,500,200],
+			            itemStyle : {
+                                normal : {
+
+                                        color:'#f5994c',
+
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'201704',
+			            type:'line',
+			            smooth:true,
+			            data:[50,150,100, 600,50,100],
+			            itemStyle : {
+                                normal : {
+
+                                        color:'#de6aab'
+
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			var option1 = {
+			    title : {
+			        text: '分单不足城市数同比',
+			        // subtext: '会员数',
+			        x:'left',
+			        textStyle: {
+                     color: '#369beb'          // 主标题文字颜色
+                           },
+			    },
+			    tooltip : {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:['2016分单不足城市数','2017分单不足城市数'],
+			        y:'bottom'
+			    },
+			    calculable : true,
+			    xAxis : [
+			        {
+			            type : 'category',
+			            boundaryGap : true,
+			            data : ['02','03','04','05','06','07','08']
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            axisLabel : {
+			                formatter: '{value}'
+			            },
+			            splitArea:{
+                         show:true
+			                  },
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'2016分单不足城市数',
+			            type:'line',
+			            smooth:true,
+			            data:[10,500,100,50, 150,10],
+			            itemStyle : {
+                                normal : {
+                                        color:'#369beb',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                    {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        },
+			        {
+			            name:'2017分单不足城市数',
+			            type:'line',
+			            smooth:true,
+			            data:[50,150,100,600,50,100],
+			            itemStyle : {
+                                normal : {
+                                        color:'#f5994c',
+                                }
+                            },
+			            markPoint : {
+			                data : [
+			                     {type : 'max', name: '最大值'}
+			                ]
+			            }
+			        }
+			    ]
+			};
+			myChart.setOption(option, true);
+			myChart1.setOption(option1, true);
+			// 窗口缩放时canvas重新渲染
+			$(window).on('resize',function(){
+				var myChart = echarts.init(dom);
+				var myChart1 = echarts.init(dom1);
+				myChart.setOption(option, true);
+				myChart1.setOption(option1, true);
+			});
+
+			// 时间选择
+			$(".datepicker").datetimepicker({
+				startView:4,
+				minView:'decade',
+				format:"yyyy",
+				autoclose:true,
+				pickerPosition: "bottom-left"
+			});
+			// 注释信息
+			$('.zhushi-icon').hover(function() {
+				$('.zhushi-info').show();
+			}, function() {
+				$('.zhushi-info').hide();
+			});
+
+		})
+
+
+
+
+
+
+
+
+	</script>
+</block>

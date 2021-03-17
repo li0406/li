@@ -1,0 +1,349 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+	<title>齐装网美图榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+	<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+	<link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/meitu.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .w300{width: 300px;}
+    </style>
+</block>
+
+<block name="content">
+	<section class="content-header">
+		<h1>家居美图管理</h1>
+		<ol class="breadcrumb">
+			<li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+			<li><a href="/meitu/">美图管理</a></li>
+		</ol>
+	</section>
+	<section class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-body">
+						<div class="row">
+							<div class="col-xs-6">
+								<a href="/meituv2/meitudetail/">
+									<button class="btn btn-success normal">
+										<i class="fa fa-plus-circle"></i>新增美图
+									</button>
+								</a>
+								<foreach name="level2Category" item="vo">
+								<a href="/meituv2/meituCategory?type={$vo.id}">
+									<button class="btn normal">
+										<i class="fa fa-plus-circle"></i>{$vo.name}
+									</button>
+								</a>
+								</foreach>
+								<a href="/meitu/subWebEffect/">
+									<button class="btn normal">
+										<i class="fa fa-plus-circle"></i>分站美图效果图推荐
+									</button>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div class="box box-default">
+					<div class="box-header with-border">
+						<h3 class="box-title">条件查询</h3>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<form action="">
+								<div class="col-xs-4" id="">
+									<div style="margin-left: 3%;">选择分类：</div>
+									<div class="cx-select-wrap">
+										<volist name="categorylist" id="vo">
+											<if condition="$vo['id'] eq 7">
+											    <select class="cx-select mg form-control" name="space_category">
+											<elseif condition="$vo['id'] eq 8" />
+											    <select class="cx-select mg form-control" name="part_category">
+											<elseif condition="$vo['id'] eq 9" />
+												<select class="cx-select mg form-control" name="style_category">
+											<elseif condition="$vo['id'] eq 10" />
+											    <select class="cx-select mg form-control" name="layout_category">
+											<else />
+											</if>
+												<option value="">{$vo.name}</option>
+												<volist name="vo.child" id="v">
+													<if condition="$vo['id'] eq 7">
+														<if condition="$requestData['space_category'] eq $v['id']" >
+															<option value="{$v.id}" selected="selected">{$v.name}</option>
+														<else />
+															<option value="{$v.id}">{$v.name}</option>
+														</if>
+													<elseif condition="$vo['id'] eq 8" />
+														<if condition="$requestData['part_category'] eq $v['id']" >
+															<option value="{$v.id}" selected="selected">{$v.name}</option>
+														<else />
+															<option value="{$v.id}">{$v.name}</option>
+														</if>
+													<elseif condition="$vo['id'] eq 9" />
+														<if condition="$requestData['style_category'] eq $v['id']" >
+															<option value="{$v.id}" selected="selected">{$v.name}</option>
+														<else />
+															<option value="{$v.id}">{$v.name}</option>
+														</if>
+													<elseif condition="$vo['id'] eq 10" />
+															<if condition="$requestData['layout_category'] eq $v['id']" >
+																<option value="{$v.id}" selected="selected">{$v.name}</option>
+															<else />
+																<option value="{$v.id}">{$v.name}</option>
+															</if>
+													<else />
+													</if>
+												</volist>
+											</select>
+										</volist>
+									</div>
+								</div>
+								<div class="col-xs-1">
+									状态：
+									<select name="state" id="state" class="form-control">
+										<option value="0">请选择</option>
+										<option value="2" <if condition="$requestData.state eq 2">selected </if>>预发布</option>
+										<option value="3" <if condition="$requestData.state eq 3">selected </if>>已发布</option>
+									</select>
+								</div>
+								<div class="col-xs-2">
+									标题或ID：<input type="text" name="keyword" id="keyword" class="form-control keyword" placeholder="标题或ID" value="{$requestData.keyword}" autocomplete="off">
+								</div>
+								<div class="col-xs-1">
+									<br/>
+									<button type="submit" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+										<i class="fa fa-search"></i>查询
+									</button>
+                                </div>
+                                <div class="col-xs-1">
+									<br/>
+									<span id="fabu-more"  class="key-down-event btn btn-block btn-primary normal">批量重新发布</span>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div class="box">
+					<div class="box-header">
+                        <h3 class="box-title">美图列表</h3>
+					</div>
+					<div class="box-body">
+						<form id="form">
+							<table class="table table-hover">
+								<tbody>
+								<tr>
+                                    <th><input type="checkbox" id="all-choose"><label for="all-choose">全选</label></th>
+									<th>ID</th>
+                                    <th>标题</th>
+									<th>标签</th>
+									<th>创建人</th>
+									<th class="text-align-center">创建时间</th>
+									<th class="text-align-center">发布时间</th>
+									<th class="text-align-center">修改人</th>
+									<th class="text-align-center">修改时间</th>
+									<th>状态</th>
+									<th>操作</th>
+								</tr>
+								<foreach name="list.data" item="vo">
+								<tr>
+                                    <td class="list-td"><input type="checkbox" class="allchoose" data-id="{$vo.id}"></td>
+									<td>{$vo.id}</td>
+									<td class="w300">
+										<if condition="$vo.state eq 2">
+										<span class="label label-success"><i class="fa fa-clock-o"></i>预</span>
+										</if>
+
+										<if condition="($vo.is_house_custom eq 1) and ($vo.state eq 3)">
+											<a title="{$vo.title}" href="http://{:C('QZ_YUMINGWWW')}/qwdz/t{$vo.id}.html" target="_blank">
+												{$vo.title}
+											</a>
+										<elseif condition="($vo.is_house_custom eq -1) and ($vo.state eq 3)"/>
+											<a title="{$vo.title}" href="http://{:C('QZ_YUMINGWWW')}/tu/j{$vo.id}.html" target="_blank">
+												{$vo.title}
+											</a>
+										<else />
+											{$vo.title}
+										</if>
+                                    </td>
+									<td></td>
+									<td>
+										{$vo.creator_name}
+									</td>
+									<td class="text-align-center">
+										{$vo.created_at}
+									</td>
+									<td class="text-align-center">
+										<if condition="$vo.state eq 3">
+											{$vo.publish_at}
+										</if>
+									</td>
+									<td class="text-align-center">{$vo.operator_name}</td>
+									<td class="text-align-center">{$vo.updated_at}</td>
+									<td>
+										{$vo.state_name}
+									</td>
+									<td data-id="{$vo.id}">
+                                        <a href="javascript:void(0)"  class="fabu-btn" data-value="{$vo.id}">
+											<span title="重新发布" class="fa fa-mail-forward"></span>
+										</a>
+										<a href="/meituv2/meitudetail/?id={$vo.id}">
+											<span title="编辑" class="fa fa-pencil"></span>
+										</a>
+										<a href="javascript:void(0)" class="del-btn" data-value="{$vo.id}">
+											<span title="删除" class="fa fa-trash"></span>
+										</a>
+									</td>
+								</tr>
+								</foreach>
+								</tbody>
+							</table>
+						</form>
+					</div>
+					<div class="box-footer clearfix">
+						<div class="col-xs-12">
+							{$list.page}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</block>
+<block name="script">
+	<script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+	<script type="text/javascript">
+		$ (document).ready (function () {
+			$ ('.del-btn').click (function () {
+				var id = $ (this).parent ().attr ('data-id');
+				var state = $ (this).attr ('data-value');
+				layer.confirm ('确认要删除吗？', {
+					title: '确认删除！',
+					btn: ['确定', '取消'] //按钮
+				}, function () {
+					if (id === '') {
+						alert ('数据错误');
+						return;
+					}
+					$.ajax ({
+						url: '/meituv2/delMeitu/',
+						type: 'POST',
+						dataType: 'json',
+						data: {
+							id: id,
+						},
+					})
+						.done (function (data) {
+							if (data.code == 0) {
+								window.location.href = "/meituv2/meitulist";
+							}else {
+								console.log(data.msg);
+							}
+					});
+				})
+			});
+		})
+		// 翻页enter键查询
+		$("#skipPage").keyup(function(e){
+			if(e.keyCode == 13){
+				var space_category = $("select[name=space_category").val();
+				var style_category = $("select[name=style_category").val();
+				var part_category = $("select[name=part_category").val();
+				var layout_category = $("select[name=layout_category").val();
+				var state = $("select[name=state").val();
+				var keyword = $("input[name=keyword").val();
+				var p = $("#skipPage").val();
+				window.location.href = '/meituv2/meitulist?space_category=' + space_category+'&style_category='+ style_category+'&part_category='+ part_category+'&layout_category='+ layout_category +'&state='+ state + '&keyword='+ keyword+'&p='+p
+			}
+		})
+		function msg(msg, fn) {
+			layer.msg (
+				msg,
+				{time: 2000,},
+				fn || function () {
+				}
+			)
+		}
+        //全选全不选
+        $("#all-choose").click(function () {
+            if($(this).is(":checked")){
+                $(".allchoose").prop("checked",true);
+            }else{
+                $(".allchoose").prop("checked",false);
+            }
+        });
+        //单个重新发布
+        $ ('.fabu-btn').click (function () {
+            var id = $ (this).parent ().attr ('data-id');
+            var state = $ (this).attr ('data-value');
+            layer.confirm ('确认要重新发布吗？', {
+                title: '确认重新发布！',
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                if (id === '') {
+                    alert ('数据错误');
+                    return;
+                }
+                $.ajax ({
+                    url: '/meituv2/restore/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        ids: id,
+                    },
+                })
+                    .done (function (data) {
+                        if (data.code == 0) {
+                            layer.msg('发布成功', {icon: 1});
+                            window.location.href = "/meituv2/meitulist";
+                        }else {
+                            layer.msg(data.msg, {icon: 2});
+                        }
+                });
+            })
+        });
+        //批量重新发布
+        $("#fabu-more").click(function () {
+            var arr = [];
+            $(".list-td").each(function (index,item) {
+                if($(this).find("input[type=checkbox]").is(':checked')){
+                    arr.push($(this).find("input[type=checkbox]").data("id"))
+                }
+            })
+            if(arr != ''){
+                layer.confirm('是否确认批量发布？', {
+                    btn: ['确认','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/meituv2/restore/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            ids:arr
+                        }
+                    })
+                    .done(function (data) {
+                        if (data.code == 0) {
+                            layer.msg('批量发布成功', {icon: 1});
+                            setTimeout("history.go(0);",1000);
+                        } else {
+                            layer.msg(data.msg, {icon: 2});
+                            return false;
+                        }
+                    })
+                    .fail(function (xhr) {
+                        layer.msg("网络错误，请稍后重试！");
+                    })
+                })
+            }
+        })
+	</script>
+</block>

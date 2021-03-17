@@ -1,0 +1,144 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>每日订单情况统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>每日订单情况统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">每日订单情况统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-xs-12">
+                            <form id="searchform" action="/orderstat/review" method="get">
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="datefrom" placeholder="开始时间" value="{$Think.get.datefrom}">
+                                </div>
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="dateto" placeholder="结束时间" value="{$Think.get.dateto}">
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="box-tools"></div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead >
+                                <tr style="font-size:14px;color:#000">
+                                    <th>日期</th>
+                                    <th>有会员+总站</th>
+                                    <th>分/(有会员+总站)</th>
+                                    <th>(分+赠送)/(有会员+总站)</th>
+                                    <th>分</th>
+                                    <th>赠送(问)</th>
+                                    <th>分没人跟</th>
+                                    <th>赠送(问)没人跟</th>
+                                    <th>总的有效</th>
+                                    <th>待定</th>
+                                    <th>新单</th>
+                                    <th>次新单</th>
+                                    <th>扫单</th>
+                                    <th>无效</th>
+                                    <th>空号</th>
+                                    <th>装修公司</th>
+                                    <th>无效咨询</th>
+                                    <th>总数</th>
+                                    <th>无会员城市订单数</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataLists">
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.日期}</td>
+                                        <td>{$vo.有会员加总站订单}</td>
+                                        <td>{$vo.分单率}%</td>
+                                        <td>{$vo.分问单率}%</td>
+                                        <td>{$vo.分}</td>
+                                        <td>{$vo.问}</td>
+                                        <td>{$vo.分没人跟}</td>
+                                        <td>{$vo.问没人跟}</td>
+                                        <td>{$vo.总的有效}</td>
+                                        <td>{$vo.待定}</td>
+                                        <td>{$vo.新单}</td>
+                                        <td>{$vo.次新单}</td>
+                                        <td>{$vo.扫单}</td>
+                                        <td>{$vo.无效}</td>
+                                        <td>{$vo.空号}</td>
+                                        <td>{$vo.装修公司}</td>
+                                        <td>{$vo.无效咨询}</td>
+                                        <td>{$vo.总数}</td>
+                                        <td>{$vo.无会员订单}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $("#city").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+
+    $('.datetime').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        format: "yyyy-mm-dd",
+        minView: 2,
+        pickerPosition: "bottom-left",
+        autoclose: true,
+    });
+
+    $('#all_list').DataTable({
+        paging:false,
+        searching:true,
+        language:{
+            zeroRecords: "没有内容",
+            info:""
+        },
+        aaSorting: [[ 0, "desc" ]],
+        scrollY:"600px",
+    });
+
+    $("#searchform button").click(function(event) {
+        window.location.href = "/orderstat/everydayordersstat?datefrom="+$('input[name=datefrom]').val()+"&dateto="+$('input[name=dateto]').val();
+    });
+    </script>
+</block>

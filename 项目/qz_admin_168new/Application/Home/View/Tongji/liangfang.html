@@ -1,0 +1,324 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>量房统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>量房统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/order/">订单列表</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>开始时间：</div>
+                                        <input type="text" name="time_start"
+                                               class="form-control datepicker clear-target" id="start_time" placeholder="选择日期"
+                                               value="{$search_data.time_start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>结束时间：</div>
+                                        <input type="text" name="time_end" class="form-control datepicker clear-target" id="end_time"
+                                               placeholder="选择日期" value="{$search_data.time_end}">
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div>订单状态：</div>
+                                        <select name="order-status" class="form-control" >
+                                            <option value="0">请选择</option>
+                                            <if condition="isset($search_data['order_status']) and ($search_data['order_status'] EQ 1)">
+                                                <option value="1" selected > 分单</option>
+                                                <option value="2">赠单</option>
+                                                <elseif condition="isset($search_data['order_status']) and $search_data['order_status'] EQ 2"/>
+                                                <option value="1">分单</option>
+                                                <option value="2" selected >赠单</option>
+                                                <else/>
+                                                <option value="1">分单</option>
+                                                <option value="2">赠单</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div>会员量房状态{$think.get.measure}：</div>
+                                        <select name="measure-status" type="text" class="form-control">
+                                            <if condition="isset($search_data['measure']) and ($search_data['measure'] EQ 1)">
+                                                <option value="">请选择</option>
+                                                <option value="3">未知</option>
+                                                <option value="1" selected="selected">未量房</option>
+                                                <option value="2">已量房</option>
+                                            <elseif condition="isset($search_data['measure']) and ($search_data['measure'] EQ 2)" />
+                                                <option value="">请选择</option>
+                                                <option value="3">未知</option>
+                                                <option value="1">未量房</option>
+                                                <option value="2" selected="selected">已量房</option>
+                                            <elseif condition="isset($search_data['measure']) and ($search_data['measure'] EQ 3)" />
+                                                <option value="">请选择</option>
+                                                <option value="3" selected="selected">未知</option>
+                                                <option value="1">未量房</option>
+                                                <option value="2">已量房</option>
+                                            <else/>
+                                                <option value="" selected="selected">请选择</option>
+                                                <option value="3">未知</option>
+                                                <option value="1">未量房</option>
+                                                <option value="2">已量房</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div>业主量房状态：</div>
+                                        <select name="yz-liangfang" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="3"  <if condition="$search_data['yzstatus'] EQ 3"> selected </if> >未知</option>
+                                            <option value="2"  <if condition="$search_data['yzstatus'] EQ 2"> selected </if> >未量房</option>
+                                            <option value="1"  <if condition="$search_data['yzstatus'] EQ 1"> selected </if> >已量房</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-1">
+                                        <div>是否二次回访：</div>
+                                        <select name="revisit" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <if condition="$search_data['revisit'] EQ 1">
+                                                <option value="1" selected>是</option>
+                                                <option value="2">否</option>
+                                                <elseif condition="$search_data['revisit'] EQ 2"/>
+                                                <option value="1">是</option>
+                                                <option value="2" selected>否</option>
+                                                <else/>
+                                                <option value="1">是</option>
+                                                <option value="2">否</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单归属人：</div>
+                                        <select id="uid" name="uid" type="text" class="form-control">
+                                            <option value="0">请选择</option>
+                                            <volist name="operaters" id="vo">
+                                                <option value="{$vo.id}" <if condition="$search_data['uid'] EQ $vo['id']">selected</if>>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2" style="padding-top: 16px;">
+                                        <button type="button" id="search" class="btn btn-primary col-xs-1" style="width: 80px; float: none">查询</button>
+                                        <button type="button" id="output" class="btn btn-primary col-xs-1" style="width: 80px; float: none">导出</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th class="width-150">时间</th>
+                                <th>订单号</th>
+                                <th>订单状态</th>
+                                <th>会员量房状态</th>
+                                <th>业主量房状态</th>
+                                <th>是否二次回访</th>
+                                <th>归属人</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <foreach name="list" item="vo">
+                                <tr>
+                                    <td>{$vo.give_time|date="Y年m月d日",###}</td>
+                                    <td>{$vo.order_id}</td>
+                                    <td>
+                                        <if condition="$vo['type_fw'] EQ 1">
+                                            分单
+                                            <else/>
+                                            赠单
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['lf_status'] EQ 2">
+                                            未量房
+                                            <elseif condition="$vo['lf_status'] EQ 3"/>
+                                            已量房
+                                            <else/>
+                                            未知
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['yzstatus'] EQ 2">
+                                            未量房
+                                            <elseif condition="$vo['yzstatus'] EQ 1"/>
+                                            已量房
+                                            <else/>
+                                            未知
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['lf_order_id'] EQ null">
+                                            否
+                                            <else/>
+                                            是
+                                        </if>
+                                    </td>
+                                    <td>{$vo.op_name}</td>
+                                </tr>
+                            </foreach>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 liangfang">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        /**
+         * 计算两个日期之间相差的天数
+         * @param d1 开始时间
+         * @param d2 结束时间
+         * @returns {number}
+         */
+        function daysDistance(d1, d2) {
+            d1 = new Date(d1);
+            d2 = new Date(d2);
+            var dateTime = 24*60*60*1000,
+                t1 = d1.getTime(),
+                t2 = d2.getTime();
+            var minusDays = Math.floor(((t2-t1)/dateTime));//计算出两个日期的天数差
+            var days = Math.abs(minusDays);//取绝对值
+            return days;
+        }
+        $(document).ready(function () {
+            $("#jump").click(function () {
+                var skip = $('#skipPage').val();
+                var url = $(this).val();
+                if ('' == skip) {
+                    alert('请输入要跳转的页码');
+                } else {
+                    window.location.href = url + 'p=' + skip;
+                }
+            });
+            /*S-初始化插件*/
+            // 开始时间
+            $('#start_time').datepicker({
+                todayBtn : false,
+                autoclose : true,
+                endDate : new Date()
+            }).on('changeDate',function(e){
+                var startTime = e.date,
+                    endTime = new Date(e.date.getTime()+(31*24*60*60*1000));
+                // console.log(startTime);
+                $('#end_time').datepicker('setStartDate',startTime);
+                $('#end_time').datepicker('setEndDate',endTime);
+            });
+            //结束时间：
+            $('#end_time').datepicker({
+                todayBtn : false,
+                autoclose : true,
+                endDate : new Date()
+            }).on('changeDate',function(e){
+                var startTime =new Date(e.date.getTime()-(31*24*60*60*1000)),
+                    endTime = new Date(e.date.getTime()+(24*60*60*1000));
+                $('#start_time').datepicker('setStartDate',startTime);
+                $('#start_time').datepicker('setEndDate',endTime);
+            });
+            /*E-初始化插件*/
+
+
+            /*S-搜索按钮*/
+            $('#search').on('click', function () {
+                var time_start = $('input[name=time_start]').val();
+                var time_end = $('input[name=time_end]').val();
+                var orderStatus = $('select[name=order-status]').val();
+                var measureStatus = $('select[name=measure-status]').val();  //会员量房状态
+                var channel = $('select[name=channel]').val();
+                var revisit = $('select[name=revisit]').val();
+                // var vipChannel = $('select[name=vip-channel]').val(); //会员量房渠道
+                var yzLiangFangStatus = $('select[name=yz-liangfang]').val(); //业主量房状态
+                // var yzChannel = $('select[name=yz-channel]').val(); //会员量房渠道
+                var uid = $('select[name=uid]').val(); // 订单归属人
+                //判断时间间隔
+                if ((time_end != '') && (time_start > time_end)) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '查询开始时间不能大于结束时间~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                };
+                if(daysDistance(time_start, time_end) >= 31){
+                    var e = dialog({
+                        title: '消息',
+                        content: '开始时间和结束时间不能大于31天',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                }
+                // console.log(new Date(time_end).getTime());
+                // console.log(new Date(time_start).getTime());
+                // return;
+                window.location.href = '/tongji/liangfang/?time_start=' + time_start + '&time_end=' + time_end + '&order_status=' + orderStatus + '&measure=' + measureStatus + '&yzstatus=' + yzLiangFangStatus + '&revisit=' + revisit + '&uid=' + uid;
+            });
+            /*E-导出excle按钮*/
+            $('#output').on('click', function () {
+                var time_start = $('input[name=time_start]').val();
+                var time_end = $('input[name=time_end]').val();
+                var orderStatus = $('select[name=order-status]').val();
+                var measureStatus = $('select[name=measure-status]').val();
+                var revisit = $('select[name=revisit]').val();
+
+                // var vipChannel = $('select[name=vip-channel]').val(); //会员量房渠道
+                var yzLiangFangStatus = $('select[name=yz-liangfang]').val(); //业主量房状态
+                // var yzChannel = $('select[name=yz-channel]').val(); //会员量房渠道
+                //判断时间间隔
+                if ((time_end != '') && (time_start > time_end)) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发单开始时间不能大于结束时间~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                }
+                window.location.href = '/tongji/liangfangexp/?time_start=' + time_start + '&time_end=' + time_end + '&order_status=' + orderStatus + '&measure=' + measureStatus + '&yzstatus=' + yzLiangFangStatus + '&revisit=' + revisit;
+            });
+        });
+    </script>
+</block>

@@ -1,0 +1,246 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>运营系统-页面分析 - 版本管理</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>上线版本管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <!-- S 条件查询模块 -->
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-3 page-category-wrap">
+                                <div class="">所属分类</div>
+                                <div class="col-xs-5 no-padding">
+                                    <select name="cid_parent" class="level-one form-control" data-value="{$Think.get.cid_parent|default=0}"></select>
+                                </div>
+                                <div class="col-xs-6 no-padding pull-right">
+                                    <select name="cid" class="level-two form-control" data-value="{$Think.get.cid|default=0}"></select>
+                                </div>
+                            </div>
+                            <div class="col-xs-2">
+                                <div class="">上线版本号</div>
+                                <select name="version_number" class="select2 form-control">
+                                    <option value="0">全部</option>
+                                    <volist name="vars.version" id="vi">
+                                        <eq name="vi.version_number" value="$Think.get.version_number">
+                                            <option selected="true" value="{$vi.version_number}">
+                                                {$vi.version_number}
+                                            </option>
+                                        <else />
+                                            <option value="{$vi.version_number}">{$vi.version_number}</option>
+                                        </eq>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-3">
+                                <div class="">上线时间</div>
+                                <div class="datatime">
+                                    <input type="text" name="reservation" id="reservationtime" class="form-control span4"
+                                    value="{$timerange}" placeholder="选择日期范围" />
+                                </div>
+                            </div>
+                            <div class="col-xs-2">
+                                <div class="">上线标题</div>
+                                <div>
+                                    <input name="version_title" type="text" class="form-control" value="{$Think.get.version_title}" />
+                                </div>
+                            </div>
+                            <div class="col-xs-1">
+                                <br>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i> 查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <a href="/yy/versionoperate/" class="btn btn-success"><i class="fa fa-plus-circle"></i> 新增版本</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- E 条件查询模块 -->
+                <!-- S 表格内容模块 -->
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>上线版本号</th>
+                                                <th class="text-left">标题</th>
+                                                <th class="text-left">所属分类</th>
+                                                <th>上线时间</th>
+                                                <th class="text-left">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <volist name="vars.info" id="vi">
+                                                <tr>
+                                                    <td>{$key + $indexStart + 1}</td>
+                                                    <td>{$vi.version_number}</td>
+                                                    <td class="text-left">{$vi.version_title}</td>
+                                                    <td class="text-left">{$vi.parent_category_name}-{$vi.category_name}</td>
+                                                    <td>{$vi.online_time}</td>
+                                                    <td class="text-left">
+                                                        <a href="/yy/versionoperate/?id={$vi.id}" class="text-green">编辑</a>
+                                                        &nbsp;&nbsp;
+                                                        <a href="javascript:void(0)" class="submit-delete text-red" data-id="{$vi.id}" >删除</a>
+                                                        <notempty name='vi.enclosure'>
+                                                            &nbsp;&nbsp;
+                                                            <a class="download-enclosure text-yellow" href="javascript:void(0)" data-id="{$vi.id}">下载附件</a>
+                                                        </notempty>
+                                                    </td>
+                                                </tr>
+                                            </volist>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-center">
+                                    {$vars.page}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(document).ready(function() {
+            //页面分类
+            $('.page-category-wrap').cxSelect({
+                selects: ['level-one', 'level-two'],
+                jsonValue: 'id',
+                jsonName: 'name',          // 数据标题字段名称
+                jsonSub: 'children',            // 子集数据字段名称
+                data: {$vars.category}
+            });
+            // select选项
+            $('select[name=version_number]').select2();
+            // 时间选择
+            $('#reservationtime').daterangepicker({
+                timePicker: false,
+                timePickerIncrement: 30,
+                format: 'YYYY/MM/DD',
+                timePicker12Hour: false
+            }, function(start, end, label) {
+                console.log(start.toISOString(), end.toISOString(), label);
+            });
+
+            //删除
+            $('.submit-delete').click(function(event) {
+                if (confirm('确认删除该版本？\n删除后该版本的数据将清空！')) {
+                    var id = $(this).attr('data-id');
+                    $.ajax({
+                        url: '/yy/versiondelete/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                                window.location.href = window.location.href;
+                            }
+                        });
+                        e.width(300).show();
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,网络错误！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.width(300).show();
+                    })
+                };
+            });
+
+            //下载附件
+            $('.download-enclosure').click(function(event) {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/yy/versiondownloadenclosure/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if ('1' == data.status) {
+                        window.open(data.data.url);
+                    } else {
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.width(300).show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,网络错误！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.width(300).show();
+                })
+            });
+
+            //搜索按钮
+            $('#search').click(function(event) {
+                var cid_parent = $('select[name=cid_parent]').val();
+                var cid = (null == $('select[name=cid]').val()) ? '' : $('select[name=cid]').val();
+                window.location.href = '/yy/version/?cid_parent=' + cid_parent + '&cid=' + cid + '&version_number=' + $('select[name=version_number]').val() + '&version_title=' + $('input[name=version_title]').val() + '&timerange=' + $('#reservationtime').val();
+            });
+        });
+
+    </script>
+</block>

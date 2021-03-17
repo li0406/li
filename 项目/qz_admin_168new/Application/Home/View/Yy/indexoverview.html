@@ -1,0 +1,347 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>
+        页面指标分析 - 控制台
+    </title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/market/sc-cngl.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/yy/css/indexoverview.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header pbootom">
+        <div class="box">
+            <div class="box-header boxlh with-border no-padding">
+                <h3 class="box-title bxt pull-left col-xs-2">
+                    页面指标概览
+                </h3>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    条件查询
+                </h3>
+            </div>
+            <div class="box-body">
+                <div class="search-box">
+                    <div class="col-xs-2 margin-left-2">
+                        时间：
+                    </div>
+                </div>
+                <div class="search-box">
+                    <div class="pull-left time-box">
+                        <span data-day='1' data-value="{$vars.time.recent_1_day}">
+                            昨天
+                        </span>
+                        <span data-day='7' data-value="{$vars.time.recent_7_day}">
+                            最近7天
+                        </span>
+                        <span data-day='30' data-value="{$vars.time.recent_30_day}">
+                            最近30天
+                        </span>
+                    </div>
+                    <div class="col-xs-4">
+                        <input type="text" name="reservation" id="reservationtime" class="form-control span4"
+                        value="{$timerange}" placeholder="选择日期范围" />
+                    </div>
+                </div>
+                <div class="pull-left marginLeft">
+                    <div class="search-title">
+                        页面地址:
+                    </div>
+                    <div class="page-addr">
+                        <input name="url" type="text" id="page-addr" value="{$Think.get.url}">
+                    </div>
+                </div>
+                <div class="pull-left marginLeft">
+                    <div class="search-title">&nbsp;</div>
+                    <label style="margin-top: 5px;">
+                        <eq name="Think.get.complete" value="2">
+                            <input type="checkbox" name="complete">精确匹配
+                        <else />
+                            <input type="checkbox" name="complete" checked="true">精确匹配
+                        </eq>
+                    </label>
+                </div>
+                <div class="pull-left marginLeft">
+                    <div class="search-title">
+                        &nbsp;
+                    </div>
+                    <button type="submit" class="btn btn-primary submit-search">
+                        <i class="fa fa-search"></i>查询
+                    </button>
+                </div>
+            </div>
+            <div class="search-recommend-info">
+                注：输入网址时无需输入‘http://’，另精确匹配时，网址末尾不加'/'。
+            </div>
+            <div class="zdy">
+                <div class="zdy-title">
+                    自定义指标
+                </div>
+                <div class="search-box span-box">
+                    <span>
+                        <if condition="'1' == cookie('indexoverview_btn_1')">
+                            <i class="chose-item fa fa-check" data-chcek="1"></i>
+                        <else />
+                            <i class="chose-item fa" data-chcek="0"></i>
+                        </if>
+                        &nbsp;&nbsp;跳出率
+                    </span>
+                    <span>
+                        <if condition="'1' == cookie('indexoverview_btn_2')">
+                            <i class="chose-item fa fa-check" data-chcek="1"></i>
+                        <else />
+                            <i class="chose-item fa" data-chcek="0"></i>
+                        </if>
+                        &nbsp;&nbsp;退出率
+                    </span>
+                    <span>
+                        <if condition="'1' == cookie('indexoverview_btn_3')">
+                            <i class="chose-item fa fa-check" data-chcek="1"></i>
+                        <else />
+                            <i class="chose-item fa" data-chcek="0"></i>
+                        </if>
+                        &nbsp;&nbsp;平均访问时长
+                    </span>
+                    <span>
+                        <if condition="'1' == cookie('indexoverview_btn_4')">
+                            <i class="chose-item fa fa-check" data-chcek="1"></i>
+                        <else />
+                            <i class="chose-item fa" data-chcek="0"></i>
+                        </if>
+                        &nbsp;&nbsp;入口页面次数
+                    </span>
+                    <span>
+                        <if condition="'1' == cookie('indexoverview_btn_5')">
+                            <i class="chose-item fa fa-check" data-chcek="1"></i>
+                        <else />
+                            <i class="chose-item fa" data-chcek="0"></i>
+                        </if>
+                        &nbsp;&nbsp;退出页次数
+                    </span>
+                </div>
+                <div class="pushout"></div>
+            </div>
+        </div>
+        <div class="box no-border">
+            <table class="table table-hover" id="myTable">
+                <thead>
+                    <th></th>
+                    <th class="right-boder text-align-left url-short-wrap">
+                        页面地址
+                    </th>
+                    <th>
+                        <a href="javascript:void(0)" class="submit-sort">
+                            浏览量PV
+                            <switch name="sort">
+                                <case value="pv-0"><i  class="fa fa-sort" data-sort="pv-2"></i></case>
+                                <case value="pv-1"><i  class="fa fa-sort-asc" data-sort="pv-0"></i></case>
+                                <case value="pv-2"><i  class="fa fa-sort-desc" data-sort="pv-1"></i></case>
+                                <default /><i  class="fa fa-sort" data-sort="pv-2"></i>
+                            </switch>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="javascript:void(0)" class="submit-sort">
+                            访客数量UV
+                            <switch name="sort">
+                                <case value="uv-0"><i  class="fa fa-sort" data-sort="uv-2"></i></case>
+                                <case value="uv-1"><i  class="fa fa-sort-asc" data-sort="uv-0"></i></case>
+                                <case value="uv-2"><i  class="fa fa-sort-desc" data-sort="uv-1"></i></case>
+                                <default /><i  class="fa fa-sort" data-sort="uv-2"></i>
+                            </switch>
+                        </a>
+                    </th>
+                    <if condition="'1' == cookie('indexoverview_btn_1')">
+                        <th class="btn_1">
+                            跳出率
+                        </th>
+                    <else />
+                        <th class="btn_1 hide">
+                            跳出率
+                        </th>
+                    </if>
+                    <if condition="'1' == cookie('indexoverview_btn_2')">
+                        <th class="btn_2">
+                            退出率
+                        </th>
+                    <else />
+                        <th class="btn_2 hide">
+                            退出率
+                        </th>
+                    </if>
+                    <if condition="'1' == cookie('indexoverview_btn_3')">
+                        <th class="btn_3">
+                            平均访问时长
+                        </th>
+                    <else />
+                        <th class="btn_3 hide">
+                            平均访问时长
+                        </th>
+                    </if>
+                    <th>
+                        <a href="javascript:void(0)" class="submit-sort">
+                            发单量
+                            <switch name="sort">
+                                <case value="fd-0"><i  class="fa fa-sort" data-sort="fd-2"></i></case>
+                                <case value="fd-1"><i  class="fa fa-sort-asc" data-sort="fd-0"></i></case>
+                                <case value="fd-2"><i  class="fa fa-sort-desc" data-sort="fd-1"></i></case>
+                                <default /><i  class="fa fa-sort" data-sort="fd-2"></i>
+                            </switch>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="javascript:void(0)" class="submit-sort">
+                            实际分单量
+                            <switch name="sort">
+                                <case value="sjfd-0"><i  class="fa fa-sort" data-sort="sjfd-2"></i></case>
+                                <case value="sjfd-1"><i  class="fa fa-sort-asc" data-sort="sjfd-0"></i></case>
+                                <case value="sjfd-2"><i  class="fa fa-sort-desc" data-sort="sjfd-1"></i></case>
+                                <default /><i  class="fa fa-sort" data-sort="sjfd-2"></i>
+                            </switch>
+                        </a>&nbsp;<a href="javascript:;" title="实际分单量说明：因采集不到运营系统上线之前的数据，会在一定范围内造成实际分单量比实际数据少的问题，此差异会随着时间的推移逐渐减小，所需时间大致为3个月—6个月。"><i class="fa fa-question-circle"></i></a>
+                    </th>
+                    <th>
+                        发单转化率
+                    </th>
+                    <th>
+                        实际分单转化率
+                    </th>
+                    <if condition="'1' == cookie('indexoverview_btn_4')">
+                        <th class="btn_4">
+                            入口页次数
+                        </th>
+                    <else />
+                        <th class="btn_4 hide">
+                            入口页次数
+                        </th>
+                    </if>
+                    <if condition="'1' == cookie('indexoverview_btn_5')">
+                        <th class="btn_5">
+                            退出页次数
+                        </th>
+                    <else />
+                        <th class="btn_5 hide">
+                            退出页次数
+                        </th>
+                    </if>
+                </thead>
+                <tbody>
+                    <volist name="vars.info.list" id="vi">
+                        <tr>
+                            <td>{$key + $indexStart + 1}</td>
+                            <td class="right-boder text-align-left url-short-wrap">
+                                <span>{$vi.url}</span>
+                                <a href="/yy/historicaltrend/?url={:urlencode($vi['url'])}&timerange={$timerange}&from=2" class="details">趋势</a>
+                            </td>
+                            <td>{$vi.pv}</td>
+                            <td>{$vi.uv}<a href="/yy/uvresource/?url={:urlencode($vi['url'])}&timerange={$timerange}&from=2" class="details" target="_blank">来源</a></td>
+                            <if condition="'1' == cookie('indexoverview_btn_1')">
+                                <td class="btn_1">{$vi.bounce_rate}%</td>
+                            <else />
+                                <td class="btn_1 hide">{$vi.bounce_rate}%</td>
+                            </if>
+                            <if condition="'1' == cookie('indexoverview_btn_2')">
+                                <td class="btn_2">{$vi.exit_rate}%</td>
+                            <else />
+                                <td class="btn_2 hide">{$vi.exit_rate}%</td>
+                            </if>
+                            <if condition="'1' == cookie('indexoverview_btn_3')">
+                                <td class="btn_3">{$vi.visit_time_avg}</td>
+                            <else />
+                                <td class="btn_3 hide">{$vi.visit_time_avg}</td>
+                            </if>
+                            <td>{$vi.order_count}</td>
+                            <td>{$vi.real_order_count}</td>
+                            <td>{$vi.fd_zh_rate}%</td>
+                            <td>{$vi.sjfd_zh_rate}%</td>
+                            <if condition="'1' == cookie('indexoverview_btn_4')">
+                                <td class="btn_4">{$vi.entry_count}</td>
+                            <else />
+                                <td class="btn_4 hide">{$vi.entry_count}</td>
+                            </if>
+                            <if condition="'1' == cookie('indexoverview_btn_5')">
+                                <td class="btn_5">{$vi.exit_count}</td>
+                            <else />
+                                <td class="btn_5 hide">{$vi.exit_count}</td>
+                            </if>
+                        </tr>
+                    </volist>
+                </tbody>
+            </table>
+            {$vars.info.page}
+        </div>
+    </section>
+</block>
+<block name="script">
+<script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/jscookie/js/jscookie-1.0.2.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(document).ready(function() {
+
+        $('.time-box span').each(function(index, el) {
+            if ($(this).attr('data-value') == '{$timerange|default=""}') {
+                $(this).addClass('time-box-chose');
+            };
+        });
+
+        //获取查询条件
+        function queryString() {
+            var complete = 2;
+            if($("input[name=complete]").is(":checked")){
+                complete = 1;
+            }
+            return 'url=' + $('input[name=url]').val() + '&timerange=' + $('#reservationtime').val() + '&complete=' + complete;
+        }
+
+        //搜索
+        $('.submit-search').click(function(event) {
+            window.location.href = '/yy/indexoverview/?' + queryString() + '&sort={$sort}';
+        });
+
+        //排序
+        $('.submit-sort').click(function(event) {
+            window.location.href = '/yy/indexoverview/?' + queryString() + '&sort=' + $(this).find('i').attr('data-sort');
+        });
+
+        //条件选择
+        $(".span-box span i").click(function() {
+            var flag = $(this).attr('data-chcek'),
+            index = $(this).parent('span').index() + 1;
+            if (flag == 0) {
+                $(this).addClass('fa-check');
+                $(this).attr("data-chcek", 1);
+                $(".btn_" + index).removeClass("hide");
+                cookies.set('indexoverview_btn_' + index,1,365);
+            } else {
+                $(this).removeClass('fa-check');
+                $(this).attr("data-chcek", 0);
+                $(".btn_" + index).addClass("hide");
+                cookies.set('indexoverview_btn_' + index,2,365);
+            }
+        });
+
+        //日期设置
+        $(".time-box span").click(function() {
+            $('.time-box span').removeClass('time-box-chose');
+            $(this).addClass('time-box-chose');
+            $("#reservationtime").val($(this).attr('data-value'));
+        });
+
+        $('#reservationtime').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 30,
+            format: 'YYYY/MM/DD',
+            timePicker12Hour: false
+        }, function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+        });
+    });
+</script>
+</block>

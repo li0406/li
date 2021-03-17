@@ -1,0 +1,148 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网美图榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/subwebeffect.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>分站首页效果图推荐</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitu/">美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box boxtab">
+                    <div class="headTab">
+                        <a class="headback mocs" href="/meitu/subWebEffect/">
+                            文字推荐
+                        </a>
+                        <a class="headTwo" href="/meitu/subwebtu/">
+                            图片推荐
+                        </a>
+                    </div>
+                    <ul class="tabs">
+                        <li class="tabOne"><a href="/meitu/subwebtu?tab=0">默认图片</a></li>
+                        <li class="tabTwo"><a href="/meitu/subwebtu?tab=1">城市图片</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab_container">
+                <div id="tab1" class="col-xs-12 tab_content">
+                    <div class="box">
+                        <div class="row cs-box">
+                            <eq name="Think.get.tab" value="1">
+                                <div class="cq-title">城市</div>
+                                <div class="col-xs-1 box-cs">
+                                    <select id="cslet"  class="col-sm-12">
+                                        <volist name="cityList" id="city">
+                                            <option value="{$city.cid}">{$city.first_abc} {$city.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </eq>
+                            <a href="javascript:void(0)" class="box-button image-op" data-count="{:count($list)}">添加图片</a>
+                        </div>
+                        <div class="box-body box-back">
+                            <table class="table table-bordered table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th class="col-xs-2">图片</th>
+                                        <th>标题</th>
+                                        <th>url</th>
+                                        <th>排序</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="list" id="item">
+                                        <tr>
+                                            <td class="col-xs-2">
+                                                <img class="imgcover" src="//{:C('QINIU_DOMAIN')}/{$item.img}-w240">
+                                            </td>
+                                            <td>
+                                                {$item.title}
+                                            </td>
+                                            <td>
+                                                <a href="{$item.url}" target="_blank">{$item.url}</a>
+                                            </td>
+                                            <td>{$item.order}</td>
+                                            <td>{$item.updated_at|date='Y-m-d',###}</td>
+                                            <td>
+                                                <a href="/meitu/newimgup/?cs={$item.cs}&id={$item.id}" data-img="{$item.img}" data-url="{$item.url}" data-id="{$item.id}" data-order="{$item.order}" data-title="{$item.title}" class="image-operate">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                    <empty name="list">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                    </empty>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="modal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    美图图片推荐最多为8个~
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function(){
+            $('#cslet').select2();
+
+            if("{$Think.get.tab}" == "1"){
+                $("#cslet").select2("val", "{$cs}");
+                $(".tabs .tabTwo").addClass('active')
+            } else {
+                $(".tabs .tabOne").addClass('active')
+            }
+
+            $("#cslet").change(function(){
+                var cs = $(this).val();
+                window.location.replace('subwebtu?tab=1&cs='+cs);
+            })
+
+            $('.image-op').on('click',function(){
+                if($(this).attr('data-count') >= 8){
+                    $('#modal2').modal('show')
+                    return false;
+                }else{
+                    var cs = "";
+                    if("{$Think.get.tab}" == "1"){
+                        cs = $("#cslet").val();
+                    }
+
+                    location.href = '/meitu/newimgup?cs='+cs;
+                }
+            })
+        });
+    </script>
+</block>

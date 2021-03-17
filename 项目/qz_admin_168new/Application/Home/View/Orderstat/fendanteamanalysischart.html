@@ -1,0 +1,120 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-多时段团队人均分单量柱状图</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>多时段团队人均分单量柱状图</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/branchorderoverview/">分单量总览</a>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/customerorderstatistics/">分时段统计</a>
+                            </button>
+                            <button type="button" class="btn btn-info">团队分析</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header with-border text-center">
+                        <div class="box-title">
+                            <eq name="Think.get.average" value="1">
+                                多时段人均分单量柱状图
+                            <else />
+                                多时段团队分单量柱状图
+                            </eq>
+                        </div>
+                    </div>
+                    <div class="box-header">
+                        <div class="pull-right" role="group" aria-label="Large button group">
+                            <a class="btn btn-info" href="/orderstat/fendanteamanalysissheet/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                切换至表格
+                            </a>
+                            <eq name="Think.get.average" value="1">
+                                <a class="btn btn-info" href="/orderstat/fendanteamanalysischart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=0">
+                                    切换至团队
+                                </a>
+                            <else />
+                                <a class="btn btn-info" href="/orderstat/fendanteamanalysischart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=1">
+                                    切换至人均
+                                </a>
+                            </eq>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div id="canvas" class="col-xs-12 no-padding" style="height: 600px;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:'ture'
+    });
+
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+
+    option = {
+        title: {
+            subtext: '查询时间：{$main.start_time}到{$main.end_time}',
+            x: '75%'
+        },
+        tooltip : {
+            trigger: 'axis',
+            axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+        legend: {
+            data: {$main.echarts.legend},
+            orient:'vertical',
+            x:'right',
+            top:'50px',
+        },
+        grid: {
+            left: '3%',
+            right: '8%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis:  {
+            type: 'value'
+        },
+        yAxis: {
+            type: 'category',
+            data: {$main.echarts.yAxis},
+
+        },
+        series: {$main.echarts.series}
+    };
+    myChart.setOption(option);
+
+    window.onresize=function(){
+        var myChart = echarts.init(Dom);
+        myChart.setOption(option);
+    }
+
+</script>
+</block>

@@ -1,0 +1,240 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <if condition="$getdata['id']">
+        <title>编辑专题-页面内容设置</title>
+    <else/>
+        <title>新增专题-页面内容设置</title>
+    </if>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/subthemeatic/css/addthemeaticpageinfo.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <if condition="$getdata['id']">
+                            <h4 class="col-xs-2">分站-专题页管理 > 编辑专题</h4>
+                            <else/>
+                            <h4 class="col-xs-2">分站-专题页管理 > 新增专题</h4>
+                        </if>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="info-tab">
+                        <if condition="$getdata['id']">
+                            <a href="/subthematic/addthematicbasicinfo?ztid={$Think.get.id}">页面基础信息设置</a>
+                            <else/>
+                            <a href="/subthematic/addthematicbasicinfo">页面基础信息设置</a>
+                        </if>
+                        <span class="active navRight">页面内容设置</span>
+                    </div>
+                    <div class="box-body" style="padding-left:35px;">
+                        <div>
+                            <i class="red">*</i>
+                            <span>专题页简介：</span>
+                        </div>
+                        <div>
+                            <textarea class="form-control w70" placeholder="请输入专题简介" name="add_description" maxlength="500" style="height:100px;">{$info.synopsis}</textarea>
+                            <input class="form-control w50" type="hidden" value="{$info.id}" name="id"  maxlength="60"/>
+                        </div>
+                        <div class="mb15">
+                            <i class="red">*</i>
+                            <span>选择装修公司：</span>
+                            <span class="btn btn-primary choose-company">选取</span>
+                        </div>
+                        <div class="w70">
+                            <table class="table table-hover table-bordered table-company">
+                                <thead>
+                                <tr>
+                                    <th>装修公司ID</th>
+                                    <th>装修公司简称</th>
+                                    <th>服务特长</th>
+                                    <th>会员状态</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <volist name="choosecompanylist" id="vo">
+                                    <tr>
+                                        <td>{$vo.company_id}</td>
+                                        <td>{$vo.company_jc}</td>
+                                        <td>{$vo.fuwu}</td>
+                                        <td>{$vo.vipstatus}</td>
+                                        <td class="delete company-delete" data-id="{$vo.id}">删除</td>
+                                    </tr>
+                                </volist>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mb15">
+                            <i class="red">*</i>
+                            <span>选择装修案例：</span>
+                            <a href="/subthematic/choosecases?ztid={$Think.get.id}" class="btn btn-primary choose-anli">选取</a>
+                        </div>
+                        <div class="w40">
+                            <table class="table table-hover table-bordered table-anli">
+                                <thead>
+                                <tr>
+                                    <th>装修案例ID</th>
+                                    <th>装修案例名称</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                    <volist name="choosecaselist" id="vo">
+                                        <tr>
+                                            <td>{$vo.cases_id}</td>
+                                            <td>{$vo.cases_title}</td>
+                                            <td class="delete anli-delete" data-id="{$vo.id}">删除</td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <i class="red">*</i>
+                            <span>装修知识：根据专题名完全匹配文章标签调用6篇</span>
+                        </div>
+                        <div class="info-btn">
+                            <a href="#" class="btn btn-primary save-btn">保存</a>
+                            <span class="btn cancel-btn">返回</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+          if(localStorage.getItem("description") != null){
+            $("textarea[name=add_description]").val(localStorage.getItem("description"))
+          }
+          $(".choose-company").click(function () {
+            var description = $("textarea[name=add_description]").val();
+            localStorage.setItem("description", description);
+            window.location.href = '/subthematic/choosecompanys'+'?ztid='+{$Think.get.id};
+          })
+          $(".choose-anli").click(function () {
+            var description = $("textarea[name=add_description]").val();
+            localStorage.setItem("description", description);
+            window.location.href = '/subthematic/choosecases'+'?ztid='+{$Think.get.id};
+          })
+            //返回
+          $(".cancel-btn").click(function () {
+            localStorage.removeItem("description");
+            window.location.href = '/subthematic';
+          })
+            //保存
+            $(".save-btn").click(function (){
+                var id = $("input[name=id]").val();
+                var description = $("textarea[name=add_description]").val();
+              var description = description.replace(/\s*/g,'')
+                var params = {};
+                params.id = id;
+                params.synopsis = description;
+                if(description == ""){
+                    alert("请输入专题简介");
+                    return false;
+                }
+              if($.trim(description) == ''){
+                alert("简介不能为空格");
+                return false;
+              }
+                if($(".table-company tbody tr").length == 0){
+                    alert("请选择装修公司");
+                    return false;
+                }
+                if($(".table-anli tbody tr").length == 0){
+                    alert("请选择装修案例");
+                    return false;
+                }
+
+                $(".addbutton").attr("disabled", "disabled");
+                $.ajax({
+                    url: '/subthematic/editthematicaction',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: params
+                })
+                    .done(function(data) {
+                        if(data.error_code == 1){
+                            layer.msg('编辑成功', {icon: 1});
+                            setTimeout("history.go(0);",1000);
+                          localStorage.removeItem("description");
+                        }else{
+                            $("#btn").removeAttr("disabled");
+                            alert(data.error_msg);
+                            return false;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $(".addbutton").removeAttr("disabled");
+                        alert("网络错误，请稍后重试！");
+                    })
+            })
+
+            //删除选择的装修公司
+            $('.company-delete').click(function(){
+                if (confirm("确定删除吗？")) {
+                    var id = $(this).data('id');
+                    var params = {};
+                    params.id = id;
+                    $.ajax({
+                        url: '/subthematic/deletechoosecompany',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: params
+                    })
+                        .done(function (data) {
+                            if (data.error_code == 1) {
+                                layer.msg('删除成功', {icon: 1});
+                                setTimeout("history.go(0);",1000);
+                            } else {
+                                alert(data.error_msg);
+                                return false;
+                            }
+                        })
+                        .fail(function (xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+                }
+            });
+
+            //删除选择的案例anli-delete
+            $('.anli-delete').click(function(){
+                if (confirm("确定删除吗？")) {
+                    var id = $(this).data('id');
+                    var params = {};
+                    params.id = id;
+                    $.ajax({
+                        url: '/subthematic/deletechoosecases',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: params
+                    })
+                        .done(function (data) {
+                            if (data.error_code == 1) {
+                                layer.msg('删除成功', {icon: 1});
+                                setTimeout("history.go(0);",1000);
+                            } else {
+                                alert(data.error_msg);
+                                return false;
+                            }
+                        })
+                        .fail(function (xhr) {
+                            alert("网络错误，请稍后重试！");
+                        })
+                }
+            });
+
+
+        })
+    </script>
+</block>

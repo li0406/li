@@ -1,0 +1,183 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网文章榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/qckindlyremind/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>温馨提醒</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/qckindlyremind/">温馨提醒</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                            发布时间：<input type="text" class="form-control publish-time-end datepicker" placeholder="发布时间" value="{$Think.get.publish_time_end}">
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-1 ">
+                <button type="button" class="btn-add btn btn-block btn-success mgb-15">
+                    <i class="fa fa-plus-circle"></i>新增
+                </button>
+            </div>
+
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">查询列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form role="form" class="list-form">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>发布时间</th>
+                                        <th class="input-content-head">提醒内容</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <volist name="main.info.list" id="vo">
+                                        <tr>
+                                            <td>{$vo.id}</td>
+                                            <td>{$vo.publish_time|date='Y-m-d',###}</td>
+                                            <td>{$vo.content}</td>
+                                            <td></td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <notempty name="main.info.page">
+                        <div class="box-footer clearfix">
+                            <div class="col-xs-12">
+                                {$main.info.page}
+                            </div>
+                        </div>
+                    </notempty>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+    $(document).ready(function(){
+        //初始化插件
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+
+        //新增温馨提示内容
+        $('.btn-add').click(function(event) {
+            var id = $('.list-form tbody tr td:first').text();
+            if (id == '') {
+                id = 0;
+            };
+            var id = parseInt(id) + 1;
+            $('.list-form tbody').prepend(
+                '<tr>' +
+                '<td>默认</td>' +
+                '<td>默认当前日期</td>' +
+                '<td><input name="content" class="input-content"></td>' +
+                '<td><a href="javascript:void(0)" class="table-save-btn">保存</a></td>' +
+                '</tr>'
+            );
+
+            $("body").on("click",".table-save-btn",function(event) {
+                var content = $(this).parent().parent().find('.input-content').val();
+                if (content == '' || typeof(content) == 'undefined') {
+                    var d = dialog({
+                        title: '消息',
+                        content: '请填写温馨提示内容',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    d.show();
+                    return false;
+                };
+                $.ajax({
+                    url: '/qckindlyremind/operate/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        content:content
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        var d = dialog({
+                            title: '消息',
+                            content: '添加成功',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                                window.location.href = window.location.href;
+                            }
+                        });
+                        d.show();
+                        return false;
+                    }else{
+                        var d = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {
+                            }
+                        });
+                        d.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,网络错误！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                })
+            })
+        });
+
+        //搜索按钮
+        $('#search').click(function(event) {
+            window.location.href = '/qckindlyremind/?publish_time_end=' + $('.publish-time-end').val();
+        });
+    })
+    </script>
+</block>

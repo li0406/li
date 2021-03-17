@@ -1,0 +1,183 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <!--样式表-->
+    <link href="/assets/mobile/video/css/zhuangxiujiangtang.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link href="/assets/mobile/video/css/dropload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+    <link rel="canonical" href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}{$_SERVER['REQUEST_URI']}" />
+    <style>
+        #q-a-z-dv{padding: 0 0.08rem; background-color: white;margin-top: 10px;}
+    </style>
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <!-- 页面标题 -->
+    <div class="m-header-tit">{$basic.body.title}</div>
+    <!-- 页面logo -->
+    <a href="/" class="m-header-left"></a>
+</block>
+<block name="content">
+<!--     <div class="box">
+    <div class="form_control">
+        <form action="">
+            <input type="text" name="keyword" value="" placeholder="请输入您想了解的装修百科">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </div>
+</div> -->
+    <div class="type_box">
+        <div id="parent_list">
+            <ul>
+                <volist name="allCategory" id="vi">
+                    <eq name="vi.char" value="$bigCategory['char']">
+                        <li class="active">
+                            <a href="/video/{$vi.char}/" class="active">{$vi.name}</a>
+                            <div class="under_line"></div>
+                        </li>
+                    <else />
+                        <li>
+                            <a href="/video/{$vi.char}/" >{$vi.name}</a>
+                            <div class="under_line"></div>
+                        </li>
+                    </eq>
+                </volist>
+            </ul>
+        </div>
+        <div id="children_list">
+            <div id="wrapper" class="active">
+                <ul id="paren_width">
+                    <volist name="bigCategory.children" id="vi">
+                        <eq name="vi.char" value="$subCategory['char']">
+                            <li>
+                                <a href="/video/{$vi.char}/" class="active">{$vi.name}</a>
+                            </li>
+                        <else />
+                            <li>
+                                <a href="/video/{$vi.char}/">{$vi.name}</a>
+                            </li>
+                        </eq>
+                    </volist>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="video_box">
+        <ul class="wrapul">
+            <volist name="info.info" id="vo">
+                <li class="zxfgjj">
+                    <a href="/video/v{$vo.id}.html">
+                        <div class="img_box">
+                            <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.cover_img}-w400.jpg" alt="{$vo.title}">
+                            <div class="video_kg"><img src="/assets/mobile/video/img/playanniu.png" alt=""></div>
+                            <span class="qishutime">{$vo.time|date="Y-m-d",###}期</span>
+                        </div>
+                        <p class="video_name">
+                            {$vo.title}
+                        </p>
+                        <p class="video_author">
+
+                            本期讲师: <empty name="vo.author" >小鹿老师</empty>{$vo.author}
+                        </p>
+                    </a>
+                </li>
+
+            </volist>
+        </ul>
+    </div>
+    <include file="Common/footfadantc"/>
+</block>
+<block name="script">
+    <!--脚本-->
+    <script type="text/javascript" src="/assets/mobile/video/js/dropload.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/sub/js/TouchSlide.1.1.js?v={:C('STATIC_VERSION')}"></script>
+    <!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script> -->
+    <!-- <script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+    <script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+    <script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/mobile/qzgold/js/qz_gold.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var cityId = "{$cityInfo.id}";
+        console.log(cityId)
+        // 调用广告
+        qzInsertGold('.wrapul .zxfgjj:first-child', 7, cityId)
+
+        $(function(){
+            var num=$("#paren_width li").length;
+            $("#paren_width").width(num*$("#paren_width li").width()+15);
+            new JRoll("#wrapper",{scrollX:true,scrollY:false});
+            // 页数
+            var page = 1;
+            // dropload
+            $('.zhuagnxiuxg').dropload({
+                scrollArea : window,
+                loadDownFn : function(me){
+                    page++;
+                    // 拼接HTML
+                    var result = '';
+                    $.ajax({
+                        type: 'GET',
+                        url: '{$info.canonical}?p=' + page,
+                        dataType: 'json',
+                        success: function(data){
+                            if (data.status == 1) {
+                                var domain = '{$SCHEME_HOST.scheme_full}{:C("QINIU_DOMAIN")}';
+                                var data = data.data;
+                                for(var i=0; i<data.length; i++){
+                                    var css = (i%2 == 0) ? 'zxfgjj' : 'zxfgjj02';
+                                    result = result + '<li class="'+css+'"><a href="/video/v'+data[i].id+'.html"><div class="img_box"><img src="'+domain+'/'+data[i].cover_img+'-w400.jpg"><div class="video_kg"><img src="/assets/mobile/video/img/playanniu.png" alt=""></div><span class="qishutime">{$vo.time|date="Y-m-d",###}期</span></div> <p class="video_name">'+data[i].title+'</p><p class="video_author">本期讲师:'+data[i].author+'</p></a></li>';
+                                }// <i class="fa fa-play-circle-o"></i>
+                            } else {
+                                // 锁定
+                                me.lock();
+                                // 无数据
+                                me.noData();
+                            }
+
+                            // 插入数据到页面，放到最后面
+                            $('.wrapul').append(result);
+                            // 每次数据插入，必须重置
+                            me.resetload();
+
+                        },
+                        error: function(xhr, type){
+                            alert('Ajax error!');
+                            // 即使加载出错，也得重置
+                            me.resetload();
+                        }
+                    });
+                }
+            });
+        })
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$basic.head.title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+    <script>
+        $(function () {
+            var Oli = $(".wrapul li").eq(4)
+            var html = '<li class="zxfgjj five-appentry" data-tag="M-18" style="cursor:pointer;">\n' +
+                '                        <div class="img_box">\n' +
+                    '                            <img src="/assets/mobile/video/img/video.png">\n' +
+                '                        </div>\n' +
+                '                        <p class="video_name">\n' +
+                '                            更多装修干货视频就在齐装APP\n' +
+                '                        </p>\n' +
+                '                        <p class="video_author">\n' +
+                '                            <span style="color:#FF4E4E;">齐装APP</span>\n' +
+                '                            <span style="display: inline-block;padding: 0.04rem 0.1rem;;background: #FFB1B1;color: #FF4E4E;border-radius: 17px;position: absolute;right: 0.1rem;">立即下载</span>\n' +
+                '                        </p>\n' +
+                '                </li>'
+            $(html).insertAfter(Oli)
+        })
+    </script>
+</block>

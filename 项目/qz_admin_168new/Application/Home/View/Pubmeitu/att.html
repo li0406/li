@@ -1,0 +1,132 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>公装美图</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>公装美图--{$attname}管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/pubmeitu">公装美图管理</a></li>
+            <li class="active"><a href="/pubmeitu/att?type={$Think.get.type}">{$attname}管理</a></li>
+        </ol>
+    </section>
+    <section class="content-header">
+        <a href="/pubmeitu/action?type={$Think.get.type}" class="btn btn-primary"><i class="fa fa-plus"></i> 添加{$attname}</a>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <span class="span">{$attname}名称：</span>
+                            </div>
+                            <div class="col-xs-2">
+                                <input type="text" name="query" class="form-control"  placeholder="{$attname}名称" value="{$query}">
+                            </div>
+                            <div class="col-xs-1">
+                              <button type="submit" class="btn btn-primary submit"><i class="fa fa-search"></i>查询</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="content-header">
+                    <h1 class="">{$attname}列表</h1>
+                </section>
+                <div class="box box-default">
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                           <th class="col-sm-1">{$attname}名称</th>
+                           <th class="col-sm-1">排序</th>
+                           <th class="col-sm-1">推荐状态</th>
+                           <th class="col-sm-1">启用状态</th>
+                           <th class="col-sm-1">添加状态</th>
+                           <th class="col-sm-1">操作</th>
+                        </tr>
+                        <volist name="info.list" id="v">
+                        <tr>
+                           <td class="col-sm-1">{$v.name}</td>
+                           <td class="col-sm-1">{$v.px}</td>
+                           <td class="col-sm-1">
+                                <if condition="$v['istop']">
+                                    是
+                                <else/>
+                                    否
+                                </if>
+                            </td>
+                           <td class="col-sm-1">
+                               <if condition="$v['enabled']">
+                                    是
+                                <else/>
+                                    否
+                                </if>
+                            </td>
+                           <td class="col-sm-1">{$v.time}</td>
+                           <td class="col-sm-1">
+                                <span title="编辑" class="fa fa-pencil edit" data-id="{$v.id}"></span>
+                                <if condition="$v['enabled']">
+                                    <span title="删除标签" class="fa fa-close enabled" data-id="{$v.id}" data-on="{$v.enabled}"></span>
+                                <else/>
+                                     <span title="启用标签" class="fa fa-check enabled" data-id="{$v.id}" data-on="{$v.enabled}"></span>
+                                </if>
+                                <!-- <span title="删除" class="fa fa-trash" data-id="{$v.id}"></span> -->
+                           </td>
+                        </tr>
+                        </volist>
+                    </table>
+                    {$info.page}
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript">
+var attname = "{$Think.get.type}";
+$(".submit").click(function(event) {
+    var query = $("input[name=query]").val();
+    window.location.href = "/pubmeitu/att?type="+attname+"&keyword="+query;
+});
+
+//编辑美图
+$(".edit").click(function(event) {
+    var id = $(this).attr('data-id');
+    window.location.href="/pubmeitu/action?type="+attname+"&id="+id;
+});
+
+//删除
+$('.enabled').click(function(){
+            var id = $(this).attr('data-id');
+            if(id === ''){
+                alert('数据错误');
+                return;
+            }
+            var on = $(this).attr('data-on');
+            $.ajax({
+                url: '/pubmeitu/del/',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    on: on,
+                    type: "att"
+                    },
+            })
+            .done(function(data) {
+                if(data.status == 1){
+                    window.location.href="/pubmeitu/att?type={$Think.get.type}";
+                }
+            })
+        });
+</script>
+</block>

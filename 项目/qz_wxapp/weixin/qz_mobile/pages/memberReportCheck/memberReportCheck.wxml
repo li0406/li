@@ -1,0 +1,195 @@
+<import src="../../components/modal/modal.wxml" />
+<view class='header'>
+    <view class='iconfont icon-location dingwei' bindtap='toCity'>{{curCity}}</view>
+    <view class='search'>
+        <view class='icon'>
+            <image src='../../img/search.png'></image>
+        </view>
+        <input placeholder='公司名称、负责人、电话' bindconfirm="searchWord" confirm-type="search"></input>
+    </view>
+</view>
+<view class='tab-back'>
+    <view class='tab'>
+        <view class="flex1">
+            <picker class="flex_text" value="{{style_index}}" range="{{style}}" range-key="name" bindchange="bindPickerChange_style">
+                <view wx:if="{{style_index == 0}}">合作类型</view>
+                <view wx:else>{{style[style_index].name}}</view>
+            </picker>
+            <image src="../../img/jian.png"></image>
+        </view>
+
+        <view class="flex1">
+            <picker class="flex_text" value="{{isNew_index}}" range="{{isNew}}" range-key="name" bindchange="bindPickerChange_isNew">
+                <view wx:if="{{isNew_index == 0}}">新/老会员</view>
+                <view wx:else>{{isNew[isNew_index].name}}</view>
+            </picker>
+            <image src="../../img/jian.png"></image>
+        </view>
+        <view class="flex1">
+            <picker class="flex_text" value="{{status_index}}"  range="{{status}}" range-key="name" bindchange="bindPickerChange_status">
+                <view wx:if="{{status_index == 0}}">状态</view>
+                <view wx:else>{{status[status_index].name}}</view>
+            </picker>
+            <image src="../../img/jian.png"></image>
+        </view>
+    </view>
+</view>
+<view class='list'>
+    <view class='ul'>
+        <view class='li clearfix' wx:for="{{checkList}}" wx:for-index='index' wx:key>
+            <view class='company-name'>
+                <text class='jianchen'>{{item.company_name}}</text><text class="red" wx:if="{{item.repetition_num}}">重{{item.repetition_num}}</text>
+            </view>
+            <view class='info clearfix' catchtap='checkMemberReport' data-id='{{item.id}}' data-cooperationtype='{{item.cooperation_type}}'>
+                <view class='w70 name' wx:if='{{item.city_name}}'>
+                    <view class='t1' style='display:inline-block;vertical-align:top;'>城市：</view>
+                    <view class='t2 fixcswidth'>{{item.city_name ? item.city_name : '----'}}</view>
+                    <view class="{{item.related_payment_status === 1? 'isSmallG':'isSmallR'}}">{{item.related_payment_status === 1? '已关联小报备':'未关联小报备'}}</view>
+                </view>
+                <view class="status wait-sub" style="top:0; max-width:340rpx; width:auto; right:0rpx;">
+                    <text wx:if="{{item.status == 2}}" class='fix-radius c78beff'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 3}}" class='fix-radius cacde87'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 4}}" class='fix-radius cff3b3b'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 5}}" class='fix-radius c5dbb16'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 6}}" class='fix-radius cff3b3b'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 7}}" class='fix-radius cff3b3b'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 8}}" class='fix-radius c5dbb16'>{{item.status_name}}</text>
+                    <text wx:if="{{item.status == 9}}" class='fix-radius cff3b3b'>{{item.status_name}}</text>
+                </view>
+                <view class='w50 name'>
+                    <text class='t1'>合作类型：</text>
+                    <text class='t2'>{{item.cooperation_type_name}}</text>
+                </view>
+                <view class='w50 way' wx:if="{{item.cooperation_type == 6}}">
+                    <text class='t1'>返点比例：</text>
+                    <text class='t2'>{{item.back_ratio ? item.back_ratio : "----"}}</text>
+                </view>
+                <view class='w100' wx:elif="{{item.cooperation_type == 14}}">
+                    <text class='t1'>单倍/几倍：</text>
+                    <text class='t2'>标杆会员（保产值）</text>
+                </view>
+                <view class='w100' wx:elif="{{item.cooperation_type == 15}}">
+                    <text class='t1'>返点比例：</text>
+                    <text class='t2'>标杆会员（保产值）</text>
+                </view>
+                <view class='w50 way' wx:elif="{{item.cooperation_type != 5}}">
+                    <text class='t1'>单倍/几倍：</text>
+                    <text class='t2'>{{item.viptype ? item.viptype : "----"}}</text>
+                </view>
+                <view class='w100' wx:if='{{item.cooperation_type != 4}}'>
+                    <text class='t1'>新/老会员：</text>
+                    <text class='t2'>{{item.is_new == '1'?'新会员':'老会员'}}</text>
+                </view>
+                <view class='w100'>
+                    <text class='t1'>上传时间：</text>
+                    <text class='t2'>{{item.submit_time}}</text>
+                </view>
+                <!-- <view class='w100'>
+                    <text class='t1'>审批完成时间：</text>
+                    <text class='t2'>{{item.check_time}}</text>
+                </view> -->
+                <view class='w100' wx:if='{{item.cooperation_type == 8}}'>
+                    <text class='t1'>延期合同日期：</text>
+                    <text class='t2'>{{item.delay_contract_start_show}} 至 {{item.delay_contract_end_show}}</text>
+                </view>
+                <view class='w100' wx:if="{{item.contract_start && item.contract_end}}">
+                    <text class='t1'>总合同时间：</text>
+                    <text class='t2'>{{item.contract_start_show}} ~ {{item.contract_end_show}}</text>
+                </view>
+                <!-- <view class='w100' wx:if='{{item.cooperation_type != 5}}'>
+                    <text class='t1'>{{item.cooperation_type == 4 ? '时间：' : '本次会员时间：'}}</text>
+                    <text class='t2'>{{item.current_contract_start}} —— {{item.current_contract_end}}</text>
+                </view> -->
+                <view class='w50' wx:if='{{item.total_contract_amount}}'>
+                    <text class='t1'>总合同金额：</text>
+                    <text class='t2'>{{item.total_contract_amount}}</text>
+                </view>
+                <view class='w50 level' wx:if='{{item.cooperation_type != 8}}'>
+                    <text class='t1'>{{item.cooperation_type == 4 ? '金额：' : '本次到款金额：'}}</text>
+                    <text class='t2'>{{item.current_contract_amount}}</text>
+                </view>
+                <view class='w100' wx:if="{{item.promised_orders}}">
+                    <text class='t1'>承诺订单量：</text>
+                    <text class='t2'>{{item.promised_orders}}</text>
+                </view>
+                <view class='w100'>
+                    <text class='t1'>负责人：</text>
+                    <text class='t2'>{{item.saler}}</text>
+                </view>
+            </view>
+            <view class='log-report clearfix'>
+                <view class='edit' data-id='{{item.id}}' data-cooperationtype='{{item.cooperation_type}}' catchtap='showModalFn' wx:if='{{item.status == "2"}}'>
+                    <i class='iconfont icon-aim red'></i>
+                    <text>审核</text>
+                </view>
+                <view class='edit' data-id='{{item.id}}' data-cooperationtype='{{item.cooperation_type}}' catchtap='rejectShowModalFn' wx:if='{{item.show_recall == 1}}'>
+                    <image src='../../img/shanchu.png' class="iconfont icon-see"></image>
+                    <text>驳回</text>
+                </view>
+                <view class='detail' data-id='{{item.id}}' data-cooperationtype='{{item.cooperation_type}}' catchtap='checkMemberReport'>
+                    <!-- <i class='iconfont icon-book red'></i> -->
+                    <image src='../../img/chakan.png' class="iconfont icon-see"></image>
+                    <text>查看</text>
+                </view>
+            </view>
+        </view>
+    </view>
+    <view class='page' wx:if='{{page}}'>
+        <view class="pre {{pageCurrent==1?'disabled':''}}" bindtap='prevBtn'>上一页</view>
+        <view class='total'>
+            <picker bindchange="toPage" value="" range="{{pageNumber}}">
+                <view class="picker">
+                    <view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+                </view>
+            </picker>
+        </view>
+        <view class="next {{pageCurrent == pageTotalNumber?'disabled':''}}" bindtap='nextBtn'>下一页</view>
+    </view>
+    <view class='no-result' wx:if='{{noResult}}'>
+        <image src='../../img/no_result.png'></image>
+        <view>暂无搜索结果</view>
+    </view>
+    <view class='no-result' wx:if='{{noInternet}}'>
+        <image src='../../img/no_internet.png'></image>
+        <view>网络开了小差~请稍等</view>
+        <button bindtap='toCustom'>重新加载</button>
+    </view>
+</view>
+
+<modal show="{{showModal}}" title='{{modalTitle}}' cancelTitle='关闭' confirmTitle='提交' height='60%' bindcancel="modalCancel" bindconfirm='modalConfirm'>
+    <view class='modal-content'>
+        <view class="check-body">
+            <view class="radio-part">
+                <radio-group class="radio-group" bindchange="radioChange">
+                    <label class="radio" style="margin-right:50rpx;">
+                        <radio value="3" checked="{{checkPassVal == 3}}" /> 通过
+                    </label>
+                    <label class="radio">
+                        <radio value="4" checked="{{checkPassVal == 4}}" /> 不通过
+                    </label>
+                </radio-group>
+            </view>
+            <view class='note-part clearfix'>
+                <text class="note-part-text">备注</text>
+                <view class='note-part-textarea'>
+                    <textarea name="textarea" maxlength='150' bindinput='getRemark' fixed="true" value="{{checkRemark}}" />
+                </view>
+            </view>
+        </view>
+    </view>
+</modal>
+<modal show="{{rejectShowModal}}" title='驳回' cancelTitle='取消' confirmTitle='确定' height='60%' bindcancel="rejectModalCancel" bindconfirm='rejectModalConfirm'>
+    <view class='modal-content'>
+        <view class="check-body">
+            <view class="reject-modal-tip">
+                确定要驳回该条数据吗？此操作不可挽回！
+            </view>
+            <view class='note-part clearfix'>
+                <text class="note-part-text">备注</text>
+                <view class='note-part-textarea'>
+                    <textarea name="textarea" maxlength='150' bindinput='getRemarkReject' fixed="true" value="{{rejectCheckRemark}}" />
+                </view>
+            </view>
+        </view>
+    </view>
+</modal>

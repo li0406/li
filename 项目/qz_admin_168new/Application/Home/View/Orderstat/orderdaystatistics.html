@@ -1,0 +1,224 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市审单数量统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市分单汇总统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active">城市审单数量统计</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body act-box">
+                        <div class="col-xs-10">
+                            <form id="searchform" action="/orderstat/orderDayStatistics" method="get">
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="begin" placeholder="开始时间" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-sm-2" style="margin-top:10px">
+                                    <input type="text" class="form-control datetime" name="end" placeholder="开始时间" value="{$Think.get.end}">
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1" style="margin-top:10px">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <button type="button" id="export" class="btn btn-info"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <div class="box-tools"></div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="all_list">
+                            <thead >
+                                <tr style="font-size:14px;color:#000">
+                                    <th>日期</th>
+                                    <th>总数</th>
+
+                                    <th>分</th>
+                                    <th>分没人跟</th>
+                                    <th>赠</th>
+
+                                    <th>赠没人跟</th>
+                                    <th>总有效率</th>
+                                    <th>分单率</th>
+
+                                    <th>分单率(分+赠/10)</th>
+                                    <th>系数分单率</th>
+                                    <th>待定</th>
+
+                                    <th>无效</th>
+                                    <th>空号</th>
+                                    <th>装修公司</th>
+
+                                    <th>重复</th>
+                                    <th>拒绝服务</th>
+                                    <th>未接通</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataLists">
+                                <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.date}</td>
+                                        <td>{$vo.all}</td>
+
+                                        <td>{$vo.fen}</td>
+                                        <td>{$vo.no_fen}</td>
+                                        <td>{$vo.zen}</td>
+
+                                        <td>{$vo.no_zen}</td>
+                                        <td>{$vo.fz_rate}%</td>
+                                        <td>{$vo.fen_rate}%</td>
+
+                                        <td>{$vo.last_fen_rate}%</td>
+                                        <td>{$vo.last_fen_zen_rate}%</td>
+                                        <td>{$vo.dd}</td>
+
+                                        <td>{$vo.wx}</td>
+                                        <td>{$vo.kh}</td>
+                                        <td>{$vo.zxgs}</td>
+
+                                        <td>{$vo.cf}</td>
+                                        <td>{$vo.jjfw}</td>
+                                        <td>{$vo.wjt}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+            <p>分单率:（分+赠/10）/总数</p>
+            <p>系数分单率：分单率（分+赠/10）/总数/系数</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+    $("#city").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("#city").select2("val", "{$Think.get.city_id}");
+
+    $("#manager").select2({
+        allowClear: true,
+        placeholder: "客服师级"
+    });
+    $("#manager").select2("val", "{$Think.get.manager}");
+
+    $("#group").select2({
+        allowClear: true,
+        placeholder: "选择客服组"
+    });
+    $("#group").select2("val", "{$Think.get.group}");
+
+    $('.datetime').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        format: "yyyy-mm-dd",
+        minView: 2,
+        pickerPosition: "bottom-left",
+        autoclose: true,
+    });
+
+    $('#all_list').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       },
+        scrollY:"600px",
+    });
+
+
+    $("#export").click(function(event) {
+        var colums = [];
+        var data = [];
+        $("#all_list th").each(function() {
+            var text = $(this).html().trim();
+            text = text.split("/")[0];
+            var sub = [];
+            sub["text"] = text;
+            sub["fontColor"] = $(this).css("color");
+            sub["bgColor"] = $(this).css("background-color");
+            colums.push(sub);
+        });
+        data.push(colums);
+
+        $("#dataLists tr").each(function(i) {
+            var tr = $(this);
+            var sub = [];
+            tr.find("td").each(function() {
+                var text = $(this).text().trim();
+
+                var _td = {
+                    text: text,
+                    fontColor: $(this).css("color"),
+                    bgColor: $(this).css("background-color")
+                }
+                sub.push(_td);
+            });
+            data.push(sub);
+        });
+
+        $(this).exportExcel({
+            data: data,
+            title: "城市审单数量统计表",
+            url: "/export/download"
+        });
+    });
+    </script>
+
+    <if condition="date('d') EQ '01' AND date('H') LT 18">
+    <script type="text/javascript">
+         $("body").Alert({
+              msg:'因数据采集时间问题,每月1号18点之前只能查看前一个月的数据,历史数据查询不受限制！',
+              level:1
+          });
+    </script>
+    </if>
+</block>

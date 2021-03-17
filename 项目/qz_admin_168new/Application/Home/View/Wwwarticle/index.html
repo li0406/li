@@ -1,0 +1,482 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网文章榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/css/wwwarticle.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>主站文章</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/wwwarticle/">文章管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-4" id="articleclass">
+                            选择分类：
+                                <div class="cx-select-wrap">
+                                    <select data-value="{$Think.get.onelevel}" class="onelevel cx-select form-control">
+                                    </select>
+                                    <select data-value="{$Think.get.twolevel}" class="twolevel cx-select mg form-control">
+                                    </select>
+                                    <select data-value="{$Think.get.threelevel}" class="threelevel cx-select mg form-control">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-1">
+                            状态：
+                                <select class="form-control" id="state">
+                                    <option value="0" selected>请选择</option>
+                                    <option value="1">未审核</option>
+                                    <option value="2">已审核</option>
+                                    <option value="3">预发布</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1" id="articleclass">
+                            是否推荐：
+                                <select class="form-control" id="recommend">
+                                    <option value="" selected>请选择</option>
+                                    <option value="0">未推荐</option>
+                                    <option value="1">推荐</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                            标题或ID：<input type="text" id="condition" class="form-control condition" placeholder="标题或ID" value="{$Think.get.condition}">
+                            </div>
+                            <div class="col-xs-2">
+                                词条名：<input type="text" id="item" class="form-control" name="item" placeholder="词条名" value="{$Think.get.item}">
+                            </div>
+                            <div class="col-xs-1">
+                                编辑人员：
+                                <select class="form-control" id="role_id">
+                                    <option value="0" selected>请选择</option>
+                                    <option value="24" <if condition='$getdata["role_id"] eq 24'>selected="selected"</if> >主站编辑</option>
+                                    <option value="69" <if condition='$getdata["role_id"] eq 69'>selected="selected"</if> >编辑组长</option>
+                                    <option value="151" <if condition='$getdata["role_id"] eq 151'>selected="selected"</if> >兼职编辑</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1" id="editerid">
+                                &nbsp;
+                                <select class="form-control" id="editer_id">
+                                    <option value="" selected>请选择</option>
+                                    <volist name="role_list" id="vo">
+                                        <if condition="$getdata['editer_id'] eq $vo['id']" >
+                                            <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                                        <else />
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </if>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-xs-2">
+                                发布时间-开始：<br>
+                                <input type="text" class="form-control addtime-start datepicker" placeholder="发布时间-开始" value="{$Think.get.addtimeStart}">
+                            </div>
+                            <div class="col-xs-2">
+                                发布时间-结束：<br>
+                                <input type="text" class="form-control addtime-end datepicker" placeholder="发布时间-结束" value="{$Think.get.addtimeEnd}">
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a href="/wwwarticle/operate/" class="pull-right">
+                                    <button class="btn btn-block btn-success normal" style="width:auto">
+                                        <i class="fa fa-plus-circle"></i>新增文章
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">文章列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>标题</th>
+                                        <th>关键字</th>
+                                        <th>标签</th>
+                                        <th>分类</th>
+                                        <th>创建时间</th>
+                                        <th>发布时间</th>
+                                        <th>发布人</th>
+                                        <th>IP浏览量</th>
+                                        <th>状态</th>
+                                        <th width="140px">操作</th>
+                                    </tr>
+                                    <volist name="info.info.list" id="vo">
+                                        <tr>
+                                            <td>{$vo.id}</td>
+                                            <td>
+                                                <if condition="$vo['state'] EQ 2">
+                                                    <if condition="in_array($vo['class_id'],$info['qwdz'])">
+                                                        <a href="http://www.{:C('QZ_YUMING')}/qwdz/{$vo.shortname}/{$vo.id}.html" target="_blank">{$vo.title}</a>
+                                                    <else/>
+                                                        <a href="http://www.{:C('QZ_YUMING')}/gonglue/{$vo.shortname}/{$vo.id}.html" target="_blank">{$vo.title}</a>
+                                                    </if>
+
+                                                <else/>
+                                                    {$vo.title}
+                                                </if>
+                                            </td>
+                                            <td>{$vo.keywords}</td>
+                                            <td>{$vo.tagname}</td>
+                                            <td>
+                                                {$vo.classname}
+                                            </td>
+                                            <td>{$vo.createtime|date='Y-m-d',###}</td>
+                                            <td>{$vo.addtime|date='Y-m-d',###}</td>
+                                            <td>{$vo.uname}</td>
+                                            <td>{$vo.realview}</td>
+                                            <td>
+                                                <switch name="vo.state">
+                                                    <case value="-1"><span class="text-red">已删除</span></case>
+                                                    <case value="1"><span class="text-yellow">未审核</span></case>
+                                                    <case value="2"><span>已审核</span></case>
+                                                    <case value="3"><span class="text-aqua">预发布</span></case>
+                                                </switch>
+                                            </td>
+                                            <td data-id="{$vo.id}">
+                                                <a href="/wwwarticle/operate/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <eq name="vo.from_ruanwen" value="1">
+                                                    <span title="删除" class="fa fa-trash" style="color: #ccc; cursor:default;"></span>
+                                                <else/>                                                
+                                                    <a href="javascript:void(0)" class="state-btn" data-value="-1">
+                                                        <span title="删除" class="fa fa-trash"></span>
+                                                    </a>
+                                                </eq>
+                                                <if condition="!in_array($vo['state'], array('2'))">
+                                                    <a href="javascript:void(0)" class="state-btn" data-value="2">
+                                                        <span title="发布" class="fa fa-eye-slash"></span>
+                                                    </a>
+                                                <else />
+                                                    <a href="javascript:void(0)" class="state-btn" data-value='1' >
+                                                        <span title="撤销发布" class="fa fa-eye"></span>
+                                                    </a>
+                                                </if>
+                                                <eq name="vo.recommend" value="1">
+                                                    <a href="javascript:void(0)" class="recommend-btn" data-value="0">
+                                                        <span title="已推荐到列表页，点击后取消推荐" class="text-green fa fa-list"></span>
+                                                    </a>
+                                                <else />
+                                                    <a href="javascript:void(0)" class="recommend-btn" data-value='1' >
+                                                        <span title="未推荐到列表页，点击后推荐" class="text-gray fa fa-list"></span>
+                                                    </a>
+                                                </eq>
+                                                <switch name="vo.istop">
+                                                    <case value="0">
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="2">
+                                                            <span title="未推荐到咨询页，点击后推荐到咨询页" class="fa fa-toggle-right text-gray">
+                                                            </span>
+                                                        </a>
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="1">
+                                                            <span title="未推荐到首页，点击后推荐到首页" class="fa fa-home text-gray"></span>
+                                                        </a>
+                                                    </case>
+                                                    <case value="1">
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="2">
+                                                            <span title="未推荐到咨询页，点击后推荐到咨询页" class="fa fa-toggle-right text-gray">
+                                                            </span>
+                                                        </a>
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="0">
+                                                            <span title="已推荐到首页，点击后取消推荐" class="fa fa-home text-green"></span>
+                                                        </a>
+                                                    </case>
+                                                    <case value="2">
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="0">
+                                                            <span title="已推荐到咨询页，点击后取消推荐" class="fa fa-toggle-right text-green">
+                                                            </span>
+                                                        </a>
+                                                        <a href="javascript:void(0)" class="istop-btn" data-value="1">
+                                                            <span title="未推荐到首页，点击后推荐到首页" class="fa fa-home text-gray"></span>
+                                                        </a>
+                                                    </case>
+                                                    <default />
+                                                </switch>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$info.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#articleclass').cxSelect({
+                selects: ['onelevel', 'twolevel', 'threelevel'],
+                jsonValue: 'id',
+                jsonName: 'text',          // 数据标题字段名称
+                jsonSub: 'children',            // 子集数据字段名称
+                data: {$info.articleclass}
+            });
+            $(".datepicker").datetimepicker({
+                format:"yyyy-mm-dd",
+                startView: 2,
+                minView: 2,
+                todayBtn:true,
+                autoclose:true
+            });
+
+            var state = "{$Think.get.state}";
+            if(state != '' && state != 'null' && state != 'undefined'){
+                $('#state').val(state);
+            }
+            $('#recommend').val("{$Think.get.recommend}");
+
+            $('.state-btn').click(function(){
+                var id = $(this).parent().attr('data-id');
+                var state = $(this).attr('data-value');
+                if(state == -1){
+                    if(confirm("确定要删除该文章吗？此操作不可恢复！！")){
+                        $.ajax({
+                            url: '/wwwarticle/editstate/',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                id:id,
+                                state:state
+                            }
+                        })
+                        .done(function(data) {
+                            if(data.status == '1'){
+                                window.location.href = window.location.href;
+                            }else{
+                                var e = dialog({
+                                    title: '消息',
+                                    content: data.info,
+                                    okValue: '确 定',
+                                    quickClose: true,
+                                    ok: function () {}
+                                });
+                                e.show();
+                            }
+                        })
+                        .fail(function(xhr) {
+                            var e = dialog({
+                                title: '消息',
+                                content: '操作失败,请联系技术部门！',
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        })
+                    }
+                }else{
+                    $.ajax({
+                        url: '/wwwarticle/editstate/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id,
+                            state:state
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            window.location.href = window.location.href;
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                }
+            });
+
+            $('.istop-btn').click(function(){
+                var id = $(this).parent().attr('data-id');
+                var istop = $(this).attr('data-value');
+                $.ajax({
+                    url: '/wwwarticle/editistop/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        istop:istop
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+
+            $('.recommend-btn').click(function(){
+                var id = $(this).parent().attr('data-id');
+                var recommend = $(this).attr('data-value');
+                $.ajax({
+                    url: '/wwwarticle/editrecommend/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        recommend:recommend
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+
+            $("#role_id").change(function(){
+                var role_id = $(this).val()
+
+                if (!role_id) {
+                    $('#editer_id').empty();
+                    html = '<option value="" selected>请选择</option>';
+                    $('#editer_id').append(html);
+                    return true;
+                }
+
+                $.ajax({
+                    url: '/wwwarticle/getusersbyroleid/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        roleid:role_id
+                    }
+                })
+                    .done(function(data) {
+                        if(data.error_code == 0){
+                            //
+                            $('#editer_id').empty();
+                            html = '<option value="" selected>请选择</option>';
+                            $.each(data.data,function(i,v){
+                                html = html + '<option value="' + v["id"] + '">' + v['name'] + '</option>';
+                            });
+                            $('#editer_id').append(html);
+
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+            });
+
+            $('#search').click(function(){
+                var onelevel = $('.onelevel').val();
+                var twolevel = $('.twolevel').val();
+                var threelevel = $('.threelevel').val();
+                var state = $('#state').val();
+                var recommend = $('#recommend').val();
+                var condition = $('#condition').val();
+                var addtimeStart = $('.addtime-start').val();
+                var addtimeEnd = $('.addtime-end').val();
+                var item = $('input[name=item]').val();
+                var role_id = $('#role_id').val();
+                var editer_id = $('#editer_id').val();
+                if(!condition){
+                    condition = '';
+                }
+                window.location.href = '/wwwarticle/?onelevel='+onelevel+'&twolevel='+twolevel+'&threelevel='+threelevel+'&state=' + state+'&recommend='+recommend + '&condition=' +condition + '&addtimeStart=' +addtimeStart + '&addtimeEnd=' +addtimeEnd+ '&item=' +item + '&role_id=' + role_id + '&editer_id=' + editer_id;
+            })
+        })
+    </script>
+</block>

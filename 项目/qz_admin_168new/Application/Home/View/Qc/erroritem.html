@@ -1,0 +1,179 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服错误项管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/qc/css/errorItem.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/common/plugins/bootstrap-switch/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header">
+                <table class="head-table headTable">
+                    <tr>
+                        <td style="text-align: left; padding-left: 10px;"><h4>客服错误项管理</h4></td>
+                        <td class="active" style="padding-left:20px;padding-right:20px;"><h5><a href="/qc/erroritem">错误项</a></h5></td>
+                        <td style="padding-left:20px;padding-right:20px;"><h5><a href="/qc/erroritem?type=1">错误组</a></h5></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="box">
+            <form method="get">
+            <div class="box-body">
+                <h4>条件查询</h4>
+                <div class="row">
+                    <div class="col-xs-2">
+                        <div>错误项名称</div>
+                        <input type="text" name="itemname" class="form-control" value="{$_GET['itemname']}">
+                    </div>
+                     <div class="col-xs-2">
+                        <div>客服类型</div>
+                        <select name="itemgroup"  class="form-control">
+                            <option value="">请选择</option>
+                            <option value="1" <if condition="$_GET['itemgroup'] EQ 1 ">selected</if>>审核客服</option>
+                            <option value="2" <if condition="$_GET['itemgroup'] EQ 2 ">selected</if>>对接客服</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>所属组</div>
+                        <select name="itemparentid" class="form-control">
+                            <option value="">请选择</option>
+                            <volist name="group" id="vo">
+                                <option value="{$vo.id}" <if condition="$_GET['itemparentid'] EQ $vo['id']">selected</if>>{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>&nbsp;</div>
+                        <button class="btn btn-primary"> <a href="/qc/adderroritem"><i class="fa fa-plus"></i>&nbsp;新增错误项</a></button>
+                    </div>
+                    <div class="col-xs-1">
+                        <span>&nbsp</span>
+                        <button type="submit" class="btn btn-primary btn-block anniucx">查询</button>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </section>
+    <section class="content">
+        <div class="box box-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>错误名称</th>
+                        <th>扣款</th>
+                        <th>福利</th>
+                        <th>所属组</th>
+                        <th>客服类型</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <volist name="list.list" id="vo">
+                        <tr>
+                            <td>{$key + $row + 1}</td>
+                            <td>{$vo.name}</td>
+                            <td>
+                                <notempty name="vo.money">
+                                    {$vo.money}元/次
+                                </notempty>
+                                <notempty name="vo.money2">
+                                    、{$vo.money2}元/次
+                                </notempty>
+                                <notempty name="vo.money3">
+                                    、{$vo.money3}元/次
+                                </notempty>
+                            </td>
+                            <td>
+                                <if condition="$vo['welfare'] eq 1">
+                                    1次免罚/月
+                                </if>
+                            </td>
+                            <td>{$group[$vo['parentid']]['name']}</td>
+                            <td>
+                                <if condition="$vo.group eq 1">
+                                    审核客服
+                                </if>
+                                <if condition="$vo.group eq 2">
+                                    对接客服
+                                </if>
+                                <if condition="$vo.group eq 3">
+                                    质检客服
+                                </if>
+                            </td>
+                            <td class="opration-group">
+                                <a href="/qc/adderroritem?id={$vo.id}"><i class="fa fa-pencil"></i></a>
+                                <i class="fa">
+                                    <div class="switch switch-mini">
+                                        <input class="itemstatus" type="checkbox" data-id="{$vo.id}" <if condition="$vo.status EQ 1">data-status='1' checked<else/>data-status='2'</if> />
+                                    </div>
+                                </i>
+                            </td>
+                        </tr>
+                    </volist>
+
+                </tbody>
+            </table>
+            {$list.page}
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/bootstrap-switch/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.itemstatus').bootstrapSwitch({size:'mini',onColor:'success'});
+            $(".itemstatus").on('switchChange.bootstrapSwitch', function (e, state) {
+                var id = $(this).attr('data-id');
+                var status = $(this).attr('data-status');
+                if(status == '1'){
+                    if (!confirm("确认禁用该错误项吗?")) {
+                        return false;
+                    }
+                    $(this).attr('data-status',2);
+                    var tip = '禁用成功';
+                    var tipno = '禁用失败';
+                }else{
+                    if (!confirm("确认启用该错误项吗?")) {
+                        return false;
+                    }
+                    $(this).attr('data-status',1);
+                    var tip = '启用成功';
+                    var tipno = '启用失败';
+                }
+
+                $.ajax({
+                    url: '/qc/erroritem/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        status:status
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            alert(tip);
+                        }
+                        if (data.status == 0) {
+                            alert(tipno);
+                            return false;
+                        }
+                    })
+                    .fail(function(xhr) {
+                        alert('网络错误，请稍后重试~');
+                        return false;
+                    })
+            });
+
+
+        })
+
+
+
+    </script>
+</block>

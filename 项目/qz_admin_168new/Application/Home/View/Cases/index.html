@@ -1,0 +1,293 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>装修案例审核 - 齐装网</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/cases/css/index.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>装修案例审核</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/cases/">装修案例审核</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                选择站点：
+                                <select name="cs" class="select2">
+                                    <option value="">全部城市</option>
+                                    <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.char_name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                装修案例ID：
+                                <input name="cases_id" class="form-control" value="{$Think.get.cases_id}" placeholder="装修案例ID" />
+                            </div>
+                            <div class="col-xs-2">
+                                设计师ID：
+                                <input name="designer_id" class="form-control" value="{$Think.get.designer_id}" placeholder="设计师ID" />
+                            </div>
+                            <div class="col-xs-2">
+                                装修公司ID：
+                                <input name="company_id" class="form-control" value="{$Think.get.company_id}" placeholder="装修公司ID" />
+                            </div>
+                            <div class="col-xs-2">
+                                开始发布时间：
+                                <input name="cases_time_start" class="form-control datetimepicker" value="{$Think.get.cases_time_start}" placeholder="开始发布时间" />
+                            </div>
+                            <div class="col-xs-2">
+                                结束发布时间：
+                                <input name="cases_time_end" class="form-control datetimepicker" value="{$Think.get.cases_time_end}" placeholder="结束发布时间" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <button type="button" id="search" data-triger="#search" class="key-down-event btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">数据列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>添加时间</th>
+                                        <th>城市</th>
+                                        <th>案例ID</th>
+                                        <th>标题</th>
+                                        <th>装修公司(ID)</th>
+                                        <th>设计师(ID)</th>
+                                        <th>会员类型</th>
+                                        <th>状态</th>
+                                        <th width="140px">操作</th>
+                                    </tr>
+                                    <volist name="main.info.list" id="vo">
+                                        <tr>
+                                            <td>{$vo.time|date="Y-m-d H:i",###}</td>
+                                            <td>{$vo.cname}</td>
+                                            <td>
+                                                <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.id}.shtml" target="_blank">
+                                                    {$vo.id}
+                                                </a>
+                                            </td>
+                                            <td>{$vo.title}</td>
+                                            <td>
+                                                <empty name="vo.company_id">
+                                                    -
+                                                <else />
+                                                    {$vo.company_name}({$vo.company_id})
+                                                </empty>
+                                            </td>
+                                            <td>
+                                                <empty name="vo.designer_id">
+                                                    -
+                                                <else />
+                                                    {$vo.design_name}({$vo.designer_id})
+                                                </empty>
+                                            </td>
+                                            <switch name="vo.on">
+                                                <case value="-4">
+                                                    <td class="fd-bg-error">会员暂停</td>
+                                                </case>
+                                                <case value="-3">
+                                                    <td class="fd-bg-error">预约会员</td>
+                                                </case>
+                                                <case value="-1">
+                                                    <td class="fd-bg-error">过期会员</td>
+                                                </case>
+                                                <case value="0">
+                                                    <td class="fd-bg-error">注册用户</td>
+                                                </case>
+                                                <case value="1">
+                                                    <td class="fd-bg-error">认证状态</td>
+                                                </case>
+                                                <case value="2">
+                                                    <td class="fd-bg-success">正常会员</td>
+                                                </case>
+                                                <default />
+                                                    <td>未知状态</td>
+                                            </switch>
+                                            <if condition="$vo['cases_on'] == 1">
+                                                <td class="fd-bg-success">已审核</td>
+                                            <elseif condition = "$vo['cases_on'] == 2" />
+                                                <td>未审核</td>
+                                            <elseif condition = "$vo['cases_on'] == 3" />
+                                                <td class="fd-bg-error">不通过</td>
+                                            <else />
+                                                <td>未知</td>
+                                            </if>
+                                            <td data-id="{$vo.id}">
+                                                <a href="javascript:void(0)" class="images-btn">
+                                                    <span title="编辑" class="fa fa-search"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" class="delete-btn">
+                                                    <span title="删除" class="fa fa-trash"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$main.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="imagesVerify" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            /*S-初始化*/
+            $(".select2").select2();
+            $(".select2").select2("val", '{$Think.get.cs}');
+            $('.datetimepicker').datetimepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn:true,
+                minView:0,
+                autoclose: true
+            });
+            /*E-初始化*/
+
+            //审核图片模态框
+            $('.images-btn').click(function(event) {
+                var id = $(this).parent().attr('data-id');
+                $.ajax({
+                    url: '/cases/images/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $('#imagesVerify .modal-content').html(data.data);
+                        $('#imagesVerify').modal('show');
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+
+            /*S-删除*/
+            $('.delete-btn').click(function(event) {
+                var id = $(this).parent().attr('data-id');
+                if (confirm('确认删除该案例吗?')) {
+                    $.ajax({
+                        url: '/cases/delete/',
+                        type: 'GET',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == '1'){
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {
+                                    window.location.href = window.location.href;
+                                }
+                            });
+                            e.show();
+                        }else{
+                            var e = dialog({
+                                title: '消息',
+                                content: data.info,
+                                okValue: '确 定',
+                                quickClose: true,
+                                ok: function () {}
+                            });
+                            e.show();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var e = dialog({
+                            title: '消息',
+                            content: '操作失败,请联系技术部门！',
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    })
+                };
+            });
+            /*E-删除友情链接*/
+
+            //搜索
+            $('#search').click(function(){
+                var cs               = $('select[name=cs]').val();
+                var cases_id         = $('input[name=cases_id]').val();
+                var designer_id      = $('input[name=designer_id]').val();
+                var company_id       = $('input[name=company_id]').val();
+                var cases_time_start = $('input[name=cases_time_start]').val();
+                var cases_time_end   = $('input[name=cases_time_end]').val();
+                window.location.href = '/cases/?cs='+cs+'&cases_id='+cases_id+'&designer_id='+designer_id+'&company_id='+company_id+'&cases_time_start='+cases_time_start+'&cases_time_end='+cases_time_end;
+            })
+        })
+    </script>
+</block>

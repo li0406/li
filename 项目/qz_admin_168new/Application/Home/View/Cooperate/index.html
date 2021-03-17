@@ -1,0 +1,408 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/cooperate/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>合作商家活动管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <p style="margin-left: 15px;font-size:18px;">条件查询</p>
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>所属城市：</div>
+                                        <select id="city" name="cid" type="text" placeholder="请选择">
+                                            <option value="">请选择</option>
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>活动标题：</div>
+                                        <input type="text" name="name" class="form-control clear-target" placeholder="请输入活动标题或ID" value="{$Think.get.name}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>活动时间：</div>
+                                        <input type="text" name="start" class="form-control datepicker clear-target" placeholder="本次活动开始时间" value="{$Think.get.start}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>&nbsp;</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target" placeholder="本次活动结束时间" value="{$Think.get.end}">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 set-mt16">
+                                    <div class="col-xs-2">
+                                        <div>启用状态：</div>
+                                        <select id="status" name="status" class="form-control"  type="text">
+                                            <option value="">请选择</option>
+                                            <option value="1" >启用</option>
+                                            <option value="2" >禁用</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>商家名称：</div>
+                                        <input type="text" name="sj_name" class="form-control clear-target" placeholder="请输入商家名称"  value="{$Think.get.sj_name}">
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <div>&nbsp;</div>
+                                        <div>
+                                            <button type="submit" id="search" class="btn btn-primary"><i class="fa fa-search">查询</i></button>
+                                            <button type="button" id="add" class="btn btn-download"><i class="fa fa-plus-circle">新增</i></button>
+                                            <button type="button" id="setImage" class="btn btn-download">顶部图片设置</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">活动列表</h3>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>活动标题</th>
+                                <th>城市</th>
+                                <th>活动时间</th>
+                                <th>商家名称</th>
+                                <th>状态</th>
+                                <th>排序</th>
+                                <th class="width-210">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.list" id="vo">
+                                    <tr>
+                                        <td>{$vo.id}</td>
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.cnames|default='全站'}</td>
+                                        <td>{$vo.start_at|date="Y-m-d",###}~{$vo.end_at|date="Y-m-d",###}</td>
+                                        <td>{$vo.business_name}</td>
+                                        <td><if condition="$vo.state eq 1">启用<else/>禁用</if></td>
+                                        <td>{$vo.px}</td>
+                                        <td class="operate-btn">
+                                            <span class="edit-btn" data-id="{$vo.id}">编辑</span>
+                                            <span class="disable-btn" data-id="{$vo.id}" data-state="{$vo.state}">
+                                            <if condition="$vo.state eq 1">禁用<else/>启用</if>
+                                            </span>
+                                            <span class="delete-btn" data-id="{$vo.id}">删除</span>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                    <div class="col-xs-12">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--顶部图片设置 -->
+        <div class="dialog-mask">
+            <div class="operate-dialog">
+                <span class="close-btn">×</span>
+                <div class="dialog-content">
+                    <label>pc端</label>
+                    <input id="pc_image" type="file" />
+                    <input type="hidden" name="pc-ad-img" value="{$banner.pc_url}">
+                    <span class="operate-action">尺寸要求1210*440px</span>
+                </div>
+                <div>
+                    <img src="" />
+                </div>
+                <div class="dialog-content">
+                    <label>m端</label>
+                    <input id="m_image" type="file" />
+                    <input type="hidden" name="m-ad-img" value="{$banner.m_url}">
+                    <span class="operate-action">尺寸要求750*500px</span>
+                </div>
+                <div>
+                    <img src="" />
+                </div>
+                <div class="dialog-btn">
+                    <button type="button" class="btn btn-primary dialog-submit-btn">确认</button>
+                    <button type="button" class="btn btn-cancel dialog-cancel-btn">取消</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/jscookie/js/jscookie-1.0.2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=1.4"></script>
+    <script>
+        $(function () {
+            $("#city").select2({
+                allowClear: true,
+                placeholder: "选择城市"
+            });
+
+            $("#city").select2("val","{$Think.get.cid}");
+            $("#status").val("{$Think.get.status}");
+
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd'
+            }).on("change", function () {
+                if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+                    msg("活动开始时间必须小于活动结束时间", function () {
+                        $("input[name=end]").val("");
+                    });
+                }
+            });
+            $("#pc_image").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption: false,
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount: 1,
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync: true,
+                autoReplace: true,
+                dropZoneEnabled:false,
+                uploadExtraData: {
+                    prefix:'cooperatebanner',
+                    chars:'true'
+                },
+                minImageWidth: 1210, //图片的最小宽度
+                minImageHeight: 440,//图片的最小高度
+                maxImageWidth: 1210,//图片的最大宽度
+                maxImageHeight: 440,//图片的最大高度
+                maxFileSize:1000000000,
+                previewSettings:{
+                    image: {width: "323px", height: "164px"}
+                },
+                //initialPreview: pcInitialPreview,
+                initialPreview:[ //预览图片的设置
+                    {$banner['pc_url_quan']}
+                ],
+            }).on('fileuploaded', function(event, data, id, index) {
+                if(1 == data.response.status){
+                    $('input[name="pc-ad-img"]').val(data.response.data.name);
+                }else{
+                    alert(data.response.info);
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                alert('文件上传失败,请检查文件格式，规格是否符合要求！')
+                return false;
+            }).on("fileclear", function () {
+                $('input[name="pc-ad-img"]').val("");
+            }).on("filebatchselected", function (event, files) {
+                if ($('input[name="pc-ad-img"]').val()) {
+                    layer.msg('只能上传一张图片')
+                    var length = $(".file-preview-thumbnails>div").length;
+                    $(".file-preview-thumbnails>div").addClass("img-child");
+                    $(".file-preview-thumbnails").find(":last-child").removeClass("img-child");
+                    if(length>=2){
+                        $(".file-preview-thumbnails").find(".img-child").remove();
+                    }
+                }
+            });
+            $("#m_image").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadimg/",
+                showCaption: false,
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                maxFileCount: 1,
+                autoReplace: true,
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync: true,
+                dropZoneEnabled:false,
+                uploadExtraData: {
+                    prefix:'cooperatebanner',
+                    chars:'true'
+                },
+                minImageWidth: 750, //图片的最小宽度
+                minImageHeight: 500,//图片的最小高度
+                maxImageWidth: 750,//图片的最大宽度
+                maxImageHeight: 500,//图片的最大高度
+                maxFileSize:1000000000,
+                previewSettings:{
+                    image: {width: "323px", height: "164px"}
+                },
+                initialPreview:[ //预览图片的设置
+                    {$banner['m_url_quan']}
+                ]
+            }).on('fileuploaded', function(event, data, id, index) {
+                if(1 == data.response.status){
+                    $('input[name="m-ad-img"]').val(data.response.data.name);
+                }else{
+                    alert(data.response.info);
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                alert('文件上传失败,请检查文件格式，规格是否符合要求！')
+                return false;
+            }).on("fileclear", function () {
+                $('input[name="m-ad-img"]').val("");
+            }).on("filebatchselected", function (event, files) {
+                if ($('input[name="m-ad-img"]').val()) {
+                    layer.msg('只能上传一张图片')
+                    var length = $(".file-preview-thumbnails>div").length;
+                    $(".file-preview-thumbnails>div").addClass("img-child");
+                    $(".file-preview-thumbnails").find(":last-child").removeClass("img-child");
+                    if(length>=2){
+                        $(".file-preview-thumbnails").find(".img-child").remove();
+                    }
+                }
+            });
+            //顶部图片设置
+            $("#setImage").click(function () {
+                $(".dialog-mask").show();
+                $("body").css({"overflow":"hidden","height":"100%"})
+            })
+
+            //禁用
+            $(".disable-btn").click(function () {
+                var id = $(this).data('id');
+                var state =  $(this).data('state');
+                layer.confirm('确定要禁用该活动吗？', {
+                    btn: ['确定','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/cooperate/changeState',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {id:id,state:state},
+                        success: function (res) {
+                            if(res.error_code == 0){
+                                layer.msg('保存成功', {icon: 1});
+                                window.location.href = '/cooperate/index';
+                            }
+                        },
+                        error: function (res) {
+                            layer.msg('服务器异常',function () {
+                            });
+                        }
+                    })
+
+                }, function(){
+                    layer.msg('取消保存', {icon: 2});
+                });
+            });
+
+            //删除
+            $(".delete-btn").click(function () {
+                var id = $(this).data('id');
+                layer.confirm('确定要删除该活动吗？此操作不可恢复！！', {
+                    btn: ['确定','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/cooperate/deleteActivity',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {id:id},
+                        success: function (res) {
+                            if(res.error_code == 0){
+                                window.location.href = '/cooperate/index';
+                            }
+                        },
+                        error: function (res) {
+                            layer.msg('服务器异常',function () {
+                            });
+                        }
+                    })
+
+                }, function(){
+                    layer.msg('取消删除', {icon: 2});
+                });
+            })
+            //关闭弹窗
+            $("body").on("click",".dialog-cancel-btn,.close-btn",function () {
+                $(".dialog-mask").hide();
+                $("body").css({"overflow":"inherit","height":"100%"})
+            })
+
+
+            $("body").on("click",".dialog-submit-btn",function () {
+                //图片不为空
+               var pc_url = $('input[name="pc-ad-img"]').val();
+               var m_url = $('input[name="m-ad-img"]').val();
+                if(pc_url == '' || m_url == ''){
+                    alert('请上传图片');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/cooperate/editBanner',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {pc_url:pc_url,m_url:m_url},
+                    success: function (res) {
+                        if(res.error_code == 0){
+                            layer.msg('保存成功', {icon: 1});
+                            window.location.href = '/cooperate/index';
+                        }
+                    },
+                    error: function (res) {
+                        layer.msg('服务器异常',function () {
+                        });
+                    }
+                })
+            })
+
+            $(".edit-btn").click(function(){
+                var id = $(this).data('id');
+                window.location.href = '/cooperate/edit?id='+id;
+            })
+
+            $("#add").click(function(){
+                window.location.href = '/cooperate/edit';
+            })
+
+        });
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

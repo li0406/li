@@ -1,0 +1,619 @@
+<div class="panel-body contractTemp">
+    <form>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                会员时间
+            </div>
+
+            <div class="panel-body">
+                <div style="border: 1px dashed #ccc; color: #0099FF; margin: 5px 30px 15px; text-align: center; padding: 5px 0;cursor:pointer;"
+                    onclick="signBackActive.get_contact_newall_temp()"> + 添加总合同</div>
+
+                <div style="margin: 5px 30px; border: 1px solid #CCCCCC;">
+                    <notempty name="noInfo">
+                        <p style="padding: 8px 30px;">下次合同时间：{$noInfo.start_time} 至 {$noInfo.end_time}</p>
+                    </notempty>
+                    <div class="row" style="margin: 15px;">
+                        <input type="hidden" name="all_contract_id" value="{$info.all.id}" />
+                        <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">总合同</label>
+                        <label class="col-sm-1 control-label" style="text-align: right; line-height: 34px;">总合同时间:</label>
+                        <div class="col-sm-2">
+                            <input id="allbegin" type="text" class="form-control datepicker" readonly value="{$info.all.start_time}"/>
+                        </div>
+                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                        <div class="col-sm-2">
+                            <input id="allend" type="text" class="form-control datepicker" readonly value="{$info.all.end_time}" />
+                        </div>
+                        <div class="col-sm-1" style="line-height: 34px;">
+                            {:getTwoDateDays($info["all"]["start_time"], $info["all"]["end_time"])}天
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="button" class="btn btn-primary" onclick="signBackActive.get_contact_new_temp()">
+                                添加本次合同
+                            </button>
+                        </div>
+                    </div>
+
+                    <notempty name="info.now">
+                        <hr>
+                        <div class="row" style="margin: 15px;">
+                            <input type="hidden" name="now_contract_id" value="{$info.now.id}" />
+                            <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">本次合同</label>
+                        </div>
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">本次合同时间:</label>
+                            <div class="col-sm-2">
+                                <input id="begin" type="text" class="form-control datepicker" readonly value="{$info.now.start_time}" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="end" type="text" class="form-control datepicker" readonly value="{$info.now.end_time}" />
+                            </div>
+                            <div class="col-sm-1" style="line-height: 34px;">
+                                {:getTwoDateDays($info["now"]["start_time"], $info["now"]["end_time"])}天
+                            </div>
+                        </div>
+
+                        <if condition="$info['now']['is_can_edit'] eq 1">
+                            <div class="row" style="margin: 15px;">
+                                <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">更改合同：</label>
+                                <div class="col-sm-2">
+                                    <select name="change_type" class="form-control">
+                                        <option value="">请选择</option>
+                                        <option value="4">暂停</option>
+                                        <option value="5">延期</option>
+                                        <option value="7">退费</option>
+                                        <option value="9">转让</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </if>
+
+                        <div class="row change_item change_item_4" style="margin: 15px; display: none;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">暂停:</label>
+                            <div class="col-sm-2">
+                                <input id="stopbegin" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="暂停开始时间" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="stopend" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="暂停结束时间" />
+                            </div>
+                        </div>
+
+                        <div class="row change_item change_item_4" style="margin: 15px; display: none;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期天数:</label>
+                            <div class="col-sm-2">
+                                <input id="stopdelayday" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="延期天数" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="stopdelayend" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="延期到期时间" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnStop" type="button" class="btn btn-success">
+                                    <i class="fa fa-floppy-o"></i> 保存
+                                </button>
+
+                                <button type="button" class="btn btn-danger btn_change_cancel">
+                                    <i class="fa fa-floppy-o"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row change_item change_item_5" style="margin: 15px; display: none;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期:</label>
+                            <div class="col-sm-2">
+                                <input id="delayday" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="延期天数" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="delayend" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="延期到期时间" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnDelay" type="button" class="btn btn-success">
+                                    <i class="fa fa-floppy-o"></i> 保存
+                                </button>
+
+                                <button type="button" class="btn btn-danger btn_change_cancel">
+                                    <i class="fa fa-floppy-o"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row change_item change_item_7" style="margin: 15px; display: none;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">退费:</label>
+                            <div class="col-sm-2">
+                                <input id="refundDate" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="退费日期" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="refundDateConfirm" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="二次确认退费日期" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnRefund" type="button" class="btn btn-success">
+                                    <i class="fa fa-floppy-o"></i> 保存
+                                </button>
+
+                                <button type="button" class="btn btn-danger btn_change_cancel">
+                                    <i class="fa fa-floppy-o"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row change_item change_item_9" style="margin: 15px; display: none;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">转让:</label>
+                            <div class="col-sm-2">
+                                <input id="tranbegin" type="text" class="form-control datepicker" autocomplete="off"
+                                    placeholder="转让开始日期" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">转让公司:</label>
+                            <div class="col-sm-2">
+                                <select class="search_trans_company" class="form-control" style="width: 220px;">
+                                    <option value="">--请选择--</option>
+                                </select>
+                                <input type="hidden" class="trans_company_id" />
+                                <input type="hidden" class="trans_company_name" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnTran" type="button" class="btn btn-success">
+                                    <i class="fa fa-floppy-o"></i> 保存
+                                </button>
+
+                                <button type="button" class="btn btn-danger btn_change_cancel">
+                                    <i class="fa fa-floppy-o"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+
+                        <notempty name="info.child">
+                        <volist name="info.child" id="child">
+                            <eq name="child.type" value="4">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">暂停:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.start_time}" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.end_time}" />
+                                    </div>
+                                    <div class="col-sm-1" style="line-height: 34px;">
+                                        {:getTwoDateDays($child["start_time"], $child["end_time"])}天
+                                    </div>
+                                </div>
+
+                                <notempty name="child.delay_day">
+                                    <div class="row" style="margin: 15px;">
+                                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期天数:</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" readonly value="{$child.delay_day}" />
+                                        </div>
+                                        <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" class="form-control" readonly value="{$child.delay_time}"  />
+                                        </div>
+                                    </div>
+                                </notempty>
+                            </eq>
+
+                            <eq name="child.type" value="5">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">延期:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_day}" />
+                                    </div>
+                                    <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+
+                            <eq name="child.type" value="7">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">退费:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+
+                            <eq name="child.type" value="9">
+                                <div class="row" style="margin: 15px;">
+                                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">转让:</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control" readonly value="{$child.delay_time}" />
+                                    </div>
+                                </div>
+                            </eq>
+                        </volist>
+                        </notempty>
+
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">广告报备:</label>
+                            <div class="col-sm-9">
+                                <div class="row advform" style="margin: 0; border-radius: 5px; border: 1px solid #CCC; padding: 10px;">
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">投放位置:</label>
+                                        <div class="col-sm-3" style="line-height: 34px;">
+                                            <eq name="advreport.flag" value="1">
+                                                老站
+                                            <else />
+                                                新站
+                                            </eq>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right;">轮显:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$advreport[1][0]['total']} 天
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right;">通栏A:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$advreport[2][1]["total"]} 天
+                                        </div>
+                                        <label class="col-sm-2 control-label" style="text-align: right;">通栏B:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$advreport[2][2]["total"]} 天
+                                        </div>
+                                    </div>
+                                    <eq name="advreport.flag" value="1">
+                                        <div class="row form-group adv-item">
+                                            <label class="col-sm-2 control-label" style="text-align: right;">通栏C:</label>
+                                            <div class="col-sm-3" style="">
+                                                {$advreport[2][3]["total"]} 天
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: right;">通栏D:</label>
+                                            <div class="col-sm-3" style="">
+                                                {$advreport[2][101]["total"]} 天
+                                            </div>
+                                        </div>
+                                    </eq>
+                                </div>
+                            </div>
+                        </div>
+                    </notempty>
+
+                    <notempty name="newInfo">
+                        <hr>
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-1 control-label" style="line-height: 34px; font-size: 16px;">新合同</label>
+                        </div>
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">本次合同时间:</label>
+                            <div class="col-sm-2">
+                                <input id="begin" type="text" class="form-control datepicker" readonly value="{$newInfo.start_time}" />
+                            </div>
+                            <label class="col-sm-1 control-label" style="text-align: center; line-height: 34px;">至:</label>
+                            <div class="col-sm-2">
+                                <input id="end" type="text" class="form-control datepicker" readonly value="{$newInfo.end_time}" />
+                            </div>
+                            <div class="col-sm-1" style="line-height: 34px;">
+                                {:getTwoDateDays($newInfo["start_time"], $newInfo["end_time"])}天
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin: 15px;">
+                            <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">广告报备:</label>
+                            <div class="col-sm-9">
+                                <div class="row advform" style="margin: 0; border-radius: 5px; border: 1px solid #CCC; padding: 10px;">
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">投放位置:</label>
+                                        <div class="col-sm-3" style="line-height: 34px;">
+                                            <eq name="newAdvreport.flag" value="1">
+                                                老站
+                                            <else />
+                                                新站
+                                            </eq>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right;">轮显:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$newAdvreport[1][0]["total"]} 天
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <label class="col-sm-2 control-label" style="text-align: right;">通栏A:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$newAdvreport[2][1]["total"]} 天
+                                        </div>
+                                        <label class="col-sm-2 control-label" style="text-align: right;">通栏B:</label>
+                                        <div class="col-sm-3" style="">
+                                            {$newAdvreport[2][2]["total"]} 天
+                                        </div>
+                                    </div>
+                                    <eq name="newAdvreport.flag" value="1">
+                                        <div class="row form-group adv-item">
+                                            <label class="col-sm-2 control-label" style="text-align: right;">通栏C:</label>
+                                            <div class="col-sm-3" style="">
+                                                {$newAdvreport[2][3]["total"]} 天
+                                            </div>
+                                            <label class="col-sm-2 control-label" style="text-align: right;">通栏D:</label>
+                                            <div class="col-sm-3" style="">
+                                                {$newAdvreport[2][101]["total"]} 天
+                                            </div>
+                                        </div>
+                                    </eq>
+                                </div>
+                            </div>
+                        </div>
+                    </notempty>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        $(".contractTemp select[name=change_type]").change(function(){
+            var type = $(this).val();
+            $(".contractTemp").find(".change_item").hide();
+            $(".contractTemp").find(".change_item_" + type).show();
+        });
+
+        // 取消
+        $(".contractTemp").on("click", ".btn_change_cancel", function(){
+            // 清除暂停选项
+            $(".contractTemp #stopdelayday").val("");
+            $(".contractTemp #stopdelayend").val("");
+            $(".contractTemp #stopbegin").val("");
+            $(".contractTemp #stopend").val("");
+
+            // 清除延期选项
+            $(".contractTemp #delayday").val("");
+            $(".contractTemp #delayend").val("");
+
+            // 清除退费选项
+            $(".contractTemp #refundDate").val("");
+            $(".contractTemp #refundDateConfirm").val("");
+
+            // 清除转让选项
+            $(".contractTemp .trans_company_id").val("");
+            $(".contractTemp .trans_company_name").val("");
+            $(".contractTemp #tranbegin").val("");
+            $(".search_trans_company").select2("val", "");
+
+            $(".contractTemp").find("select[name=change_type]").val("");
+            $(".contractTemp").find(".change_item").hide();
+        });
+
+        $(".contractTemp #stopbegin,.contractTemp #stopend,.contractTemp #stopdelayend").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $(".contractTemp #delayend").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $(".contractTemp #refundDate,.contractTemp #refundDateConfirm").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        $(".contractTemp #tranbegin").datepicker({
+            format: "yyyy-mm-dd",
+            minViewMode: 0,
+            autoclose: true
+        });
+
+        // 会员公司选择
+        $(".search_trans_company").select2({
+            ajax: {
+                url: "/signbackuser/findcomnapnyinfo/",
+                dataType: 'json',
+                type: "post",
+                data: function(params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function(data, params) {
+                    return {
+                        results: data.items
+                    };
+                }
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            minimumInputLength: 3,
+            templateResult: function(repo) {
+                if (repo.loading) return repo.text;
+                var markup = "<div class='select2-result-repository clearfix'>" +
+                    "<div class='select2-result-repository__meta'>" +
+                    "<div class='select2-result-repository__title'>" + repo.id + " " + repo.jc + " (" + repo.cname + ")</div>";
+
+                return markup;
+            },
+            templateSelection: function(repo) {
+                $(".contractTemp .trans_company_id").val(repo.id);
+                $(".contractTemp .trans_company_name").val(repo.jc);
+                return repo.jc;
+            }
+        });
+
+
+        // 暂停
+        $(".contractTemp").on("click", "#btnStop", function(){
+            if($("#stopbegin").val() == '' ){
+                alert("请选择暂停开始时间")
+                return false
+            }
+            if($("#stopend").val() == '' ){
+                alert("请选择暂停结束时间")
+                return false
+            }
+            if($("#stopbegin").val() > $("#stopend").val()){
+                alert("暂停结束时间不得小于暂停开始时间")
+                return false
+            }
+
+            var data = {
+                start: $("#stopbegin").val(),
+                end: $("#stopend").val(),
+                delay_day: $("#stopdelayday").val(),
+                delay_time: $("#stopdelayend").val(),
+                company_id: signBackActive["param"]["company_id"],
+                company_name: signBackActive["param"]["company_name"],
+                saler_id: signBackActive["param"]["saler_id"],
+                saler_name: signBackActive["param"]["saler_name"],
+                parentid: $("input[name=now_contract_id]").val(),
+            };
+
+            $.ajax({
+                url: '/signbackuser/pause',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.get_contact_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });
+        });
+
+        // 延期
+        $(".contractTemp").on("click", "#btnDelay", function(){
+            if($("#delayday").val() == ''){
+                alert("请输入延期天数")
+                return false;
+            }
+            if($("#delayend").val() == ''){
+                alert("请填写延期到期时间")
+                return false;
+            }
+            var data = {
+                day: $("#delayday").val(),
+                delay_time: $("#delayend").val(),
+                company_id: signBackActive["param"]["company_id"],
+                company_name: signBackActive["param"]["company_name"],
+                saler_id: signBackActive["param"]["saler_id"],
+                saler_name: signBackActive["param"]["saler_name"],
+                parentid: $("input[name=now_contract_id]").val(),
+            };
+
+            $.ajax({
+                url: '/vip/delay',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.get_contact_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });
+        });
+
+        // 退费
+        $(".contractTemp").on("click", "#btnRefund", function(){
+
+            if($("#refundDate").val() == ''){
+                alert("请选择退费日期")
+                return false;
+            }
+            if($("#refundDateConfirm").val() == ''){
+                alert("请确认退费日期")
+                return false;
+            }
+
+
+            var data = {
+                delay_time: $("#refundDate").val(),
+                confirm_delay_time: $("#refundDateConfirm").val(),
+                company_id: signBackActive["param"]["company_id"],
+                company_name: signBackActive["param"]["company_name"],
+                saler_id: signBackActive["param"]["saler_id"],
+                saler_name: signBackActive["param"]["saler_name"],
+                parentid: $("input[name=now_contract_id]").val(),
+            };
+
+            $.ajax({
+                url: '/vip/refund',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.get_contact_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });
+        });
+
+        // 转让
+        $(".contractTemp").on("click", "#btnTran", function(){
+
+            if($("#tranbegin").val() == ''){
+                alert("请选择转让开始日期")
+                return
+            }
+            if($("input[name = trans_company_name]").val() === ''){
+                alert("选择转让公司")
+                return
+            }
+
+            var data = {
+                delay_time: $("#tranbegin").val(),
+                to: $(".trans_company_id").val(),
+                to_company_id: $(".trans_company_id").val(),
+                to_compnay_name: $(".trans_company_name").val(),
+                company_id: signBackActive["param"]["company_id"],
+                company_name: signBackActive["param"]["company_name"],
+                saler_id: signBackActive["param"]["saler_id"],
+                saler_name: signBackActive["param"]["saler_name"],
+                parentid: $("input[name=now_contract_id]").val(),
+            };
+
+            $.ajax({
+                url: '/signbackuser/returnvip',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.get_contact_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });
+        });
+    });
+</script>

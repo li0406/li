@@ -1,0 +1,386 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>视频管理-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>视频管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <form id="myForm" class="form-horizontal" method="GET" onsubmit="return false">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">输入标题<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input type="text" name="title" class="form-control" placeholder="文章标题" value="{$info.title}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">简介描述<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <textarea name="description" class="form-control" placeholder="描述">{$info.description}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">标签设置<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <select id="tags" class="col-sm-12" multiple="multiple">
+                                            <volist name="info.child" id="vo">
+                                                <option selected="selected" value="{$vo.id}">{$vo.text}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-xs-3">
+                                    <div class="col-xs-12">
+                                        <label  class="col-sm-12">节目类型<span style="color:red;">*</span></label>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <div class="col-sm-12">
+                                            <select name="type" class="form-control">
+                                                <option value="0">-请选择-</option>
+                                                <if condition="($info['type'] EQ 1)">
+                                                    <option value="1" selected="selected">装修讲堂</option>
+                                                    <option value="2">装修头条</option>
+                                                <elseif condition="$info['type'] EQ 2"/>
+                                                    <option value="1">装修讲堂</option>
+                                                    <option value="2" selected="selected">装修头条</option>
+                                                <else/>
+                                                    <option value="1">装修讲堂</option>
+                                                    <option value="2">装修头条</option>
+                                                </if>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3">
+                                    <div class="col-xs-12">
+                                        <label  class="col-sm-12">选择讲师<span style="color:red;">*</span></label>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <div class="col-sm-12">
+                                            <select name="teacher" class="form-control">
+                                                <option value="0">-请选择-</option>
+                                                <volist name="teachers" id="v">
+                                                    <option value="{$v.id}" <if condition="($info['teacher'] EQ $v['id'])">selected="selected"</if>>{$v.author}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">主题分类<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-xs-12">
+                                        <div class="col-sm-9 checkboxList" style="border:1px #D2D6DE solid;">
+
+                                        <div class="grouplist">
+                                            <label class="select-sj">
+                                                <input type="checkbox" name="bigCategory[1]"><span>&nbsp;设计</span>
+                                            </label>
+                                            <div class="select-sj-list col-xs-12">
+                                                <div class="col-xs-2"><label manager="1"><input type="checkbox" name="category[1]"><span>空间利用</span></label></div>
+                                                <div class="col-xs-2"><label manager="0"><input type="checkbox" name="category[2]"><span>动线设计</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[3]"><span>案例分享</span></label></div>
+                                            </div>
+                                        </div>
+                                
+                                        <div class="grouplist">
+                                            <label class="select-jubu">
+                                                <input type="checkbox" name="bigCategory[2]"><span>&nbsp;局部装修</span>
+                                            </label>
+                                            <div class="select-jubu-list col-xs-12">
+                                                <div class="col-xs-2"><label manager="1"><input type="checkbox" name="category[4]"><span>客厅</span></label></div>
+                                                <div class="col-xs-2"><label manager="0"><input type="checkbox" name="category[5]"><span>卫生间</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[6]"><span>厨房</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[7]"><span>阳台</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[8]"><span>卧室</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[9]"><span>其他</span></label></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grouplist">
+                                            <label class="select-sm">
+                                                <input type="checkbox" name="bigCategory[3]"><span>&nbsp;装修扫盲</span>
+                                            </label>
+                                            <div class="select-sm-list col-xs-12">
+                                                <div class="col-xs-2"><label manager="1"><input type="checkbox" name="category[10]"><span>合同签订</span></label></div>
+                                                <div class="col-xs-2"><label manager="0"><input type="checkbox" name="category[11]"><span>装修增减项</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[12]"><span>装修猫腻</span></label></div>
+                                                <div class="col-xs-2"><label manager="2"><input type="checkbox" name="category[13]"><span>常见问题</span></label></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grouplist">
+                                            <label class="select-dg">
+                                                <input type="checkbox" name="bigCategory[4]"><span>&nbsp;选材导购</span>
+                                            </label>
+                                            <div class="select-dg-list col-xs-12">
+                                                <div class="col-xs-2"><label manager="1"><input type="checkbox" name="category[14]"><span>装修材料</span></label></div>
+                                                <div class="col-xs-2"><label manager="0"><input type="checkbox" name="category[15]"><span>软装搭配</span></label></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grouplist">
+                                            <label class="">
+                                                <input type="checkbox" name="bigCategory[5]"><span>&nbsp;其它</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-2">视频封面<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input id="bigImg"  type="file" class="form-control" />
+                                        <input type="hidden" name="bigimg" value="{$info.cover_img}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-3">网页端视频链接地址<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input type="text" name="url" class="form-control" placeholder="输入完整的视频地址" value="{$info.url}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <label  class="col-sm-3">移动端视频链接地址<span style="color:red;">*</span></label>
+                                </div>
+                                <div class="col-xs-12">
+                                    <div class="col-sm-9">
+                                        <input type="text" name="mobile_url" class="form-control" placeholder="输入完整的视频地址" value="{$info.mobile_url}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-1 col-sm-1">
+                                    <button id="btnSave" class="btn btn-block btn-info">发布</button>
+                                    <input type="hidden" value="{$info.id}" name="id" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <a href="/vedio/" class="btn btn-block btn-default">取消</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>封面图片尺寸：660px*360px</p>
+                        <p>提示：上传精美的封面会更加赢得用户的点击观看和喜欢哦！</p>
+                        <p>视频链接：网页请使用移动端优酷、腾讯视频等视频的分享链接地址，注意不是打开网页的地址。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<style type="text/css">
+.checkboxList .col-xs-2 span {font-weight:normal;padding-left:5px;}
+.grouplist {padding-top:15px;padding-bottom:15px;}
+</style>
+<script type="text/javascript">
+    <volist name="category['big']" id="v">
+        $("input[name='bigCategory[{$v}]']").prop('checked',true);
+    </volist>
+    <volist name="category['sub']" id="v">
+        $("input[name='category[{$v}]']").prop('checked',true);
+        
+    </volist>
+</script>
+<script type="text/javascript">
+
+    
+
+    allselsect($('.select-sj'),$('.select-sj-list'));
+    allselsect($('.select-jubu'),$('.select-jubu-list'));   
+    allselsect($('.select-sm'),$('.select-sm-list'));
+    allselsect($('.select-dg'),$('.select-dg-list'));
+
+
+    function allselsect(a,b){
+        // 全选
+        a.on('click',function(){
+            if($(this).find('input').is(":checked")){
+                b.find('input').prop('checked',true)
+            }else{
+                b.find('input').prop('checked',false);
+            }
+        });
+        // 单选
+        b.on('click',' label',function(){
+            if($(this).find('input').is(":checked")){
+                $(this).attr('gou',1);
+                if(b.find('label').length == b.find('label[gou=1]').length){
+                    a.find('input').prop('checked',true)
+                }
+            }else{
+                $(this).removeAttr('gou');
+                a.find('input').prop('checked',false)
+            }
+        });
+    }    
+
+    $("#bigImg").fileinput({
+        language: 'zh', //设置语言,
+        uploadUrl:"/upload/uploadImg",
+        showCaption:false,
+        browseClass:"btn btn-primary",
+        allowedFileExtensions : ['jpg','png','gif'],
+        maxFileCount:1,
+        uploadClass:"btn btn-info",
+        removeClass:"btn btn-danger",
+        uploadAsync:true,
+        dropZoneEnabled:false,
+        previewSettings:{
+            image: {width: "660px", height: "360px"}
+        },
+        layoutTemplates:{
+            actionDelete:"",
+            actionUpload:""
+        },
+        uploadExtraData:{
+            prefix:"vedio"
+        },
+        minImageWidth: "660",
+        minImageHeight: "360",
+        maxImageWidth: "660",
+        maxImageHeight: "360",
+        initialPreview:{$info.bigimg|default="'' "}
+    }).on('fileuploaded', function(event, data) {
+        var _this = $(this);
+        if(data.response.status == 1){
+            var obj = data.response.data;
+            console.log(obj);
+            $("input[name=bigimg]").val(obj.name);
+        }else{
+            _this.Alert({
+                msg:data.response.info,
+                level:2
+            });
+        }
+    }).on("fileuploaderror",function(event, data){
+          var _this = $(this);
+          _this.Alert({
+              msg:"图片不符合要求!",
+              level:2
+          });
+        return false;
+    }).on("fileclear",function(){
+        $("input[name=bigimg]").val("");
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var data = $("#myForm").serializeArray();
+        var json = $("#tags").select2("data");
+
+        if (json !== null) {
+            if(typeof $("#tags").select2("data") == "string"){
+                json = JSON.parse($("#tags").select2("data"));
+            }
+
+            for(var i in json){
+               data.push({name:"tags[]",value:json[i]["id"]});
+            }
+        }
+
+        $.ajax({
+            url: '/vedio/vedioup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:data
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = "/vedio/?p={$p}";
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+
+    $("#tags").select2({
+        allowClear: true,
+        placeholder: "选择标签",
+        ajax:{
+            url: "/vedio/findtags/",
+            type:"post",
+            dataType: 'json',
+            data: function (params) {
+              return {
+                  query: params.term
+              };
+            },
+            processResults:function (data, params) {
+              if (data.status ==1) {
+                  var result = {
+                      results: []
+                  };
+                  for(var i in data.data){
+                      result.results.push({
+                          id:data.data[i].id,
+                          text:data.data[i].name
+                      });
+                  }
+                  return{
+                      results:result.results
+                  }
+              };
+            }
+        }
+    });
+</script>
+</block>

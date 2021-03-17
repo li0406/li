@@ -1,0 +1,142 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+    <style type="text/css">
+        .ms-container {width:420px !important;}
+        .ms-container .ms-list {height:450px !important;}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1><a href="/flowanalysis/channellabel/">频道标签管理</a> <i class="fa fa-angle-right"></i> 标签编辑</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-4 h5">
+                            频 道 标 签ID：&nbsp;&nbsp;&nbsp;&nbsp;<span>{$tag.code}</span>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left h5">频道标签名称：</div>
+                        <div class="col-xs-2">
+                            <input type="text" name="name" class="form-control" value="{$tag.name}">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 h5">
+                        <div class="pull-left">选&nbsp;&nbsp;取&nbsp;&nbsp;&nbsp;频&nbsp;&nbsp;道：</div>
+                        <div class="col-xs-5">
+                            <select id='citys' multiple='multiple' class="flat">
+                                    <volist name="channels" id="vo">
+                                        <option value='{$vo.id}' class="citynum">{$vo.name}</option>
+                                    </volist>
+                            </select>
+                            <br>
+                            <div class="col-xs-12 no-padding">
+                                <div class="col-xs-2 no-padding editNow" data-id="{$tag.id}"><div class="btn btn-info">确认</div></div>
+                                <div class="btn btn-default" id="backToList">取消</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            /*城市列表*/
+            $('#citys').multiSelect({
+                selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+                selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='搜索'>",
+                afterInit: function(ms){
+                    var that = this,
+                    $selectableSearch = that.$selectableUl.prev(),
+                    $selectionSearch = that.$selectionUl.prev(),
+                    selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+                    selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+                    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                    .on('keydown', function(e){
+                        if (e.which === 40){
+                            that.$selectableUl.focus();
+                            return false;
+                        }
+                    });
+
+                    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                    .on('keydown', function(e){
+                        if (e.which == 40){
+                            that.$selectionUl.focus();
+                            return false;
+                        }
+                    });
+                },
+                afterSelect: function(){
+                    this.qs1.cache();
+                    this.qs2.cache();
+                },
+                afterDeselect: function(){
+                    this.qs1.cache();
+                    this.qs2.cache();
+                }
+            });
+            $('#citys').multiSelect('select', {$hotids});
+
+
+            $('.editNow').click(function(){
+                var data    = new Object();
+                data.city   = $('#citys').val();
+                if(data.city == null){
+                    alert('请选择频道');
+                    return false;
+                }
+                var str     = data.city.join();
+                var id = $(this).attr('data-id');
+                var name = $('input[name=name]').val();
+                if(name == ''){
+                    alert('请输入正确的标签名称');
+                    return false;
+                }
+                //ajax写入数据
+                $.ajax({
+                    url: '/flowanalysis/channellabeledit/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        name:name,
+                        channel:str
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = '/flowanalysis/channellabel/';
+                    }else{
+                        alert(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('操作失败');
+                })
+
+            });
+
+            $("#backToList").click(function(){
+                window.location.href = '/flowanalysis/channellabel/';
+            });
+
+        })
+    </script>
+</block>

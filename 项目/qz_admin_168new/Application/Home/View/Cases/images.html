@@ -1,0 +1,150 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+        &times;
+    </button>
+    <h4 class="modal-title" id="myModalLabel">
+        审核管理
+    </h4>
+</div>
+<div class="modal-body">
+    <div class="delete-wrap-button">
+        <button type="button" class="btn btn-danger delete-images-btn">删除选中</button>
+    </div>
+    <div class="images-wrap">
+        <volist name="images" id="vi">
+            <div class="images-list-wrap">
+                <eq name="vi.img_host" value="qiniu">
+                    <img class="image-box" alt="{$vi.title}" src="//{:C('QINIU_DOMAIN')}/{$vi.img_path}-w280.jpg" data-id="{$key +1}" data-src="//{:C('QINIU_DOMAIN')}/{$vi.img_path}-s3.jpg">
+                <else />
+                    <img class="image-box" alt="{$vi.title}" src="http://{:C('STATIC_HOST1')}{$vi.img_path}s_{$vi.img}" data-id="{$key +1}" data-src="http://{:C('STATIC_HOST1')}{$vi.img_path}m_{$vi.img}">
+                </eq>
+                <p>
+                    <input name="imagecheck" data-id="{$vi.id}" id="check-{$vi.id}" type="checkbox">
+                    <label for="check-{$vi.id}">选择</label>
+                </p>
+            </div>
+        </volist>
+    </div>
+</div>
+<div class="modal-footer" data-id="{$id}">
+    <button type="button" class="case-on btn btn-danger" data-target="3">审核不通过</button>
+    <button type="button" class="case-on btn btn-primary" data-target="1">审核</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+</div>
+<script>
+    $(document).ready(function(){
+        //根据input框是否选择显示删除图片按钮
+        $('input[name=imagecheck]').change(function(event) {
+            var hascheck = false;
+            $('input[name=imagecheck]').each(function(index, el) {
+                if ($(this).prop('checked') == true) {
+                    hascheck = true;
+                };
+            });
+            if (hascheck == true) {
+                $('.delete-wrap-button').css('display', 'block');
+            } else {
+                $('.delete-wrap-button').css('display', 'none');
+            }
+        });
+
+        //点击图片显示大图
+        $('.image-box').click(function(event) {
+            var imgId = $(this).attr('data-id');
+            var src = $(this).attr('data-src');
+            var e = dialog({
+                title: '消息',
+                content: '<img width="800px" height="600px;" src="' + src + '" data-id="'+ imgId +'" />',
+                okValue: '确 定',
+                quickClose: true
+            });
+            e.show();
+            // 图片向左预览
+            $('.ui-dialog-arrow-a').css({
+                width:"50px",height:"50px",
+                display:"block",top:"40%",
+                left:"0",lineHeight:"50px",
+                border:"1px solid #ccc",zIndex:"10",
+                background:"#fff",
+                cursor:"pointer"
+            }).addClass('text-center h3').append('<i class="fa fa-chevron-left"></i>').on('click',function(){
+                var count = $('.ui-dialog-content').find('img').attr('data-id');
+                count--;
+                if(!(count <= 0)){
+                    var url = $('.images-wrap img[data-id="'+count+'"]').attr('src')
+                    $('.ui-dialog-content').find('img').attr('src',url).attr('data-id',count);
+                }
+            });
+            // 图片向右预览
+            $('.ui-dialog-arrow-b').css({
+                width:"50px",height:"50px",
+                display:"block",top:"40%",
+                right:"0",lineHeight:"50px",
+                border:"1px solid #ccc",zIndex:"10",
+                background:"#fff",
+                cursor:"pointer"
+            }).addClass('text-center h3').append('<i class="fa fa-chevron-right"></i>').on('click',function(){
+                var count = $('.ui-dialog-content').find('img').attr('data-id');
+                count++;
+                if(!(count > $('.images-wrap img').length)){
+                    var url = $('.images-wrap img[data-id="'+count+'"]').attr('src')
+                    $('.ui-dialog-content').find('img').attr('src',url).attr('data-id',count);
+                }
+            });
+        });
+
+        //删除图片按钮
+        $('.delete-images-btn').click(function(event) {
+            var ids = '';
+            $('input[name=imagecheck]').each(function(index, el) {
+                if ($(this).prop('checked') == true) {
+                    ids = ids + $(this).attr('data-id') + ',';
+                };
+            });
+
+            if (ids == '') {
+                alert('请选择要删除的图片！');
+            };
+
+            $.ajax({
+                url: '/cases/deleteimages/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    ids:ids
+                }
+            })
+            .done(function(data) {
+                alert(data.info)
+                if (data.status == 1) {
+                    $('#imagesVerify').modal('hide');
+                };
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请联系技术部门！')
+            })
+        });
+
+        //案例审核按钮
+        $('.case-on').click(function(event) {
+            $.ajax({
+                url: '/cases/setcasesstatus/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    id:$(this).parent().attr('data-id'),
+                    on:$(this).attr('data-target')
+                }
+            })
+            .done(function(data) {
+                alert(data.info);
+                if (data.status == 1) {
+                    $('#imagesVerify').modal('hide');
+                };
+            })
+            .fail(function(xhr) {
+                alert('操作失败,请联系技术部门！')
+            })
+        });
+    })
+</script>

@@ -1,0 +1,182 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>缓存管理 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/plugins/simpleTree/SimpleTree.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>缓存管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/cache">缓存管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body act-box">
+                <form id="searchform" action="" method="get">
+                    <div class="col-sm-2"  style="margin-top:12px">
+                        <select name="group" class="select2">
+                            <option value="">全部分组</option>
+                            <volist name="groupMenu" id="v">
+                            <option value="{$v}">{$v}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-sm-3" style="margin-top:13px">
+                        <div class="input-group" >
+                            <input type="text" name="keyword" class="form-control pull-right" placeholder="缓存名" value="{$Think.get.keyword}">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>&nbsp;筛选</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="col-sm-4 pull-right" style="text-align:right">
+                    统计开关
+                    {$isSwitch.mobile}
+                    {$isSwitch.old}
+                    {$isSwitch.new}
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="row">
+
+                    <div class="col-sm-3">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">
+                                <div class="pull-left" style="width:175px;"><i class="fa fa-navicon"></i>&nbsp;Redis缓存管理</div>
+                                <div class="pull-right" style="font-size:14px;color:#666;padding-top:3px"></div>
+                                </h3>
+                            </div>
+                            <div class="st_tree">
+                                <ul>{$tree}</ul>
+                            </div>
+                            <div class="box-footer text-center">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-9">
+                        <empty name="item.name">
+                        <div class="box box-default" style="min-height: 300px">
+                            <div class="box-header with-border"><h3 class="box-title"><-请在左侧选择缓存名</h3></div>
+                            <div class="box-body col-sm-5 ">
+
+                            </div>
+                        </div>
+                        <else />
+                        <div class="box box-default" style="min-height: 300px">
+                            <div class="box-header with-border">
+                                <h3 class="box-title"><i class="fa fa-info-circle"></i>&nbsp;{$item.name}</h3>
+                            </div>
+                            <div class="box-body col-sm-10 ">
+                                <form class="form-horizontal" id="editbox" action="/salesetting/znbmEdit" method="POST">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="col-sm-1">名称</label>
+                                            <div class="col-sm-8">{$item.name}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-1">函数</label>
+                                            <div class="col-sm-10">{$item.function}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-1">位置</label>
+                                            <div class="col-sm-8">{$item.model}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-1">调用</label>
+                                            <div class="col-sm-8"><strong>{$item.count}</strong> 次</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-1">内容</label>
+                                            <div class="col-sm-10">
+                                            <textarea id="RawJson" class="textarea" style="height:300px" spellcheck="false">{$item.content}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="box-footer">
+                                        <input type="hidden" name="id" id="cacheKey" value="{$item.name}"/>
+                                        <button type="button" class="btn btn-info" id="delCache">
+                                        <i class="fa fa-trash"></i> 删除缓存</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        </empty>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/simpleTree/SimpleTree.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $(function(){
+            $(".st_tree").SimpleTree({
+                click:function(a){
+                    if(!$(a).attr("hasChild"))
+                        alert($(a).attr("ref"));
+                }
+            });
+            $(".st_tree").find("a").click(function(){
+                var id = $(this).attr('data-id');
+                if(id != undefined){
+                    window.location.href = "/cache/?key=" + id;
+                }
+                return false;
+            });
+        });
+
+        $(".select2").select2();
+        $(".select2").select2("val", '{$group}');
+
+
+        $('.fa-pencil').click(function(){
+            location.href="/homequickask/edit?id=" + $(this).attr('data-id');
+        });
+
+        $('.switch').click(function(){
+            var valId = $(this).find('i');
+            var status = $(valId).attr('data-id');
+            var type = $(valId).attr('type-id');
+            location.href = "/cache/setStatStatus/?type=" + type + "&status=" + status;
+
+        });
+
+        $('#delCache').click(function(){
+            if(confirm("您确定要删除吗？")){
+                var id = $('#cacheKey').val();
+                if(id === ''){
+                    alert('数据错误');
+                    return;
+                }
+                location.href="/cache/remove/?key="+id;
+            }
+        });
+    </script>
+</block>

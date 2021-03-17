@@ -1,0 +1,183 @@
+<extend name="Common:basic"/>
+<block name="keywords">
+<meta name="keywords" content="{$info.category_name|default="装修知道"}装修问答" />
+<link href="{$static_host}/assets/mobile/baike/css/baike-content.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+<link href="/assets/mobile/css/top-sj-bj.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</block>
+<block name="description">
+<meta name="description" content="齐装网装修问答平台为业主提供室内装修中的{$info.category_name}装修遇到的问题及答案；帮助业主解决{$info.category_name}装修问题。" />
+</block>
+<block name="title">
+    <title>{$info.title} - 装修日记</title>
+</block>
+<block name="link">
+    <if condition="$info['canonical'] eq 1">
+        <link href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/riji/" rel="canonical" />
+    </if>
+    <link rel="stylesheet" type="text/css" href="/assets/mobile/riji/css/index.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/mobile/common/css/red-packet.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css">
+</block>
+<block name="top">
+    <div class="m-header-his">
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-title">装修日记</div>
+</block>
+<block name="content">
+    <div class="zx-ask-nav under-line">
+        <div class="zx-ask-menu" id="wrapper">
+            <ul class="zx-ask-box" id="scroller">
+                <li data-id="0" id="px0"><span class="ask-active"><a href="/riji/">全部日记</a><i></i></span></li>
+                <volist name="category" id="v">
+                    <li data-id="{$v.id}" id="{$v.px}"><span><a href="/riji/c{$v.id}/">{$v.type_name}</a><i></i></span></li>
+                </volist>
+            </ul>
+        </div>
+    </div>
+    <div class="riji-list contentnr">
+        <include file="list-content" />
+    </div>
+    <!--geolocation定位-->
+    <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+    <!--引入红包-->
+    <!--<include file="Common:red-packet" />-->
+
+    <!--底部免费设计-->
+    <!--<include file="Common:float-sj" />-->
+    <include file="Common/footfadantc"/>
+</block>
+
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/App.js?v={:C('STATIC_VERSION')}"></script>
+<!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+<script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script> -->
+<script type="text/javascript" src="/assets/mobile/common/js/red-packet.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+$(function(){
+
+    // 横向滚动导航
+    var jroll1 = new JRoll("#wrapper", {scrollX:true,scrollY:false});
+    $('.zx-ask-box').on('click','li',function(){
+        var bool = $(this).find('span').hasClass('ask-active');
+        if(!bool){
+            $('.zx-ask-list').html('');
+            category = $(this).attr('data-id');
+            page = 1;
+            startup = true;
+            isEmpty = false;
+            //getNextPage();
+            $(this).find('span').addClass('ask-active');
+            $(this).siblings().find('span').removeClass('ask-active')
+        }
+    });
+    $("#{$info.px}").find('span').addClass('ask-active');
+    $("#{$info.px}").siblings().find('span').removeClass('ask-active');
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px3'){
+        jroll1.scrollTo(-120, 0, 300, true);
+    }
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px4'){
+        jroll1.scrollTo(-160, 0, 300, true);
+    }
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px5'){
+        jroll1.scrollTo(-220, 0, 300, true);
+    }
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px6'){
+        jroll1.scrollTo(-224, 0, 300, true);
+    }
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px7'){
+        jroll1.scrollTo(-240, 0, 300, true);
+    }
+    if($("#{$info.px}").find('span').hasClass('ask-active') && '{$info.px}' == 'px8'){
+        jroll1.scrollTo(-240, 0, 300, true);
+    }
+
+    if($('.riji-item').length && $('.riji-item').length<=1){
+        $('#footer').css({
+            'padding-bottom':'80px',
+            'position':'fixed',
+            'left':'0',
+            'bottom':'0',
+            'z-index':'0'
+        });
+        $('.zb-link-bottom').css({'z-index':'1'})
+    }else{
+        $('#footer').css({
+            'padding-bottom':'100px',
+            'position':'',
+            'left':'none',
+            'bottom':'none',
+            'z-index':'none'
+        });
+        $('.zb-link-bottom').css({'z-index':'1'})
+    }
+
+    //定义固有变量
+    var loading = false;
+    var last_page = '{$totalpage|default=0}';
+    var this_page = '{$pageid}';
+    var alertinfo = false;
+    var list_sums = '{:count($list)}';
+    //var url_no_page = "{$url_no_page}";
+    //下拉无限加载
+    window.onscroll=function(){
+        /*导航栏固定*/
+        /*var top=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop;
+        if(top>103){
+            $("#tofixed").addClass('tofixed')
+        }else{
+            $("#tofixed").removeClass('tofixed')
+        }*/
+        /*下拉刷新加载*/
+        if ($(document).height() - $(this).scrollTop() - $(this).height() < 800){
+            if(this_page >= last_page){
+                if (alertinfo == false && list_sums > 0) {
+                    $(".contentnr").append('<div class="wrapbt"><div class="spmore">没有更多了，看看别的吧..</div></div>');                        };
+                alertinfo = true;
+                return false;
+            }else{
+                if (loading == true) {
+                    return false;
+                };
+                loading = true;
+                var url = '?p=' + (parseInt(this_page) + 1);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'html',
+                })
+                .done(function(result) {
+                    loading = false;
+                    $(".contentnr").append($(result).fadeIn(2000));
+                    this_page++;
+                })
+                .fail(function(xhr) {
+                    loading = false;
+                    alert("加载失败,请刷新再试！");
+                });
+            }
+        }
+
+        //回到顶部
+        if($(document).scrollTop()>="1000"){
+            $('#gotop').addClass('show');
+        }else{
+            $('#gotop').removeClass('show');
+        }
+    }
+});
+</script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$info.title} - 装修日记",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

@@ -1,0 +1,102 @@
+<extend name="Search:basic_tu"/>
+<block name="meta">
+    <title>
+        <empty name="input.search_word">
+            美图-{$input.scene_word}-搜索结果页
+            <else />
+            {$input.search_word}-美图-{$input.scene_word}-搜索结果页
+        </empty>
+    </title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/search/css/tu.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="wrap search-result">
+        <empty name="input.search_word">
+            为您找到{$data.page.total_number}个相关结果
+            <else/>
+            为您找到{$data.page.total_number}个与“{$input.search_word}”相关的结果
+        </empty>
+    </div>
+    <div class="wrap classify">
+        <volist name="categoryList" id="vo_cate">
+            <div class="classify-box">
+                <div class="classify-title">
+                    <span>{$vo_cate.name}</span>
+                </div>
+                <div class="classify-list">
+                    <div class="reset-with">
+                        <volist name="vo_cate.child" id="vo">
+                            <span <eq name="input.cate_id" value="$vo['id']"> class="actived" </eq> >
+                            <a href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/search/{$module}/tu/?keyword={$input.search_word}&category={$vo_cate.url}{$vo.url}">{$vo.name}</a>
+                            </span>
+                        </volist>
+                    </div>
+                </div>
+                <if condition="$vo_cate['child_count'] GT 10" >
+                    <div class="classify-operate"><span>展开</span><i class="fa fa-angle-down"></i></div>
+                </if>
+            </div>
+        </volist>
+    </div>
+
+    <notempty name="data.list">
+        <div class="wrap search-tu">
+            <volist name="data.list" id="item">
+                <div class="tu-box">
+                    <div class="tu-img">
+                        <a rel="nofollow" href="{$SCHEME_HOST.scheme_full}www.{$SCHEME_HOST.domain}/tu/{$item.detail_flag}{$item.id}.html" target="_blank">
+                            <img src="{$item.img_src_full}-w300.jpg" alt="{$item.title}"/>
+                        </a>
+                        <p class="p1">{$item.title}</p>
+                    </div>
+                    <div class="tulist-details">
+                        <if condition="$item['maininfo']['type'] == 1">
+                            <span>{$item.maininfo.pub_name}</span>
+                            <else />
+                            <span>{$item.maininfo.layout_name}</span>
+                            <span>{$item.maininfo.part_name}</span>
+                            <span>{$item.maininfo.style_name}</span>
+                        </if>
+                        <span class="num"><img src="/assets/home/decoration/img/icon-eye.png">{$item.maininfo.pv}</span>
+                    </div>
+                </div>
+            </volist>
+        </div>
+        <div class="pagebox">
+            {$pageshow}
+        </div>
+    <else />
+        <include file="Home@Search/nodata" />
+    </notempty>
+    <div class="wrap cases-banner">
+        <img src="/assets/home/decoration/img/tu-banner.jpg" />
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(function () {
+            /*S-导航栏动画*/
+            $(".classify-operate").click(function(){
+                var touch = $(this).attr('data-on');
+                if('show' == touch){
+                    $(this).attr('data-on','hidden');
+                    $(this).find('span').html('展开');
+                    $(this).find('i').removeClass('fa-angle-up').addClass('fa-angle-down');
+                    $(this).parent().stop().animate({"height":"38px"},600);
+                    $(this).parent().find('.classify-title').stop().animate({height: '38px'},600);
+                }else{
+                    $(this).attr('data-on','show');
+                    var type= $(this).attr('data-type');
+                    var count = $(this).parent().find('.classify-list span').length;
+                    var height = $(this).parent().find('.classify-list').height();
+                    $(this).find('span').html('收起');
+                    $(this).find('i').removeClass('fa-angle-down').addClass('fa-angle-up');
+                    $(this).parent().stop().animate({height: height},600);
+                    $(this).parent().find('.classify-title').stop().animate({height: height},600);
+                }
+            });
+        })
+    </script>
+</block>

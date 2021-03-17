@@ -1,0 +1,164 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>全屋定制订单</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/home/activity/css/qwdzldy.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>全屋定制订单</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default" id="tabContent" class="tab-content" >
+            <div class="tab-pane fade in active" id="">
+                <div class="box-header with-border">
+                    <h4 class="box-title">条件查询</h4>
+                </div>
+                <div class="box-body">
+                    <form id="searchForm"  action="" method="get">
+                        <div class="col-xs-2">
+                            <label>发单城市</label>
+                            <select id="city" name="cs" class="form-control ">
+                                <option value="">请选择</option>
+                                <volist name="city" id="vo">
+                                    <if condition="$getdata['cs'] EQ $vo['cid']">
+                                        <option value="{$vo.cid}" selected="selected">{$vo.cname}</option>
+                                    <else/>
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                    </if>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>订单查询</label>
+                            <input type="text" name="keyword" value="{$getdata.keyword}" class="form-control" placeholder="姓名、电话" autocomplete="off">
+                        </div>
+                        <div class="col-xs-2">
+                            <label>发单时间-开始</label>
+                            <input type="text" name="start" value="{$getdata.start}" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="">
+                        </div>
+                        <div class="col-xs-2">
+                            <label>发单时间-结束</label>
+                            <input type="text" name="end" value="{$getdata.end}" class="form-control datepicker" autocomplete="off" placeholder="选择日期" value="">
+                        </div>
+                        <div class="col-xs-2">
+                            <label>来源页面</label>
+                            <select id="source" name="source" class="form-control ">
+                                <option value="">请选择</option>
+                                <option value="1"<if condition="$getdata['source'] EQ 1"> selected="selected"</if> >PC</option>
+                                <option value="2"<if condition="$getdata['source'] EQ 2"> selected="selected"</if> >m</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-1">
+                            <label class="col-xs-12" style="opacity: 0;">查询</label>
+                            <button type="submit" id="btnSearch" class="btn btn-info">查询</button>
+                        </div>
+                        <div class="col-xs-1">
+                            <label class="col-xs-12 pull-right hideLoading" style="opacity: 0;">导出</label>
+                            <button type="button" id="export" class="btn btn-flat hideLoading">导出报表</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default">
+            <div class="box-header">
+                <h3 class="box-title">订单列表</h3>
+            </div>
+            <div class="col-xs-12">
+                <form role="form" class="list-form">
+                    <table class="table table-hover dataTable">
+                        <thead class="thead">
+                            <tr role="row">
+                                <th>发布时间</th>
+                                <th>城市区县</th>
+                                <th>姓名</th>
+                                <th>联系方式</th>
+                                <th>来源页面</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.created_at}</td>
+                                <td>{$vo.cname}{$vo.quxian}</td>
+                                <td>{$vo.name}</td>
+                                <td>{$vo.tel}</td>
+                                <td>
+                                    <if condition="$vo['source'] EQ 1">
+                                        PC
+                                    <else/>
+                                        M
+                                    </if>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </form>
+                {$page}
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#export").click(function(){
+            var cs = $('#city').val() ? $('#city').val() : '';
+            var keyword = $("input[name=keyword]").val() ? $("input[name=keyword]").val() : '';
+            var start = $("input[name=start]").val() ? $("input[name=start]").val() : '';
+            var end = $("input[name=end]").val() ? $("input[name=end]").val() : '';
+            var source = $('#source').val() ? $('#source').val() : '';
+            location.href="/activity/exportquanwuorder?cs=" + cs + "&keyword=" + keyword + "&start" + start+ "&end="+ end + "&source=" + source;
+        });
+        $("#city").select2({
+            allowClear: true,
+            placeholder: "请选择",
+            language: "zh-CN"
+        });
+        $('.datepicker').datepicker({
+            weekStart: 1,
+            todayHighlight: 1,
+            todayBtn: true,
+            minView: 0,
+            autoclose: true,
+            language: 'zh-CN',
+            format: 'yyyy-mm-dd'
+        }).on("change", function () {
+            if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+                msg("发单开始时间必须小于发单结束时间", function () {
+                    $("input[name=end]").val("");
+                });
+            }
+        });
+        function toTimeStamp(time){
+            if(time!=undefined){
+                var date = time;
+                date = date.substring(0,19);
+                date = date.replace(/-/g,'/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

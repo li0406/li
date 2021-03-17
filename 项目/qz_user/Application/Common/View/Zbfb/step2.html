@@ -1,0 +1,98 @@
+<div class="windowbg validate">
+    <div class="order-window">
+        <div class="tit">感谢您申请齐装网服务</div>
+        <div class="shutdown"><i class="fa fa-remove"></i></div>
+        <div class="order-info">
+            <h4><span class="f-red">15分钟</span>内齐装网客服会与您联系，优先为您服务。
+                <br>
+            请您继续完善以下信息：</h4>
+            <div class="box-line edit-text mt10">
+                <select class="edit-city" name="mianji">
+                    <volist name="step.mianji" id="vo">
+                        <if condition="$vo EQ '100-120㎡'">
+                        <option value="{$vo}" selected="selected">{$vo}</option>
+                        <else/>
+                        <option value="{$vo}">{$vo}</option>
+                        </if>
+                    </volist>
+                </select>
+            </div>
+            <div class="box-line edit-text">
+                <select class="edit-city" name="huxing">
+                    <volist name="step.hx" id="vo">
+                        <if condition="$vo['id'] EQ 43 ">
+                        <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                        <else/>
+                        <option value="{$vo.id}">{$vo.name}</option>
+                        </if>
+                    </volist>
+                </select>
+            </div>
+            <div class="box-line edit-text">
+                <select class="edit-city" name="fengge">
+                    <volist name="step.fengge" id="vo">
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </volist>
+                </select>
+            </div>
+            <div class="box-line edit-text">
+                <select class="edit-city" name="fangshi">
+                    <volist name="step.fs" id="vo">
+                        <if condition="$vo['id'] EQ 30">
+                        <option value="{$vo.id}" selected="selected">{$vo.name}</option>
+                        <else/>
+                        <option value="{$vo.id}">{$vo.name}</option>
+                        </if>
+                    </volist>
+                </select>
+            </div>
+            <button type="button">提交</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".windowbg .fa-remove").click(function(event) {
+        $(".windowbg").remove();
+    });
+
+    $(".windowbg button").click(function(event) {
+        var container = $(".windowbg");
+        $(".focus", container).removeClass('focus');
+        $(".height_auto", container).removeClass('height_auto');
+        $(".valdate-info", container).remove();
+
+        $.ajax({
+            url: '/fb_order/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                mianji:$("select[name=mianji]", container).val(),
+                huxing:$("select[name=huxing]", container).val(),
+                fengge:$("select[name=fengge]", container).val(),
+                fangshi:$("select[name=fangshi]", container).val(),
+                orderid:"{$step.orderid}",
+                tel:"{$step.tel}",
+                step:3
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                container.remove();
+                $("body").append(data.data.tmp);
+            } else {
+                $("select[name=mianji]", container).parent().addClass('height_auto');
+                $("select[name=mianji]", container).addClass('focus').focus();
+                var span = $("<i class='valdate-info'></i>");
+                span.html(data.info);
+                $("select[name=mianji]", container).parent().append(span);
+            }
+        })
+        .fail(function(xhr) {
+            $("select[name=mianji]", container).parent().addClass('height_auto');
+            $("select[name=mianji]", container).addClass('focus').focus();
+            var span = $("<i class='valdate-info'></i>");
+            span.html("发布失败,请刷新页面！");
+            $("select[name=mianji]", container).parent().append(span);
+        });
+    });
+</script>

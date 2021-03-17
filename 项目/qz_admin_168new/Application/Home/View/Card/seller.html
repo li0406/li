@@ -1,0 +1,295 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>商家领用</title>
+
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/card/css/seller.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>商家领用</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">条件查询</h3>
+            </div>
+            <div class="box-body bottom-border">
+                <form action="" method="get">
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <div class=" lh-34">礼券名称：</div>
+                            <input type="text" name="name" class="form-control" value="{$Think.get.name}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">公司名称/ID：</div>
+                            <input type="text" name="card_id" class="form-control" value="{$Think.get.card_id}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">城市:</div>
+                            <select id="state2" class="select2 select2-offscree" name="cs" type="text" tabindex="-1">
+                                <option value="">请选择</option>
+                                <volist name="citys" id="vo">
+                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">商家申请日期：</div>
+                            <input type="text" name="apply_time" class="form-control datepicker range" value="{$Think.get.apply_time}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">状态：</div>
+                            <select id="src" class="form-control" name="status" type="text">
+                                <option value="0">请选择</option>
+                                <volist name="status" key="k" id="vo">
+                                    <option value="{$Think.lang.$key}">{$vo}</option>
+                                </volist>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <div class=" lh-34">有效时间-开始：</div>
+                            <input type="text" name="start" class="form-control datepicker range" value="{$Think.get.start}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">有效时间-结束：</div>
+                            <input type="text" name="end" class="form-control datepicker range" value="{$Think.get.end}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">活动时间-开始：</div>
+                            <input type="text" name="activity_start" class="form-control datepicker range" value="{$Think.get.activity_start}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div class=" lh-34">活动时间-结束：</div>
+                            <input type="text" name="activity_end" class="form-control datepicker range" value="{$Think.get.activity_end}">
+                        </div>
+                        <div class="col-xs-2">
+                            <div>&nbsp;</div>
+                            <button id="btnSearch" type="submit" class="btn btn-primary pull-right" data-loading-text="查询中....."><i
+                                    class="fa fa-search"></i>查询</button>
+                        </div>
+                    </div>
+                </form>
+                <br>
+            </div>
+        </div>
+        <div class="box stat-by">
+            <div class="box-body " style="padding:0px;">
+                <div class="table-responsive table-wrap-list">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <th>序号</th>
+                            <th>礼券名称</th>
+                            <th>会员ID</th>
+                            <th>公司名称</th>
+                            <th>城市</th>
+                            <th>商家申请日期</th>
+                            <th>领用数量</th>
+                            <th>业主领取</th>
+                            <th>有效时间</th>
+                            <th>活动时间</th>
+                            <th>状态</th>
+                            <th>操作人</th>
+                            <th>操作</th>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo" >
+                            <tr>
+                                <td>{$key+1}</td>
+                                <td>{$vo.name}</td>
+                                <td>{$vo.com_id}</td>
+                                <td>{$vo.qc}</td>
+                                <td>{$vo.cname}</td>
+                                <td>
+                                    <if condition="$vo['apply_time'] NEQ 0">
+                                        {$vo.apply_time|default=''|date='Y-m-d H:i:s',###}
+                                    </if>
+                                </td>
+                                <td>{$vo.amount}</td>
+                                <td>
+                                    <a href="/card/user/?card_id={$vo.qc}&cs={$vo.cs}&name={$vo.name}">{$vo.get_count}</a>
+                                </td>
+                                <td>{$vo.start|default=''|date='Y-m-d H:i:s',###}至<br>{$vo.end|default=''|date='Y-m-d H:i:s',###}</td>
+                                <td>{$vo.activity_start|default=''|date='Y-m-d H:i:s',###}至<br>{$vo.activity_end|default=''|date='Y-m-d H:i:s',###}</td>
+                                <td>
+                                    <switch name="vo.status" >
+                                        <case value="4"><span style="color:blue">未生效</span></case>
+                                        <case value="7"><span>已禁用</span></case>
+                                        <case value="5"><span style="color:green">可用</span></case>
+                                        <case value="6"><span style="color:grey">失效</span></case>
+                                        <case value="1"><span>待确认</span></case>
+                                        <case value="3"><span style="color:red">不通过</span></case>
+                                    </switch>
+                                </td>
+                                <td>{$vo.check_username}</td>
+                                <td>
+                                    <if condition="$vo['status'] EQ 1">
+                                        <a href="javascript:;" data-id="{$vo.id}" class="confirm">确认</a>
+                                    </if>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 模态框 -->
+    <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">提示</h4>
+            </div>
+            <div class="modal-body">
+                确认同意该公司领用此券吗？
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="btn2">同意</button>
+              <button type="button" id="btn1" class="btn btn-default">不同意</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="modal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" id="closetip"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">不同意理由:</label>
+                        <textarea name="" id="rule" maxlength="100" cols="75" rows="10"></textarea>
+                    </div>
+            </div>
+                <div class="modal-footer submit">
+                  <button type="button" id="submit" class="btn btn-primary">提交</button>
+                </div>
+              </div>
+            </div>
+          </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#state2').select2();
+            $("#state2").select2("val", "{$Think.get.cs}");
+            $('select[name=status]').val('{$Think.get.status}' == '' ? 0 : '{$Think.get.status}');
+            $('input').attr('autocomplete','off')
+            $(".range").daterangepicker({
+                "timePicker": true,
+                "timePicker24Hour": true,
+                "linkedCalendars": false,
+                "autoUpdateInput": false,
+                "locale": {
+                    format: 'YYYY-MM-DD',
+                    separator: ' ~ ',
+                    applyLabel: "应用",
+                    cancelLabel: "取消",
+                    resetLabel: "重置",
+                    "daysOfWeek": ["日", "一", "二", "三", "四", "五", "六"],
+                    "monthNames": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                }
+            }, function (start, end, label) {
+                var beginTimeStore = start;
+                var endTimeStore = end;
+                if (!this.startDate) {
+                    this.element.val('');
+                } else {
+                    this.element.val(this.startDate.format(this.locale.format) + this.locale.separator +
+                        this.endDate.format(this.locale.format));
+                }
+            });
+            $(".datepicker.seller").datepicker({
+                format: "yyyy-mm-dd",
+            })
+
+            $('.confirm').on('click',function(){
+                $('#btn2').data('id',$(this).data('id'));
+                $('#submit').data('id',$(this).data('id'));
+                $('#modal1').modal('show')
+            })
+
+            $('#btn2').on('click',function(){
+                $('#btn2').attr("disabled","disabled");
+                checkStatus($(this).data('id'),2);
+                // 同意
+                $('#modal1').modal('hide')
+            })
+
+            $('#btn1').on('click',function(){
+                // 不同意
+                $('#modal1').modal('hide')
+                $('#modal2').modal('show')
+            })
+
+            $('#submit').on('click',function(){
+                // $('#submit').attr("disabled","disabled");
+                checkStatus($(this).data('id'),3);
+                // $('#modal2').modal('hide')
+                // 提交
+            })
+
+            $('#closetip').on('click',function(){
+                $('#rule').val('')
+                $('#modal2').modal('hide')
+            })
+
+            function checkStatus(id,status){
+                var reason = $('#rule').val().trim();
+                if(status == 3 && reason == ''){
+                    alert('请输入不同意理由');
+                    // $('#submit').removeAttr("disabled");
+                }else{
+                    $.ajax({
+                        url: '/card/examine/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {id:id,reason:reason,status:status,type:1}
+                    })
+                            .done(function(data) {
+                                if(data.status == 0){
+                                    window.location.href='/card/seller/';
+                                }else{
+                                    $('#btn2').removeAttr("disabled");
+                                    $('#submit').removeAttr("disabled");
+                                    alert(data.info);
+                                    return false;
+                                }
+                            })
+                            .fail(function(xhr) {
+                                alert("网络错误，请稍后重试！");
+                            })
+                }
+
+
+
+            }
+
+        });
+    </script>
+</block>

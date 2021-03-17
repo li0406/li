@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="zh-CN" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="zh-CN" class="ie9"> <![endif]-->
+<!--[if !IE]><![endif]-->
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>个人信息-用户中心</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="/assets/common/css/bootstrap.min.new.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/bootstrap-responsive.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/common/css/style-metro.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link href="/assets/home/css/main.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+    <script src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+</head>
+<body>
+    <include file="Main:header" />
+    <div class="container mt10 inner-box basic-box">
+        <div class="row">
+            <include file="Main:navleft" />
+            <div class="col-sm-9 basic-right">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="basic-setting-title">
+                            <h3>头像设置</h3>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="tabbable-custom">
+                                <ul class="nav nav-tabs mt10">
+                                    <li class="active"  >
+                                        <a data-toggle="tab" href="#tab_1">自定义头像</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div id="tab_1" class="tab-pane active">
+                                        <dl class="portrait-list">
+                                            <dd>
+                                                <div class="alert alert-danger text-center hide">
+                                                    <button class="close" data-dismiss="alert"></button>
+                                                    <span></span>
+                                                </div>
+                                            </dd>
+                                            <dd>方法一： 选择本地照片，上传自己的头像</dd>
+                                            <dd>
+                                                <div id="logo_form"></div>
+                                                <div id="logo_img" class="hide" >
+                                                    <p>
+                                                        <img src=""/>
+                                                    </p>
+                                                    <button id="btnReset" type="button" class="btn">重新上传</button>
+                                                </div>
+                                            </dd>
+                                            <dd>方法二： 选择推荐的头像</dd>
+                                            <dd>
+                                                <div class="portrait-img-list">
+                                                    <for start="1" end="7" name="vo">
+                                                        <div class="portrait-img">
+                                                            <img  src="/assets/common/img/default_portrait{$vo}.jpg" />
+                                                            <span class="recommend"></span>
+                                                        </div>
+                                                    </for>
+                                                </div>
+                                            </dd>
+                                            <dd>
+                                                <button id="btn-upload" type="button" class="btn green">保存头像</button>
+                                                <span class="errMsg"></span>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/assets/common/js/jquery-migrate-1.2.1.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/bootstrap.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/placeholders.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/common/js/jquery.validate.min.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="/assets/home/js/basic.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script src="//open.web.meitu.com/sources/xiuxiu.js?v={:C('STATIC_VERSION')}" type="text/javascript"></script>
+<script type="text/javascript">
+    Basic.init();
+    xiuxiu.setLaunchVars("quality", 100);
+    //图片生成大小
+    xiuxiu.setLaunchVars("maxFinalWidth", "100");
+    xiuxiu.setLaunchVars("maxFinalHeight", "100");
+    //裁剪尺寸
+    xiuxiu.setLaunchVars("cropPresets", "100x100");
+    //设置上传URL
+    xiuxiu.setUploadURL("{:C('UC_URL')}/uplogo/");
+    //设置上传类型
+    xiuxiu.setUploadType(2);
+    //加载文件
+    xiuxiu.embedSWF("logo_form", 5, 800, 500, "xiuxiuForm");
+    xiuxiu.onInit = function(id) {
+
+    };
+    //上传图片前调用
+    xiuxiu.onBeforeUpload = function(data, id) {
+            var types = "jpg,png,gif";
+            if (types.indexOf(data.type) < 0) {
+                return false;
+            }
+            return true;
+        }
+        //上传响应
+    xiuxiu.onUploadResponse = function(data, id) {
+        if (typeof data == "string") {
+            data = eval("(" + data + ")");
+        }
+        $(".alert").addClass('hide');
+        if (data.status == 1) {
+            $("#xiuxiuForm").hide();
+            $("#logo_img img").attr("src",data.data.url)
+            $("#logo_img").removeClass('hide');
+        } else {
+            $(".alert").removeClass("hide").find("span").html(data.info);
+        }
+    }
+
+    $("#btnReset").click(function(event) {
+        $("#xiuxiuForm").show();
+        $("#logo_img").addClass('hide');
+        $(".portrait-img.active").removeClass('active');
+        $("#logo_img img").attr("src","")
+    });
+
+    $(".portrait-img").click(function(event) {
+        $(".alert").addClass('hide');
+        $(".portrait-img.active").removeClass('active');
+        if($(this).hasClass('active')){
+            $(this).removeClass('active');
+        }else{
+            $(this).addClass('active');
+        }
+        $("#xiuxiuForm").hide();
+        $("#logo_img img").attr("src",$(this).find("img").attr("src"))
+        $("#logo_img").removeClass('hide');
+    });
+
+    $("#btn-upload").click(function(event) {
+        $(".alert").addClass('hide');
+        if($("#logo_img img").attr("src") == ""){
+            $(".alert").removeClass("hide").find("span").html("请先选择上传的头像！");
+            return false;
+        }
+        var src =  $("#logo_img img").attr("src");
+        $.ajax({
+            url: '/portrait',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                src: src
+            }
+        })
+        .done(function(data) {
+            $(".alert").removeClass("hide").find("span").html(data.info);
+        })
+        .fail(function(xhr) {
+            $(".alert").removeClass("hide").find("span").html("系统异常,请联系技术部门！");
+        });
+    });
+</script>
+</html>

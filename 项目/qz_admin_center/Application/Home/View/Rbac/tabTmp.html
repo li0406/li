@@ -1,0 +1,43 @@
+<select id="my_multi_select_1" multiple="multiple">
+<volist name="department" id="vo" key="key">
+    <optgroup label="{$vo.name}">
+    <volist name="vo.roles" id="v" key="k">
+        <if condition="array_key_exists($v['id'],$sys_roles)">
+            <option value="{$v.id}" data-group="{$vo.id}" selected="selected" class="ms-selected" >{$v.role_name}</option>
+        <else/>
+            <option value="{$v.id}" data-group="{$vo.id}"  class="ms-selected" >{$v.role_name}</option>
+        </if>
+    </volist>
+    </optgroup>
+</volist>
+</select>
+<div class="form-group ">
+<div class="col-sm-2 mt10">
+    <button id="btnSysSave" type="sbumit" class="btn btn-block blue">保存</button>
+</div>
+</div>
+<script type="text/javascript">
+    $('#my_multi_select_1').multiSelect({
+        selectableOptgroup: true
+    });
+    $("#btnSysSave").click(function(event) {
+        var val = null;
+        $('#my_multi_select_1').multiSelect("getValue",function(args){ val = args;});
+        $.ajax({
+            url: '/systemrole',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                ids: val,
+                id:"{$sysId}"
+            }
+        })
+        .done(function(data) {
+             $(".alert-sec").removeClass('hide').find("span").html(data.info);
+        })
+        .fail(function(xhr) {
+            $(".alert-sec").removeClass('hide').find("span").html("系统异常,请联系技术部门！");
+
+        });
+    });
+</script>

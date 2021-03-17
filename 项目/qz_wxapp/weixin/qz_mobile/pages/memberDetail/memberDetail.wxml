@@ -1,0 +1,536 @@
+<!--pages/memberDetail/memberDetail.wxml-->
+<view class="info no-margin">
+  <view class='li no-border'>
+    <text>合作类型</text>
+    <text class='fr' bindtap='chooseMember'>{{parms.cooperation_type_name}}</text>
+  </view>
+</view>
+<view class="main">
+  <view wx:if="{{common}}" class="common">
+    <view class='info'>
+      <view class='li company-name clearfix'>
+        <text>1.公司名称</text>
+        <text class="fr">{{parms.company_name}}</text>
+      </view>
+      <view class='li city'>
+        <text>2.城市</text>
+        <text class="fr">{{parms.city_name}}</text>
+      </view>
+    </view>
+    <view class='info'>
+      <view class='li times' wx:if="{{member == 6 || member == 15}}">
+        <text>3.返点比例</text>
+        <text class="fr">{{member == 15 ? '标杆会员（保产值）' : backRatios[backRatioIndex]}}</text>
+      </view>
+      <view class='li times' wx:else>
+        <text>3.单倍/几倍</text>
+        <text class="fr">{{member == 14 ? '标杆会员（保产值）' : times[timesIndex]}}</text>
+      </view>
+      <view class='li'>
+        <text>4.新/老会员</text>
+        <text class="fr">{{is_new[is_newIndex]}}</text>
+      </view>
+      <view class='li contact-name'>
+        <text>5.联系人</text>
+        <text class="fr">{{parms.company_contact ==''?'--':parms.company_contact}}</text>
+      </view>
+      <view class='li contact-job'>
+        <text>6.职务</text>
+        <text class="fr">{{parms.company_contact_position == ''?'--':parms.company_contact_position}}</text>
+      </view>
+      <view class='li tel'>
+        <text>7.电话</text>
+        <text class="fr">{{parms.company_contact_phone}}</text>
+      </view>
+      <view class='li wechat'>
+        <text>8.微信</text>
+        <text class="fr">{{parms.company_contact_weixin == ''?'--':parms.company_contact_weixin}}</text>
+      </view>
+    </view>
+    <view class="info">
+      <block  wx:if="{{parms.cooperation_type != 6 && parms.cooperation_type != 15}}">
+        <view class='li'>
+          <text class='fl'>9.总合同时间-开始</text>
+          <text class="fr">{{parms.contract_start==''?'--':parms.contract_start}}</text>
+        </view>
+        <view class='li pl20'>
+          <text class='fl'>总合同时间-结束</text>
+          <text class="fr">{{parms.contract_end==''?'--':parms.contract_end}}</text>
+        </view>
+        <view class='li'>
+          <view class='fl stime'>{{contract_days}}</view>
+          <textarea class="h130" placeholder='' disabled="disabled" value="{{parms.total_contract_remark}}"></textarea>
+        </view>
+        <view class='li'>
+          <text class='fl'>10.本次会员时间-开始</text>
+          <text class="fr {{parms.is_abnormal== 1?'red':''}}">{{parms.current_contract_start==''?'--':parms.current_contract_start}}</text>
+        </view>
+        <view class='li pl40'>
+          <text class='fl'>本次会员时间-结束</text>
+          <text class="fr {{parms.is_abnormal== 1?'red':''}}">{{parms.current_contract_end==''?'--':parms.current_contract_end}}</text>
+        </view>
+        <view class='li'>
+          <view class='fl stime'>{{current_contract_days}}</view>
+          <textarea class="h130" placeholder='' disabled="disabled" value="{{parms.contract_remark}}"></textarea>
+        </view>
+      </block>
+      <view class='li'>
+        <text class='fl'>11.本次款项到账时间</text>
+        <text class="fr">{{parms.current_payment_time==''?'--':parms.current_payment_time}}</text>
+      </view>
+      <view class='li'>
+        <text class='fl'>12.下次付款时间</text>
+        <text class="fr">{{parms.next_payment_time==''?'--':parms.next_payment_time}}</text>
+      </view>
+      <view class='li zong-money'>
+        <text>13.总合同金额</text>
+        <text class="fr">{{parms.total_contract_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 6 || parms.cooperation_type == 15}}'>
+        <text>保证金</text>
+        <text class="fr">{{total_contract_bond}}</text>
+      </view>
+       <view class='li get-money pl40' wx:if='{{(parms.cooperation_type == 6 || parms.cooperation_type == 15) && total_contract_fixed_amount > 0}}'>
+        <text>服务费</text>
+        <text class="fr">{{total_contract_fixed_amount}}</text>
+      </view>
+      <view class='li get-money pl40'>
+        <text>{{parms.cooperation_type == 6 || parms.cooperation_type == 15 ? '轮单费' : '会员费'}}</text>
+        <text class="fr {{parms.cooperation_type == 6 || parms.cooperation_type == 15 ? 'c90f' : ''}}">{{total_contract_round_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 6 || parms.cooperation_type == 15}}'>
+        <text>返现金额</text>
+        <text class="fr c90f">{{total_contract_gift_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{(parms.cooperation_type == 6 || parms.cooperation_type == 15) && total_contract_round_total_amount > 0}}'>
+        <text>总轮单费</text>
+        <text class="fr">{{total_contract_round_total_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 14 || parms.cooperation_type == 15}}'>
+        <text>总合同保产值金额</text>
+        <text class="fr">{{parms.total_contract_amount_guaranteed}}</text>
+      </view>
+      <view class='li get-money pl40'>
+        <text>平台使用费</text>
+        <text class="fr">{{info.total_platform_money}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if="{{info.current_platform_money}}">
+        <text>平台使用费有效期起始日期</text>
+        <text class="fr">{{info.total_platform_money_start_date}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if="{{info.current_platform_money}}">
+        <text>平台使用费有效期终止日期</text>
+        <text class="fr">{{info.total_platform_money_end_date}}</text>
+      </view>
+      <view class='li pl40' wx:if="{{info.total_platform_money}}">
+        <view class='fl stime'>{{info.total_platform_money_use_days}}</view>
+      </view>
+      <view class='li get-money'>
+        <text>14.本次到账金额</text>
+        <text class="fr c90f {{((report_money_compart == 1) || report_payment_number == '0') ? '' : 'smallBbact' }}">{{parms.current_contract_amount}}</text> 
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 6 || parms.cooperation_type == 15}}'>
+        <text>保证金</text>
+        <text class="fr">{{current_contract_bond}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{(parms.cooperation_type == 6 || parms.cooperation_type == 15) && current_contract_fixed_amount > 0}}'>
+        <text>服务费</text>
+        <text class="fr">{{current_contract_fixed_amount}}</text>
+      </view>
+      <view class='li get-money pl40'>
+        <text>{{parms.cooperation_type == 6 || parms.cooperation_type == 15 ? '轮单费' : '会员费'}}</text>
+        <text class="fr {{parms.cooperation_type == 6 || parms.cooperation_type == 15 ? 'c90f' : ''}}">{{current_contract_round_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 6 || parms.cooperation_type == 15}}'>
+        <text>返现金额</text>
+        <text class="fr c90f">{{current_contract_gift_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{(parms.cooperation_type == 6 || parms.cooperation_type == 15) && current_contract_round_total_amount > 0}}'>
+        <text>总轮单费</text>
+        <text class="fr">{{current_contract_round_total_amount}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{parms.cooperation_type == 14 || parms.cooperation_type == 15}}'>
+        <text>本次合同保产值金额</text>
+        <text class="fr">{{parms.current_contract_amount_guaranteed}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if='{{(parms.cooperation_type == 6 || parms.cooperation_type == 15) && cashdeposit_handler}}'>
+        <text>保证金预约日期</text>
+        <text class="fr">{{cashdeposit_handler}}</text>
+      </view>
+      <view class='li get-money pl40'>
+        <text>平台使用费</text>
+        <text class="fr">{{info.current_platform_money}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if="{{info.current_platform_money}}">
+        <text>平台使用费有效期起始日期</text>
+        <text class="fr">{{info.current_platform_money_start_date}}</text>
+      </view>
+      <view class='li get-money pl40' wx:if="{{info.current_platform_money}}">
+        <text>平台使用费有效期终止日期</text>
+        <text class="fr">{{info.current_platform_money_end_date}}</text>
+      </view>
+      <view class='li pl40' wx:if="{{info.current_platform_money}}">
+        <view class='fl stime'>{{info.current_platform_money_use_days}}</view>
+      </view>
+
+      <view class='li get-money pl40' wx:if='{{ (parms.cooperation_type == 6 || parms.cooperation_type == 15 || parms.cooperation_type == 1 ||parms.cooperation_type == 2||parms.cooperation_type == 3) && report_payment_number > 0  }}'>
+        <text class="smallBb">小报备</text>
+        <text class="fr smallBb">{{report_payment_money}}({{report_payment_number}})</text> 
+      </view>
+      <view class='li yu-money'>
+        <text>15.余额多少</text>
+        <text class="fr">{{parms.lave_amount == '0'?'--':parms.lave_amount}}</text>
+      </view>
+      <view class='li order-cn'>
+        <text>16.订单承诺量</text>
+        <text class="red" wx:if="{{parms.cooperation_type == 1 ||parms.cooperation_type == 2||parms.cooperation_type == 3||parms.cooperation_type == 7 || parms.cooperation_type == 14}}">（系统折算订单量）</text>
+      </view>
+      <block wx:if="{{parms.cooperation_type == 1 ||parms.cooperation_type == 2||parms.cooperation_type == 3||parms.cooperation_type == 7||parms.cooperation_type == 14}}">
+        <view class='li pl40' wx:if="{{parms.promised_orders_fen}}">
+          <text class='fl'>总合同-分单</text>
+          <text class="fr"><text class="c90f">{{parms.promised_orders_fen}}</text><text class="cf00"  wx:if="{{parms.cooperation_type == 1 ||parms.cooperation_type == 2||parms.cooperation_type == 3}}">({{parms.total_convert_order_count ? parms.total_convert_order_count : '-'}})</text></text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.promised_orders_zeng}}">
+          <text class='fl'>总合同-赠单</text>
+          <text class="fr c90f">{{parms.promised_orders_zeng}}</text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.year_month_one != '--'}}">
+          <text class='fl'>过年月不承诺订单</text>
+          <text class="fr">{{!parms.year_month_one || parms.year_month_one == '请选择' ? '--' : parms.year_month_one}}</text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.year_month_two != '--'}}">
+          <text class='fl'>过年月不承诺订单</text>
+          <text class="fr">{{!parms.year_month_two || parms.year_month_two == '请选择' ? '--' : parms.year_month_two}}</text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.current_promised_orders_fen}}">
+          <text class='fl'>本次合同-分单</text>
+          <text class="fr"><text class="c90f">{{parms.current_promised_orders_fen}}</text><text class="cf00"  wx:if="{{parms.cooperation_type == 1 ||parms.cooperation_type == 2||parms.cooperation_type == 3}}">({{parms.convert_order_count? parms.convert_order_count : '-'}})</text></text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.current_promised_orders_zeng}}">
+          <text class='fl'>本次合同-赠单</text>
+          <text class="fr c90f">{{parms.current_promised_orders_zeng}}</text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.current_year_month_one != '--'}}">
+          <text class='fl'>过年月不承诺订单</text>
+          <text class="fr">{{!parms.current_year_month_one || parms.current_year_month_one == '请选择' ? '--' : parms.current_year_month_one}}</text>
+        </view>
+        <view class='li pl40' wx:if="{{parms.current_year_month_two != '--'}}">
+          <text class='fl'>过年月不承诺订单</text>
+          <text class="fr">{{!parms.current_year_month_two || parms.current_year_month_two == '请选择' ? '--' : parms.current_year_month_two}}</text>
+        </view>
+      </block>
+      <block wx:if="{{parms.cooperation_type == 6 ||parms.cooperation_type == 15}}">
+        <view class='li pl40' wx:if="{{parms.round_order_amount}}">
+          <text class='fl'>轮单费单价</text>
+          <text class="fr c90f">{{parms.round_order_amount}}</text>
+        </view>
+      </block>
+      <view class='li logo-wz'>
+        <text>17.LOGO位置</text>
+        <text class="fr">{{parms.logo_address == ''?'--':parms.logo_address}}</text>
+      </view>
+      <view class='li tonglan-wz'>
+        <text>18.通栏位置</text>
+        <text class="fr">{{tonglan[tonglanIndex] == '请选择'?'--':tonglan[tonglanIndex]}}</text>
+      </view>
+      <view class='li ad'>
+        <text>19.总广告赠送-轮显</text>
+        <text class="fr mr30">天</text>
+        <text class="fr">{{parms.contract_handsel_banner}}</text>
+      </view>
+      <view class='li tonglan-zs pl40'>
+        <text>总广告赠送-通栏</text>
+        <text class="fr mr30">天</text>
+        <text class="fr">{{parms.contract_handsel_passage}}</text>
+      </view>
+      <view class='li'>
+        <text>20.家装/公装是否都接</text>
+        <text class="fr">{{zxType[zxTypeIndex]}}</text>
+      </view>
+      <view class='li' wx:if="{{zxTypeIndex == 4}}">
+        <text></text>
+        <text class="fr">{{parms.lxs_remark}}</text>
+      </view>
+      <view class='li'>
+        <view>21.本次上广告情况</view>
+        <textarea placeholder='' disabled="disabled" bindinput='current_adver_content' value="{{parms.current_adver_content}}"></textarea>
+      </view>
+      <view class='li'>
+        <view>22.接单金额及区域</view>
+        <textarea placeholder='' disabled="disabled" bindinput='amount_and_area' value="{{parms.amount_and_area}}"></textarea>
+      </view>
+      <view class='li wd-code'>
+        <text>23.网店代码</text>
+        <text class="fr">{{parms.company_id == ''?'--':parms.company_id}}</text>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>24.备注</view>
+        <textarea placeholder='' maxlength="500" disabled="disabled" bindinput='remarke' value="{{parms.remarke}}"></textarea>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>25.上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{pics}}">
+          <view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>26.客服上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{kfPics}}">
+          <view class='uploader-list' wx:for="{{kfPics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg2' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>27.开站讨论组备注</view>
+        <textarea placeholder='' disabled="disabled" bindinput='open_city_chat_remark' value="{{parms.open_city_chat_remark}}"></textarea>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{erp}}" class="erp">
+    <view class='info'>
+      <view class='li company-name clearfix'>
+        <text>1.公司名称</text>
+        <text class="fr">{{parms.company_name}}</text>
+      </view>
+      <view class='li city'>
+        <text>2.城市</text>
+        <text class="fr">{{parms.city_name}}</text>
+      </view>
+    </view>
+    <view class='info'>
+      <view class='li'>
+        <text>3.新/老会员</text>
+        <text class="fr">{{is_new[is_newIndex]}}</text>
+      </view>
+      <view class='li contact-name'>
+        <text>4.联系人</text>
+        <text class="fr">{{parms.company_contact ==''?'--':parms.company_contact}}</text>
+      </view>
+      <view class='li contact-job'>
+        <text>5.职务</text>
+        <text class="fr">{{parms.company_contact_position == ''?'--':parms.company_contact_position}}</text>
+      </view>
+      <view class='li tel'>
+        <text>6.电话</text>
+        <text class="fr">{{parms.company_contact_phone}}</text>
+      </view>
+      <view class='li wechat'>
+        <text>7.微信</text>
+        <text class="fr">{{parms.company_contact_weixin == ''?'--':parms.company_contact_weixin}}</text>
+      </view>
+    </view>
+    <view class="info">
+      <view class='li'>
+        <text class='fl'>8.合作模式</text>
+        <text class="fr">{{parms.cooperation_mode==1?'一年':'终身'}}</text>
+      </view>
+      <view class='li'>
+        <text class='fl'>9.合同时间-开始</text>
+        <text class="fr">{{parms.contract_start==''?'--':parms.contract_start}}</text>
+      </view>
+      <view class='li pl20'>
+        <text class='fl'>合同时间-结束</text>
+        <text class="fr">{{parms.contract_end==''?'--':parms.contract_end}}</text>
+      </view>
+      <view class='li pl20'>
+        <text class='fl stime'>{{contract_days}}</text>
+      </view>
+      <view class='li'>
+        <text class='fl'>11.本次款项到账时间</text>
+        <text class="fr">{{parms.current_payment_time==''?'--':parms.current_payment_time}}</text>
+      </view>
+      <view class='li'>
+        <text class='fl'>12.下次付款时间</text>
+        <text class="fr">{{parms.next_payment_time==''?'--':parms.next_payment_time}}</text>
+      </view>
+      <view class='li zong-money'>
+        <text>13.总合同金额</text>
+        <text class="fr">{{parms.total_contract_amount}}</text>
+      </view>
+      <view class='li get-money'>
+        <text>14.本次到账金额</text>
+        <text class="fr">{{parms.current_contract_amount}}</text>
+      </view>
+      <view class='li yu-money'>
+        <text>15.余额多少</text>
+        <text class="fr">{{parms.lave_amount == '0'?'--':parms.lave_amount}}</text>
+      </view>
+      <view class='li wd-code'>
+        <text>16.网店代码</text>
+        <text class="fr">{{parms.company_id == ''?'--':parms.company_id}}</text>
+      </view>
+      <view class='li'>
+        <text>17.账户登录名称</text>
+        <text class="fr">{{parms.account}}</text>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>18.备注</view>
+        <textarea placeholder='' disabled="disabled" bindinput='remarke' value="{{parms.remarke}}"></textarea>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>19.上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{pics}}">
+          <view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>20.客服上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{kfPics}}">
+          <view class='uploader-list' wx:for="{{kfPics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg2' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>21.开站讨论组备注</view>
+        <textarea placeholder='' disabled="disabled" bindinput='open_city_chat_remark' value="{{parms.open_city_chat_remark}}"></textarea>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{three}}" class="three">
+    <view class='info'>
+      <view class='li company-name clearfix'>
+        <text>1.<text class="red">*</text>公司名称</text>
+        <text class="fr">{{parms.company_name}}</text>
+      </view>
+      <view class='li'>
+        <text>2.部门</text>
+        <text class="fr">{{parms.section}}</text>
+      </view>
+    </view>
+    <view class='info'>
+      <view class='li three-name'>
+        <text>3.姓名</text>
+        <text class="fr">{{parms.company_contact}}</text>
+      </view>
+      <view class='li phone'>
+        <text>4.手机号</text>
+        <text class="fr">{{parms.company_contact_phone}}</text>
+      </view>
+      <view class='li wechat'>
+        <text>5.账号</text>
+        <text class="fr">{{parms.account}}</text>
+      </view>
+      <view class='li'>
+        <text>6.角色</text>
+        <text class="fr">{{parms.company_rolers}}</text>
+      </view>
+      <view class='li wechat'>
+        <text>7.金额</text>
+        <text class="fr">{{parms.current_contract_amount}}</text>
+      </view>
+      <view class='li'>
+        <text>8.标签</text>
+        <text class="fr">{{parms.company_tag}}</text>
+      </view>
+      <view class='li'>
+        <text class='fl'>9.<text class="red">*</text>总合同时间-开始</text>
+        <text class="fr">{{parms.current_contract_start==''?'请选择':parms.current_contract_start}}</text>
+      </view>
+      <view class='li pl20'>
+        <text class='fl'><text class="red">*</text>总合同时间-结束</text>
+        <text class="fr">{{parms.current_contract_end==''?'请选择':parms.current_contract_end}}</text>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>10.备注</view>
+        <textarea placeholder='' disabled="disabled" bindinput='remarke' value="{{parms.remarke}}"></textarea>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>11.上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{pics}}">
+          <view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>12.客服上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{kfPics}}">
+          <view class='uploader-list' wx:for="{{kfPics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg2' />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{info.cooperation_type == 8}}" class="delay">
+    <view class='info'>
+      <view class='li'>
+        <text>网店代码</text>
+        <text class="fr">{{info.company_id}}</text>
+      </view>
+      <view class='li delay-company-name clearfix'>
+        <text>公司名称</text>
+        <text class="fr">{{info.company_name}}</text>
+      </view>
+      <view class='li'>
+        <text>会员类型</text>
+        <text class="fr">{{info.company_mode_name}}</text>
+      </view>
+      <view class='li'>
+        <text><text class="red">*</text>本次会员时间</text>
+        <text class="fr">{{info.current_contract_start_show}} 至 {{info.current_contract_end_show}}</text>
+      </view>
+      <view class='li'>
+        <text>本次分单量</text>
+        <text class="fr">{{info.current_fen_orders}}</text>
+      </view>
+      <view class='li'>
+        <text><text class="red">*</text>本次报备合同</text>
+        <text class="fr {{info.contract_date_compare == 2?'red':''}}">{{info.current_vip_start_show}} 至 {{info.current_vip_end_show}}</text>
+      </view>
+      <view class='li'>
+        <text>承诺订单量</text>
+        <text class="fr">{{info.promise_orders}}</text>
+      </view>
+      <view class='li'>
+        <text><text class="red">*</text>延期承诺单量</text>
+        <text class="fr">{{info.delay_promise_orders}}</text>
+      </view>
+      <view class='li delay-icon'>
+        <text><text class="red">*</text>应延期天数</text>
+        <text class="fr">{{info.delay_days}}</text>
+        <image src="/img/yellow-w.png" bindtap="popRemark"></image>
+      </view>
+      <view class='li'>
+        <text>实际延期天数</text>
+        <text class="fr {{info.delay_real_days === info.delay_sys_days ? 'green-yq' : 'red-yq'}}">{{info.delay_real_days}}</text>
+      </view>
+      <view class='li'>
+        <text>延期合同日期</text>
+        <text class="fr">{{info.delay_contract_start_show}} 至 {{info.delay_contract_end_show}}</text>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>上传图片</view>
+        <view class='uploader-img clearfix' wx:if="{{pics}}">
+          <view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+            <image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+          </view>
+        </view>
+      </view>
+      <view class='li pb30 no-border'>
+        <view>备注</view>
+        <textarea placeholder='' disabled="disabled" bindinput='remarke' value="{{info.remarke}}"></textarea>
+      </view>
+    </view>
+  </view>
+</view>
+<check-log list="{{checkLog}}" isBigReport="true"></check-log>
+<view class="modal-mask" wx:if="{{showModal}}" catchtap="preventTouchMove"></view> 
+ <view class="modal-dialog" wx:if="{{showModal}}">
+    <view class="m-title">报备记录</view>
+    <view class="m-con" wx:if="{{company_report_payment_number>0}}">
+       <view>历史小报备{{company_report_payment_number}}次</view>
+      <view data-url="../hisxReport/hisxReport" bindtap="bingoBb" class="m-nav">点击查看</view>
+    </view>
+    <view class="m-con" wx:if="{{company_report_number>0}}">
+      <view>历史大报备{{company_report_number}}次</view>
+      <view data-url="../hisdReport/hisdReport" bindtap="bingoBb" class="m-nav">点击查看</view>
+    </view>
+    <image src="../../img/error.png" class="m-error" catchtap="preventTouchMove"></image>
+</view>

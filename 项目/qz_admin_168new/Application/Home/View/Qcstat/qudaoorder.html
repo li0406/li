@@ -1,0 +1,121 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/qcstat/css/qudaoorder.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="title">
+    <title>渠道异常订单统计</title>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="heat_nav">
+                    <ul class="navli">
+                        <li class="first_ms">渠道异常订单统计</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <div class="tjquery">条件查询</div>
+                    <div class="timelayer">
+                        <form method="get" action="/qcstat/qudaoorder">
+                            <div class="zujian">
+                                <span>日期：</span>
+                                <input class="datepicker" name="date"  type="text" placeholder="选择日期" value="{$Think.get.date|default=date('Y-m-d',strtotime('-1 day'))}">
+                            </div>
+                            <div class="zujian">
+                                <span>渠道代号：</span>
+                                <input type="text" name="channel" placeholder="输入渠道代号" value="{$Think.get.channel}">
+                            </div>
+                            <button class="btn searchcx">查询</button>
+                        </form>
+                    </div>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td rowspan="2">渠道代号</td>
+                        <td rowspan="2">渠道发单数</td>
+                        <td colspan="2">手机号归属地与发单地不符</td>
+                        <td colspan="4">分单率异常</td>
+                    </tr>
+                    <tr>
+                        <td>异常数量</td>
+                        <td>异常占比</td>
+                        <td>分单数量</td>
+                        <td>分单率</td>
+                        <td>历史分单率</td>
+                        <td>分单增长</td>
+                    </tr>
+                    <foreach name="list.list" item="vo" key="k" >
+                        <tr>
+                            <td>{$vo.alias}</td>
+                            <td>{$vo.now_order_count}</td>
+                            <td><a class="clickdetail" href="javascript:void(0)" data-src-title="{$vo.src}">{$vo.phone_count}</a>
+                              <div class="tanchaungwk">
+                                 <div class="tabletitle">{$vo.alias}</div>
+                                 <div class="closegb">
+                                        <i class="fa fa-close" aria-hidden="true"></i>
+                                    </div>
+                                <div class="tancdetail phone-content">
+                                    
+                                    <table class="table">
+                                        <!-- <tr>
+                                            <td class="tdtitle" colspan="3">{$vo.channel}</td>
+                                        </tr> -->
+                                        <tr>
+                                            <td class="leftborder topborder">手机号</td>
+                                            <td class="topborder">归属地</td>
+                                            <td class="rightborder topborder">发单地</td>
+                                        </tr>
+                                        <foreach name="vo.phone" item="vu" key="ke" >
+                                        <tr>
+                                            <td class="leftborder"><a href="/qc/?id={$vu.order}&begin={:I('get.date',date('Y-m-d',strtotime('-1 day')))}&end={:I('get.date',date('Y-m-d',strtotime('-1 day')))}" target="_blank">{$vu.tel8}</a></td>
+                                            <td>{$vu.city}</td>
+                                            <td class="rightborder">{$vu.cname}</td>
+                                        </tr>
+                                        </foreach>
+                                    </table>
+                                </div>
+                               </div> 
+                            </td>
+                            <td>{$vo.phone_count_rate}%</td>
+                            <td>{$vo.now_real_order_count}</td>
+                            <td>{$vo.now_rate}%</td>
+                            <td>{$vo.history_rate}%</td>
+                            <td>{$vo.diff_rate}%</td>
+                        </tr>
+                    </foreach>
+                </table>
+                {$list.page}
+            </div>
+        </div>
+
+        <div class="toumingdubj"></div>
+
+    </section>
+
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $(".datepicker").datepicker({
+                format:"yyyy-mm-dd",
+                autoclose:true
+            });
+            $('.clickdetail').click(function () {
+              $('.toumingdubj').fadeIn();
+               $(this).next('div').show();
+//                find('[data-id]').attr('data-id'));
+//                $('.tancdetail').show();
+            });
+
+            $(".tanchaungwk .closegb").click(function () {
+                $('.tanchaungwk').hide();
+                $('.toumingdubj').fadeOut();
+            });
+        });
+    </script>
+
+</block>

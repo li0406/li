@@ -1,0 +1,1022 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderbackhistory/css/index.css?v={:C('STATIC_VERSION')}">
+
+    <style>
+        .my-dialog div {
+            font-size: 12px;
+        }
+
+        .my-dialog div.col-xs-12.no-padding {
+            margin-top: 3px;
+        }
+
+        .my-dialog input {
+            height: 20px;
+        }
+
+        .my-dialog .bgcolor {
+            background: #0019ff;
+            color: #fff;
+            width: 70px;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>历史撤单记录</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/orderBackHistory/">历史撤单记录</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2 reset-padding">
+                                        <div>订单编号：</div>
+                                        <input type="text" name="condition" class="form-control clear-target"
+                                               placeholder="订单编号" value="{$Think.get.order_id}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>撤消时间-开始：</div>
+                                        <input type="text" name="time_start"
+                                               class="form-control datepicker clear-target" placeholder="选择日期"
+                                               value="{$search['start']|default=''}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>撤消时间-结束：</div>
+                                        <input type="text" name="time_end" class="form-control datepicker clear-target"
+                                               placeholder="选择日期" value="{$search['end']|default=''}">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市：</div>
+                                        <select id="city" name="city" type="text" placeholder="选择城市"
+                                                class="form-control">
+                                            <option value="0">请选择</option>
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>撤消人：</div>
+                                        <select id="revoked" name="revoked" type="text" placeholder="撤消人"
+                                                class="form-control">
+                                            <if condition="!empty($search['op'])">
+                                                <option value="{$search['op']['id']}">{$search['op']['user']}</option>
+                                                <option value="0">请选择</option>
+                                            <else/>
+                                                <option value="0">请选择</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>撤消提出方：</div>
+                                        <select id="proposer" name="proposer" type="text" placeholder="撤消提出方"
+                                                class="form-control">
+                                            <if condition="!empty($search['push'])">
+                                                <option value="{$search['push']['id']}">{$search['push']['user']}
+                                                </option>
+                                                <option value="0">请选择</option>
+                                                <else/>
+                                                <option value="0">请选择</option>
+                                            </if>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 set-mt16">
+                                    <div class="col-xs-2">
+                                        <div>撤消原因：</div>
+                                        <select id="reason" name="reason" type="text" placeholder="撤消原因"
+                                                class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="reason" id="vo" key="kk">
+                                                <option value="{$kk}">{$vo}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+
+                                        <div>渠道代号：</div>
+                                        <select id="channel" name="channel" type="text" placeholder="渠道代号"
+                                                class="form-control">
+                                            <if condition="!empty($search['src_alias'])">
+                                                <option value="{$search['src_alias']}">{$search['src_alias']}</option>
+                                                <option value="0">请选择</option>
+                                                <else/>
+                                                <option value="0">请选择</option>
+                                            </if>
+                                        </select>
+
+                                    </div>
+                                    <div class="col-xs-2">
+
+                                        <div>审核人：</div>
+                                        <select id="reviewer" name="reviewer" type="text" placeholder="审核人"
+                                                class="form-control">
+                                            <if condition="!empty($search['check'])">
+                                                <option value="{$search['check']['id']}">{$search['check']['user']}
+                                                </option>
+                                                <option value="0">请选择</option>
+                                                <else/>
+                                                <option value="0">请选择</option>
+                                            </if>
+                                        </select>
+
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>审核结果：</div>
+                                        <select id="results" name="results" type="text" placeholder="选择城市"
+                                                class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="1">正常</option>
+                                            <option value="2">异常</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>分配状态：</div>
+                                        <select id="allot_state" name="allot_state" class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="1" {:($search['allot_state'] == 1 ? "selected" : "")} >已分配</option>
+                                            <option value="2" {:($search['allot_state'] == 2 ? "selected" : "")} >未分配</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 set-mt16">
+                                    <button type="button" id="reset" class="btn btn-download col-xs-1">重置</button>
+                                    <button type="button" id="search" class="btn btn-success col-xs-1">查询</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th class="width-150">订单编号</th>
+                                <th>城市</th>
+                                <th>渠道代号</th>
+                                <th>订单归属人</th>
+                                <th>撤消时间</th>
+                                <th>撤消人</th>
+                                <th>撤消提出方</th>
+                                <th>分配状态</th>
+                                <th>撤回原因</th>
+                                <th>审核结果</th>
+                                <th>审核人</th>
+                                <th>审核时间</th>
+                                <th class="width-210">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.order_id}</td>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.src_alias}</td>
+                                    <td>{$vo.belonger}</td>
+                                    <td>{$vo.created_at|date='Y-m-d H:i:s',###}</td>
+                                    <td>{$vo.op_name}</td>
+                                    <td>{$vo.push_name}</td>
+                                    <td>{$vo.allot_state_name}</td>
+                                    <td>{$vo.back_reason_name}</td>
+                                    <td>{$vo.status_name}</td>
+                                    <td>{$vo.check_name}</td>
+                                    <td>
+                                        <if condition="!empty($vo['check_time'])">
+                                            {$vo.check_time|date='Y-m-d H:i:s',###}
+                                        </if>
+                                    </td>
+                                    <td class="cz-btn" data-order-id="{$vo.order_id}" data-id="{$vo.id}">
+                                        <button data-toggle="modal" data-target="#recordingModal" class="cxjl-btn"
+                                                data-id="{$vo.order_id}">撤消日志
+                                        </button>
+                                        |
+                                        <if condition="!empty($vo['check_name'])">
+                                            <button data-toggle="modal" data-target="#auditResModal" class="sh-btn"
+                                                    data-id="{$vo.order_id}">审核详情
+                                            </button>
+                                            <else/>
+                                            <button data-toggle="modal" data-target="#auditModal" class="sh-btn"
+                                                    data-id="{$vo.order_id}">审核操作
+                                            </button>
+                                        </if>
+                                        <notempty name="order_priv">
+                                        |
+                                        <a href="/orders/?condition={$vo.order_id}&bs=cx" target="_blank">订单详情</a>
+                                        </notempty>
+                                    </td>
+                            </volist>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-xs-12">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 撤消记录 -->
+        <div class="modal fade" id="recordingModal" tabindex="-1" role="dialog" aria-labelledby="recordingModal"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="recordingModalLabel">
+                            撤消记录
+                        </h4>
+                    </div>
+                    <div class="modal-body recording" style="max-height: 600px;overflow-y:auto;" id="cxjl">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">
+                            确定
+                        </button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+
+        <!-- 未审核 -->
+        <div class="modal fade" id="auditModal" tabindex="-1" role="dialog" aria-labelledby="auditModal"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="auditModalLabel">
+                            审核
+                        </h4>
+                    </div>
+                    <div class="modal-body recording clearfix">
+                        <div class="audit-recording" id="wshjl">
+                            <!--未审核记录通过模板语法插入-->
+                        </div>
+
+                        <!--审核 操作-->
+                        <div class="audit-result" id="wshRes">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveSh">
+                            提交审核
+                        </button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+
+        <!-- 已审核 -->
+        <div class="modal fade" id="auditResModal" tabindex="-1" role="dialog" aria-labelledby="auditResModal"
+             aria-hidden="true">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="auditModalLabel">
+                            审核
+                        </h4>
+                    </div>
+                    <div class="modal-body recording clearfix">
+                        <div class="audit-recording" id="yshBox"></div>
+                        <div class="audit-result" id="yshResult"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">
+                            确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 撤消记录 -->
+    <script type="text/html" id="list_temp">
+        {{ each list item index }}
+        <div class="recording-item">
+            <div class="clearfix"><span class="title">撤消时间:</span>
+                <p>{{item.created_at| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p></div>
+            <div class="clearfix"><span class="title">撤消人:</span>
+                <p>{{item.op_name}}</p></div>
+            <div class="clearfix"><span class="title">撤消原因:</span>
+                <p>{{item.back_reason_name}}</p></div>
+            <div class="clearfix">
+                <span class="title">文字备注:</span>
+                <p>{{item.back_remark}}</p>
+            </div>
+            <div class="clearfix">
+                <span class="title">图片备注:</span>
+                <div class="img-list">
+                    {{ each item.img img index }}
+                    <img src="{{img}}" alt="">
+                    {{ /each }}
+                </div>
+            </div>
+        </div>
+        {{ /each }}
+    </script>
+
+    <!-- 未审核 -->
+    <script type="text/html" id="list_temp2">
+
+        {{ each list item index }}
+        {{if index == 0}}
+        <div class="history-order">
+            <h2 class="audit-title">撤单记录</h2>
+            <div class="recording-item">
+                <div class="clearfix"><span class="title">撤消时间:</span>
+                    <p>{{item.created_at| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p></div>
+                <div class="clearfix"><span class="title">撤消人:</span>
+                    <p>{{item.op_name}}</p></div>
+                <div class="clearfix"><span class="title">撤消原因:</span>
+                    <p>{{item.back_reason_name}}</p></div>
+                <div class="clearfix">
+                    <span class="title">文字备注:</span>
+                    <p>{{item.back_remark}}</p>
+                </div>
+                <div class="clearfix">
+                    <span class="title">图片备注:</span>
+                    <div class="img-list">
+
+                        {{ each item.img img index }}
+                        <img src="{{img}}" alt="">
+                        {{ /each }}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+        {{ /each }}
+
+        <div class="history-list">
+            <h2 class="audit-title">历史记录</h2>
+
+            {{ each list item index }}
+            {{if index != 0}}
+            <div class="recording-item">
+                <div class="clearfix"><span class="title">撤消时间:</span>
+                    <p>{{item.created_at| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p></div>
+                <div class="clearfix"><span class="title">撤消人:</span>
+                    <p>{{item.op_name}}</p></div>
+                <div class="clearfix"><span class="title">撤消原因:</span>
+                    <p>{{item.back_reason_name}}</p></div>
+                <div class="clearfix">
+                    <span class="title">文字备注:</span>
+                    <p>{{item.back_remark}}</p>
+                </div>
+                <div class="clearfix">
+                    <span class="title">图片备注:</span>
+                    <div class="img-list">
+
+                        {{ each item.img img index }}
+                        <img src="{{img}}" alt="">
+                        {{ /each }}
+
+                    </div>
+                </div>
+                <div class="audit-history" style="margin-top: 60px">
+                    <div class="history-res clearfix">
+                        <div>
+                            <span>审核状态:</span>
+                            {{if item.status == 0}}
+                            <p>未审核</p>
+                            {{else}}
+                            <p>已审核</p>
+                            {{/if}}
+
+                        </div>
+                        <div>
+                            <span>审核人:</span>
+                            <p>{{item.check_name}}</p>
+                        </div>
+                        <div>
+                            <span>审核结果:</span>
+                            {{if item.status == 0}}
+                            <p></p>
+                            {{else if item.status == 1}}
+                            <p>正常</p>
+                            {{else}}
+                            <p>异常</p>
+                            {{/if}}
+                        </div>
+                    </div>
+                    <div class="history-time clearfix">
+                        <span>审核时间:</span>
+                        {{if item.check_time == 0}}
+                        <p></p>
+                        {{else}}
+                        <p>{{item.check_time| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p>
+                        {{/if}}
+                    </div>
+                    <div class="history-reason clearfix">
+                        <span>原因:</span>
+                        <p>{{item.check_remark}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{ /each }}
+        </div>
+
+    </script>
+
+    <script type="text/html" id="list_temp5">
+        {{ each list item index }}
+        <h2>审核</h2>
+        <div class="result-box">
+            <div class="result-item clearfix">
+                <span>审核状态:未审核</span>
+                <span>审核人:</span>
+            </div>
+            <div class="result-item">
+                <p>审核日期: </p>
+            </div>
+        </div>
+
+        <h2>审核结果</h2>
+        <div>
+            <div class="result-item">
+                审核结果:
+                <label><input type="radio" name="shStatus" value="1">正常</label>
+                <label><input type="radio" name="shStatus" value="2">异常</label>
+            </div>
+            <div class="result-item">
+                原因:
+                <textarea rows="5" cols="35" name="remark"></textarea>
+            </div>
+        </div>
+        {{ /each }}
+    </script>
+
+    <!-- 已审核 -->
+    <script type="text/html" id="list_temp3">
+        <div class="history-order">
+            <h2 class="audit-title">撤单记录</h2>
+            {{ each list item index }}
+            {{if index == 0}}
+            <div class="recording-item">
+                <div class="clearfix"><span class="title">撤消时间:</span>
+                    <p>{{item.created_at| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p></div>
+                <div class="clearfix"><span class="title">撤消人:</span>
+                    <p>{{item.op_name}}</p></div>
+                <div class="clearfix"><span class="title">撤消原因:</span>
+                    <p>{{item.back_reason_name}}</p></div>
+                <div class="clearfix">
+                    <span class="title">文字备注:</span>
+                    <p>{{item.back_remark}}</p>
+                </div>
+                <div class="clearfix">
+                    <span class="title">图片备注:</span>
+                    <div class="img-list">
+
+                        {{ each item.img img index }}
+                        <img src="{{img}}" alt="">
+                        {{ /each }}
+
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{ /each }}
+        </div>
+
+        <div class="history-list">
+            <h2 class="audit-title">历史记录</h2>
+            {{ each list item index }}
+            {{if index != 0}}
+            <div class="recording-item">
+                <div class="clearfix"><span class="title">撤消时间:</span>
+                    <p>{{item.created_at| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p></div>
+                <div class="clearfix"><span class="title">撤消人:</span>
+                    <p>{{item.op_name}}</p></div>
+                <div class="clearfix"><span class="title">撤消原因:</span>
+                    <p>{{item.back_reason_name}}</p></div>
+                <div class="clearfix">
+                    <span class="title">文字备注:</span>
+                    <p>{{item.back_remark}}</p>
+                </div>
+                <div class="clearfix">
+                    <span class="title">图片备注:</span>
+                    <div class="img-list">
+
+                        {{ each item.img img index }}
+                        <img src="{{img}}" alt="">
+                        {{ /each }}
+
+                    </div>
+                </div>
+                <div class="audit-history" style="margin-top: 60px">
+                    <div class="history-res clearfix">
+                        <div>
+                            <span>审核状态:</span>
+                            {{if item.status == 0}}
+                            <p>未审核</p>
+                            {{else}}
+                            <p>已审核</p>
+                            {{/if}}
+                        </div>
+                        <div>
+                            <span>审核人:</span>
+                            <p>{{item.check_name}}</p>
+                        </div>
+                        <div>
+                            <span>审核结果:</span>
+                            {{if item.status == 0}}
+                            <p></p>
+                            {{else if item.status == 1}}
+                            <p>正常</p>
+                            {{else}}
+                            <p>异常</p>
+                            {{/if}}
+                        </div>
+                    </div>
+                    <div class="history-time clearfix">
+                        <span>审核时间:</span>
+                        {{if item.check_time == 0}}
+                        <p></p>
+                        {{else}}
+                        <p>{{item.check_time| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p>
+                        {{/if}}
+                    </div>
+                    <div class="history-reason clearfix">
+                        <span>原因:</span>
+                        <p>{{item.check_remark}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{ /each }}
+        </div>
+        <!--审核 操作-->
+    </script>
+
+    <script type="text/html" id="list_temp4">
+        <h2>审核</h2>
+        {{ each list item index }}
+        <div class="result-box">
+            <div class="result-item clearfix">
+                <span>
+                    审核状态: 已审核
+                </span>
+                <span>审核人:{{item.check_name}}</span>
+            </div>
+            <div class="result-item">
+                <p>审核日期: {{item.check_time| artDateFormat:'yyyy-MM-dd h:mm:ss'}}</p>
+            </div>
+        </div>
+
+        <h2>审核结果</h2>
+        <div>
+            <div class="result-item-res clearfix">
+                <span class="title">审核结果:</span>
+                {{if item.status == 0}}
+                <p>未审核</p>
+                {{else if item.status == 1}}
+                <p>正常</p>
+                {{else}}
+                <p>异常</p>
+                {{/if}}
+            </div>
+            <div class="result-item-res clearfix">
+                <span class="title">原因:</span>
+                <p>{{item.check_remark}}</p>
+            </div>
+        </div>
+
+        {{ /each }}
+    </script>
+
+
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/bootstrap-dialog/bootstrap-dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/zeroclipboard/ZeroClipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/orderbackhistory/js/art_template.js"></script>
+    <script>
+
+        function artDateFormat(date, format) {
+            date = date * 1000
+            date = new Date(date);
+            var map = {
+                "M": date.getMonth() + 1, //月份
+                "d": date.getDate(), //日
+                "h": date.getHours(), //小时
+                "m": date.getMinutes(), //分
+                "s": date.getSeconds(), //秒
+                "q": Math.floor((date.getMonth() + 3) / 3), //季度
+                "S": date.getMilliseconds() //毫秒
+            };
+            format = format.replace(/([yMdhmsqS])+/g, function (all, t) {
+                var v = map[t];
+                if (v !== undefined) {
+                    if (all.length > 1) {
+                        v = '0' + v;
+                        v = v.substr(v.length - 2);
+                    }
+                    return v;
+                } else if (t === 'y') {
+                    return (date.getFullYear() + '').substr(4 - all.length);
+                }
+                return all;
+            });
+            return format;
+        };
+
+        // art-template日期格式化
+        template.defaults.imports.dateFormat = artDateFormat;
+        $(document).ready(function () {
+            /*S-初始化插件*/
+            $('#city').select2();
+            $('#city').select2('val', "{$Think.get.cs|default=0}");
+
+            $('#reason').select2();
+            $('#reason').select2('val', "{$Think.get.reason}");
+
+            // 渠道代号，撤消人，撤消提出方，审核人通过异步筛选
+            $("select[name=channel]").select2({
+                ajax: {
+                    url: "/ordersource/findsrcinfo/",
+                    dataType: 'json',
+                    type: "post",
+                    data: function(params) {
+                        return {
+                            q: params.term // search term
+                        };
+                    },
+                    processResults: function(data, params) {
+                        return {
+                            results: data.data
+                        };
+                    }
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                }, // let our custom formatter work
+                minimumInputLength: 1,
+                templateResult: function (item) {
+                    return item.text;
+                },
+            })
+
+            $("select[name=revoked]").select2({
+                ajax: {
+                    url: '/adminuser/getUserBuUser',
+                    method: "get",
+                    data: function (params) {
+                        return {
+                            user_name: params.term
+                        }
+                    },
+                    processResults: function (data) {
+                        var dataList = $.map(data.list, function (obj) {
+                            obj.text = obj.user;
+                            return obj;
+                        });
+                        return {
+                            results: dataList
+                        }
+                    },
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                }, // let our custom formatter work
+                minimumInputLength: 1,
+                templateResult: function (item) {
+                    return item.text;
+                },
+            })
+
+            $("select[name=proposer]").select2({
+                ajax: {
+                    url: '/adminuser/getUserBuUser',
+                    method: "get",
+                    data: function (params) {
+                        return {
+                            user_name: params.term
+                        }
+                    },
+                    processResults: function (data) {
+                        var dataList = $.map(data.list, function (obj) {
+                            obj.text = obj.user;
+                            return obj;
+                        });
+                        return {
+                            results: dataList
+                        }
+                    },
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                }, // let our custom formatter work
+                minimumInputLength: 1,
+                templateResult: function (item) {
+                    return item.text;
+                },
+            })
+
+            $("select[name=reviewer]").select2({
+                ajax: {
+                    url: '/adminuser/getUserBuUser',
+                    method: "get",
+                    data: function (params) {
+                        return {
+                            user_name: params.term
+                        }
+                    },
+                    processResults: function (data) {
+                        var dataList = $.map(data.list, function (obj) {
+                            obj.text = obj.user;
+                            return obj;
+                        });
+                        return {
+                            results: dataList
+                        }
+                    },
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                }, // let our custom formatter work
+                minimumInputLength: 1,
+                templateResult: function (item) {
+                    return item.text;
+                },
+            })
+
+            $('#results').select2();
+            $('#results').select2('val', "{$Think.get.check_status}");
+
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd',
+                startDate: new Date(new Date() - 1000 * 60 * 60 * 24 * 366),  //只显示一年的日期365天
+                endDate: new Date()
+            });
+
+
+            /*S-重置搜索条件*/
+            $('#reset').on('click', function () {
+                clearSearchCondition();
+                $('select[name=status]').removeAttr('disabled');
+            });
+            /*E-重置搜索条件*/
+
+
+            $('.cxjl-btn').click(function () {
+                $("#cxjl").html('');
+                var order_id = $(this).attr('data-id')
+                $.ajax({
+                    url: '/orderBackHistory/back_record?order_id=' + order_id,
+                    type: 'get',
+                }).done(function (data) {
+                    const html = template("list_temp", {list: data.data.list});
+                    $("#cxjl").html(html);
+                    $('.img-list img').click(function () {
+                        layer.photos({
+                            photos: '.img-list',
+                            anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                        });
+                    });
+                }).fail(function (xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                })
+            })
+
+            $('.sh-btn').click(function () {
+                $("#wshjl").html('');
+                var order_id = $(this).attr('data-id')
+                $.ajax({
+                    url: '/orderBackHistory/back_record?order_id=' + order_id,
+                    type: 'get',
+                }).done(function (data) {
+
+                    $('#saveSh').attr('data-id', data.data.info.id)
+                    var info = []
+                    info.push(data.data.info)
+                    if (data.data.info.check_uid != 0) {
+                        const html = template("list_temp3", {list: data.data.list});
+                        $("#yshBox").html(html);
+                        const html1 = template("list_temp4", {list: info});
+                        $("#yshResult").html(html1);
+
+                        $('.img-list img').click(function () {
+                            layer.photos({
+                                photos: '.img-list',
+                                anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                            });
+                        });
+                    } else {
+                        const html = template("list_temp2", {list: data.data.list});
+                        $("#wshjl").html(html);
+                        const html1 = template("list_temp5", {list: info});
+                        $("#wshRes").html(html1);
+
+                        $('.img-list img').click(function () {
+                            layer.photos({
+                                photos: '.img-list',
+                                anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                            });
+                        });
+
+
+                    }
+                }).fail(function (xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                })
+            })
+
+            /*S-搜索按钮*/
+            $('#search').on('click', function () {
+                var condition = $('input[name=condition]').val();
+                var time_start = $('input[name=time_start]').val();
+                var time_end = $('input[name=time_end]').val();
+                var city = $('select[name=city]').val();
+                var revoked = $('select[name=revoked]').val();
+                var proposer = $('select[name=proposer]').val();
+                var reason = $('select[name=reason]').val();
+                var channel = $('select[name=channel]').val();
+                var reviewer = $('select[name=reviewer]').val();
+                var results = $('select[name=results]').val();
+                var allot_state = $('select[name=allot_state]').val();
+
+                //判断时间间隔
+                if ((time_end != '') && (time_start > time_end)) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '撤消开始时间不能大于结束时间~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                };
+
+                window.location.href = '/orderBackHistory/?order_id=' + condition + '&start_time=' + time_start + '&end_time=' + time_end + '&cs=' + city + '&op_uid=' + revoked + '&push_uid=' + proposer + '&reason=' + reason + '&src_alias=' + channel + '&check_uid=' + reviewer + '&check_status=' + results + '&allot_state=' + allot_state;
+            });
+            /*E-搜索按钮*/
+
+            /*S-清空筛选条件*/
+            function clearSearchCondition() {
+
+                var date = new Date()
+                var y = date.getFullYear()
+                var m = add0(date.getMonth() + 1)
+                var d = add0(date.getDate())
+                var time = y + '-' + m + '-' + d
+
+                //修改月、天的格式，保持两位数显示
+                function add0(m){
+                    return m<10?'0'+m:m
+                }
+
+                // 获取前一个月的日期用来重置默认值
+                function getPreMonth(date) {
+                    var arr = date.split('-');
+                    var year = arr[0]; //获取当前日期的年份
+                    var month = arr[1]; //获取当前日期的月份
+                    var day = arr[2]; //获取当前日期的日
+                    var days = new Date(year, month, 0);
+                    days = days.getDate(); //获取当前日期中月的天数
+                    var year2 = year;
+                    var month2 = parseInt(month) - 1;
+                    if (month2 == 0) {
+                        year2 = parseInt(year2) - 1;
+                        month2 = 12;
+                    }
+                    var day2 = day;
+                    var days2 = new Date(year2, month2, 0);
+                    days2 = days2.getDate();
+                    if (day2 > days2) {
+                        day2 = days2;
+                    }
+                    if (month2 < 10) {
+                        month2 = '0' + month2;
+                    }
+                    var t2 = year2 + '-' + month2 + '-' + day2;
+                    return t2;
+                }
+
+
+                $('input[name=condition]').val('')
+
+                $('input[name=time_start]').val(getPreMonth(time))
+
+                $('input[name=time_end]').val(time)
+
+                $("select[name=city]").select2('val', '0');
+
+                $('select[name=revoked]').select2('val', '0');
+
+                $('select[name=proposer]').select2('val', '0');
+
+                $('select[name=reason]').select2('val', '');
+
+                $('select[name=channel]').select2('val', '0');
+
+                $('select[name=reviewer]').select2('val', '0');
+
+                $('select[name=results]').select2('val', '');
+
+                $('select[name=allot_state]').val('');
+            }
+
+            $('#saveSh').click(function () {
+
+                $.ajax({
+                    url: '/orderBackHistory/check_record',
+                    type: 'post',
+                    data: {
+                        id: $(this).attr('data-id'),
+                        status: $('input[name=shStatus]:checked').val(),
+                        remark: $('textarea[name=remark]').val()
+                    }
+                }).done(function (data) {
+                    if (data.error_code == 0) {
+                        alert('审核成功')
+                    } else {
+                        if ($('input[name=shStatus]:checked').val() == undefined || $('input[name=shStatus]:checked').val() == ''){
+                            alert('请选择审核结果')
+                            return
+                        }
+                        alert(data.error_msg)
+                    }
+                    window.location.reload()
+                }).fail(function (xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    e.show();
+                    return false;
+                })
+            })
+
+
+            /*E-清空筛选条件*/
+        });
+    </script>
+</block>

@@ -1,0 +1,316 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/home/substationinfo/css/index.css?v={:C('STATIC_VERSION')}" rel="stylesheet"
+          type="text/css"/>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>
+            <span>
+                办事处信息设置
+            </span>
+        </h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" action="">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>使用状态：</div>
+                                        <select id="status" name="stat" type="text" class="form-control">
+                                            <option value="" >请选择</option>
+                                            <option value="1" <if condition="$getdata['stat'] eq 1">selected="selected" </if> >启用</option>
+                                            <option value="0" <if condition="$getdata['stat'] eq 0 and $getdata['stat'] neq ''">selected="selected" </if> >停用</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3 reset-padding">
+                                        <div>&nbsp;</div>
+                                        <input type="text" name="search_text" class="form-control station_info"
+                                               placeholder="请输入办事处名称/城市/电话号码" value="{$getdata.search_text}">
+                                    </div>
+                                    <div class="col-xs-2" style="margin-top:18px;">
+                                        <button type="submit" id="btnSearch" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                        <div id="btnreact" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-wrench"></i>&nbsp;重置</div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">办事处列表</h3>
+                        <div class="button">
+                            <div class="btn btn-info addstation">新增办事处</div>
+                        </div>
+                    </div>
+                    <div class="box-body no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>分部名称</th>
+                                <th>城市</th>
+                                <th>联系电话</th>
+                                <th>联系人</th>
+                                <th>地址</th>
+                                <th>排序</th>
+                                <th>添加时间</th>
+                                <th>更新时间</th>
+                                <th>是否启用</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.substation_name}</td>
+                                    <td>{$vo.city}</td>
+                                    <td>{$vo.tel}</td>
+                                    <td>{$vo.contact_name}</td>
+                                    <td>{$vo.address}</td>
+                                    <td>{$vo.sort_num}</td>
+                                    <td>{$vo.add_time|date='Y-m-d H:i:s',###}</td>
+                                    <td>
+                                        <if condition="$vo['update_time']">
+                                            {$vo.update_time|date='Y-m-d H:i:s',###}
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['stat'] eq 1" >
+                                            启用
+                                            <else />
+                                            停用
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <span class="edit" data-id="{$vo.id}">编辑</span>
+                                        <if condition="$vo['stat'] eq 1" >
+                                            <span class="status" data-id="{$vo.id}" data-stat="0">停用</span>
+                                        <else />
+                                            <span class="status" data-id="{$vo.id}" data-stat="1">启用</span>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="page">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--弹框-->
+    <div class="mask">
+        <div class="station-dialog">
+            <div class="dialog-top">
+                办事处信息
+                <span class="closeBtn">×</span>
+            </div>
+            <div class="station-content">
+                <div class="station-list">
+                    <div class="col-xs-6">
+                        <label>分部名称：</label>
+                        <input type="text" name="fenbu" class="form-control">
+                        <input type="hidden" name="id" class="form-control">
+                    </div>
+                    <div class="col-xs-6">
+                        <label>城市名称：</label>
+                        <input type="text" name="city" class="form-control">
+                    </div>
+                </div>
+                <div class="station-list">
+                    <div class="col-xs-6">
+                        <label>联系电话：</label>
+                        <input type="text" name="tele" class="form-control">
+                    </div>
+                    <div class="col-xs-6">
+                        <label>联系人：</label>
+                        <input type="text" name="contact" class="form-control">
+                    </div>
+                </div>
+                <div class="station-list">
+                    <div class="col-xs-6">
+                        <label>排序：</label>
+                        <input type="number" name="rule" class="form-control" value="0">
+                    </div>
+                    <div class="col-xs-6">
+                        <label>是否启用：</label>
+                        <select type="text" name="staus" class="form-control">
+                            <option value="1">启用</option>
+                            <option value="0">停用</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="station-list">
+                    <div class="col-xs-12">
+                        <label>联系地址：</label>
+                        <input type="text" name="address" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-btn">
+                <button type="button" class="submit-btn">保存提交</button>
+                <button type="button" class="close-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //启用/停用
+            $('.status').click(function(){
+                var id = $(this).data("id");
+                var stat = $(this).data("stat");
+                var text = $(this).text();
+                layer.confirm('确定'+text+"该办事处吗？", {
+                    btn: ['确定','取消'] //按钮
+                }, function(){
+                    $.ajax({
+                        url: '/SubstationInfo/changesubstationstat',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            stat: stat,
+                            id:id
+                        }
+                    }).done(function (data) {
+                        if(data.error_code == 1){
+                            layer.msg(data.error_msg, {icon: 1});
+                            setTimeout(function () {
+                                history.go(0)
+                            }, 1000);
+
+                        }else{
+                            layer.msg(data.error_msg, {icon: 2});
+                        }
+
+                    })
+                }, function(){
+
+                });
+            });
+
+            //重置
+            $("#btnreact").click(function () {
+                $("#status").val('');
+                $(".station_info").val('');
+            });
+            //新增办事处
+            $(".addstation").click(function () {
+                $(".mask").show();
+                $(".station-list input").val('');
+                $(".station-list input[name=rule]").val('0');
+                $(".station-list select[name=staus]").val('1');
+            });
+            //编辑
+            $(".edit").click(function () {
+                $(".station-list input").val('');
+                $(".mask").show()
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '/SubstationInfo/getsubstationinfo',
+                    type: 'get',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                }).done(function (data) {
+                    if(data.error_code == 1){
+                        $(".station-list input[name=fenbu]").val(data.data.substation_name);
+                        $(".station-list input[name=id]").val(data.data.id);
+                        $(".station-list input[name=city]").val(data.data.city);
+                        $(".station-list input[name=tele]").val(data.data.tel);
+                        $(".station-list input[name=contact]").val(data.data.contact_name);
+                        $(".station-list input[name=rule]").val(data.data.sort_num);
+                        $(".station-list select[name=staus]").val(data.data.stat);
+                        $(".station-list input[name=address]").val(data.data.address);
+                    }else{
+                        layer.msg(data.error_msg, {icon: 2});
+                    }
+                })
+
+            })
+            //关闭弹窗
+            $(".closeBtn,.close-btn").click(function () {
+                $(".mask").hide()
+            });
+            //保存提交
+            $(".submit-btn").click(function () {
+                var fenbu = $("input[name=fenbu]").val();
+                var id = $("input[name=id]").val();
+                var city_name = $("input[name=city]").val();
+                var tele = $("input[name=tele]").val();
+                var contact = $("input[name=contact]").val();
+                var address = $("input[name=address]").val();
+                var sort_num = $("input[name=rule]").val();
+                var stat = $("select[name=staus]").val();
+                if(fenbu == ''){
+                    msg('分部名称必填');
+                    return false
+                }
+                if(city_name == ''){
+                    msg('城市名称必填');
+                    return false
+                }
+                if(tele == ''){
+                    msg('联系电话必填');
+                    return false
+                }
+                if(contact == ''){
+                    msg('联系人必填');
+                    return false
+                }
+                $.ajax({
+                    url: '/SubstationInfo/savestation',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        substation_name: fenbu,
+                        city: city_name,
+                        tel: tele,
+                        contact_name: contact,
+                        address: address,
+                        sort_num: sort_num,
+                        stat: stat,
+                        id:id
+                    }
+                }).done(function (data) {
+                    if(data.error_code == 1){
+                        layer.msg(data.error_msg, {icon: 1});
+                        setTimeout(function () {
+                            history.go(0)
+                        }, 1000);
+                    }else{
+                        layer.msg(data.error_msg, {icon: 2});
+                    }
+                })
+            });
+        })
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+    </script>
+</block>

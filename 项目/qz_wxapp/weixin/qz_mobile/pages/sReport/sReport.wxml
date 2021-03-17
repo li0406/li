@@ -1,0 +1,163 @@
+<!--pages/sReport/sReport.wxml-->
+<view class='header'>
+  <view class='iconfont icon-location dingwei' bindtap='toCity'>{{curCity}}</view>
+  <view class='search'>
+    <view class='icon'>
+      <image src='../../img/search.png'></image>
+    </view>
+    <input placeholder='请输入公司名称' bindconfirm="searchWord" confirm-type="search"></input>
+  </view>
+  <view class='select' bindtap='toAddReport'>
+    <image src='../../img/add-big.png'></image>
+    <view>添加</view>
+  </view>
+</view>
+<view class='tab-back'>
+  <view class='tab'>
+    <view class="flex1">
+      <picker class="flex_text" value="{{style_index}}" range="{{style}}" range-key="{{'name'}}" bindchange="bindPickerChange_style">
+        <view wx:if="{{style_index == 0}}">合作类型</view>
+        <view wx:else>{{style[style_index].name}}</view>
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+    <view class="flex1">
+      <picker class="flex_text" value="{{status_index}}" range="{{status}}" range-key="{{'name'}}" bindchange="bindPickerChange_status">
+        <view wx:if="{{status_index==0}}">状态</view>
+        <view wx:else>{{status[status_index].name}}</view>
+      </picker>
+      <image src="../../img/jian.png"></image>
+    </view>
+  </view>
+</view>
+<view class='list'>
+  <view class='ul'>
+    <view class='li clearfix' wx:for='{{list}}' wx:key="id">
+      <view class='company-name'>
+        <view class='jianchen' catchtap='toDetail' data-id='{{item.id}}' data-cooperation_type='{{item.cooperation_type}}'>
+          <text class="j-com"> {{item.cut_company}}</text>
+        </view>
+      </view>
+      <view class='info clearfix' catchtap='toDetail' data-id='{{item.id}}' data-cooperation_type='{{item.cooperation_type}}'>
+        <view class='w100 name'>
+          <text class='t1'>城市：</text>
+          <text class='t2'>{{item.city_name?item.city_name:''}}</text>
+          <view class="status {{item.className}}">
+            {{item.exam_status_name}}
+          </view>
+          <image src="../../img/no-pass.png" catchtap='popRemark' data-reason='{{item.exam_reason}}' data-cooperation_type='{{item.cooperation_type}}' wx:if="{{(item.exam_status == '4' || item.exam_status == '6') && item.exam_reason}}" class="{{item.exam_status == '4'?'passImg':'passImg2'}}"></image>
+        </view>
+        <view class="name {{item.cooperation_type == 10 ? 'w100' : 'w60'}}">
+          <text class='t1'>类型：</text>
+          <text class='t2'>{{item.cooperation_type_name}}</text>
+          <text class="t2" wx-if="{{item.cooperation_type != '8' && item.cooperation_type != '9' && item.cooperation_type != '11' && item.cooperation_type != '13'}}">({{item.is_related == '1' ? '未报备' : '已报备'}})</text>
+        </view>
+        <view class='w40' wx:if="{{item.cooperation_type == 1 || item.cooperation_type == 2 || item.cooperation_type == 3 || item.cooperation_type == 7}}">
+          <text class='t1'>倍数：</text>
+          <text class='t2'>{{item.viptype}}</text>
+        </view>
+        <view class='w40' wx:if="{{item.cooperation_type == '6' || item.cooperation_type == '8' || item.cooperation_type == '10'}}">
+          <text class='t1'>返点：</text>
+          <text class='t2'>{{item.back_ratio}}</text>
+        </view>
+        <view class='w60' wx:if="{{item.cooperation_type != 10 && item.cooperation_type != 13}}">
+          <text class='t1'>{{item.cooperation_type == 11 ? '退款：' : '收款：'}}</text>
+          <text class='t2'><text class="{{item.cooperation_type == 11 ? 'red' : ''}}">{{item.cooperation_type == 11 ? item.refund_money : item.payment_total_money}}</text><text class="payment_type_name {{item.payment_type == '1'?'payment-xin':(item.payment_type == '2'?'payment-xu':(item.payment_type == '3'?'payment-yu': ''))}}">{{item.payment_type_name}}</text></text>
+        </view>
+        <view class='w50' wx:if="{{item.cooperation_type == 13}}">
+          <text class='t1'>保证金抵扣: </text>
+          <text class='t2'>{{item.deposit_to_platform_money}}</text>
+          <text class='t2 payment-xu ml20'>{{item.payment_type_name}}</text>
+        </view>
+        <view class='w40 rname'>
+          <text class='t1'>报备人: </text>
+          <text class='t2'>{{item.creator_name}}</text>
+        </view>
+        <view class='w100' wx:if="{{item.cooperation_type == 12 || item.cooperation_type == 13}}">
+          <text class='t1'>有效期: </text>
+          <text class='t2'>{{item.platform_money_start_date}}~{{item.platform_money_end_date}}</text>
+        </view>
+        <view class='w100' wx:if="{{item.cooperation_type == 10}}">
+          <text class='t1'>保证金抵扣: </text>
+          <text class='t2'>{{item.deposit_to_round_money}}</text>
+          <text class='t2 payment-xu ml20'>{{item.payment_type_name}}</text>
+        </view>
+
+        <view class='w100 methods' wx:if="{{item.cooperation_type != 10 && item.cooperation_type != 11 && item.cooperation_type != 13}}">
+          <view class='t1'>收款方名称: </view>
+          <view class="t2-con">
+            <text class='t2' wx:for="{{item.payee_list}}" wx:for-item="it" wx:key="payee_type_name">{{it.payee_type_name}}、</text>
+          </view>
+        </view>
+
+        <view class='w100'>
+          <text class='t1'>{{item.cooperation_type == 11 ? '退款' : '汇款'}}时间: </text>
+          <text class='t2'>{{item.payment_date_show}}</text>
+        </view>
+        <view class='w100 hkname' wx:if="{{item.cooperation_type != 10 && item.cooperation_type != 11 && item.cooperation_type != 13}}">
+          <text class='t1'>汇款方名称: </text>
+          <text class='t2'>{{item.payment_uname}}</text>
+        </view>
+      </view>
+      <view class='log-report clearfix'>
+        <view class='edit' data-id='{{item.id}}' data-cooperation_type="{{item.cooperation_type}}" catchtap='toEdit' wx:if="{{item.exam_status == '1'|| item.exam_status == '4'|| item.exam_status == '6'}}">
+          <image src='../../img/bianji.png'></image>
+          <text>编辑</text>
+        </view>
+        <view class='del' data-id='{{item.id}}' data-cooperation_type="{{item.cooperation_type}}" catchtap='toDel' wx:if="{{item.exam_status == '1' || item.exam_status == '4'|| item.exam_status == '6'}}">
+          <image src='../../img/tijiao.png'></image>
+          <text>提交</text>
+        </view>
+        <view class='chehui' data-id='{{item.id}}' data-cooperation_type="{{item.cooperation_type}}" catchtap='toback' wx:if="{{item.exam_status == '2'}}">
+          <image src='../../img/chehui.png'></image>
+          <text>撤回</text>
+        </view>
+        <view class='detail' data-id='{{item.id}}' data-cityid="{{item.city_id}}" data-cname="{{item.city_name}}" data-item="{{item}}" catchtap='toSelect' wx:if="{{item.exam_status == '3' && item.is_related == '1' && item.cooperation_type!== 8 && item.cooperation_type!== 9 && item.cooperation_type!== 11 && item.cooperation_type!== 13}}">
+          <image src='../../img/baobei.png'></image>
+          <text>报备会员</text>
+        </view>
+        <view class='detail' data-id='{{item.id}}' data-cityid="{{item.city_id}}" data-cname="{{item.city_name}}" data-type="{{item.cooperation_type}}" catchtap='toreReport' wx:if="{{item.exam_status == '3' && item.is_related == '2' && item.cooperation_type!== 8 && item.cooperation_type!== 9 && item.cooperation_type!== 11 && item.cooperation_type!== 13}}">
+          <image src='../../img/baobei.png'></image>
+          <text>重新报备会员</text>
+        </view>
+        <view class='detail' data-id='{{item.id}}' data-invoice="{{item.has_invoice}}" data-item="{{item}}" catchtap='toInvoiceReporting' wx:if="{{item.cooperation_type!== 11 && item.exam_status == 3 || item.exam_status == 5 ||item.exam_status == 30 }}">
+          <image src='../../img/fp-icon.png'></image>
+          <text>发票报备</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class='page' wx:if='{{page}}'>
+    <view class="pre {{pageCurrent==1?'disabled':''}}" bindtap='prevBtn'>上一页</view>
+    <view class='total'>
+      <picker bindchange="toPage" value="" range="{{pageNumber}}">
+        <view class="picker">
+          <view>{{pageCurrent}}/{{pageTotalNumber}}</view>
+        </view>
+      </picker>
+    </view>
+    <view class="next {{pageCurrent == pageTotalNumber?'disabled':''}}" bindtap='nextBtn'>下一页</view>
+  </view>
+  <view class='no-result' wx:if='{{noResult}}'>
+    <image src='../../img/no_result.png'></image>
+    <view>暂无搜索结果</view>
+  </view>
+  <view class='no-result' wx:if='{{noInternet}}'>
+    <image src='../../img/no_internet.png'></image>
+    <view>网络开了小差~请稍等</view>
+    <button bindtap='toMemberReport'>重新加载</button>
+  </view>
+</view>
+
+<view class="mask" catchtap="preventTouchMove" wx:if="{{showModal}}"></view>
+<view class="modalDlg {{item.cooperation_type === 12 ? 'modalDlg-one' : ''}}" wx:if="{{showModal}}">
+  <view class="btn" catchtap="tobigReport" wx:if="{{item.cooperation_type !== 12}}">
+    <image class="btn-img" src="../../img/add.png"></image>
+    <view>创建大报备</view>
+  </view>
+  <view class="line" wx:if="{{item.cooperation_type !== 12}}"></view>
+  <view class="btn" catchtap="toglReport">
+    <image class="btn-img" src="../../img/guanlian.png"></image>
+    <view>关联大报备</view>
+  </view>
+</view>

@@ -1,0 +1,205 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/weixinarticle/css/weixinarticle.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/weixinarticle/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content">
+        <div class="content-header hed">
+            <h1>
+                <small class="ftjz">
+                    微信文章推荐管理
+                </small>
+            </h1>
+        </div>
+        <div class="box tabletb">
+            <div class="box-header">
+                <div class="from-item pull-right">
+                    <button type="button" class="btn btn-primary daoru btn-operate">
+                        +新增
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="box zhuti">
+            <div class="content-header hdtb">
+                <h1 class="hbot">
+                    <small class="ftjz">内容列表</small>
+                    <small class="ftjy">共{$vars.count}条</small>
+                </h1>
+            </div>
+            <div class="col-sm-12">
+                <ul class="liebiao">
+                    <volist name="vars.info" id="vi">
+                        <li>
+                            <div class="xh">
+                                <span class="xh_01">序号{$key+1}</span>
+                                <span class="xh_02">操作时间</span>
+                                <span class="xh_03">{:substr($vi['update_time'], 0, 10)}</span>
+                            </div>
+                            <img class="tpzs" src="//{:C('QINIU_DOMAIN')}/{$vi.face}-w240.jpg">
+                            <p class="yfzcs">
+                                {$vi.title}
+                            </p>
+                            <p class="jvtms">
+                                {:mbstr($vi['description'], 0, 50)}
+                            </p>
+                            <div class="db">
+                                <span class="shanchu btn-delete" data-id="{$vi.id}"></span>
+                                <span class="bianji btn-operate" data-id="{$vi.id}"></span>
+                                <eq name="vi.recommend" value="1">
+                                    <input class="xzan" type="checkbox" name="my-checkbox" checked data-id="{$vi.id}">
+                                <else />
+                                    <input class="xzan" type="checkbox" name="my-checkbox" data-id="{$vi.id}">
+                                </eq>
+                            </div>
+                        </li>
+                    </volist>
+                </ul>
+            </div>
+            {$vars.page}
+            <div class="col-sm-12">
+                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <div class="text-msg">
+                        <strong>说明：</strong>
+                        <div>
+                            由于前端只有2个显示位置，超出2个后按新增顺序显示最新的2个内容，其它的系统使其处于停用状态；<br>
+                            如果重新“启用”停用的内容，系统将现2个启用内容中添加时间旧的内容使其处于停用状态。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="myModal"  tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content tanchaun">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">
+                            &times;
+                        </span>
+                    </button>
+                    <h4 class="modal-title">
+                        新增微信文章推荐
+                    </h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-primary btn-save">
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/home/weixinarticle/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/weixinarticle/js/highlight.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/weixinarticle/js/main.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('.btn-operate').click(function(event) {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/weixinarticle/operate/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        if (id > 0) {
+                            $('#myModal .modal-title').text('编辑微信文章推荐');
+                        } else {
+                            $('#myModal .modal-title').text('新增微信文章推荐');
+                        }
+                        $('#myModal .modal-body').html(data.data);
+                        $('#myModal').attr('data-id', id);
+                        $('#myModal').modal('show');
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('发生网络错误！');
+                })
+            });
+
+            $('.btn-save').click(function(event) {
+                var id = $('#myModal').attr('data-id');
+                $.ajax({
+                    url: '/weixinarticle/operate/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id,
+                        title:$('#myModal').find('input[name=title]').val(),
+                        description:$('#myModal').find('textarea[name=description]').val(),
+                        url:$('#myModal').find('input[name=url]').val(),
+                        face:$('#myModal').find('input[name=face]').attr('data-key'),
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        $('#myModal').modal('hide');
+                        window.location.href = window.location.href;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('发生网络错误！');
+                })
+            });
+
+            $('.btn-delete').click(function(event) {
+                var id = $(this).attr('data-id');
+                if (confirm('确定删除该内容吗？')) {
+                    $.ajax({
+                        url: '/weixinarticle/delete/',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id:id
+                        }
+                    })
+                    .done(function(data) {
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    })
+                    .fail(function(xhr) {
+                        alert('发生网络错误！');
+                    })
+                };
+            });
+        })
+        $('input[name="my-checkbox"]').bootstrapSwitch({'size':'mini'});
+        $('input[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function (event,state) {
+            var id = $(this).attr('data-id');
+            var recommend = (state == true) ? 1: 2;
+            $.ajax({
+                url: '/weixinarticle/recommend/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id:id,
+                    recommend:recommend
+                }
+            })
+            .done(function(data) {
+                window.location.href = window.location.href;
+            })
+            .fail(function(xhr) {
+                alert('发生网络错误！');
+            })
+        });
+    </script>
+</block>

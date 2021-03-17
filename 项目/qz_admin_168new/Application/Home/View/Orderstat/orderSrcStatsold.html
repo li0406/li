@@ -1,0 +1,597 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道来源统计 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/global.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .dataTables_filter {display:none}
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>渠道来源统计</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/ordersrcstatsold">渠道来源统计</a></li>
+        </ol>
+    </section>
+    <section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body act-box" style="min-width:500px">
+            <form id="searchform" action="" method="get">
+                <div class="col-sm-2">
+                <input type="text" class="form-control datetime" name="start_time" placeholder="开始时间" value="{$info.start_time}">
+                </div>
+                <div class="col-sm-2">
+                <input type="text" class="form-control datetime" name="end_time" placeholder="开始时间" value="{$info.end_time}">
+                </div>
+                <div class="col-sm-2">
+                    <select name="dept" id="dept" class="form-control" {$info.deptDisabled} >
+                        <option value="">所有部门</option>
+                        <option value="1" <if condition="$info.deptId EQ '1' ">selected</if>>总裁办</option>
+                        <option value="2" <if condition="$info.deptId EQ '2' ">selected</if>>推广部</option>
+                        <option value="3" <if condition="$info.deptId EQ '3' ">selected</if>>流量部</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select name="charge" id="charge" class="form-control">
+                        <option value="">全部渠道</option>
+                        <option value="2" <if condition="$info.chargeId EQ '2' ">selected</if>>付费</option>
+                        <option value="1" <if condition="$info.chargeId EQ '1' ">selected</if>>免费</option>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="submit" class="btn btn-success"><i class="fa fa-search"></i>&nbsp;查询筛选</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs ui-sortable-handle">
+                    <li class="active"><a href="#group-all" data-toggle="tab" aria-expanded="false">全部来源</a></li>
+                    <volist name="group" id="v">
+                    <li><a href="#group-{$v.id}" data-toggle="tab" aria-expanded="false">{$v.group_name}</a></li>
+                    </volist>
+                </ul>
+                <div class="tab-content" style="height:90px">
+                    <div class="tab-pane orderstats active" id="group-all">
+                        <div class="col-sm-2">访客数（UV）<p>{$info.allUV|number_format}</p></div>
+                        <div class="col-sm-2">IP数<p>{$info.allIP|number_format}</p></div>
+                        <div class="col-sm-2">发单量<p>{$info.allCounts|number_format}</p></div>
+                        <div class="col-sm-2">
+                            实际有效订单量
+                            <a href="javascript:void(0)">
+                                <i title="在查询时间段内，客服实际打出的分单量与赠单量的和" class="fa fa-question-circle"></i>
+                            </a>
+                            <p>{$info.real_youxiao|number_format}</p>
+                        </div>
+                        <div class="col-sm-2">
+                            实际分单量
+                            <a href="javascript:void(0)">
+                                <i title="选择时间段内，客服实际产生的分单量" class="fa fa-question-circle"></i>
+                            </a>
+                            <p>{$info.real_fendan|number_format}</p>
+                        </div>
+                        <div class="col-sm-2">实际分单率<p>{$info.real_fendanlv}%</p></div>
+                    </div>
+                    <volist name="group" id="v">
+                    <div class="tab-pane orderstats" id="group-{$v.id}">
+                        <div class="col-sm-2">访客数（UV）<p>{$v.sub_UV|number_format}</p></div>
+                        <div class="col-sm-2">IP数<p>{$v.sub_IP|number_format}</p></div>
+                        <div class="col-sm-2">发单量<p>{$v.count|number_format}</p></div>
+                        <div class="col-sm-2">
+                            实际有效订单量
+                            <a href="javascript:void(0)">
+                                <i title="在查询时间段内，客服实际打出的分单量与赠单量的和" class="fa fa-question-circle"></i>
+                            </a>
+                            <p>{$v.sub_real_youxiao|number_format}</p></div>
+                        <div class="col-sm-2">实际分单量<p>{$v.sub_real_fendan|number_format}</p></div>
+                        <div class="col-sm-2">实际分单率<p>{$v.sub_real_fendan_lv}%</p></div>
+                    </div>
+                    </volist>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="box-body act-box">
+                    <form id="searchform" action="" method="get">
+                        <div class="col-sm-2">
+                        <select name="dataType" id="dataType" class="form-control">
+                            <option value="count">发单量</option>
+                            <option value="uv">访客数（UV）</option>
+                            <option value="youxiao">有效订单量（分+赠）</option>
+                            <option value="youxiaolv">有效订单率</option>
+                            <option value="fendan">分单量</option>
+                            <option value="fendanlv">分单率</option>
+                        </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-4">
+                    <div id="echarts1" style="width:100%;height:300px;"></div>
+                </div>
+                <div class="col-sm-8">
+                    <div id="echarts2" style="height:280px;width:90%;"></div>
+                </div>
+            </div>
+
+            <div class="box">
+                <table class="table table-hover table-bordered" id="all_list">
+                    <thead id="dataListTitle">
+                        <tr style="font-size:14px;">
+                            <th style="text-align:left;">来源类型</th>
+                            <th width="80">访客数UV</th>
+                            <th width="80">IP数</th>
+                            <th width="80" title="选择时间段内，业主发送的订单量">
+                                发单量
+                                <a href="javascript:void(0)"><i class="fa fa-question-circle"></i></a>
+                            </th>
+                            <th width="100" title="选择时间段内，分单量与赠单量的和">
+                                有效订单量
+                                <a href="javascript:void(0)"><i class="fa fa-question-circle"></i></a>
+                            </th>
+                            <th width="130" title="在查询时间段内，客服实际打出的分单量与赠单量的和">
+                                实际有效订单量
+                                <a href="javascript:void(0)"><i class="fa fa-question-circle"></i></a>
+                            </th>
+                            <th width="100" title="客服从查询时间段内的发单量中，在查询时间段内打出的分单量">
+                                分单量
+                                <a href="javascript:void(0)"><i class="fa fa-question-circle"></i></a>
+                            </th>
+                            <th width="100">分单率</th>
+                            <th width="100" title="选择时间段内，客服实际产生的分单量">
+                                实际分单量
+                                <a href="javascript:void(0)"><i class="fa fa-question-circle"></i></a>
+                            </th>
+                            <th width="100">实际分单率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataLists">
+                    <volist name="group" id="v">
+                        <tr class="itemList">
+                            <td style="text-align:left;color:#000;font-size:15px;"><i class="fa fa-plus-square-o sub" data-id="{$v.id}" data-on="0"></i>&nbsp;{$v.group_name}</td>
+                            <td>{$v.sub_UV|number_format}</td>
+                            <td>{$v.sub_IP|number_format}</td>
+                            <td>{$v.count|number_format}</td>
+                            <td>{$v.sub_current_youxiao|number_format} </td>
+                            <td>{$v.sub_real_youxiao|number_format} </td>
+                            <td>{$v.sub_current_fendan|number_format}</td>
+                            <td>{$v.sub_current_fendan_lv} %</td>
+                            <td>{$v.sub_real_fendan|number_format}</td>
+                            <td>{$v.sub_real_fendan_lv} %</td>
+                        </tr>
+                    </volist>
+
+                    <tr class="itemList" style="font-weight: bold;font-size:15px;color:#000">
+                        <td style="text-align:left;">总数</td>
+                        <td>{$countval.uv|number_format}</td>
+                        <td>{$countval.IP|number_format}</td>
+                        <td>{$countval.ddl|number_format}</td>
+                        <td>{$countval.current_youxiao|number_format}</td>
+                        <td>{$countval.real_youxiao|number_format}</td>
+                        <td>{$countval.current_fendan|number_format}</td>
+                        <td>{$countval.current_fendan_lv} %</td>
+                        <td>{$countval.real_fendan|number_format}</td>
+                        <td>{$countval.real_fendan_lv} %</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<input type="hidden" id="groupid" value="0">
+</section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<link href="/assets/common/js/plugins/dataTables/metisMenu.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<link href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+<script src="/assets/common/js/plugins/dataTables/metisMenu.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+var pieData = [<volist name="group" id="v">{value:{$v.count}, name:'{$v.group_name}'},</volist>];
+var lineItem = [<volist name="group" id="v">'{$v.group_name}',</volist>];
+var lineXData = [<volist name="days" id="v">'{$key}',</volist>];
+var lineData = [<volist name="group" id="v">{name:'{$v.group_name}',type:'line',smooth: true,data:[{$v.dayData}]},</volist>];
+</script>
+<script type="text/javascript">
+function compareTime(beginTime,endTime){
+    var beginTimes = beginTime.substring(0,10).split('-');
+    var endTimes   =  endTime.substring(0,10).split('-');
+    beginTime = beginTimes[1]+'-'+beginTimes[2]+'-'+beginTimes[0]+' '+beginTime.substring(10,16);
+    endTime    = endTimes[1]+'-'+endTimes[2]+'-'+endTimes[0]+' '+endTime.substring(10,16);
+    var a =(Date.parse(endTime)-Date.parse(beginTime))/3600/1000;
+    if(a<0){
+        return 1;   //endTime小
+    }else if (a>0){
+        return 2;   //endTime大
+    }else if (a==0){
+        return 3;   //时间相等
+    }
+}
+
+//检测时间
+function checkTime(){
+    var start_time = $("input[name=start_time]").val();
+    var end_time = $("input[name=end_time]").val();
+
+    //对比开始和结束时间
+    if(start_time != '' && end_time != ''){
+        var r = compareTime(start_time,end_time);
+        if(r == '1'){
+            alert('结束时间不能早于开始时间！');
+            $("input[name=end_time]").val('');
+        }
+    }
+}
+
+$(document).ready(function(){
+    $(".datetime").change(function(){
+        checkTime();
+    });
+});
+
+//定义总订单量
+var theAllCount = new Array();
+
+$('#dataType').change(function(){
+    var subtype = $(this).val();
+    var gid = $('#groupid').val();
+
+    //如果子统计项为总量
+    if(subtype == 'count'){
+        //全部来源
+        if(gid == '0'){
+            myChart.setOption({
+                legend: {
+                    data:lineItem
+                },
+                series : [{
+                    data:pieData
+                }]
+            });
+            myChart2.clear();
+            myChart2.setOption({
+                tooltip: {
+                },
+                legend: {
+                    data:lineItem
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: lineXData
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series:lineData
+            });
+        }else{
+            myChart.setOption({
+                legend: {
+                    data:theAllCount[gid]['item']
+                },
+                series: [{
+                    data:theAllCount[gid]['pieData']
+                }]
+            });
+            myChart2.clear();
+            myChart2.setOption({
+                tooltip: {
+                },
+                legend: {
+                    data:theAllCount[gid]['item']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data:theAllCount[gid]['dayList']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series:theAllCount[gid]['lineData']
+            });
+        }
+        return false;
+    }
+
+    $.ajax({
+        url: '/ordersrcstatsold/getsubdetails/',
+        type: 'GET',
+        dataType: 'JSON',
+        data: {
+            subtype:subtype,
+            gid:gid,
+            start_time:'{$info.start_times}',
+            end_time:'{$info.end_times}',
+        }
+    })
+    .done(function(result) {
+        if(result.status == '1'){
+            myChart.setOption({
+                legend: {
+                    data:result.data.item
+                },
+                series: [{
+                    data:result.data.pieData
+                }]
+            });
+            myChart2.clear();
+            myChart2.setOption({
+                tooltip: {
+                },
+                legend: {
+                    data:result.data.item
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: result.data.dayList
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series:result.data.lineData
+            });
+        }else{
+            alert(result.info);
+        }
+    }).fail(function(xhr) {
+        alert('操作失败,请稍后再试！');
+    });
+
+});
+
+//主分类模块切换
+$('.nav-tabs a').click(function(event) {
+    var gid = $(this).attr('href');
+    $("#dataType").val("count");
+
+    if(gid == '#group-all'){
+        $('#groupid').val('0');
+        myChart.setOption({
+            legend: {
+                data:lineItem
+            },
+            series : [{
+                data:pieData
+            }]
+        });
+        myChart2.clear();
+        myChart2.setOption({
+            tooltip: {
+            },
+            legend: {
+                data:lineItem
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: lineXData
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series:lineData
+        });
+    }else{
+        $('#groupid').val(gid);
+        $.ajax({
+            url: '/ordersrcstatsold/getstatsdetails/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                subtype:'groupAllData',
+                gid: gid,
+            }
+        })
+        .done(function(result) {
+            if(result.status == '1'){
+                theAllCount[gid] = result.data;
+                myChart.setOption({
+                    legend: {
+                        data:result.data.item
+                    },
+                    series: [{
+                        data:result.data.pieData
+                    }]
+                });
+
+                myChart2.clear();
+                myChart2.setOption({
+                    tooltip: {
+                    },
+                    legend: {
+                        data:result.data.item
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: result.data.dayList
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series:result.data.lineData
+                });
+            }else{
+                alert(result.info);
+            }
+        }).fail(function(xhr) {
+            alert('操作失败,请稍后再试！');
+        });
+    }
+});
+
+$('#dataLists .sub').click(function(event) {
+    var gid =  $(this).attr('data-id');
+    var _this = $(this);
+    //是否展开状态
+    if ($(this).attr("data-on") == 1) {
+        $(this).removeClass('fa-minus-square-o');
+        $(this).addClass('fa-plus-square-o');
+        $(this).attr("data-on", 0);
+        _this.parent().parent().nextUntil(".itemList").remove();
+        _this.parent().parent().removeClass('info');
+    }else{
+        $.ajax({
+            url: '/ordersrcstatsold/getstatsdetails/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                subtype:'itemList',
+                gid: gid,
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                _this.parent().parent().addClass('info');
+                _this.parent().parent().after(data.data);
+            }else{
+                alert(data.info);
+            }
+        }).fail(function(xhr) {
+            alert('操作失败,请稍后再试！');
+        });
+        $(this).removeClass('fa-plus-square-o');
+        $(this).addClass('fa-minus-square-o');
+        $(this).attr("data-on", 1);
+    }
+});
+
+//重设表格
+var isInit = false;
+function initTable(){
+    if(isInit == true){
+        $('.subList').remove();
+        $('.itemList .sub').removeClass('fa-minus-square-o').addClass('fa-plus-square-o').attr("data-on", 0);
+        $('.itemList').removeClass('info');
+    }else{
+        isInit = true;
+    }
+}
+
+//排序表格设置
+$('#all_list').on('order.dt',function () {
+    initTable();
+}).DataTable({
+    "paging":false,
+    "info":false,
+    responsive: true,
+    "order": [8, 'desc'],
+});
+
+var myChart = echarts.init(document.getElementById('echarts1'));
+var option = {
+    tooltip : {
+        trigger: 'item',
+        formatter: "{b} : {c} ({d}%)"
+    },
+    legend: {
+        right:1,
+        align:'right',
+        orient: 'vertical',
+        data: lineItem
+    },
+    series : [
+        {
+            type:'pie',
+            data:pieData,
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+myChart.setOption(option);
+
+
+//第二个图表
+var myChart2 = echarts.init(document.getElementById('echarts2'));
+var option = {
+    tooltip: {
+    },
+    legend: {
+        data:lineItem
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: lineXData
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: lineData
+};
+myChart2.setOption(option);
+
+$('.datetime').datetimepicker({
+    weekStart: 1,
+    todayHighlight: 1,
+    todayBtn:true,
+    format:"yyyy-mm-dd",
+    minView:2,
+    pickerPosition: "bottom-left",
+    autoclose: true,
+    //startDate:'{$info.set_start_time}',
+    endDate:'{$info.set_end_time}'
+});
+</script>
+</block>

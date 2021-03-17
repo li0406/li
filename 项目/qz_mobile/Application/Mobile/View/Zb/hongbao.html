@@ -1,0 +1,252 @@
+<extend name="Common:basic"/>
+<block name="link">
+    <link href="/assets/mobile/zb/css/hongbao.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+    <link href="/assets/mobile/common/css/qzCitySelect.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</block>
+<block name="top">
+    <div class="m-header-his" >
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a class="m-header-left" href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/"></a>
+    <div class="m-header-tit">装修红包</div>
+</block>
+<block name="content">
+<article>
+    <div class="redsitfa">
+        <a href="#">
+            <img src="/assets/mobile/zb/images/hongbaojiangjin.jpg" alt="">
+        </a>
+    </div>
+    <br>
+    <div class="form-once hongbao-wrap">
+        <ul class="m-bj-edit">
+            <li id="area">
+                <div>
+                    <button id="showCityPicker2" class="c-zb-city" type="button">
+                        <i class="fa fa-map-marker">
+                        </i>
+                        <empty name="info.cityarea">
+                        请选择您所在的区域
+                        <else />
+                        {$mapUseInfo.provincefull} {$mapUseInfo.name} {$info.cityarea.name}
+                        </empty>
+                    </button>
+                    <input type="hidden" name="province" data-id="{$mapUseInfo.pid}">
+                    <input type="hidden" name="city" data-id="{$mapUseInfo.id}">
+                    <input type="hidden" name="area" data-id="{$info.cityarea.id}">
+                </div>
+            </li>
+             <li>
+                <input class="m-row-int1 m-bj-edit-list" type="tel" maxlength="11" name="tel" placeholder="请输入手机号获取4套报价方案">
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list" type="text" name="name" placeholder="怎么称呼您">
+            </li>
+            <li>
+                <input class="m-row-int1 m-bj-edit-list xiaoqumc" type="text" name="xiaoqu" placeholder="填写小区名称以便准确匹配">
+            </li>
+            <li id="shenming" style="padding-left: 5px;">
+                <input type="checkbox" checked="checked" id="mianze">
+                <label for="mianze" id="check" class="fa fa-check"></label>
+                <span>我已阅读并同意齐装网的</span>
+                <a href="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}/about/disclaimer"><span>《免责声明》</span></a>
+            </li>
+            <input type="hidden" name="source" value="{$source}">
+            <input type="hidden" name="hide_city_id" value="{$info.cityarea.id}">
+        </ul>
+        <a class="m-b-btn save-submit">
+            立即获取
+        </a>
+    </div>
+    <!--获取成功-->
+    <div class="red_box_pop">
+        <div class="end_box">
+            <i class="close_start"></i>
+            <div class="end_box_info">
+                <div class="red_logo"><img src="/assets/mobile/meitu/img/red_logo.png"></div>
+                <p class="ok_text">恭喜您领取成功</p>
+                <p class="ok_info">客服会在24小时内回访了解您的具体需求请保持手机畅通</p>
+                <button class="close_ok">关闭</button>
+            </div>
+        </div>
+    </div>
+</article>
+<include file="Common/cooperationad" />
+</block>
+<block name="script">
+<script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="//{:C('QINIU_DOMAIN')}/{:OP('ALL_REAL_VIP_PCA_JSON')}"></script>
+<script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/qzCitySelect.js?v={:C('STATIC_VERSION')}"></script>
+<script src="//msite.baidu.com/sdk/c.js?appid=1575859058891466"></script>
+<script type="text/javascript">
+    // 城市选择插件
+    selectQz.init({
+        province:$("input[name=province]").attr("data-id"),
+        city:$("input[name=city]").attr("data-id"),
+        area:$("input[name=area]").attr("data-id")
+    });
+    //切换免责对勾
+    $("#check").click(function(){
+        $(this).toggleClass('fa-check');
+    });
+    //获取红包
+    $(function(){
+        $('.save-submit').click(function(event) {
+            var tel = $("input[name=tel]").val();
+            var name = $("input[name=name]").val();
+            var xq= $("input[name=xiaoqu]").val();
+            var checked = $("#mianze").is(':checked');
+             
+           
+            if ($('.hongbao-wrap input[name=city]').attr('data-id')=="") {
+                alert("请选择您所在的城市");
+                return false;
+            }
+
+            if ($('.hongbao-wrap input[name=area]').attr('data-id')=="") {
+                alert("请选择您所在的区域");
+                return false;
+            }
+            if (!App.validate.run(tel)) {
+                $("input[name=tel]").focus();
+                $("input[name=tel]").val('');
+                alert("请填写正确的手机号码 ^_^!");
+                return false;
+            }else{
+                var reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                if(!reg.test(tel)){
+                    $("input[name=tel]").focus();
+                    $("input[name=tel]").val('');
+                    alert("请填写正确的手机号码 ^_^!");
+                    return false;
+                }
+            }
+            if (!App.validate.run(name,'name')) {
+                $("input[name=name]").focus();
+                alert("请输入您的称呼");
+                return false;
+            }else{
+                var reg = new RegExp("^[\u4e00-\u9fa5a-zA-Z]+$");
+                if(!reg.test(name)){
+                    $("input[name=name]").focus();
+                    alert("请输入正确的名称，只支持中文和英文");
+                    return false;
+                }
+            }
+            if (xq == '') {
+                alert("请填写您的小区名称");
+                return false;
+            }
+            var re = /^[0-9]+(.[0-9]{1,2})?$/gi;
+            if (re.test(xq)) {
+                $("input[name=xiaoqu]").focus();
+                alert("亲，请填写正确的小区名称！");
+                return false;
+            }
+            if(!checked){
+                alert('请勾选我已阅读并同意齐装网的《免责声明》！')
+                return false;
+            };
+             
+            window.order({
+                extra:{
+                    cs:$('.hongbao-wrap input[name=city]').attr('data-id'),
+                    qx:$('.hongbao-wrap input[name=area]').attr('data-id'),
+                    tel:$(".hongbao-wrap input[name=tel]").val(),
+                    name:$(".hongbao-wrap input[name=name]").val(),
+                    xiaoqu:$(".hongbao-wrap input[name=xiaoqu]").val()
+                },
+                submitBtn:{
+                    className:$(this),
+                    type:'btn'
+                },
+                error:function(){
+                    alert("发生了未知的错误,请稍后再试！");
+                     
+                },
+                success:function(data, status, xhr){
+                     
+                    $('.red_box_pop').css('display', 'block');
+                    $('.end_box').css('display', 'block');
+                },
+                validate:function(item, value, method, info){
+                    // if ('tel' == item && ('notempty' == method) || 'ismobile' == method) {
+                    //     alert(info);
+                    //     return false;
+                    // };
+                    // if ('name' == item && ('notempty' == method) || 'isword' == method) {
+                    //     alert(info);
+                    //     return false;
+                    // };
+                    // if ('xiaoqu' == item && !value) {
+                    //     alert('请填写您的小区名称');
+                    //     return false;
+                    // };
+
+                    return true;
+                }
+            });
+        });
+        //关闭红包
+        $('.red_box_pop .close_start').click(function(event) {
+            window.location.href = '{$referUrl}';
+        });
+        $('.red_box_pop .close_ok').click(function(event) {
+            window.location.href = '{$referUrl}';
+        });
+    })
+</script>
+<script type="application/ld+json">
+    {
+        "@context": "https://zhanzhang.baidu.com/contexts/cambrian.jsonld",
+        "@id": "{$baidu.url}",
+        "title": "{$info.article.title}",
+        "images": [
+            "{$images.0}",
+            "{$images.1}",
+            "{$images.2}"
+            ],
+        "description":"{$baidu.str}",
+        "pubDate": "{$baidu.optime}"
+    }
+</script>
+<script>
+    $(function () {
+        // 异业合作广告
+        $(document).on('click', function (event) {
+            var $target = $(event.target),
+                className = $target[0].className && $target[0].className.toLowerCase(),
+                source = 28;
+            if(className.indexOf("save-submit") > -1){
+                $.ajax({
+                    url: "/getPartnerad",
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        source: source,
+                    }
+                }).done(function (res) {
+                    if(res.error_code == 0) {
+                        $(".cooperation_box").find(".ad-area").html('<img src="'+res.data.m_img+'">')
+                        $(".cooperation_box").find("#ad-link").attr('href', res.data.m_url)
+                        $(".cooperation_box").find("#ad-link").on('click', function () {
+                            countAdPv(res.data.id)
+                        })
+                        $(".cooperation_ad_mask").fadeIn(0)
+                        $(".cooperation_box").fadeIn(0)
+                        var topV = $(window).width() * 355 / 750;
+                        $(".cooperation_box").find(".link-box").css('top', topV)
+                    }
+                })
+                $(".cooperation_box").find(".close").on("click", function () {
+                    $(".cooperation_box").find("#ad-link").off('click')
+                    $(".cooperation_ad_mask").fadeOut(0)
+                    $(".cooperation_box").fadeOut(0)
+                })
+            }
+        })
+    })
+</script>
+</block>

@@ -1,0 +1,196 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网流量分析管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/plugins/daterangepicker/daterangepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>频道管理</h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-header with-border">条件查询</div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12 no-padding">
+                        <div class="col-xs-2">
+                            <label>频道名称：</label>
+                            <div class="form-group">
+                                <select class="select2" id="name">
+                                    <option value="">全部</option>
+                                    <volist name="channels" id='v'>
+                                        <option value='{$v.name}'>{$v.name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label>频道ID：</label>
+                            <div class="form-group">
+                                <input type="text" name="id" class="form-control" value="{$keyword.id}">
+                            </div>
+                        </div>
+                        <div class="col-xs-3">
+                            <label>频道URL：</label>
+                            <div class="form-group">
+                                <input type="text" name="url" class="form-control" value="{$keyword.url}">
+                            </div>
+                        </div>
+                        <div class="col-xs-5">
+                            <div><label>时间选择：</label></div>
+                            <div class="col-xs-6 no-padding">
+                                <input class="form-control flat timer" name="time" placeholder="请选择时间"/>
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="btn btn-primary" id="searchNow"><i class="fa fa-search"></i> 查询</div>
+                                <div class="btn btn-primary" id="wantAddNew"><i class="fa fa-plus-circle"></i> 新增频道</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>频道ID</th>
+                                    <th>频道名称</th>
+                                    <th>频道URL</th>
+                                    <th>更新日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="v">
+                                    <tr>
+                                        <td>{$v.code}</td>
+                                        <td>{$v.name}</td>
+                                        <td>{$v.url}</td>
+                                        <td>{$v.edit_time|date="Y-m-d H:i:s",###}</td>
+                                        <td>
+                                            <a href="/flowanalysis/channelmanageedit/?id={$v.id}" target="_blank"><span class="label label-success edit-now" data-id="{$v.id}"><i class="fa fa-edit"> 编辑</i></span></a>
+                                            <span class="label label-danger delNow" data-id="{$v.id}"><i class="fa fa-trash" data-toggle="modal" data-target="#deleteModalTrue"> 删除</i></span>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="page-num-box">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 确定删除模态框->确定 -->
+        <div class="modal fade" id="deleteModalTrue" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            频道删除
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        确认删除该频道？
+                    </div>
+                    <div class="modal-footer text-center">
+                       <button type="button" class="btn btn-info pull-left" data-dismiss="modal" id="yes" data-id=''>确定</button>
+                       <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $("#name").select2();
+            $("#name").select2('val','{$keyword.name}');
+
+            var nowtime = new Date();
+            var ms = parseInt({$lastDate});
+            nowtime.setTime(ms);
+            $('.timer').daterangepicker({
+                maxDate : moment(), //最大时间
+                startDate:nowtime,
+                endDate:new Date(),
+                showDropdowns : true,
+                showWeekNumbers : false, //是否显示第几周
+                opens : 'left', //日期选择框的弹出位置
+                cancelClass : 'btn-small',
+                format: 'YYYY/MM/DD', //控件中from和to 显示的日期格式
+                locale : {
+                    applyLabel : '确定',
+                    cancelLabel : '取消',
+                    fromLabel : '起始时间',
+                    toLabel : '结束时间',
+                    monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                            '七月', '八月', '九月', '十月', '十一月', '十二月' ]
+                }
+            });
+            var time = "{$keyword.time}";
+            if(time != ''){
+                $('.timer').prop('value',"{$keyword.time}");
+            }
+
+            $("#wantAddNew").click(function(){
+                window.location.href = '/flowanalysis/channelmanageadd/';
+            });
+
+            $('#searchNow').on('click',function(){
+                var name    = $('#name').val();
+                var id      = $('input[name=id]').val();
+                var url     = $('input[name=url]').val();
+                var time    = $('input[name=time]').val();
+                window.location.href = '/flowanalysis/channelmanage/?name='+name+'&id='+id+'&url='+url+'&time='+time;
+            });
+
+            //删除
+            $(".delNow").on('click',function(){
+                var id = $(this).attr('data-id');
+                $('#yes').attr('data-id',id);
+            });
+            $('#yes').on('click',function(){
+                var id = $(this).attr('data-id');
+                //ajax写入数据
+                $.ajax({
+                    url: '/flowanalysis/delchannelnow/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        alert(data.info);
+                        window.location.href = window.location.href;
+                    }else{
+                        alert(data.info);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('操作失败');
+                })
+            });
+
+        })
+    </script>
+
+</block>

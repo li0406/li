@@ -1,0 +1,393 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网美图榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/meitu3d.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/meitu3d.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <empty name="Think.get.id">
+            <h1>3D效果图管理-新增</h1>
+        <else />
+            <h1>3D效果图管理-编辑</h1>
+        </empty>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i>控制面板</a></li>
+            <li><a href="/meitu/">美图管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12"><h5>输入标题</h5></div>
+                            <div class="col-xs-12">
+                                <input name="title" type="text" class="form-control" value="{$vars.info.title}">
+                            </div>
+                            <div class="col-xs-12 mt20"><h5>选择风格</h5></div>
+                            <div class="allbtn">
+                                <div class="col-xs-12 fengge-wrap">
+                                    <volist name="vars.category" id="vi">
+                                        <eq name="vi.type" value="1">
+                                            <if condition="$vi['id'] EQ $vars['info']['fengge']">
+                                                <div class="btn btn-info" data-id="{$vi.id}">{$vi.name}</div>
+                                            <else />
+                                                <div class="btn btn-default" data-id="{$vi.id}">{$vi.name}</div>
+                                            </if>
+                                        </eq>
+                                    </volist>
+                                </div>
+                                <div class="col-xs-12 mt20"><h5>选择户型</h5></div>
+                                <div class="col-xs-12 huxing-wrap">
+                                    <volist name="vars.category" id="vi">
+                                        <eq name="vi.type" value="2">
+                                            <if condition="$vi['id'] EQ $vars['info']['huxing']">
+                                                <div class="btn btn-info" data-id="{$vi.id}">{$vi.name}</div>
+                                            <else />
+                                                <div class="btn btn-default" data-id="{$vi.id}">{$vi.name}</div>
+                                            </if>
+                                        </eq>
+                                    </volist>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 mt20"><h5>标签</h5></div>
+                            <div class="col-xs-12">
+                                <div class="">
+                                    <select class="tags js-states form-control" multiple>
+                                        <notempty name="vars.info.tagname">
+                                            <volist name="vars.info.tagname" id="vo">
+                                                <option value="{$vo}" selected>{$vo}</option>
+                                            </volist>
+                                        </notempty>
+                                    </select>
+                                </div>
+                            </div>
+                            <if condition="empty($vars['info']['id'])">
+                                <div class="col-xs-12 mt20"><h5>预发布日期(可不填写，若填写则在填写的日期当天优先发布)</h5></div>
+                                <div class="col-xs-12">
+                                    <input name="publish_time" type="text" class="form-control datetime">
+                                </div>
+                            <elseif condition="3 EQ $vars['info']['status']" />
+                                <div class="col-xs-12 mt20"><h5>预发布日期(可不填写，若填写则在填写的日期当天优先发布)</h5></div>
+                                <div class="col-xs-12">
+                                    <gt name="vars.info.publish_time" value="0">
+                                        <input name="publish_time" type="text" class="form-control datetime" value="{:date('Y-m-d', strtotime($vars['info']['publish_time']))}">
+                                    <else />
+                                        <input name="publish_time" type="text" class="form-control datetime">
+                                    </gt>
+                                </div>
+                            </if>
+                            <div class="col-xs-12 mt20"><h5>添加图片</h5></div>
+                            <div id="images-wrap">
+                                <div class="col-xs-12">
+                                    <input id="images" type="file" multiple/>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 mt20">
+                                <div class="btn btn-success submit-save" data-operate="true" data-directpost="0">保存</div>
+                                <if condition="true EQ check_menu_auth('/meitu/directpostthreedimensional/')">
+                                    <if condition="empty($vars['info']['id'])">
+                                        <div type="button" class="btn btn-info submit-save" data-operate="true" data-directpost="1">
+                                            <i class="fa fa-save"></i>&nbsp;直接发布
+                                        </div>
+                                    <elseif condition="3 EQ $vars['info']['status']" />
+                                        <div type="button" class="btn btn-info submit-save" data-operate="true" data-directpost="1">
+                                            <i class="fa fa-save"></i>&nbsp;直接发布
+                                        </div>
+                                    </if>
+                                </if>
+                                <div class="btn btn-default go-back"><i class="fa fa-mail-reply"></i> 返回</div>
+                            </div>
+                        </div>
+                        <div class="row mt15">
+                            <div class="col-xs-12">
+                            <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                <div class="text-msg">
+                                    <strong>上传说明：</strong>
+                                    <div>
+                                        上传jpg格式的“球形全景图”图片；<br>
+                                        分辨率大小尽量低于6000px
+                                    </div>
+                                </div>
+                                <div class="img-msg">
+                                    <strong>球形全景图示例：</strong>
+                                    <div>
+                                        <img src="//{:C('QINIU_DOMAIN')}/threedimension/example-s3.jpg" />
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/cxselect/jquery.cxselect.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#images-wrap').data("data",'{$vars.info.imgs}');
+            $("#images-wrap").data("path","{$vars.info.path}");
+
+            $(".tags").select2({
+                language: "zh-CN",
+                tags: false,
+                multiple: true, //是否使用多个标签
+                ajax: {
+                    url: "/tags/gettagsapi/",
+                    dataType: 'json',
+                    type: 'GET',
+                    delay: 1000,
+                    data: function (params) {
+                      return {
+                        key: params.term, //查询参数
+                      };
+                    },
+                    processResults: function (data, page) {
+                        var parsed = data.data;
+                        var arr = [];
+                        for(var x in parsed){
+                            arr.push(parsed[x]); //这个应该是个json对象
+                        }
+                        return {
+                            results: arr
+                        };
+                    },
+                    cache: true
+                  },
+                escapeMarkup: function (markup) { return markup; },
+                /*最小需要输入多少个字符才进行查询，与之相关的小需要输入多少个字符才进行查询，与之相关的maximumSelectionLength表示最大输入限制*/
+                minimumInputLength: 1
+            });
+
+
+            $(".datetime").datetimepicker({
+                format:"yyyy-mm-dd",
+                startView: 2,
+                todayHighlight: 1,
+                minView: 2,
+                todayBtn:true,
+                autoclose:true
+            });
+
+            // 选择按钮
+            $('.allbtn .btn').each(function(index, el) {
+                $(el).on('click',function(){
+                    if($(el).hasClass('btn-default')){
+                        $(el).removeClass('btn-default').addClass('btn-info').siblings().removeClass('btn-info').addClass('btn-default');
+                    }else{
+                        $(el).addClass('btn-default').removeClass('btn-info')
+                    }
+                });
+            });
+            // 添加图片
+            $("#images").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl:"/upload/uploadthreedimensional/",
+                browseClass:"btn btn-primary",
+                allowedFileExtensions : ['jpg','png','gif'],
+                uploadClass:"btn btn-info",
+                removeClass:"btn btn-danger",
+                uploadAsync: true,
+                dropZoneEnabled:false,
+                overwriteInitial: false,
+                uploadExtraData: {
+                    prefix:'{$vars.info.path}'
+                },
+                maxFileSize:1000000000,
+                previewSettings:{
+                },
+                initialPreview: {$vars.imgs.preview|default="''"},
+                initialPreviewAsData: true,
+                initialPreviewFileType: 'image',
+                initialPreviewConfig: {$vars.imgs.previewconfig|default="''"}
+            }).on('fileuploaded', function(event, data, id, index) {
+                if(1 == data.response.status){
+                    $('#images-wrap').data("data",data.response.data);
+                    $("#images-wrap").data("path",data.response.path);
+                }else{
+                    var d = dialog({
+                        title: '消息',
+                        content: data.response.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                        }
+                    });
+                    d.show();
+                    return false;
+                }
+            }).on("fileuploaderror",function(event, data){
+                var e = dialog({
+                    title: '消息',
+                    content: '文件上传失败,请检查文件格式，规格是否符合要求，或联系技术部门！',
+                    okValue: '确 定',
+                    quickClose: true,
+                    ok: function () {}
+                });
+                e.show();
+                return false;
+            }).on("fileclear",function(){
+                $("#images").data("data","");
+                $(".img-upload .fileinput-upload-button").removeClass('disabled');
+            });
+
+            $('.submit-save').click(function(){
+                var _this = $(this);
+                var url = '';
+                if ('1' == $(this).attr('data-directpost')) {
+                    url = '/meitu/directpostthreedimensional/';
+                } else {
+                    url = '/meitu/threedimensionaloperate/';
+                }
+                var data = new Object();
+                data.id="{$vars.info.id}";
+                data.title = $('input[name=title]').val();
+                data.path =  $("#images-wrap").data("path");
+                if (data.title == '') {
+                    var e = dialog({
+                        title: '消息',
+                        content: '请填写标题~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                };
+                //获取位置属性
+                var fengge = $('.fengge-wrap .btn-info').attr('data-id');
+                if (fengge == '' || typeof(fengge) == 'undefined') {
+                    var e = dialog({
+                        title: '消息',
+                        content: '请选择风格属性~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                };
+                data.fengge = fengge;
+                //获取风格属性
+                var huxing = $('.huxing-wrap .btn-info').attr('data-id');
+                if (huxing == '' || typeof(huxing) == 'undefined') {
+                    var e = dialog({
+                        title: '消息',
+                        content: '请选择户型属性~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                };
+                data.huxing = huxing;
+                //获取标签属性
+                var tags = $(".tags").select2("data");
+                var tagnames = '';
+                $.each(tags,function(n,value) {
+                    tagnames = tagnames + value.text + ',';
+                });
+                if (tagnames == '') {
+                    var e = dialog({
+                        title: '消息',
+                        content: '请选择标签~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                };
+                data.tagnames = tagnames;
+
+                //获取上传的图片。此处只对新上传的进行处理
+                data.imgs = $("#images-wrap").data("data");
+                if (typeof data.imgs == "string") {
+                    data.imgs = JSON.parse(data.imgs);
+                }
+                //发布时间
+                var publish_time = $('input[name=publish_time]').val();
+                if ('undefined' == typeof(publish_time)) {
+                    publish_time = '';
+                };
+                data.publish_time = publish_time;
+                //如果是新上传美图，判断是否有id，没有id判断images是否为空
+                if( data.imgs.length == 0 ){
+                    var e = dialog({
+                        title: '消息',
+                        content: '请上传3D效果图图片~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                }
+
+                var operate = _this.attr('data-operate');
+                if (operate == 'false') {
+                    var e = dialog({
+                        title: '消息',
+                        content: '您的操作太过频繁，请稍后再试！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                    return false;
+                } else {
+                    _this.attr('data-operate','false');
+                }
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: data
+                })
+                .done(function(data) {
+                    _this.attr('data-operate','true');
+                    var e = dialog({
+                        title: '消息',
+                        content: data.info,
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {
+                            if (data.status == 1) {
+                                window.location.href = '/meitu/threedimensionallist/';
+                            }
+                        }
+                    });
+                    e.show();
+                })
+                .fail(function(xhr) {
+                    _this.attr('data-operate','true');
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            })
+        });
+    </script>
+</block>

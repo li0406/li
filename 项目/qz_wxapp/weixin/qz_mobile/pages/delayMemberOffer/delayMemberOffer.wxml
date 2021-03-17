@@ -1,0 +1,241 @@
+<!--pages/delayMemberOffer/delayMemberOffer.wxml-->
+<import src="../../components/modal/modal.wxml" />
+
+<view class="main" catchtap="hideMaskOffer">
+	<view class="common">
+		<view class='info'>
+			<view class='li'>
+				<text>合作类型</text>
+				<text class="li-fr">{{info.cooperation_type_name}}</text>
+			</view>
+			<view class='li'>
+				<view class="li-fl company-item">公司名称</view>
+				<view class="company-name">
+					<text>{{info.company_name}}</text>
+				</view>
+			</view>
+			<view class='li'>
+				<text>网店代码</text>
+				<text class="li-fr" wx:if='{{info.company_id}}'>{{info.company_id}}</text>
+				<text class="li-fr" wx:else>----</text>
+				<image class="dianpu" bindtap="tapDpu" src="../../img/dianp.png"></image>
+			</view>
+
+			<view class='li'>
+				<view class="clearfix">
+					<text>本次会员时间</text>
+					<text class="fr blue" bindtap="getViphistoryBtn">查看历史会员</text>
+				</view>
+				<view class="clearfix">
+					<text>{{info.current_contract_start_show}}至{{info.current_contract_end_show}}</text>
+					<text wx:if="{{info.viptype_ratio_show == 1}}" class="ml20">倍数: {{info.viptype}}</text>
+					<text wx:if="{{info.viptype_ratio_show == 2}}" class="ml20">返点: {{info.back_ratio}}</text>
+				</view>
+			</view>
+			<view class='li'>
+				<text>本次分单量</text>
+				<text class="fr">{{info.current_fen_orders}}</text>
+			</view>
+			<view class='li'>
+				<view class="clearfix">
+					<text>本次报备合同</text>
+					<text class="fr red" wx:if="{{info.contract_date_compare === 2}}">报备合同时间与实际会员时间不符！</text>
+				</view>
+				<view class="clearfix">
+					<text class="{{info.contract_date_compare === 2?'red':''}}">{{info.current_contract_start_show}}至{{info.current_contract_end_show}}</text>
+					<text class="ml20" wx:if="{{info.viptype_ratio_show == 1}}">倍数: {{info.report_viptype}} </text>
+					<text class="ml20" wx:if="{{info.viptype_ratio_show == 2}}">返点: {{info.report_back_ratio}} </text>
+					<text class="fr blue" bindtap="goToReport" data-id="{{info.report_id}}">查看大报备</text>
+				</view>
+			</view>
+			<view class='li'>
+				<text>承诺订单量</text>
+				<text class="fr">{{info.promise_orders}}</text>
+			</view>
+			<view class='li'>
+				<text>延期承诺单量</text>
+				<text class="fr">{{info.delay_promise_orders}}</text>
+			</view>
+			<view class='li'>
+				<text>应延期天数</text>
+				<text class="fr">{{info.delay_days}}天</text>
+				<image class="dianpu" bindtap="popRemark" src="../../img/yellow-w.png"></image>
+			</view>
+			<view class='li'>
+				<text>实际延期天数</text>
+				<text class="fr">
+					<text class="{{info.delay_real_days === info.delay_sys_days ? 'green' : 'red'}}">{{info.delay_real_days}}天</text>
+					<text class="blue">（{{info.delay_sys_days}}天）</text>
+				</text>
+			</view>
+			<view class='li'>
+				<text>延期合同日期</text>
+				<text class="fr">{{info.current_contract_start_show}}至{{info.current_contract_end_show}}</text>
+			</view>
+			<view class='li get-money pl40' wx:if='{{info.report_payment_number > 0  }}'>
+				<text class="smallBb">小报备</text>
+				<text class="fr smallBb">{{info.report_payment_money}}({{info.report_payment_number}})</text>
+			</view>
+			<view class='li pb30 no-border' style="padding-bottom:60rpx;">
+				<view>上传图片</view>
+				<view class='uploader-img clearfix' wx:if="{{info.img_list}}">
+					<view class='uploader-list' wx:for="{{info.img_list}}" wx:key="item.length">
+						<image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+					</view>
+				</view>
+			</view>
+			<view class='li no-border'>
+				<view>销售备注</view>
+				<view class='textarea-note'>{{info.remarke}}</view>
+			</view>
+			<view class="li no-border" wx:if="{{info.check_btn == 0}}" style='border:none;'>
+				<view>审核备注</view>
+				<view class='textarea-note'>{{info.admin_remarke}}</view>
+			</view>
+			<view class="li" style="padding-bottom:60rpx;" wx:if="{{info.check_btn == 0}}">
+				<view>客服备注</view>
+				<view class='textarea-note'>{{info.service_remarke}}</view>
+			</view>
+			<view class='li no-border'>
+				<text>报备人</text>
+				<text class="li-fr">{{info.saler}}</text>
+			</view>
+			<view class='li tonglan-wz'>
+				<text>所属部门</text>
+				<text class="li-fr">{{info.top_team_name}}</text>
+			</view>
+		</view>
+		<check-log list="{{info.check_log}}"></check-log>
+	</view>
+</view>
+
+<view class="check-box">
+ <view class="btn check-btn history-btn" wx:if="{{info.history_modify.count > 0}}" catchtap='showModalHistoryFn'>
+		<image src='../../img/chakan.png'></image>
+		<text>查看历史修改信息</text>
+	</view>
+	<view class="btn check-btn" wx:if="{{info.check_btn == 1}}" catchtap='showModalFn'>
+		<image src='../../img/shenhe.png'></image>
+		<text>审核</text>
+	</view>
+	<view class='offer-btn' wx:if="{{info.city_quote}}" catchtap='showOfferDetail'>
+		<image src='../../img/baojiabtn.png'></image>
+	</view>
+</view>
+
+
+<modal show="{{isShowModal}}" title='{{modalTitle}}' cancelTitle='关闭' confirmTitle='提交' height='60%' bindcancel="modalCancel" bindconfirm='modalConfirm'>
+	<view class='modal-content'>
+		<view class="check-body">
+			<view class="radio-part">
+				<radio-group class="radio-group" bindchange="radioChange">
+					<label class="radio" style="margin-right:50rpx;">
+						<radio value="3" checked="{{checkPassVal == 3}}" /> 通过
+					</label>
+					<label class="radio">
+						<radio value="4" checked="{{checkPassVal == 4}}" /> 不通过
+					</label>
+				</radio-group>
+			</view>
+			<view class='note-part clearfix'>
+				<text class="note-part-text">备注</text>
+				<view class='note-part-textarea'>
+					<textarea name="textarea" maxlength='150' fixed="true" bindinput='getRemark' value="{{checkRemark}}" />
+					</view>
+            </view>
+        </view>
+    </view>
+</modal>
+
+<view class='mask-offer' wx:if="{{maskOfferShow}}" style="height:{{offerHeight}}">
+    <view class="close-area" catchtap="closeOffer"></view>
+    <view class="offer-ul {{activeTag ? 'active' : ''}}">
+        <view class="fix-padding" style="padding-bottom: 100rpx;">
+            <view class="offer-li strong">城市报价单量参考</view>
+            <view class="offer-li">城市：{{city_quote.city_name}}</view>
+            <view class="offer-li">所属地级市：{{city_quote.parent_city_name}}</view>
+            <view class="offer-li">城市等级：{{city_quote.level}}</view>
+            <view class="offer-li" wx:if="{{city_quote.round_order_money>0}}">轮单费单价：{{city_quote.round_order_money}}</view>
+            <view class="offer-li" wx:if="{{city_quote.rebates_ratio}}">返点比例：{{city_quote.rebates_ratio}}</view>
+            <view class="offer-li">季度报价：{{city_quote.quarter_quote}}</view>
+            <view class="offer-li">半年报价：{{city_quote.half_year_quote}}</view>
+            <view class="offer-li">年度报价：{{city_quote.year_quote}}</view>
+            <view class="offer-li">月承诺订单量：{{city_quote.month_promise_order}}</view>
+            <view class="offer-li">年度会员时间：{{city_quote.year_member_time}}</view>
+
+            <view class="offer-li" wx:if="{{city_quote.grade_a_price > 0|| city_quote.grade_a_order > 0}}">A档:{{city_quote.grade_a_price ? city_quote.grade_a_price : ' / ' }}  单量:{{city_quote.grade_a_order ? city_quote.grade_a_order : ' / ' }}</view>
+            <view class="offer-li"  wx:if="{{city_quote.grade_b_price > 0|| city_quote.grade_b_order > 0}}">B档:{{city_quote.grade_b_price ? city_quote.grade_b_price : ' / '}}  单量:{{city_quote.grade_b_order ? city_quote.grade_b_order : ' / ' }}</view>
+            <view class="offer-li"  wx:if="{{city_quote.grade_c_price > 0|| city_quote.grade_c_order > 0}}">C档:{{city_quote.grade_c_price ? city_quote.grade_c_price : ' / '}}  单量:{{city_quote.grade_c_order ? city_quote.grade_c_order : ' / ' }}</view>
+            <view class="offer-li"  wx:if="{{city_quote.grade_d_price > 0|| city_quote.grade_d_order > 0}}">D档:{{city_quote.grade_d_price? city_quote.grade_d_price : ' / '}}  单量:{{city_quote.grade_d_order ? city_quote.grade_d_order : ' / ' }}</view>
+
+            <view class="offer-li">包干报价：{{city_quote.is_consist == 2 ? '不包干' : city_quote.consist_price}}</view>
+            <view class="offer-li">包干最低承诺分单数：{{ city_quote.is_consist == 2 ? '/' :city_quote.consist_fen}}</view>
+            <view class="offer-li">包干增单承诺：{{city_quote.is_consist == 2 ? '/' : city_quote.consist_zeng}}</view>
+            <view class="offer-li">独家报价：{{city_quote.is_exclusive == 2 ? '不独家' : city_quote.exclusive_price}}</view>
+            <view class="offer-li">独家最低分单数：{{city_quote.is_exclusive == 2 ? '/' : city_quote.exclusive_fen_min}}</view>
+            <view class="offer-li">独家最高分单数：{{city_quote.is_exclusive == 2 ? '/' : city_quote.exclusive_fen_max}}</view>
+            <view class="offer-li">独家增单承诺：{{city_quote.is_exclusive == 2 ? '/' : city_quote.exclusive_zeng}}</view>
+            <view wx:if="{{hasQuote}}">
+              <view class="li">报价更新日期：{{info.create_time}}</view>
+            </view>
+            <view wx:else>
+              <view class="li">报价更新日期：{{city_quote.create_time}}</view>
+              <view class="li green" bindtap="historyQuote">历史报价</view>
+            </view>
+        </view>
+    </view>
+</view>
+
+<!-- 新增 -->
+<view class="modal-mask" wx:if="{{showModal}}" catchtap="preventTouchMove"></view> 
+ <view class="modal-dialog" wx:if="{{showModal}}">
+    <view class="m-title">报备记录</view>
+		<view class="m-con" wx:if="{{info.company_report_payment_number === 0 && info.company_report_number===0}}">暂无数据</view>
+    <view class="m-con" wx:if="{{info.company_report_payment_number>0}}">
+       <view>历史小报备{{info.company_report_payment_number}}次</view>
+      <view data-url="../hisxReport/hisxReport" data-active="1" bindtap="bingoBb" class="m-nav">点击查看</view>
+    </view>
+    <view class="m-con" wx:if="{{info.company_report_number>0}}">
+      <view>历史大报备{{info.company_report_number}}次</view>
+      <view data-url="../hisdReport/hisdReport" data-active="2" bindtap="bingoBb" class="m-nav">点击查看</view>
+    </view>
+    <image src="../../img/error.png" class="m-error" catchtap="preventTouchMove"></image>
+</view>
+
+<!-- 查看历史会员 -->
+<view class="modal-mask" wx:if="{{showVipHistoryModal}}" catchtap="preventTouchMove"></view> 
+ <view class="modal-dialog modal-dialog-vip-history" wx:if="{{showVipHistoryModal}}">
+    <view class="m-title">历史会员时间</view>
+		<view class="vip-history-main">
+		<scroll-view class="vip-history-scroll-view" scroll-y="{{true}}">
+			<bolck wx:for="{{vipHistpryList}}">
+				<view class="vip-history-li">
+					<view class="w5">
+						<text>会员类型：</text>
+						<text>{{item.company_mode_name}}</text>
+					</view>
+					<view class="w5">
+						<text>倍数/返点：</text>
+						<text>{{item.viptype}}</text>
+					</view>
+					<view>
+						<text>会员时间：</text>
+						<text>{{item.start_time}}至{{item.end_time}}</text>
+					</view>
+					<view>
+						<text>添加时间：</text>
+						<text>{{item.add_date}}</text>
+					</view>
+					<view>
+						<text>操作人：</text>
+						<text>{{item.op_uname}}</text>
+					</view>
+				</view>
+			</bolck>
+		</scroll-view>
+		</view>
+    <image src="../../img/error.png" class="m-error" catchtap="preventTouchMove"></image>
+</view>
+
+<!-- 修改记录 -->
+<modify-history historyData="{{info.history_modify}}" showHistoryModal="{{showHistoryModal}}"></modify-history>

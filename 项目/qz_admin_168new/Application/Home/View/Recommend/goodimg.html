@@ -1,0 +1,175 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>推荐好图</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>推荐好图管理</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li class="active"><a href="/recommend/">推荐/专题管理</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <!-- <div class="box-header with-border">
+              <h3 class="box-title">Horizontal Form</h3>
+            </div> -->
+            <!-- S form -->
+            <div class="form-horizontal" id="form">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">标题：</label>
+                        <div class="col-sm-5">
+                            <input type="text" name="search" id="search" >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">链接：</label>
+                        <div class="col-sm-5">
+                            <input disabled class="form-control" id="url" name="url">
+                        </div>
+                    </div>
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">位置：</label>
+                            <div class="col-sm-1">
+                                <!-- <input class="form-control" id="sort" name="sort" value="{$info.sort}"> -->
+                                <select class="form-control" id="sort" name="sort">
+                                    <option value="1" >1</option>
+                                    <option value="2" >2</option>
+                                    <option value="3" >3</option>
+                                    <option value="4" >4</option>
+                                    <option value="5" >5</option>
+                                    <option value="6" >6</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <button type="submit" id="submit" class="btn btn-success button">保存</button>
+                        <input type="hidden" name="id" data-id="{$info.id}">
+                        <button type="button" class="btn btn-default" onclick="history.back()"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                    </div>
+
+                    <div class="alert alert-warning alert-dismissible fade in" role="alert" style="position:absolute; right:20px; top:10px;">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <table class="location" border="1">
+                                <tr>
+                                    <th >位置2</th>
+                                    <th rowspan="2" colspan="2">位置1</th>
+                                </tr>
+                                <tr >
+                                    <th>位置3</th>
+                                </tr>
+                                <tr >
+                                    <th>位置4</th>
+                                    <th>位置5</th>
+                                    <th>位置6</th>
+                                </tr>
+                        </table>
+
+                    </div>
+                </div>
+              <!-- E form -->
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+        //下拉反绑定
+        $("#sort").val("{$info.goodimg}");
+        if("{$Think.get.id}" != ''){
+            $("input[name=url]").val("http://{:C('QZ_YUMINGWWW')}/caseinfo/{$info.id}.shtml")
+        }
+        $("#search").select2({
+            allowClear: true,
+            placeholder:"查询美图标题",//文本框的提示信息
+            minimumInputLength: 1,
+            maximumInputLength:10,
+            query: function(query) {
+                var result = null;
+                $.ajax({
+                    url: '/recommend/getpubmeitutitle',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        query: query.term
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            var result = {
+                                results: []
+                            };
+                            for(var i in data.data){
+                                result.results.push({
+                                    id:data.data[i].id,
+                                    text:data.data[i].title
+                                });
+                            }
+                            query.callback(result);
+                        }
+                    });
+                }
+            });
+            //选中操作
+            $("#search").change(function(event) {
+                var id = $("#search").select2("data").id;
+                document.getElementById("url").value = "http://{:C('QZ_YUMINGWWW')}/caseinfo/"+ id +".shtml";
+            });
+            //select2 的反绑操作，需要select2的4.01的版本
+            if(('{$info.id}' != '') && ('{$info.title}' != '')){
+                $("#search").select2("data",{id:"{$info.id}",text:"{$info.title}"});
+            }
+
+            $("#submit").click(function(event) {
+                if(trim($("input[name=search]").val()) === ''){
+                    $("input[name=search]").focus();
+                    $("input[name=search]").addClass('focus');
+                    alert("请输入标题~ ");
+                    return false;
+                }
+
+                if($("select[name=sort]").val() === null){
+                    alert("请填写位置~ ");
+                    return false;
+                }
+
+                var data = {
+                    id:$("input[name=id]").attr("data-id"),
+                    newid:$("#search").select2("data").id,
+                    title:$("#search").select2("data").text,
+                    sort:$("select[name=sort]").val()
+                };
+
+                $.ajax({
+                    url: '/recommend/goodimg/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        data: data
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href="/recommend/";
+                    }else{
+                        alert(data.info);
+                        window.location.href="/recommend/";
+                    }
+                });
+
+            });
+        })
+    </script>
+</block>

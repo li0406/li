@@ -1,0 +1,310 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>申请查看记录黑名单表</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/home/userapply/css/contant.css?v={:C('STATIC_VERSION')}"/>
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}"/>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>用户查询名单</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <ul class="yonghu-chaxun">
+                                <li><a href="/userapply/contact/">查询明细</a></li>
+                                <li class="activity">黑名单</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab">
+                <div class="box" style="padding-bottom:20px;">
+                    <div class="box-header">
+                        <form action="/userapply/contact/" method="get">
+                            <div class="col-xs-2">
+                                <div>开始时间</div>
+                                <input type="hidden" name="type" value="2">
+                                <input type="text" name="start" class="form-control datepicker" placeholder="请输入开始时间" value="{$Think.get.start|default=date('Y-m-01')}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>结束时间</div>
+                                <input type="text" name="end" class="form-control datepicker" placeholder="请输入结束时间" value="{$Think.get.end|default=date('Y-m-d')}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-2">
+                                <div>手机号</div>
+                                <input type="text" name="tel" class="form-control" placeholder="请输入手机号" value="{$Think.get.tel|default=''}" autocomplete="off">
+                            </div>
+                            <div class="col-xs-3">
+                                <button type="submit" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export" onclick="location.href='/export/exportContactOrBlack?{$query}'">导出
+                                </button>
+                                <button type="button" class="add-btn">新增名单</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table id="myTable" class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>手机号</th>
+                                <th>IP地址</th>
+                                <th>封禁时间</th>
+                                <th>封禁原因</th>
+                                <th>上传图片</th>
+                                <th>查询次数</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list.list" id="vo">
+                                <tr>
+                                    <td>{$i}</td>
+                                    <td>{$vo.tel}</td>
+                                    <td>{$vo.ip}</td>
+                                    <td>{:date('Y-m-d H:i:s',$vo['create_time'])}</td>
+                                    <td>{$vo.mark}</td>
+                                    <td><if condition="!empty($vo['mark_img'])"><span class="yulan-btn" data-img="{$vo.mark_img}">点此预览</span><else/>—</if></td>
+                                    <td>{$vo.num}</td>
+                                    <td><span class="huifu-btn" data-id="{$vo.id}">恢复</span></td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--新增名单弹框-->
+    <div class="cover">
+        <div class="add-fengjin-modal">
+            <div class="add-fengjin-modal-top">
+                黑名单封禁
+                <span class="add-close-btn">×</span>
+            </div>
+            <div class="add-feijin-modal-content">
+                <div>
+                    <label class="height-34">手机号：</label>
+                    <input type="text" maxlength="11" class="form-control tele-num">
+                </div>
+                <div>
+                    <label class="height-34">IP地址：</label>
+                    <input type="text" class="form-control ip-add">
+                </div>
+                <p class="red warn-tit"></p>
+                <div>
+                    <label class="fengjin-reason"><span class="red">*</span>封禁原因：</label>
+                    <textarea maxlength="50" placeholder="请输入封禁原因，字数在50字以内" class="txt-edit"></textarea>
+                </div>
+                <div>
+                    <label>上传图片：</label>
+                    <div style="float:left;">
+                        <input id="push-btn" type="file" class="form-control">
+                        <input type="hidden" name="mark_img" value="">
+                    </div>
+                </div>
+                <div>
+                    <button class="query-btn">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            $('.datepicker').datepicker({
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            });
+
+          $("body").on("click",".research-btn",function () {
+              var start = $("input[name=start]").val();
+              var end = $("input[name=end]").val();
+              if (!end && start) {
+                  layer.msg("请选择结束时间",{time: 2000});
+                  return false;
+              } else if (end && !start) {
+                  layer.msg("请选择开始时间",{time: 2000});
+                  return false;
+              } else if (toTimeStamp(start) > toTimeStamp(end)) {
+                  layer.msg("结束时间不能小于开始时间",{time: 2000});
+                  return false;
+              }
+          });
+
+            $("#push-btn").fileinput({
+                language: 'zh', //设置语言,
+                uploadUrl: "/upload/uploadImg",
+                showCaption: false,
+                browseClass: "btn btn-primary",
+                showBrowse: true,
+                showPreview: true,
+                autoReplace: true,
+                allowedFileExtensions: ['jpg', 'png', 'gif'],
+                maxFileCount: 1,
+                uploadClass: "btn btn-info",
+                removeClass: "btn btn-danger",
+                uploadAsync: true,
+                dropZoneEnabled: false,
+                previewSettings: {
+                    image: {width: "120", height: "110"}
+                },
+                layoutTemplates: {
+                    actionDelete: "",
+                    actionUpload: ""
+                },
+                uploadExtraData: {
+                    prefix: "vedio"
+                }
+            }).on('filebatchselected', function (event, data) {
+                var length = $(".file-preview-thumbnails>div").length;
+                $(".file-preview-thumbnails>div").addClass("img-child");
+                $(".file-preview-thumbnails").find(":last-child").removeClass("img-child");
+                if (length >= 2) {
+                    $(".file-preview-thumbnails").find(".img-child").remove();
+                }
+            }).on('fileuploaded', function (event, data) {
+                if (data.response.status == 1) {
+                    $("input[name=mark_img]").val(data.response.data.url);
+                }
+            }).on("fileuploaderror",function(event, data){
+                layer.msg("服务器出错,请稍后再试~",{time: 2000});
+                return false;
+            }).on("fileclear", function () {
+                $("input[name=mark_img]").val("");
+            });
+
+            //恢复按钮
+            $(".huifu-btn").click(function () {
+                var id = $(this).attr("data-id");
+                layer.confirm('是否将其从黑名单中移除', {
+                    btn: ['确定','取消'], //按钮
+                    title:"提示"
+                }, function(){
+                    $.ajax({
+                        url: '/userapply/removeblack',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: id
+                        }
+                    }).done(function (data) {
+                        if (data.error_code == 0) {
+                            layer.msg(data.error_msg,{time: 800},function () {
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.error_msg);
+                        }
+                    });
+                });
+            });
+
+            //新增名单按钮
+            $(".add-btn").click(function () {
+                $(".tele-num,.ip-add,.txt-edit").val("");
+                $(".cover").show();
+            });
+
+            //弹框关闭按钮
+            $(".add-close-btn").click(function () {
+                $(".file-input").addClass("file-input-new");
+                $(".tele-num").val("");
+                $(".ip-add").val("");
+                $(".txt-edit").val("");
+                $("input[name=mark_img]").val("");
+                $(".cover").hide();
+            });
+
+            //预览图片
+            $(".yulan-btn").click(function () {
+                var imgArr = $(this).data('img').split(',');
+                var imgData = [];
+                imgArr.forEach(function (item, index) {
+                    imgData.push({
+                        alt: "图片名",
+                        pid: index, //图片id
+                        src: item, //原图地址
+                        thumb: item //缩略图地址
+                    })
+                });
+                layer.photos({
+                    shade: [0.7],
+                    anim: 5,
+                    photos: {data: imgData},
+                    scrollbar: false,
+                    move: false
+                });
+            });
+
+            //封禁弹框确认按钮
+            $(".query-btn").click(function () {
+                var tele_num = $(".tele-num").val();
+                var ip_add = $(".ip-add").val();
+                var txt_edit = $(".txt-edit").val();
+                var tel_reg = new RegExp("^(13|14|15|16|17|18|19)[0-9]{9}$");
+                var mark_img = $("input[name=mark_img]").val();
+                if (tele_num == "" && ip_add == "") {
+                    $(".warn-tit").html("手机号和IP地址必填一项");
+                    return false;
+                } else if (tele_num != "" && !tel_reg.test(tele_num)) {
+                    $(".warn-tit").html("请输入正确的手机号");
+                    return false;
+                } else {
+                    $(".warn-tit").html("");
+                }
+                if (txt_edit == "") {
+                    layer.msg("请填写封禁原因",{time: 2000});
+                    return false;
+                }
+                $.ajax({
+                    url: '/userapply/saveblack',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        tel: tele_num,
+                        ip: ip_add,
+                        mark: txt_edit,
+                        mark_img: mark_img
+                    }
+                }).done(function (data) {
+                    if (data.error_code == 0) {
+                        $("input[name=mark_img]").val("");
+                        layer.msg(data.error_msg,{time: 800},function () {
+                            location.reload();
+                        });
+                    } else {
+                        layer.msg(data.error_msg);
+                    }
+                });
+            });
+        });
+
+        function toTimeStamp(time) {
+            if (time) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                return new Date(date).getTime();
+            }
+            return false;
+        }
+    </script>
+</block>

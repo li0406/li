@@ -1,0 +1,435 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>计划月分单量 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/xs-gangwei.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <div class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="overflow-x">
+                        <div class="overflow-box" style="width: 931px;">
+                            <div class="box-header">
+                                <h3><i class="xs-icon gangwei-icon"></i> 计划月分单量</h3>
+                                <form id="searchform" action="" method="get" class="form-horizontal">
+                                    <div class="from-list" id="searchBox">
+                                        <div class="from-item">
+                                            <span>城市：</span>
+                                            <select name="city">
+                                                <option value="">请选择</option>
+                                                <volist name="cityList" id="v">
+                                                <option value="{$v.id}">{$v.city}</option>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span>部门：</span>
+                                            <select type="text" class="info-item" name="dept">
+                                                <option value="">请选择</option>
+                                                <option value="1">商务</option>
+                                                <option value="2">外销</option>
+                                            </select>
+                                        </div>
+                                        <div class="from-item">
+                                            <span style="width: auto;float: left;line-height: 25px;">生效月份：</span>
+                                            <input type="text" name="date" class="form-control datepicker" style="border-radius:0 !important;float: left;width: 130px;height: 25px;border:1px #aaa solid" placeholder="选择月份" value="">
+                                        </div>
+                                        <input type="hidden" value="0" name="dl">
+                                        <input type="hidden" value="0" name="dltpl">
+                                        <button type="submit" class="search-btn xs-btn">查询</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="box-body">
+                                <div class="todo-item">
+                                    <button class="xs-btn" id="dlTemplate">模板下载</button>
+                                    <button class="xs-btn add-new" id="importAct">导入</button>
+                                    <div class="pull-right position-relative">
+                                        <button class="xs-btn hideLoading" id="exportExcel">导出</button>
+                                        <button class="xs-btn log-info">操作日志</button>
+                                        <i class="xs-icon zhushi-icon"></i>
+                                        <div class="zhushi-info">
+                                            <p>本页数据以会员ID为唯一标识，其他数据均为附属信息</p>
+                                            <p>此页系数的数值为整数</p>
+                                            <p>删除城市级别列</p>
+                                            <p>1、上方区域显示的是筛选条件，当选择相应的筛选条件并点击<查询>按钮时，列表内显示相应的搜索结果信息。</p>
+                                            <p>2、新上会员信息同步：新上会员，系统当日默认显示其”会员ID、会员简称、城市、部门、倍数、会员状态“信息，”计划月分单数、生效月份“为空白，并置顶。以便于提示管理员录入。</p>
+                                            <p>3、城市的来源为《岗位城市权限》中的城市，如果需要添加城市，则在《岗位城市权限》中添加。</p>
+                                            <p>3.1、每个月1日0:10拷贝上个月最后1天23:59的数据。</p>
+                                            <p>3.2、当月更改某一城市的数据保存，覆盖当月的数据。</p>
+                                            <p>3.3、预约设置：当月预约设置下个月（生效月份）开始执行的数据，系统默认为生效月份的1日生效。</p>
+                                            <p>3.4、默认显示本月最新的数据</p>
+                                            <p>4、查询会员历史分单数：可通过检索项查询历史会员信息（包含当前暂停+退费+过期会员分单指标信息）</p>
+                                            <p>5、会员状态：有效、暂停、退费、延期、转让、过期</p>
+                                            <p>6、计划月分单数：比如在2017年8月之前，平阳县A装饰计划月分单数为5个，在2017年7月16日设置更改为8个，生效月份为2017年8月，则（1）2017年8月之前月份的计划月分单数为5个，相关数据以5个计算。</p>
+                                            <p>（2）2017年8月及之后月份的相关数据以8个计算。</p>
+                                            <p>（3）2017年8月当月1-15日及全月的以8个计算。</p>
+                                            <p>5、操作日志：操作信息痕迹化，确保所有修改信息能够查询到记录。</p>
+                                            <p>6、只有总裁、副总裁、司令、军长，助理可以访问。所有角色只能查看自己管辖的城市。</p>
+                                            <p>7、总裁、副总裁：只有查看权限，无修改权限。司令最高权限，可设定军长，助理</p>
+                                            <p>8、助理可设置师长及以下权限</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-item-count">
+                                    <p>
+                                        <span class="count-list">共<i>{$totalnum}</i>条</span>
+                                    </p>
+                                </div>
+                                <table id="reset-table" class="table table-bordered table-hover dataTable no-footer" role="grid" >
+                                    <thead class="thead1" style="width: 930px;">
+                                        <tr role="row">
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th title="计划月分单数">计划月分单数</th>
+                                            <th title="生效月份">生效月份</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="thead2" style="width: 930px;">
+                                        <tr role="row">
+                                            <th title="城市">城市</th>
+                                            <th title="部门">部门</th>
+                                            <th title="计划月分单数">计划月分单数</th>
+                                            <th title="生效月份">生效月份</th>
+                                            <th title="操作时间">操作时间</th>
+                                            <th title="操作人">操作人</th>
+                                            <th title="操作">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <volist name="list" id="v">
+                                        <tr role="row" class="odd">
+                                            <td><span class="city-text">{$v.city}</span></td>
+                                            <td><span class="bumen-text"><if condition="$v.dept EQ '1' ">商务<else />外销</if></span></td>
+                                            <td><span class="num-text">{:number_format($v['point'], 1,'.','')}</span></td>
+                                            <td><span class="junzhang-text">{$v.start}</span></td>
+                                            <td><span class="junzhang-text">{$v.lasttime}</span></td>
+                                            <td><span class="caozuo-text">{$v.name}</span></td>
+                                            <td class="revise"><i class="fa fa-pencil" data-id="{$v.id}"></i>
+                                            <input name="theid" value="{$v.id}" type="hidden"></td>
+                                        </tr>
+                                        </volist>
+                                    </tbody>
+                                </table>
+                                <div class="city-list-pop">
+                                    <volist name="list" id="v">
+                                        <div>{$v.city}</div>
+                                    </volist>
+                                </div>
+                            </div>
+                            <div class="box-footer text-center">{$page}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="importExcel" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="" id="uploadForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">计划月分单量</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal .control-label">
+                        <div style="overflow: hidden;">
+                            <div class="col-xs-5 no-padding">
+                                <h3>导入Excel表：</h3>
+                                <input  type="file" name="excel" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="thisId" value="">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="upload">上传</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--公用记录模态框-->
+    <style type="text/css">.width-800{width: 800px;}table#reset-table thead tr th{line-height: 45px;}</style>
+    <div class="modal fade common-model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog width-800">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title">记录列表</h4>
+                </div>
+                <div class="modal-body common-model-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function() {
+
+            $('#exportExcel').on('click', function(){
+                $('input[name="dl"]').val('1');
+                $('#searchform').submit();
+                setTimeout(hideProgress,1000);
+                $('input[name="dl"]').val('0');
+            });
+
+            $('#dlTemplate').on('click', function(){
+                $('input[name="dltpl"]').val('1');
+                $('#searchform').submit();
+                setTimeout(hideProgress,1000);
+                $('input[name="dltpl"]').val('0');
+            });
+
+            {$info.cityinfo}
+            {$info.deptinfo}
+            {$info.dateinfo}
+
+            $(".datepicker").datetimepicker({
+                startView:3,
+                minView:'decade',
+                format:"yyyy-mm",
+                autoclose:true,
+                pickerPosition: "bottom-left"
+            });
+
+            //上传
+            $('#importAct').click(function(event){
+                $('#importExcel').modal('show');
+            });
+
+            //下载模板
+            $('#downloadTpl').click(function(event){
+                window.location.href = '/assets/home/sales/城市会员指标模版.xlsx';
+            });
+
+            $("#upload").click(function () {
+                var formData = new FormData($("#uploadForm")[0]);
+                $.ajax({
+                    url: "/saleset/jhyfdsUploadExcel",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.status == 1) {
+                            alert("成功！");
+                            window.location.href = window.location.href;
+                        }
+                        if (data.status == 0) {
+                            alert(data.msg);
+                        }
+                    },
+                    error: function () {
+                        alert("上传失败！");
+                    }
+                });
+                $('#importExcel').modal('hide');
+            });
+
+            // 注释信息
+            $('.zhushi-icon').click(function() {
+                if($(this).attr('show') == 'show'){
+                    $('.zhushi-info').hide();
+                    $(this).removeAttr('show')
+                }else{
+                    $('.zhushi-info').show();
+                    $(this).attr('show','show');
+                }
+            });
+            // 竖向滚动时，表格头部悬浮
+            var x = 0,y = 0;
+            $(document).on('scroll',function(){
+                y = $(this).scrollTop();
+                $('.city-list-pop').css({'top':320-y});
+                if($(document).scrollTop() >= 321){
+                    $('.thead1').show();
+                    $('.thead2').css({'position':'fixed','top':0,'left':$('.sidebar').width()+26-x,'z-index':10});
+                }else{
+                    $('.thead1').hide();
+                    $('.thead2').css({'position':'relative',left:0});
+                }
+            });
+            // 横向滚动时，表格头部悬浮
+            $('.overflow-x').on('scroll',function(){
+                if($(this).scrollLeft()>130){
+                    $('.city-list-pop').show();
+                }else{
+                    $('.city-list-pop').hide();
+                }
+                x = $(this).scrollLeft();
+                $('.thead2').css({'left':$('.sidebar').width()+26-$(this).scrollLeft()});
+                $('.city-list-pop').css({'left':$('.sidebar').width()});
+            });
+
+            // 修改 or 保存
+            $('tbody').on('click', function(event){
+                if(event.target.nodeName == 'I'){
+                    var $a = $(event.target);
+                    var val,arr=[];
+                    if($a.hasClass('fa-floppy-o')){
+
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+                            val = $a.parent().parent().find('.info-item').eq(i).val();
+                            arr.push(val);
+                            if(val){
+                                $a.parent().parent().find('td').eq(i+2).find('span').html(val);
+                            }else{
+                                $a.parent().parent().find('td').eq(i+2).find('select,input').focus();
+                                return false;
+                            }
+
+                            if(arr.length < $a.parent().parent().find('.info-item').length){
+
+                                for(var j=0;j<arr.length;j++){
+                                    $a.parent().parent().find('td').eq(j+2).find('span').hide();
+                                }
+                            }else{
+                                for(var j=0;j<arr.length;j++){
+
+                                    $a.parent().parent().find('td').eq(j+2).find('span').show();
+
+                                    $a.parent().parent().find('td').eq(j+2).find('div').hide();
+
+                                    $a.parent().parent().removeClass('new-list');
+                                }
+                                for(var i=0;i<2;i++){
+                                    $a.parent().parent().find('td').eq(i+2).find('div').remove()
+                                }
+                            }
+                        }
+
+                        var id = $a.attr("data-id");
+                        //ajax写入数据
+                        $.ajax({
+                            url: '/saleset/editjhyfds/',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: {
+                                id:id,
+                                arr:arr
+                            }
+                        })
+                        .done(function(data) {
+                            if(data.status == '1'){
+                                alert(data.info);
+                                window.location.href = window.location.href;
+                            }else{
+                                alert(data.info);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            alert('操作失败');
+                        })
+
+                        $a.removeClass('fa-floppy-o').addClass('fa-pencil');
+                        $('.add-new').attr('disabled',false).css('background','#359bed');
+                        // 都修改
+                        $('.table tbody tr').each(function(index, el) {
+                            $(this).find('.fa').each(function(index, el) {
+                                $(el).show();
+                            })
+                        });
+                    }else{
+
+                        for(var i=0;i<2;i++){
+                            var spanVal = $a.parent().parent().find('td').eq(i+2).find('span').html();
+                            if(i < 1){
+                                $a.parent().parent().find('td').eq(i+2).append('<div><input type="text" value="'+spanVal+'" name="" class="info-item"></div>');
+                            }else{
+                                $a.parent().parent().find('td').eq(i+2).append('<div><input type="text" value="'+spanVal+'" name="" class="info-item edittime"></div>');
+                            }
+
+                        }
+                        for(var i=0;i<$a.parent().parent().find('.info-item').length;i++){
+
+                            $a.parent().parent().find('div').eq(i).show();
+
+                            $a.parent().parent().find('div').eq(i).siblings('span').hide();
+                        }
+
+                        $a.removeClass('fa-pencil').addClass('fa-floppy-o');
+
+                        $('.add-new').attr('disabled',true).css('background','#ccc');
+                        //选择时间
+                        $(".edittime").datepicker({
+                            language: "zh-CN",
+                            todayHighlight: true,
+                            format: 'yyyy-mm',
+                            autoclose: true,
+                            startView: 'months',
+                            maxViewMode:'years',
+                            minViewMode:'months'
+                        });
+
+                        // 只能编辑当前操作一条
+                        $('.table tbody tr').each(function(index, el) {
+                            if($(this).find('td:last').find('i').hasClass('fa-pencil')){
+                                $(this).find('td:last').find('i').hide();
+                            }
+                        });
+                    }
+                }
+            });
+
+            //历史记录
+            /*S-最近操作记录*/
+            $('.log-info').click(function(event) {
+                $.ajax({
+                    url: '/salesetting/gethistorylog/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        type:10
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.data);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    } else {
+                        $('.common-model-content').empty();
+                        $('.common-model-content').html(data.info);
+                        $('.common-model').modal('show');
+                        $(".mask-self").remove();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '发生未知错误，请联系技术部门~',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function() {}
+                    });
+                    e.show();
+                    return false;
+                })
+            });
+        })
+    </script>
+</block>

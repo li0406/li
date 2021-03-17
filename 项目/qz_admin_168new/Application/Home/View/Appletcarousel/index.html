@@ -1,0 +1,171 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网品牌榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/advbrands.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/appletcarousel/css/lunbo.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>轮播管理</h1>
+    </section>
+    <section class="content-header">
+        <div class="box">
+            <div class="box box-header">
+            <br>
+                <div class="row">
+                    <div class="pull-right col-sm-1">
+                        <span class="btn btn-block btn-info" id="add"><i class="fa fa-plus-circle"></i>&nbsp;新增轮播</span>
+                    </div>
+                </div>
+            <br>
+            </div>
+        </div>
+        <div class="box">
+            <section class="content-header">
+                <h1>查询列表</h1>
+            </section>
+            <div class="search-list">
+                <div class="list-header">
+                    <div class="row">
+                        <div class="col-xs-1">排序</div>
+                        <div class="col-xs-2">图片</div>
+                        <div class="col-xs-2">名称</div>
+                        <div class="col-xs-3 alginLeft">链接页面</div>
+                        <div class="col-xs-2">添加时间</div>
+                        <div class="col-xs-1">启用</div>
+                        <div class="col-xs-1">操作</div>
+                    </div>
+                </div>
+                <div class="list-body">
+                    <ul>
+                        <volist name="lists" id="list">
+                            <li class="row">
+                                <div class="col-xs-1">{$list.order}</div>
+                                <div class="col-xs-2 icon-img"><img src="https://staticqn.qizuang.com/{$list.img_url}" alt=""></div>
+                                <div class="col-xs-2 alginCenter">{$list.name}</div>
+                                <div class="col-xs-3 alginLeft">{$list.url}</div>
+                                <div class="col-xs-2">{$list.add_time|date="Y-m-d H:i:s",###}</div>
+                                <div class="col-xs-1 enable">
+                                    <a href="javascript:void(0)" data-value="{$list.status}" data-id="{$list.id}"
+                                    <if condition="$list['status'] eq 1">class="fa fa-toggle-on setable"
+                                        <else/>
+                                        class="fa fa-toggle-off setable"
+                                    </if>
+                                    >
+                                    </a>
+                                </div>
+                                <div class="col-xs-1 operation"><a
+                                        href="{:U('appletcarousel/edit',array('id'=>$list['id']))}">编辑</a><span
+                                        class="delete" data-id="{$list.id}">删除</span></div>
+                            </li>
+                        </volist>
+                        <br>
+                    </ul>
+                </div>
+            </div>
+            <div class="box-footer clearfix">
+                <div class="col-xs-12">
+                    {$page}
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <div class="confirm">
+        <p><span>删除提示</span><i class="fa fa-remove"></i></p>
+        <div class="confirm-content">
+            确定删除该轮播吗？
+        </div>
+        <div class="button-box">
+            <button id="yes">确定</button><button id="no">取消</button>
+        </div>
+    </div>
+
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/icheck/icheck.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/zoom.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        var del_id = 0;
+        $(".setable").click(function() {
+            var flag=this.getAttribute('data-value');
+            var id=this.getAttribute('data-id');
+            if(flag=='1'){
+                changeStatu(id,$(this));
+            }else{
+                changeStatu(id,$(this));
+            }
+        });
+        $(".delete").click(function(){
+            del_id = this.getAttribute('data-id');
+            $(".confirm").fadeIn();
+        });
+        /*确定删除*/
+        $("#yes").click(function(){
+            $(".confirm").fadeOut();
+            delData(del_id);
+        });
+        /*取消删除*/
+        $("#no").click(function(){
+            $(".confirm").fadeOut();
+        });
+        $(".fa-remove").click(function(){
+            $(".confirm").fadeOut();
+
+        });
+
+        $("#add").click(function(){
+            location.href="{:U('appletcarousel/edit')}";
+        });
+
+        //是否启用
+        function changeStatu(id,_this) {
+            $.ajax({
+                url: '/appletcarousel/changeStatu/',
+                type: 'POST',
+                dataType: 'json',
+                data: {id}
+            })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        window.location.href = "/appletcarousel/";
+                    } else {
+                        alert(data.info);
+                        window.location.href = "/appletcarousel/";
+                    }
+                })
+                .fail(function() {
+                    alert('操作失败,请联系技术部门！');
+                });
+        }
+        //删除数据
+        function delData(id) {
+            $.ajax({
+                url: '/appletcarousel/delData/',
+                type: 'POST',
+                dataType: 'json',
+                data: {id}
+            })
+                .done(function(data) {
+                    if (data.status == 1) {
+                        window.location.href = "/appletcarousel/";
+                    } else {
+                        alert(data.info);
+                        window.location.href = "/appletcarousel/";
+                    }
+                })
+                .fail(function() {
+                    alert('操作失败,请联系技术部门！');
+                });
+        }
+    </script>
+</block>

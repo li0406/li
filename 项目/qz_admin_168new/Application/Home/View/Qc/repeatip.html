@@ -1,0 +1,218 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检管理-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/plugins/toastr/css/toastr.min.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/home/order/css/index.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <form action="/qc/repeatIp" method="get">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <p>订单编号：</p>
+                                    <input class="form-control" type="text" name="id" placeholder="订单编号/IP" value="{$Think.get.id}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>城市:</p>
+                                    <select id="city" class="select2 select2-offscree " name="cs" type="text" placeholder="城市" tabindex="-1">
+                                        <option value="">请选择</option>
+                                        <volist name="city" id="vo">
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>订单类型:</p>
+                                    <select id="orders_type" class="select2 select2-offscree " name="orders_type" type="text" placeholder="城市" tabindex="-1">
+                                        <option value="">请选择</option>
+                                        <option value="1">分单</option>
+                                        <option value="2">赠单</option>
+                                        <option value="3">次新单</option>
+                                        <option value="4">扫单</option>
+                                        <option value="5">待定单</option>
+                                        <option value="6">无效单</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>开始时间:</p>
+                                    <input class="form-control datepicker" type="text" name="begin" placeholder="发布时间" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>结束时间:</p>
+                                    <input class="form-control datepicker" type="text" name="end" placeholder="发布时间" value="{$Think.get.end}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <p>质检状态:</p>
+                                    <select id="status" class="select2 select2-offscree " name="status" type="text" placeholder="质检状态" tabindex="-1">
+                                        <option value="">请选择</option>
+                                        <option value="0">未质检</option>
+                                        <option value="4">已保存</option>
+                                        <option value="1">已质检</option>
+                                        <option value="2">抽检合格</option>
+                                        <option value="3">抽检不合格</option>
+                                        <option value="99">已撤回</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>抽检状态:</p>
+                                    <select id="sampling_status" class="select2 select2-offscree " name="sampling_status" type="text" placeholder="抽检状态" tabindex="-1">
+                                        <option value="">请选择</option>
+                                        <option value="1">已抽检</option>
+                                        <option value="0">未抽检</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p>&nbsp;</p>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-hover table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>订单号</th>
+                                <th>订单发布时间</th>
+                                <th>订单类型</th>
+                                <th>城市</th>
+                                <th>IP（重复次数）</th>
+                                <th>IP重复超过5次</th>
+                                <th>质检状态</th>
+                                <th>质检员</th>
+                                <th>抽检状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo" key="key">
+                                <tr>
+                                    <td>{$key}</td>
+                                    <td>{$vo.id}</td>
+                                    <td>{$vo.time_real|date="Y-m-d H:i:s",###}</td>
+                                    <td>
+                                        <if condition="$vo['on'] EQ 4 and $vo['type_fw'] EQ 1">
+                                            分单
+                                            <elseif condition="$vo['on'] EQ 4 and $vo['type_fw'] EQ 2"/>
+                                            赠单
+                                            <elseif condition="$vo['on'] EQ 0 and $vo['on_sub'] EQ 9"/>
+                                            次新单
+                                            <elseif condition="$vo['on'] EQ 5"/>
+                                            无效单
+                                            <elseif condition="$vo['on'] EQ 2"/>
+                                            待定单
+                                            <else/>
+                                            扫单
+                                        </if>
+                                    </td>
+                                    <td>{$vo.cname}</td>
+                                    <td><a target="_blank" href="/order/?condition={$vo.ip}">{$vo.ip}</a> <span style="color: red">({$vo.num})</span></td>
+                                    <td>
+                                        <if condition="$vo['num'] GT 4">
+                                            是
+                                            <else/>
+                                            否
+                                        </if>
+                                    </td>
+                                    <td>
+                                    <if condition="$vo['state'] EQ 0">
+                                        未质检
+                                        <elseif condition="$vo['state'] EQ 99"/>
+                                        已撤回
+                                        <elseif condition="$vo['state'] EQ 3"/>
+                                        已保存
+                                        <else/>
+                                        已质检
+                                    </if>
+                                    </td>
+                                    <td>{$vo.op_name|default="-"}</td>
+                                    <td>
+                                        <if condition=" $vo['sampling_status'] EQ 2">
+                                            <i class="fa fa-check" title="已抽检合格">已抽检</i>
+                                            <elseif condition="$vo['sampling_status'] EQ 1"/>
+                                            <i class="fa fa-times" title="已抽检未合格">已抽检</i>
+                                            <else />
+                                            <i class="fa" title="未抽检">未抽检</i>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document" style="width: 1520px; margin-top: 10px;">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding:5px;">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title text-center">质检评分</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/toastr/js/toastr.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/toastr/js/toastr.message.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $("#city").select2();
+            $("#city").select2("val","{$Think.get.cs}");
+
+            $("#manager").select2();
+            $("#manager").select2("val","{$Think.get.manager}");
+
+            $("#group").select2();
+            $("#group").select2("val","{$Think.get.group}");
+
+            $("#user").select2();
+            $("#user").select2("val","{$Think.get.user}");
+
+            $("#source").select2();
+            $("#source").select2("val","{$Think.get.source}");
+
+            $("#orders_type").select2();
+            $("#orders_type").select2("val","{$Think.get.orders_type}");
+
+            $("#state").select2();
+            $("#state").select2("val","{$Think.get.state}");
+
+            $("#repeat_five").select2();
+            $("#repeat_five").select2("val","{$Think.get.repeat_five}");
+
+            $("#sampling_status").select2();
+            $("#sampling_status").select2("val","{$Think.get.sampling_status}");
+
+            $(".datepicker").datepicker({
+                format:"yyyy-mm-dd"
+            });
+
+            $("#status").select2();
+            $("#status").select2("val","{$Think.get.status}");
+
+        });
+    </script>
+</block>

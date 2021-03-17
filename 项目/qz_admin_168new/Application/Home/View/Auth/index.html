@@ -1,0 +1,583 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/css/auth.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1 class="">设置权限</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li>设置权限</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="col-sm-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <if condition="isset($role)">
+                    <h3 class="box-title">当前用户: {$role.role_name}</h3>
+                    <else/>
+                    <h3 class="box-title">选择用户</h3>
+                    </if>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-2 auth-nav">
+                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                <volist name="auth_departments" id="vo">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <h4 class="panel-title">
+                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{$vo.id}" aria-expanded="true" aria-controls="collapseOne">
+                                              {$vo.name} <i class="fa fa-chevron-circle-down pull-right"></i>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapse{$vo.id}" class="panel-collapse collapse" role="tabpanel" >
+                                        <div class="panel-body">
+                                            <ul class="list-group">
+                                                <volist name="vo.child" id="v">
+                                                <if condition="$v['id'] EQ $role['id']">
+                                                <li class="list-group-item active">
+                                                    <a href="/auth?id={$v.id}">{$v.name}</a>
+                                                </li>
+                                                <else/>
+                                                <li class="list-group-item">
+                                                    <a href="/auth?id={$v.id}">{$v.name}</a>
+                                                </li>
+                                                </if>
+                                                </volist>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                </volist>
+                            </div>
+                        </div>
+                        <div class="col-sm-10">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#new" aria-controls="home" role="tab" data-toggle="tab">新后台</a></li>
+                                <li role="presentation"><a href="#old" aria-controls="profile" role="tab" data-toggle="tab">老后台</a></li>
+                                <li role="presentation"><a href="#yy" aria-controls="messages" role="tab" data-toggle="tab">运营系统</a></li>
+                                <!--<li role="presentation"><a href="#jj" aria-controls="messages" role="tab" data-toggle="tab">家具系统</a></li>-->
+                                <li role="presentation"><a href="#jjhy" aria-controls="messages" role="tab" data-toggle="tab">家具会员系统</a></li>
+                                <li role="presentation"><a href="#zxs" aria-controls="messages" role="tab" data-toggle="tab">装修说管理系统</a></li>
+                                <li role="presentation"><a href="#xsrb" aria-controls="messages" role="tab" data-toggle="tab">销售系统</a></li>
+                                <li role="presentation"><a href="#sms" aria-controls="messages" role="tab" data-toggle="tab">短信管理平台</a></li>
+                                <li role="presentation"><a href="#ruanwen" aria-controls="messages" role="tab" data-toggle="tab">软文城管理平台</a></li>
+                                <li role="presentation"><a href="#jiashicang" aria-controls="messages" role="tab" data-toggle="tab">数据驾驶舱</a></li>
+                                <li class="pull-right">
+                                    <if condition="isset($role)">
+                                    <button id="btnSave" type="button" class="btn btn-success"><i class="fa fa-file"></i>&nbsp;&nbsp;保存</button>
+                                    <else/>
+                                    <button id="btnSave" type="button" class="btn btn-success" disabled><i class="fa fa-file" ></i>&nbsp;&nbsp;保存</button>
+                                    </if>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="new">
+                                    <div class="panel-group" id="accordion1" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.2" id="vo">
+                                        <div class="panel panel-default">
+                                            <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                            <div class="panel-heading" role="tab">
+                                                <h4 class="panel-title">
+                                                    <a role="button" data-toggle="collapse" data-parent="#accordion1" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}" >
+                                                       {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                    </a>
+                                                </h4>
+                                            </div>
+                                            <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel">
+                                                <div class="panel-body">
+                                                    <volist name="vo.child" id="v">
+                                                    <div class="auth-menu-list">
+                                                        <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$v.nodeid}" checked/>{$v.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$v.nodeid}"/>{$v.name}
+                                                        </if>
+                                                    </div>
+                                                    <if condition="count($v['child']) GT 0">
+                                                    <div class="auth-menu-sub">
+                                                    <volist name="v.child" id="i">
+                                                        <div class="auth-menu-sub-item">
+                                                        <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$i.nodeid}" checked/>{$i.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$i.nodeid}"/>{$i.name}
+                                                        </if>
+                                                        </div>
+                                                    </volist>
+                                                    </div>
+                                                    </if>
+                                                    </volist>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="old">
+                                    <div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.1" id="vo">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading" role="tab">
+                                                <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                <h4 class="panel-title">
+                                                    <a role="button" data-toggle="collapse" data-parent="#accordion2" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                      {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                    </a>
+                                                </h4>
+                                            </div>
+                                            <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                <div class="panel-body">
+                                                    <volist name="vo.child" id="v">
+                                                    <div class="auth-menu-list">
+                                                        <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                        </if>
+                                                    </div>
+                                                    <if condition="count($v['child']) GT 0">
+                                                    <div class="auth-menu-sub">
+                                                    <volist name="v.child" id="i">
+                                                        <div class="auth-menu-sub-item">
+                                                        <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                        </if>
+                                                        </div>
+                                                    </volist>
+                                                    </div>
+                                                    </if>
+                                                    </volist>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="yy">
+                                    <div class="panel-group" id="accordion3" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.3" id="vo">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading" role="tab">
+                                                <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                <h4 class="panel-title">
+                                                    <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                      {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                    </a>
+                                                </h4>
+                                            </div>
+                                            <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                <div class="panel-body">
+                                                    <volist name="vo.child" id="v">
+                                                    <div class="auth-menu-list">
+                                                        <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                        </if>
+                                                    </div>
+                                                    <if condition="count($v['child']) GT 0">
+                                                    <div class="auth-menu-sub">
+                                                    <volist name="v.child" id="i">
+                                                        <div class="auth-menu-sub-item">
+                                                        <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                        <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                        <else/>
+                                                        <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                        </if>
+                                                        </div>
+                                                    </volist>
+                                                    </div>
+                                                    </if>
+                                                    </volist>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="jjhy">
+                                    <div class="panel-group" id="accordion3" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.5" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="zxs">
+                                    <div class="panel-group" id="accordion6" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.6" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+
+                                <div role="tabpanel" class="tab-pane" id="xsrb">
+                                    <div class="panel-group" id="accordion7" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.7" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+
+                                <div role="tabpanel" class="tab-pane" id="sms">
+                                    <div class="panel-group" id="accordion8" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.8" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="ruanwen">
+                                    <div class="panel-group" id="accordion8" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.9" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="jiashicang">
+                                    <div class="panel-group" id="accordion8" role="tablist" aria-multiselectable="true">
+                                        <volist name="auth_treemenu.10" id="vo">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab">
+                                                    <input type="checkbox" value="{$vo.nodeid}" class="all" />
+                                                    <h4 class="panel-title">
+                                                        <a role="button" data-toggle="collapse" data-parent="#accordion3" href="#menu-{$vo.id}" aria-expanded="true" aria-controls="menu-{$vo.id}">
+                                                            {$vo.name}<i class="fa fa-chevron-circle-down pull-right"></i>
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="menu-{$vo.id}" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <volist name="vo.child" id="v">
+                                                            <div class="auth-menu-list">
+                                                                <if condition="array_key_exists($v['nodeid'],$nodes)">
+                                                                    <input type="checkbox" value="{$v.nodeid}" checked/> {$v.name}
+                                                                    <else/>
+                                                                    <input type="checkbox" value="{$v.nodeid}"/> {$v.name}
+                                                                </if>
+                                                            </div>
+                                                            <if condition="count($v['child']) GT 0">
+                                                                <div class="auth-menu-sub">
+                                                                    <volist name="v.child" id="i">
+                                                                        <div class="auth-menu-sub-item">
+                                                                            <if condition="array_key_exists($i['nodeid'],$nodes)">
+                                                                                <input type="checkbox" value="{$i.nodeid}" checked/> {$i.name}
+                                                                                <else/>
+                                                                                <input type="checkbox" value="{$i.nodeid}"/> {$i.name}
+                                                                            </if>
+                                                                        </div>
+                                                                    </volist>
+                                                                </div>
+                                                            </if>
+                                                        </volist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $(".list-group-item.active").parents(".panel-collapse").addClass('in');
+
+    $(".all").click(function(event) {
+        var parent = $(this).parents(".panel");
+        if ($(this).prop("checked")) {
+            parent.find(".panel-body input[type=checkbox]").prop("checked",true);
+            parent.find(".panel-body input[type=checkbox]").attr("checked","checked");
+        } else {
+            parent.find(".panel-body input[type=checkbox]").prop("checked",false);
+            parent.find(".panel-body input[type=checkbox]").attr("checked",false);
+        }
+    });
+
+    $(".panel-title a").click(function(event) {
+        var target = $(this).find("i");
+        if (target.hasClass('fa-chevron-circle-up')) {
+           target.addClass('fa-chevron-circle-down').removeClass('fa-chevron-circle-up');
+        } else {
+           target.addClass('fa-chevron-circle-up').removeClass('fa-chevron-circle-down');
+        }
+    });
+
+    $(".auth-menu-sub-item input[type=checkbox]").click(function(event) {
+        var parent = $(this).parents(".auth-menu-sub");
+        var first = parent.prev(".auth-menu-list");
+        var check = first.find("input[type=checkbox]");
+        if (parent.find("input[type=checkbox]:checked").length > 0) {
+            check.prop("checked",true);
+            check.attr("checked","checked");
+        } else {
+            check.prop("checked",false);
+            check.attr("checked",false);
+        }
+
+    });
+
+    $(".auth-menu-list input[type=checkbox]").click(function(event) {
+        var _this = $(this);
+        var _parent = $(this).parents(".auth-menu-list");
+        var next = _parent.next(".auth-menu-sub");
+        if (_this.prop("checked")) {
+            next.find("input[type=checkbox]").prop("checked",true);
+            next.find("input[type=checkbox]").attr("checked","checked");
+        } else {
+            next.find("input[type=checkbox]").prop("checked",false);
+            next.find("input[type=checkbox]").attr("checked",false);
+        }
+
+    });
+
+    $("#btnSave").click(function(event) {
+        var _this = $(this);
+        var ids = [];
+
+        if ("{$role.id}" == "") {
+            return false;
+        }
+
+        $(".tab-pane").each(function(){
+            var _tab = $(this);
+            _tab.find(".panel").each(function(){
+                var _panel = $(this);
+                var firstId = _panel.find(".all").val();
+                var sub = new Array();
+                _panel.find(".auth-menu-list input[type=checkbox]:checked").each(function(){
+                    sub.push($(this).val());
+                });
+
+                _panel.find(".auth-menu-sub input[type=checkbox]:checked").each(function(){
+                    sub.push($(this).val());
+                });
+
+                if (sub.length > 0) {
+                    if(typeof ids[firstId] == "undefined"){
+                        ids[firstId] = new Array();
+                    }
+                    for(var i in sub){
+                       ids[firstId].push(sub[i]);
+                    }
+                }
+            });
+        });
+
+        $.ajax({
+            url: '/auth/authup',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                ids:ids,
+                id:"{$role.id}"
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                _this.Alert({
+                    msg:"设置完成",
+                    level:1
+                });
+            }else{
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"操作失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+</script>
+</block>

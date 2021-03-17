@@ -1,0 +1,230 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/css/roborder.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>抢单统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-2">
+                                        <div>查询时间-开始</div>
+                                        <input type="text" name="start"
+                                               class="form-control datepicker clear-target start" placeholder="请输入开始时间"
+                                               value="{$_GET['start']|default=''}" autocomplete="off">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>查询时间-结束</div>
+                                        <input type="text" name="end" class="form-control datepicker clear-target end"
+                                               placeholder="请输入结束时间" value="{$_GET['end']|default=''}" autocomplete="off">
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>城市</div>
+                                        <select id="city" name="cs" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="citys" id="vo">
+                                                <option value="{$vo.cid}" <if condition="$_GET['cs'] eq $vo['cid']">selected</if>>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>订单状态</div>
+                                        <select id="" name="order_status" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="1" <if condition="$_GET['order_status'] eq 1">selected</if>>分单</option>
+                                            <option value="2" <if condition="$_GET['order_status'] eq 2">selected</if>>赠单</option>
+                                            <option value="3" <if condition="$_GET['order_status'] eq 3">selected</if>>赠转分</option>
+                                            <option value="4" <if condition="$_GET['order_status'] eq 4">selected</if>>分单（可抢）</option>
+                                            <option value="5" <if condition="$_GET['order_status'] eq 5">selected</if>>赠单（可抢）</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>量房状态</div>
+                                        <select id="" name="lf_status" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="2" <if condition="$_GET['lf_status'] eq 2">selected</if>>未量房</option>
+                                            <option value="1" <if condition="$_GET['lf_status'] eq 1">selected</if>>已量房</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <div>客服组</div>
+                                        <select id="kefu" name="groups" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="group" id="vo">
+                                                <option value="{$vo.kfgroup}" <if condition="$_GET['groups'] eq $vo['kfgroup']">selected</if>>{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 mt10">
+                                        <div>归属人</div>
+                                        <select id="belonger" name="user" type="text" placeholder=""
+                                                class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="operate" id="vo">
+                                                <option value="{$vo.id}" <if condition="$_GET['user'] eq $vo['id']">selected</if>>{$vo.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2 mt10">
+                                        <br>
+                                        <button type="submit" id="search" class="btn btn-primary col-xs-4"><i
+                                                class="fa fa-search"></i>查询
+                                        </button>
+                                    </div>
+                                    <div class="col-xs-2 mt10 fr">
+                                        <br>
+                                        <button type="button" id="export" class="btn btn-success col-xs-6 fr">导出EXCEL
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body b-mt10">
+                        <div class="box-header">抢单统计</div>
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>订单发布时间</th>
+                                <th>订单号</th>
+                                <th>已分配会员数</th>
+                                <th>抢单数量</th>
+                                <th>订单状态</th>
+                                <th>量房状态</th>
+                                <th>城市</th>
+                                <th>客服组</th>
+                                <th>归属人</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.time_real|date="Y-m-d H:i:s",###}</td>
+                                    <td>{$vo.id}</td>
+                                    <td>{$vo.rob_num}</td>
+                                    <td>{$vo.qiang_num}</td>
+                                    <td>
+                                        <switch name="vo.type_fw">
+                                            <case value="1">
+                                                <!--区分是否赠转分-->
+                                                <if condition="$vo['status'] eq $vo['type_fw']">
+                                                    <if condition="$vo['is_rob'] eq 1">分单（可抢）<else/>分单</if>
+                                                <else/>
+                                                    <if condition="$vo['is_rob'] eq 1">分单（可抢）<else/>赠转分</if>
+                                                </if>
+                                            </case>
+                                            <case value="2">
+                                                <if condition="$vo['is_rob'] eq 1">赠单（可抢）<else/>赠单</if>
+                                            </case>
+                                            <default />未知
+                                        </switch>
+                                    </td>
+                                    <td>
+                                        <if condition="$vo['lf'] eq 1">
+                                            已量房
+                                            <else/>
+                                            <if condition="$vo['no_lf'] eq 1">
+                                                未量房
+                                                <else/>
+                                                未知
+                                            </if>
+                                        </if>
+                                    </td>
+                                    <td>{$vo.cname}</td>
+                                    <td>{$vo.kfgroup}</td>
+                                    <td>{$vo.op_name}</td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page|default=''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(".datepicker").datetimepicker({
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            pickerPosition: "bottom-left",
+            startView: 2,//月视图
+            endDate: new Date(),
+            format: "yyyy-mm-dd",
+            minView: 2
+        }).on("change", function () {
+            if (toTimeStamp($("input[name=start]").val()) > toTimeStamp($("input[name=end]").val())) {
+                msg("结束时间不能小于开始时间", function () {
+                    $("input[name=end]").val("");
+                });
+            }
+            if (toTimeStamp($("input[name=end]").val()) - toTimeStamp($("input[name=start]").val()) > 2678400000) {
+                msg("查询时间不能大于31天", function () {
+                    $("input[name=end]").val("");
+                });
+            }
+        });
+        $('#city').select2({
+            language: "zh-CN",
+            allowClear: true,
+            placeholder: "请选择"
+        });
+        $('#kefu').select2({
+            language: "zh-CN",
+            allowClear: true,
+            placeholder: "请选择"
+        });
+        $('#belonger').select2({
+            language: "zh-CN",
+            allowClear: true,
+            placeholder: "请选择"
+        });
+
+        function toTimeStamp(time) {
+            if (time != undefined) {
+                var date = time;
+                date = date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                var timestamp = new Date(date).getTime();
+                return timestamp;
+            }
+        };
+
+        function msg(msg, fn) {
+            layer.msg(
+                msg,
+                {time: 2000,},
+                fn || function () {
+                }
+            )
+        }
+
+        $(function () {
+            $("#export").on('click',function () {
+                window.location.href = '/export/robStatic?start={$_GET["start"]}&end={$_GET["end"]}&cs={$_GET["cs"]}&order_status={$_GET["order_status"]}&lf_status={$_GET["lf_status"]}&groups={$_GET["groups"]}&user={$_GET["user"]}';
+            })
+        })
+    </script>
+</block>

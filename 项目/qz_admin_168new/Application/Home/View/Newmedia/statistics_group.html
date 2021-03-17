@@ -1,0 +1,254 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>新媒体业绩统计 - 按组统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/ordersrcstats/jiaju-transfor.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .other-setting{float: right; width: 600px; text-align: right;}
+        .other-setting > a{font-size: 16px; display: inline-block; padding: 0.5em 1em; border: 1px solid #367fa9; border-radius: 0.3em; background-color: #3c8dbc; color: #666; margin: 0 0.5em; color: white;}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>新媒体业绩统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-body">
+                    <div class="tab-box">
+                        <a href="javascript:;" class="active">按组统计</a>
+                        <a href="/newmedia/statistics_user">按人统计</a>
+                        <a href="/newmedia/statistics_ranking">业绩排行榜</a>
+                        <div class="other-setting">
+                            <a href="/newmedia/usergroup">设置组</a>
+                            <a href="/newmedia/user">人员管理</a>
+                            <a href="/newmedia/usersrc">人员渠道设置</a>
+                            <a href="/newmedia/target">月目标设置</a>
+                        </div>
+                    </div>
+                    <div class="box box-body no-border">
+                        <div class="row">
+                            <form action="/newmedia/statistics_group" id="search_form">
+                                <div class="col-xs-2">
+                                    <div>选择团：</div>
+                                    <select id="select_team" class="form-control" name="team_id">
+                                        <option value="">请选择</option>
+                                        <volist name="team_list" id="item">
+                                            <option value="{$item.id}">{$item.user}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>选择小组：</div>
+                                    <select id="select_group" class="form-control" name="group_id">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>开始日期：</div>
+                                    <input class="form-control datepicker fix-readonly" readonly type="text" name="begin" placeholder="开始日期"
+                                    autocomplete="off" value="{$date_begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>结束日期：</div>
+                                    <input class="form-control datepicker fix-readonly" readonly type="text" name="end" placeholder="结束日期"
+                                    autocomplete="off" value="{$date_end}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <div>&nbsp;</div>
+                                    <div class="clearfix">
+                                        <button type="submit" class="btn btn-primary normal">查询</button>
+                                        <button type="button" class="btn btn-default export">导出</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <table class="table table-bordered" id="tablelist">
+                        <thead>
+                            <tr>
+                                <th style="width: 12.5%;">小组</th>
+                                <th style="width: 12.5%">本月目标量</th>
+                                <th style="width: 12.5%">实际完成量</th>
+                                <th style="width: 12.5%">发单量</th>
+                                <th style="width: 12.5%">分单率</th>
+                                <th style="width: 12.5%;">完成率</th>
+                                <th style="width: 12.5%;">时间进度</th>
+                                <th style="width: 12.5%;">进度差</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="item">
+                                <tr class="one-leveltop" data-id="{$item.id}">
+                                    <td style="text-align: center">{$item.team_name} - {$item.name}</td>
+                                    <td>{$item.target_num}</td>
+                                    <td>{$item.finish_count}</td>
+                                    <td>{$item.send_count}</td>
+                                    <td>{$item.send_rate}</td>
+                                    <td>{$item.finish_rate}</td>
+                                    <td>{$item.date_rate}</td>
+                                    <td>{$item.diff_rate}</td>
+                                </tr>
+                            </volist>
+                            <tr>
+                                <td>合计</td>
+                                <td>{$all.target_num}</td>
+                                <td>{$all.finish_count}</td>
+                                <td>{$all.send_count}</td>
+                                <td>{$all.send_rate}</td>
+                                <td>{$all.finish_rate}</td>
+                                <td>{$all.date_rate}</td>
+                                <td>{$all.diff_rate}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {$page}
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+    <script>
+        $(function () {
+            // 获取表单数据
+            function getFormData(targetId){
+                var o = {};
+                var a = $(targetId).serializeArray();
+                $.each(a, function () {
+                    if (o[this.name] !== undefined) {
+                        if (!o[this.name].push) {
+                            o[this.name] = [o[this.name]];
+                        }
+                        o[this.name].push(this.value || '');
+                    } else {
+                        o[this.name] = this.value || '';
+                    }
+                });
+
+                return o;
+            }
+
+            // 生成url字符串
+            function urlencode(data){
+                var _result = [];
+                for (var key in data){
+                    var value = data[key];
+                    if (value.constructor == Array){
+                        value.forEach(function(_value){
+                            _result.push(key + "=" + _value);
+                        });
+                    }else{
+                        _result.push(key + '=' + value);
+                    }
+                }
+
+                return _result.join('&');
+            }
+
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd'
+            }).on("change", function () {
+                var begin = $("input[name=begin]").val();
+                var end = $("input[name=end]").val();
+                if (begin != "" && end != "") {
+                    var dateBegin = new Date(begin);
+                    var timeBegin = dateBegin.getTime();
+
+                    var dateEnd = new Date(end);
+                    var timeEnd = dateEnd.getTime();
+
+                    if (timeBegin > timeEnd) {
+                        alert("开始日期不能大于结束日期");
+                        $("input[name=end]").val("");
+                        return false;
+                    }
+
+                    var monthBegin = dateBegin.getFullYear() + "-" + dateBegin.getMonth();
+                    var monthEnd = dateEnd.getFullYear() + "-" + dateEnd.getMonth();
+                    if (monthBegin != monthEnd) {
+                        alert("日期选择不能跨月");
+                        $("input[name=end]").val("")
+                        return false;
+                    }
+                }
+            });
+
+            // 查询
+            $("button.normal").click(function(){
+                var dataForm = getFormData("#search_form");
+                if (dataForm["begin"] == "" && dataForm["end"] != "") {
+                    alert("请先选择开始日期");
+                    return false;
+                }
+
+                if (dataForm["begin"] != "" && dataForm["end"] == "") {
+                    alert("请先选择结束日期");
+                    return false;
+                }
+
+                return true;
+            });
+
+            // 导出
+            $("button.export").click(function(){
+                var dataForm = {
+                    "team_id": "{$team_id}",
+                    "group_id": "{$group_id}",
+                    "begin": "{$date_begin}",
+                    "end": "{$date_end}",
+                    "export": "1"
+                };
+
+                var url_string = urlencode(dataForm);
+                window.location.href = "/newmedia/statistics_group?" + url_string;
+            });
+
+            // 用户组下拉框
+            function setSelectGroup(team_id, first){
+                $.post("/newmedia/team_group", {
+                    team_id: team_id
+                }, function(resp){
+                    if (resp.status == 1) {
+                        var list = resp.info;
+                        var optionHtml = '<option value="">请选择</option>';
+                        for (var i in list) {
+                            optionHtml += '<option value="'+list[i]["id"]+'">'+list[i]["name"]+'</option>';
+                        }
+
+                        $("#select_group").html(optionHtml);
+
+                        if (first == true) {
+                            $("#select_group").val("{$group_id}");
+                        }
+                    }
+                });
+            }
+
+            // 选择团事件
+            $("#select_team").on("change", function(){
+                var team_id = $(this).val();
+                setSelectGroup(team_id, false);
+            });
+
+            if ("{$team_id}" != "") {
+                setSelectGroup("{$team_id}", true);
+                $("#select_team").val("{$team_id}");
+            }
+        });
+    </script>
+</block>

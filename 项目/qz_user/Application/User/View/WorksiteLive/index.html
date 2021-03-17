@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/zhibo/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="{$static_host}/assets/user/zhibo/css/ht-remind.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+<input type="hidden" value="{$remind}" id="unmeasure-house">
+<include file="Home:header"/>
+<div class="ht-wrap oflow ht-relative clearfix">
+    <include file="Home:comnavleft"/>
+    <div class="ht-main maindw" style="padding-top: 10px;">
+        <p class="unmark-tips" id="instro-box">
+            <img src="{$static_host}/assets/user/zhibo/img/laba.png" alt="">
+            <a href="/worksiteLive/explain" target="_blank" class="instro">新功能强袭，点击了解装修现场究竟是什么</a>
+            <span class="close" id="close-fn-instro">×</span>
+        </p>
+
+        <div class="ht-order-check">
+            <div class="zhibo-on">
+                <img src="{$static_host}/assets/user/zhibo/img/wenhao.png" alt="">
+                装修现场订单：
+                <div class="zhibo-intro" data-type="zhibo-intro">
+                    <p>装修公司备注已签约并且齐装网已审核通过的订单</p>
+                </div>
+            </div>
+            <div class="search">
+                <form action="/worksiteLive?">
+                    <input name="keyword" type="text" placeholder="业主/小区/联系号码" value="{$_GET.keyword}">
+                    <input type="submit" value="查找订单">
+                </form>
+            </div>
+        </div>
+        <table border="0" cellpadding="0" cellspacing="0" class="ht-order-list">
+            <tr class="order-title">
+                <td>签约日期</td>
+                <td>业主</td>
+                <td>所在区域</td>
+                <td>小区名称</td>
+                <td>建筑面积</td>
+                <td>户型</td>
+                <td>订单类型</td>
+                <td style="position: relative; width: 108px;" id="indentser">
+                    <!-- <span class="ques-mark" data-type="ques-mark">?</span> -->
+                    <img src="{$static_host}/assets/user/zhibo/img/wenhao.png" alt="" style="width: 15px; height: 15px;">
+                    施工编号
+                    <div class="status-intro" data-type="ques-intro">
+                        <h3>施工编号是什么？</h3>
+                        <p>施工编号是业主与装修公司签约后生成的安全识别码，只有使用此安全码的施工人员才可查看对应订单信息以及上传该订单工地的施工进度，此安全码具有唯一性，提升服务同时，确保订单信息安全。</p>
+                        <p>提示：施工人员可通过“<span class="red">齐装网施工跟进</span>”小程序，使用施工编号绑定施工订单，或使用微信扫描施工二维码绑定施工订单，绑定后可查看已签约业主订单信息，发布装修现场信息。</p>
+                        <h4>微信扫描下方二维码，打开齐装网施工跟进小程序。</h4>
+                        <img src="{$static_host}/assets/common/img/miniprograme-qr.png" alt="" class="zhibo-qrcode" style="width: 120px; height: 120px;">
+                    </div>
+                </td>
+                <td>装修现场</td>
+            </tr>
+
+            <volist name="info.list" id="item">
+                <tr class="order-list" data-orderid="{$item.order_id}">
+                    <td>{$item.qiandan_date}</td>
+                    <td>{$item.yz_name}</td>
+                    <td>{$item.area_name}</td>
+                    <td>{$item.xiaoqu|default="--"}</td>
+                    <td>{:($item["mianji"] ? $item["mianji"] . "㎡" : "--")}</td>
+                    <td>
+                        <if condition="$item['order_type'] == 1">
+                            {$item.huxing_name|default="--"}
+                        <else />
+                            {$item.huxing_name}<br />{$item.huxing_other_name}
+                        </if>
+                    </td>
+                    <td>{$item.type_name}</td>
+                    <td style="position: relative;">
+                        <span class="sericalnumber">{$item.code}</span>
+                        <div class="sericalnumberqrcode">
+                            <p>微信扫码绑定</p>
+                            <img src="/worksiteLive/liveQrcode?_code={$item.code}" alt="">
+                        </div>
+                        <input class="sn sn_{$key}" type="text" value="{$item.code}">
+                        <img src="{$static_host}/assets/user/zhibo/img/fuzhi.png" data-clipboard-action="copy" data-clipboard-target=".sn_{$key}" alt="" class="copyactionicon">
+                        <span class="sericalcopytip">复制编号</span>
+                    </td>
+                    <td><a href="/worksiteLive/detail?id={$item.id}" class="order-look" data-id="{$item.id}" target="_blank">查看现场</a></td>
+                </tr>
+            </volist>
+        </table>
+
+        {$info.page}
+
+        <empty name="info.list">
+            <div class="emptyzhibo">
+                <img src="{$static_host}/assets/user/zhibo/img/emptyzhibo.png" alt="">
+                <p class="title">暂无订单</p>
+                <p>提示：已签约并且已审核通过的订单，才会在此显示</p>
+            </div>
+        </empty>
+    </div>
+</div>
+<div class="copysuccesstip">复制成功</div>
+<include file="Index:footer"/>
+<script src="{$static_host}/assets/common/js/clipboard.min.js?v={:C('STATIC_VERSION')}"></script>
+<script>
+    $(function() {
+        var $closeFnInstro = $('#close-fn-instro'),
+            $instroBox = $('#instro-box');
+
+        checkShowFnInstro()
+        copySericalHandle()
+        $closeFnInstro.on('click', function() {
+            $instroBox.fadeOut(0)
+            localStorage.setItem('showFnInstroTime', new Date())
+        })
+
+        $('.order-list .copyactionicon').hover(function() {
+            $(this).next(".sericalcopytip").fadeIn(0);
+        }, function() {
+            $(this).next(".sericalcopytip").fadeOut(0);
+        })
+
+        $('.order-list .sericalnumber').hover(function() {
+            $(this).next(".sericalnumberqrcode").fadeIn(0);
+        }, function() {
+            $(this).next(".sericalnumberqrcode").fadeOut(0);
+        });
+
+        /**
+        * 检测是否要显示功能提示，根据本地存储的日期判断
+        * 只要存的跟获取系统的日期不一致，则显示
+        */
+        function checkShowFnInstro() {
+            var showFnInstroTime = null,
+                todayStr = new Date().getDate();
+            showFnInstroTime = localStorage.getItem('showFnInstroTime');
+            if(!showFnInstroTime) {
+                $instroBox.fadeIn(0)
+            }
+            if(new Date(showFnInstroTime).getDate() !== todayStr) {
+                $instroBox.fadeIn(0)
+            }
+        }
+
+        /**
+         * 复制功能
+         */
+        function copySericalHandle() {
+            var clipboard = new Clipboard('.copyactionicon');
+            clipboard.on('success', function(e) {
+                $('.copysuccesstip').fadeIn(0)
+                setTimeout(function() {
+                    $('.copysuccesstip').fadeOut(0)
+                }, 500)
+            });
+
+            clipboard.on('error', function(e) {
+                console.log(e);
+            });
+        }
+    })
+</script>
+</body>
+</html>

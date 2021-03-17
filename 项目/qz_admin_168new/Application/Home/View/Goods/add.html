@@ -1,0 +1,1225 @@
+
+<extend name="Main:baseTemplate"/>
+<block name="title"><title>
+    <empty name="info['id']">
+        礼品添加
+        <else />
+        礼品编辑
+    </empty>
+</title></block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/user/css/usermanagement.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .edit{width:100%;height:auto;padding:10px 10px 30px 10px;;}
+        .edit  div{padding:5px 0}
+        .edit  label{width:150px;text-align: right;font-weight: normal;padding-right: 5px;}
+        .edit  label i{font-style: normal; color: red;margin-right: 3px;}
+        .edit  label b{display: inline-block;width: 17px;height: 17px;line-height: 16px;border: 1px solid #ccc;border-radius: 50%;text-align: center;font-weight: normal;font-size: 13px;margin-right: 5px;}
+        .edit  label #xuanfu:hover .xuanfu{display: block;}
+        .edit  label #xuanfu:hover .xuanfu-dh{display: block;}
+        .edit  input{padding:5px 10px;}
+        .edit  textarea{width:400px;vertical-align: top;border-radius: 5px;padding:10px}
+        .edit  .w300{width:300px}
+        .edit  .w100{width:120px}
+        .edit  .w110{width:110px}
+        .edit  .gift-type{margin-right: 20px;}
+        .edit  .upload{display: block;width: 100px; height: 100px;border:1px dashed #ccc;margin-left: 100px; text-align: center;
+                        line-height: 100px; border-radius: 5px;cursor: pointer;}
+        .edit .gift-detail{width:50%;margin-left:155px;margin-top:-25px;}
+        .edit .type-select{width:300px;padding:5px 10px;border-radius: 5px;}
+        .edit .btns{margin:20px 0 0 100px;}
+        .edit .btns span{padding:5px 20px;margin-right:20px;border-radius:5px;border:1px solid #ccc;cursor: pointer;box-sizing: border-box;}
+        .edit .btns span.baocun{background:royalblue;color:#fff;border:1px solid royalblue;margin-left: 57px;}
+        .edit .btn-file{margin-left:155px;padding:5px 15px;background-color: #00a65a; box-shadow: none; border: 1px solid transparent;border-color: #008d4c;color: #fff;}
+        .edit label.status{width:70px;text-align: left;}
+        .edit .xuanfu{display: none;position: absolute;margin-left: 45px;width: 260px;height: 30px;line-height: 30px;border: 1px solid #ccc;text-align: center;background: #fff;border-radius: 5px;box-shadow: 2px 2px 2px rgb(0,0,0,.2);}
+        .edit .xuanfu-dh{display: none;position: absolute;margin-left: 45px;width: 550px;height: 30px;line-height: 30px;border: 1px solid #ccc;text-align: center;background: #fff;border-radius: 5px;box-shadow: 2px 2px 2px rgb(0,0,0,.2);}
+        .file-preview{margin-left:150px;width:90%;}
+        .red{margin-left: 150px;}
+        .ml20{margin-left:20px}
+        .ml60{margin-left:60px;}
+        .vat{vertical-align: bottom;}
+        .file-thumb-progress{top:30px}
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><a href="/Goods/index">礼品管理</a> > 礼品<notempty name="info.id">编辑<else/>添加</notempty></h3>
+                    </div>
+                    <div class="edit">
+                       <!--<form action="" id="giftEdit">-->
+                           <notempty name="info.id">
+                               <div>
+                                   <label>礼品id：</label>
+                                   <span id="editId"> {$info.id}</span>
+                               </div>
+                           </notempty>
+
+                           <div>
+                                <label><i>*</i>礼品名称：</label>
+                                <input type="text" name="name" id='name' placeholder="请输入" maxlength="128" class="w300" value="{$info.name}" onkeyup="this.value=this.value.replace(/\s+/g,'')">
+                           </div>
+
+                            <div id="gift_type">
+                                <label><i>*</i>礼品类型：</label>
+                                <notempty name="info.id">
+                                    <label class="w100"><input type="radio" name="jifen" value="1"  <if condition="$info.type eq 1">checked</if> id="entity" > <span  class="gift-type">现金券实物</span></label>
+                                    <label class="w100"><input type="radio" name="jifen" value="2" <if condition="$info.type eq 2">checked</if> id="coupon"> 现金券优惠券</label>
+                                <else/>
+                                    <label class="w100"><input type="radio" name="jifen" value="1" checked  id="entity" > <span  class="gift-type">现金券实物</span></label>
+                                    <label class="w100"><input type="radio" name="jifen" value="2"  id="coupon"> 现金券优惠券</label>
+                                </notempty>
+                            </div>
+
+                            <div id="jifen">
+                                <div id="one">
+                                    <div>
+                                        <label><i>*</i>礼品图片：</label>
+                                        <span>最少一张，最多四张，尺寸为750*550，大小小于500kb</span>
+                                        <input type="hidden" id="upload_limit1" value="{$info.img_num|default=1}">
+                                        <div id="upload_adv_box1">
+                                            <input id="imgUpload1" type="file" multiple name="img_upload" value="上传"/>
+                                            <div id="files">
+                                                <input type="hidden" name="img_url" value="{$info.img_url|default=''}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="gift_price">
+                                        <label><i>*</i>礼品价格：</label>
+                                        <input type="text" name='gift_price' class="w300"  maxlength='8' placeholder="请输入" value="{$info.gift_price}" id = "price" onkeyup="gprice(this)"/> 元
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>消耗现金券：</label>
+                                        <input type="text" name='point' class="w300 point1"  placeholder="请输入" maxlength="6" value="{$info.point}"  onkeyup="regNum(this)"/>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <span id="xuanfu">
+                                                <b>?</b>
+                                                <span class="xuanfu">前台真实可兑换量 = 库存 – 已兑换</span>
+                                            </span>
+                                            <i>*</i>库存：</label>
+                                            <input type="text" name='stock' class="w300 stock1 stock" placeholder="请输入" maxlength="6" value="{$info.stock}"  onkeyup="isDigit(this)"  />
+                                            <span class='ml60'>用户实际累计已兑换：{$info.real_exchange_num|default = '0'}</span>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <span id="xuanfu">
+                                                    <b>?</b>
+                                                    <span class="xuanfu-dh">后台已兑换：前台展示兑换量使用，满足用户实际累计已兑换+后台已兑换≤库存</span>
+                                            </span>后台已兑换：</label>
+                                        <input type="text" maxlength='6' name='exchange_num' id="shiwu_exchange_num" class="w300 exchange_num" placeholder="请输入" value="{$info.exchange_num}"   onkeyup="exchangeNum(this)" />
+
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>兑换等级：</label>
+                                        <select name="grade" id="grade1" class="type-select">
+                                            <option value="0">请选择</option>
+                                            <volist name="level" id="vo">
+                                                <option value="{$vo.level}" <if condition="$info.grade EQ $vo.level ">selected</if>>LV{$vo.level}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>是否可重复领取：</label>
+                                        <notempty name="info.id">
+                                            <label class='w110'>
+                                                <input type='radio' name='repeat' value='2' <if condition="$info.is_repeat eq 2">checked</if>/> 不可重复领取
+                                            </label>
+                                            <label class='w110'>
+                                                <input type="radio" name='repeat' value='1' <if condition="$info.is_repeat eq 1">checked</if>/>可重复领取
+                                            </label>
+                                        <else/>
+                                            <label class='w110'>
+                                                <input type='radio' name='repeat' value='2' checked/> 不可重复领取
+                                            </label>
+                                            <label class='w110'>
+                                                <input type="radio" name='repeat' value='1' />可重复领取
+                                            </label>
+                                        </notempty>
+                                         <span id="isShow">
+                                            <label>个人领取上限：</label>
+                                            <input type="text" name="per_num" maxlength='6' placeholder="请输入" value="{$info.per_num}"   onkeyup="regNum(this)"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>排序：</label>
+                                        <input type="text"" name='px' class="w300 px1" maxlength='6' placeholder="请输入" value="{$info.px}" onkeyup="regNum(this)" />
+                                    </div>
+                                    <div id="gift-detail">
+                                        <label>礼品详情：</label>
+                                        <div id="editor" name="content" class="gift-detail"></div>
+                                    </div>
+                                </div>
+
+                                <div id='two'>
+                                    <div id="pics">
+                                       <label><i>*</i>礼品图片：</label>
+                                       <span>一张，尺寸为750*550px,小于500kb</span>
+                                       <input type="hidden" id="upload_limit" value="{$info.img_num|default=1}">
+                                        <div id="upload_adv_box">
+                                            <input id="imgUpload" type="file" multiple name="img_upload" value="上传"/>
+                                            <div id="files_coupon">
+                                                <input type="hidden" name="img_url_coupon" value="{$info.img_url|default=''}">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>优惠券类型：</label>
+                                        <select  name="coupon_type" id='coupon_type' class="type-select" onchange="typeSelect(this.value);">
+                                            <option value="0">请选择类型</option>
+                                            <option value="1"  <if condition="$info.coupon_type eq 1">selected</if>>满减券</option>
+                                            <option value="2"  <if condition="$info.coupon_type eq 2">selected</if>>代金券</option>
+                                            <option value="3"  <if condition="$info.coupon_type eq 3">selected</if>>礼品券</option>
+                                            <option value="4"  <if condition="$info.coupon_type eq 4">selected</if>>活动券</option>
+                                            <option value="5"  <if condition="$info.coupon_type eq 5">selected</if>>其他</option>
+                                        </select>
+                                        <span id="youhui">
+                                            <span id="div1" style="display:none">
+                                                <label>满减金额：</label>
+                                                每满 <input type="text" maxlength='8' placeholder="请输入金额" name="coupon_full" id='coupon_full' value="{$info.coupon_full}" onkeyup="gprice(this)" />
+                                                减 <input type="text" maxlength='8' placeholder="请输入金额" name="coupon_sub" id='coupon_sub' value="{$info.coupon_sub}"  onkeyup="gprice(this)" /> 元
+                                            </span>
+
+                                            <span id="div2" style="display:none">
+                                                <label>优惠券金额：</label>
+                                                <input type="text"  maxlength='8' name="coupon_money" id='coupon_money' placeholder="请输入金额" value="{$info.coupon_money}" onkeyup="gprice(this)"/> 元
+                                            </span>
+
+                                            <span id="div3" style="display:none">
+                                                <label>优惠券礼品：</label>
+                                                <input type="text" name='coupon_gift' maxlength="128" placeholder="请输入礼品名称" value="{$info.coupon_gift_name}" onkeyup="this.value=this.value.replace(/\s+/g,'')">
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>使用规则：</label>
+                                        <textarea rows='10'  id='coupon_rule'  name="coupon_rule" placeholder="请输入"   maxlength="1000" >{$info.coupon_rule}</textarea>
+                                        <span class="vat"><span id="rule" class="vat">0</span>/1000</span>
+                                    </div>
+
+
+                                    <div>
+                                        <label><i>*</i>有效期：</label>
+                                        <input type="text" name="start_time" value="{$info.start_time}" class="datepicker yxTime" readonly autocomplete="off" placeholder="开始时间" />
+                                        &nbsp;—&nbsp;
+                                        <input type="text" name="end_time" value="{$info.end_time}" class=" datepicker yxTime" readonly autocomplete="off" placeholder="结束时间" />
+                                    </div>
+
+
+                                    <div id="point">
+                                        <label><i>*</i>消耗现金券：</label>
+                                        <input type="text" name='point' maxlength='6' placeholder="请输入"class="w300 point" value="{$info.point}" onkeyup="regNum(this)" />
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <span id="xuanfu">
+                                                <b>?</b>
+                                                <span class="xuanfu">前台真实可兑换量 = 库存 – 已兑换</span>
+                                            </span>
+                                            <i>*</i>库存：</label>
+                                            <input type="text" name='stock' class="w300 coupon_stock" placeholder="请输入" maxlength="6"  value="{$info.stock}"  onkeyup="couponisDigit(this)" />
+                                            <span class='ml60 real_num coupon_real_num' >用户实际累计已兑换：{$info.real_exchange_num|default = '0'}</span>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <span id="xuanfu">
+                                                    <b>?</b>
+                                                    <span class="xuanfu-dh">后台已兑换：前台展示兑换量使用，满足用户实际累计已兑换+后台已兑换≤库存</span>
+                                            </span>后台已兑换：</label>
+                                        <input type="text" name='exchange_num1' maxlength='6' class="w300 exchange_num coupon_exchange_num" placeholder="请输入"  id='youhui_exchange_num' value="{$info.exchange_num}" onkeyup="couponexchangeNum(this)" />
+
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>兑换等级：</label>
+                                        <select name="grade" id="grade2" class="type-select">
+                                            <option value="0">请选择</option>
+                                            <volist name="level" id="vo">
+                                                <option value="{$vo.level}" <if condition="$info.grade EQ $vo.level ">selected</if>>LV{$vo.level}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>是否可重复领取：</label>
+                                            <notempty name="info.id">
+                                                <label class='w110'>
+                                                    <input type='radio' name='repeat1' value='2' class='repeat' <if condition="$info.is_repeat eq 2">checked</if>/> 不可重复领取
+                                                </label>
+                                                <label class='w110'>
+                                                    <input type="radio" name='repeat1' value='1' class='repeat' <if condition="$info.is_repeat eq 1">checked</if>/>可重复领取
+                                                </label>
+                                            <else/>
+                                                <label class='w110'>
+                                                    <input type='radio' name='repeat1' value='2' class='repeat' checked/> 不可重复领取
+                                                </label>
+                                                <label class='w110'>
+                                                    <input type="radio" name='repeat1' value='1' class='repeat' />可重复领取
+                                                </label>
+                                            </notempty>
+                                            <span id="isShow1">
+                                            <label>个人领取上限：</label>
+                                            <input type="text" name="per_num2" maxlength='6' placeholder="请输入" value="{$info.per_num}" onkeyup="regNum(this)">
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <label><i>*</i>排序：</label>
+                                        <input type="text" name='px' class="w300 px" maxlength='6' placeholder="请输入" value="{$info.px}" onkeyup="regNum(this)"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label><i>*</i>兑换须知：</label>
+                                <textarea rows='10'  id='know'  name="know" placeholder="请输入"   maxlength="1000" >{$info.know}</textarea>
+                                <span class="vat"><span id="count" class="vat">0</span>/1000</span>
+                            </div>
+                            <div>
+                                <label><i>*</i>状态：</label>
+                                <notempty name="info.id">
+                                <label class="status"><input type="radio" name='status' value="1" class="status1"<if condition="$info.status eq 1">checked</if> />上架</label>
+                                <label class="status"><input type="radio" name='status' value="2" class="status1"<if condition="$info.status eq 2">checked</if> />下架</label>
+                                <else/>
+                                <label class="status"><input type="radio" name='status' value="1" class="status1"checked>上架</label>
+                                <label class="status"><input type="radio" name='status' value="2" class="status1">下架</label>
+                                </notempty>
+                            </div>
+                        <!--</form>-->
+                            <div class="btns">
+                                <span class="baocun" id="saveEdit">
+                                    <if condition="!empty($info['id'])">保存
+                                        <else/>
+                                        确认添加
+                                    </if>
+                                </span>
+                                <span class="fanhui" id="giveUp">
+                                    <if condition="!empty($info['id'])">返回
+                                        <else/>
+                                        放弃添加
+                                    </if>
+                                </span>
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.config.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/ueditor/ueditor.all.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/daterangepicker/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/plugins/layer/layer.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script>
+        $(function(){
+            //礼品类型切换 显示隐藏
+            var id = "{$info.id}";
+            var type = "{$info.type}"; //1时实物 2时优惠券
+            var coupon_type = $("#coupon_type").val(); //1是满减优惠券  2是代金券 3 礼品券
+            var is_repeat = $("input[name=repeat]:checked").val();  //1:可以重复 2:不可以重复
+            if(id != ''){
+                if(type == 1){
+                    $("#jifen #two").hide(); // 先隐藏第二组优惠券内容entity coupon
+                }else if(type == 2){
+                    $("#jifen #one").hide();
+                    //优惠券类型显示
+                    if(coupon_type == 1){
+                        $("#div1").show()
+                    }else if(coupon_type == 2){
+                        $("#div2").show()
+                    }else if(coupon_type == 3){
+                        $("#div3").show()
+                    }
+                }
+
+                //现金券类型 按钮禁止切换
+                var input = $("#gift_type").find("input[name='jifen']"); //两个单选按钮禁止点击
+                input.attr("disabled","disabled");
+                input.each(function(){
+                    if($(this).val()==0){
+                        $(this).attr("checked",true);
+                    }
+                });
+                //是否可重复显示
+                if(is_repeat == '1'){
+                    $('#isShow').show();
+                    $('#isShow1').show();
+                    $("input[name = repeat]").on('click',function(){
+                        var show = $(this).val();
+                        if(show == '1' ){
+                            $("#isShow1").show();
+                        }else{
+                            $("#isShow1").hide();
+                        }
+                        if(show == '2'){
+                            $("input[name=per_num2]").val('')
+                        }
+                    })
+                }else if(is_repeat == '2'){
+                    $("#isShow").hide();
+                    $('#isShow1').hide();
+                }
+                var know = $("#know").val().length; //兑换须知 文本框的长度
+                 $("#count").html(know); //字数
+                var coupon_rule = $("#coupon_rule").val().length; //使用规则 文本框长度
+                 $("#rule").html(coupon_rule); //显示字数
+                //编辑的返回按钮
+                $("#giveUp").on('click', function () {
+                    window.location.href = "/Goods/index";
+                })
+
+            }else{
+                $("#jifen #two").hide();
+                $("#isShow").hide();
+                $("#isShow1").hide();
+                $("input[name='jifen']").on("click",function() {   
+                    var num = $(this).val();  // 当前按钮的value值对应需要显示内容的位置
+                    $("#jifen > div").hide();    // 先隐藏所有内容
+                    if(num == 1) {
+                        initBDEditor()
+                        $("#jifen div#one").show(); // 然后显示对应的内容
+                        $("#coupon_type").val('0');
+                        $("#div1").hide();
+                        $("#div2").hide();
+                        $("#div3").hide();
+                        $(".yxTime").val(''); //有效期
+                        $("input[name=point]").val(''); //消耗现金券
+                        $(".coupon_stock").val(''); //库存
+                        $(".exchange_num").val(''); //后台已兑换
+                        $("select[name=grade]").val('0'); //兑换等级
+                        $("input[name=repeat1]").eq(0).prop("checked",true); //是否可重复
+                        $("#isShow1").hide(); //个人领取上限
+                        $("input[name=px]").val(''); //排序
+                        $("textarea").val(''); //兑换须知
+                        $('#count').html($(this).val().length-1).val(''); //清空文本框字数
+                        $("input[name=status]").eq(0).prop("checked",true); //状态
+                     }else{
+                        $("#jifen div#two").show(); // 然后显示对应的内容
+                        $("input[name='gift_price']").val('');//礼品价格
+                        $(".stock1").val('');//库存
+                        $("input[name=repeat]").eq(0).prop("checked",true); //是否可重复
+                        $("#isShow").hide(); //个人领取上限
+                        $("#grade").val('');
+                        $("textarea").val('');
+                        $('#count').html($(this).val().length-1).val('');//清空文本框字数
+                        $("input[name=status]").eq(0).prop("checked",true); //状态
+                    }
+
+                });
+                //放弃添加
+                $("#giveUp").on('click', function () {
+                    layer.confirm('是否放弃添加礼品？', {
+                        btn: ['放弃','取消'] //按钮
+                    }, function(){
+                        window.location.href = "/Goods/index";
+                    });
+                })
+            }
+            //$("#youhui").hide(); //初始隐藏优惠券标题
+            initBDEditor()
+            function initBDEditor() {
+                if(window.ue) {
+                    window.ue = null
+                }
+                //富文本
+                window.ue = window.UE.getEditor('editor', {
+                    autoClearinitialContent: false,
+                    serverUrl: '/ueditor/upload/?ext=s3.jpg',
+                    toolbars: [['source', '|', 'undo', 'redo', '|', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|', 'rowspacingtop', 'rowspacingbottom', 'lineheight', '|', 'paragraph', 'fontfamily', 'fontsize', '|', 'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|', 'imagecenter', 'simpleupload', 'insertimage', 'link', 'unlink', 'searchreplace']],
+                    maximumWords: 10000
+                });
+                ue.ready(function() {
+                    //设置编辑器的内容
+                    ue.setContent('{$info.gift_content}');
+                });
+            }
+
+            //现金券实物显示可重复领取 1.可领取 2.不可领取
+            $("input[name = repeat]").on('click',function(){
+                var show = $(this).val();
+                if(show == '1' ){
+                    $("#isShow").show();
+                }else{
+                    $("#isShow").hide();
+                }
+                if(show == '2'){
+                    $("input[name=per_num]").val('')
+                }
+            })
+            // 现金券优惠券显示可重复领取
+            $("input[name = repeat1]").on('click',function(){
+                var show = $(this).val();
+                if(show == '1' ){
+                    $("#isShow1").show();
+                }else{
+                    $("#isShow1").hide();
+                }
+                if(show == '2'){
+                    $("input[name=per_num2]").val('')
+                }
+            })
+
+        })
+
+
+         /*初始化时间插件 S*/
+         $(function () {
+            $('.datepicker').datepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true,
+                language: 'zh-CN',
+                format: 'yyyy-mm-dd'
+            }).on("change", function () {
+                if (toTimeStamp($('input[name="start_time"]').val()) > toTimeStamp($('input[name="end_time"]').val())) {
+                    msg("开始时间不能大于结束时间", function () {
+                        $('input[name="end_time"]').val("");
+                    });
+                }
+            });
+            function toTimeStamp(time){
+                if(time!=undefined){
+                    var date = time;
+                    date = date.substring(0,19);
+                    date = date.replace(/-/g,'/');
+                    var timestamp = new Date(date).getTime();
+                    return timestamp;
+                }
+            };
+            function msg(msg, fn) {
+                layer.msg(
+                    msg,
+                    {time: 2000,},
+                    fn || function () {
+                    }
+                )
+            }
+        })
+        /*初始化时间插件 E*/
+
+
+        //优惠券类型选择
+        function typeSelect(obj){
+            console.log("-->",obj)
+            $("#div" + obj).show().siblings().hide();
+            if(obj == 0){
+                $("#div1").hide();
+                $("#div2").hide();
+                $("#div3").hide();
+            }
+            if(obj == 4){
+                $("#div1").hide();
+                $("#div2").hide();
+                $("#div3").hide();
+            }
+            if(obj == 5){
+                $("#div1").hide();
+                $("#div2").hide();
+                $("#div3").hide();
+            }
+        }
+
+        //价格
+        function gprice(obj){
+            obj.value = obj.value.replace(/[^\d.]/g,"");  //清除“数字”和“.”以外的字符
+            obj.value = obj.value.replace(/\.{2,}/g,"."); //只保留第一个. 清除多余的
+            obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+            obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d).*$/,'$1$2.$3');//只能输入1个小数
+
+             //如果没有小数点，不能为类似 01、02的金额
+            if(obj.value.indexOf(".")< 0 && obj.value !=""){
+                obj.value= parseFloat(obj.value)
+                return false
+            }
+            //如果有小数点，不能为类似 1.10的金额
+            if(obj.value.indexOf(".")> 0  && obj.value.indexOf("0")>2){
+                obj.value= parseFloat(obj.value);
+                return false
+            }
+            //如果有小数点，不能为类似 0.00的金额
+            if(obj.value.indexOf(".")> 0 && obj.value.lastIndexOf("0")>1){
+                obj.value= parseFloat(obj.value);
+                return false
+            }
+        }
+
+    /**********************实物的库存 后台已兑换*****************************/
+        //库存可以输入0 但不能以0开头
+        function isDigit(e){
+            e.value = e.value.replace(/[^\d]/g,"");  //清除“数字”以外的字符
+            //不能为类似 01、02
+            if(e.value.indexOf(".")< 0 && e.value !=""){
+                e.value= parseInt(e.value)
+                return false
+            }
+        }
+        //兑换数量可以输入0 但不能以0开头
+        function exchangeNum(e){
+            e.value = e.value.replace(/[^\d]/g,"");  //清除“数字”以外的字符
+            //不能为类似 01、02
+            if(e.value.indexOf(".")< 0 && e.value !=""){
+                e.value= parseInt(e.value)
+                return false
+            }
+        }
+    /**********************实物的库存 后台已兑换 end*****************************/
+    /**********************优惠券的库存 后台已兑换*****************************/
+        function couponisDigit(e){
+            e.value = e.value.replace(/[^\d]/g,"");  //清除“数字”以外的字符
+            //不能为类似 01、02
+            if(e.value.indexOf(".")< 0 && e.value !=""){
+                e.value= parseInt(e.value)
+                return false
+            }
+        }
+        //兑换数量可以输入0 但不能以0开头
+        function couponexchangeNum(e){
+            e.value = e.value.replace(/[^\d]/g,"");  //清除“数字”以外的字符
+            //不能为类似 01、02
+            if(e.value.indexOf(".")< 0 && e.value !=""){
+                e.value= parseInt(e.value)
+                return false
+            }
+        }
+    /**********************优惠券的库存 后台已兑换 end*****************************/
+        //只能输入正整数 大于0 的数字
+        function regNum(obj){
+            if(obj.value.length==1){
+                obj.value=obj.value.replace(/[^1-9]/g,'')
+            }else{
+                obj.value=obj.value.replace(/\D/g,'')
+            }
+        }
+        //文本框字数显示
+        $('#coupon_rule').bind('input propertychange',function(){
+            $("#rule").html($(this).val().length);
+        });
+        $('#know').bind('input propertychange',function(){
+            $('#count').html($(this).val().length);
+        });
+
+
+
+        /*现金券实物------图片上传插件 S*/
+        $(function () {
+            var $uploadLimit1 = $('#upload_limit1'),
+                $uploadAdvBox1 = $('#upload_adv_box1'),
+                $imgUrl1 = $('input[name="img_url"]');
+            $("#imgUpload1").fileinput({
+                    language: 'zh', //设置语言,
+                    uploadUrl: "/upload/uploadimg/",
+                    showCaption: false,
+                    browseClass: "btn blue",
+                    removeClass: "btn red",
+                    allowedFileExtensions: ['jpg', 'png', 'jpeg'],
+                    overwriteInitial: false,
+                    maxFileSize: 70000,
+                    maxFileCount: 0, // 这里设为0，由于存在bug，这个属性相当于没什么用了
+                    uploadClass: "btn green",
+                    removeClass: "btn red",
+                    uploadAsync: true,
+                    browseLabel: '选择',
+                    dropZoneEnabled: false,
+                    previewSettings: {
+                        image: {width: "auto", height: "100px"}
+                    },
+                    layoutTemplates: {
+                        actionUpload: ""
+                    },
+                    minImageWidth: 750,
+                    minImageHeight: 550,
+                    maxImageWidth: 750,
+                    maxImageHeight: 550,
+                    maxFileSize: 500,
+                    msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                    uploadExtraData: {
+                        prefix: 'gg_img'
+                    },
+                    initialPreview: {$info.imgs|default='[]'},
+                    initialPreviewAsData: true,
+                    initialPreviewFileType: 'image',
+                    initialPreviewConfig:  {$info.previewconfig|default='[]'},
+        })
+                .on('filebatchselected', function (evt, file) {
+                    let arr=[]
+                    let len=$uploadAdvBox1.find('.file-preview-frame').each(function(index,dom){
+                        if(arr.length==0){
+                            arr.push(dom)
+                         }
+                    })
+
+                    // 选择图片后执行，用于判断选择的图片是否超出限制，这是为了弥补maxFileCount的bug
+                    if($uploadAdvBox1.find('.file-preview-frame').length > 4) {
+                        layer.msg('仅允许上传' + 4 + '张，请删除多余的图片再上传')
+                        // 禁用选择按钮
+                        $('#imgUpload1').attr('disabled', 'disabled');
+                        $('#imgUpload1').closest('div.btn-file').addClass('btn-disabled');
+                        // 禁用上传按钮
+                        $uploadAdvBox1.find('.fileinput-upload-button').attr('disabled', 'disabled')
+                    }
+                })
+                .on('filebatchuploadcomplete', function (evt, file) {
+                    // 只会调用一次，所有图片都上传成功调用，这是为了弥补上传成功后部分DOM结构重新渲染，导致filebatchselected钩子中执行的操作失效
+                    if($uploadAdvBox1.find('.file-preview-frame').length > 4) {
+                        $('#imgUpload1').attr('disabled', 'disabled')
+                        $('#imgUpload1').closest('div.btn-file').addClass('btn-disabled');
+                    }
+                })
+                .on('fileuploaded', function (event, data, previewId, index) {
+                    // 上传成功几次就调用几次，把后端返回的地址附加到DOM结构上，为以后得操作做准备
+                    if (data.response.status == 1) {
+                        $uploadAdvBox1.find('#'+previewId).attr('data-url', data.response.data.name);
+                    } else {
+                        alert(data.response.info);
+                    }
+                })
+                .on('fileclear', function (evt, file) {
+                    // 点击右上角叉叉执行
+                    $('#imgUpload1').removeAttr('disabled')
+                    $('#imgUpload1').closest('div.btn-file').removeClass('btn-disabled')
+                    $uploadAdvBox1.find('.fileinput-upload-button').removeAttr('disabled')
+                })
+                .on("filesuccessremove",function(event, uploadedId, index){
+                    // 仅对上传成功的图片有效，未上传的图片不执行这里
+                    // 通过uploadedId找到缓存的data-url，然后去匹配files中的文件，实现删除
+                    // 延迟一秒后删除，否则不准确
+                    setTimeout(function () {
+                        if($uploadAdvBox1.find('.file-preview-frame').length < 4) {
+                            $('#imgUpload1').removeAttr('disabled')
+                            $('#imgUpload1').closest('div.btn-file').removeClass('btn-disabled')
+                        }
+                    }, 1000)
+                })
+                .on('fileremoved', function () {
+                    // 该事件钩子针对只选择不上传的情况
+                    if($uploadAdvBox1.find('.file-preview-frame').length <= 4) {
+                        $('#imgUpload1').removeAttr('disabled')
+                        $('#imgUpload1').closest('div.btn-file').removeClass('btn-disabled')
+                        $uploadAdvBox1.find('.fileinput-upload-button').removeAttr('disabled')
+                    }
+                })
+            if($imgUrl1.val()) {
+                // 给file-preview-frame元素附加data-url属性，用于提交的时候收集数据
+                window.onload = function () {
+                    setTimeout(function () {
+                        var $filePreviewFrame = $('.file-preview-frame');
+                        $filePreviewFrame.each(function (index, item) {
+                            var imgLink = $(item).find('img').attr('src')
+                            if(imgLink) {
+                                imgLink = imgLink.replace(/http:\/\/{:C('QINIU_DOMAIN')}\//, '')
+                                $(item).attr('data-url', imgLink)
+                            }
+                        })
+                    }, 1000)
+                }
+                // 监听已上传图片的删除事件，针对插件未提供图片初始化删除事件钩子的情况
+                $("#upload_adv_box1").on("click", function(event) {
+                    var $target = $(event.target);
+                    if ($target[0].nodeName.toLowerCase() == "button" || $target[0].nodeName.toLowerCase() == "i") {
+                        setTimeout(function () {
+                            if ($uploadAdvBox1.find('.file-preview-frame').length <= 4) {
+                                $('#imgUpload1').removeAttr('disabled')
+                                $('#imgUpload1').closest('div.btn-file').removeClass('btn-disabled')
+                                $uploadAdvBox1.find('.fileinput-upload-button').removeAttr('disabled')
+                            }
+                        }, 1000)
+                    }
+                })
+            }
+        })
+        /*现金券实物------图片上传插件 S*/
+
+         /*现金券优惠券------图片上传插件 S*/
+         $(function () {
+            var $uploadLimit = $('#upload_limit'),
+                $uploadAdvBox = $('#upload_adv_box'),
+                $imgUrl = $('input[name="img_url_coupon"]');
+            $("#imgUpload").fileinput({
+                    language: 'zh', //设置语言,
+                    uploadUrl: "/upload/uploadimg/",
+                    showCaption: false,
+                    browseClass: "btn blue",
+                    removeClass: "btn red",
+                    allowedFileExtensions: ['jpg', 'png', 'jpeg'],
+                    overwriteInitial: false,
+                    maxFileSize: 70000,
+                    maxFileCount: 0, // 这里设为0，由于存在bug，这个属性相当于没什么用了
+                    uploadClass: "btn green",
+                    removeClass: "btn red",
+                    uploadAsync: true,
+                    browseLabel: '选择',
+                    dropZoneEnabled: false,
+                    previewSettings: {
+                        image: {width: "auto", height: "100px"}
+                    },
+                    layoutTemplates: {
+                        actionUpload: ""
+                    },
+                     minImageWidth: 750,
+                     minImageHeight: 550,
+                     maxImageWidth: 750,
+                     maxImageHeight: 550,
+                     maxFileSize: 500,
+                    msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                    uploadExtraData: {
+                        prefix: 'gg_img'
+                    },
+                    initialPreview: {$info.imgs|default='[]'},
+                    initialPreviewAsData: true,
+                    initialPreviewFileType: 'image',
+                    initialPreviewConfig:  {$info.previewconfig|default='[]'},
+        })
+                .on('filebatchselected', function (evt, file) {
+                    // 选择图片后执行，用于判断选择的图片是否超出限制，这是为了弥补maxFileCount的bug
+                    if($uploadAdvBox.find('.file-preview-frame').length > $uploadLimit.val()) {
+                        layer.msg('仅允许上传' + $uploadLimit.val() + '张，请删除多余的图片再上传')
+                        // 禁用选择按钮
+                        $('#imgUpload').attr('disabled', 'disabled');
+                        $('#imgUpload').closest('div.btn-file').addClass('btn-disabled');
+                        // 禁用上传按钮
+                        $uploadAdvBox.find('.fileinput-upload-button').attr('disabled', 'disabled')
+                    }
+                })
+                .on('filebatchuploadcomplete', function (evt, file) {
+                    // 只会调用一次，所有图片都上传成功调用，这是为了弥补上传成功后部分DOM结构重新渲染，导致filebatchselected钩子中执行的操作失效
+                    if($uploadAdvBox.find('.file-preview-frame').length > $uploadLimit.val()) {
+                        $('#imgUpload').attr('disabled', 'disabled')
+                        $('#imgUpload').closest('div.btn-file').addClass('btn-disabled');
+                    }
+                })
+                .on('fileuploaded', function (event, data, previewId, index) {
+                    // 上传成功几次就调用几次，把后端返回的地址附加到DOM结构上，为以后得操作做准备
+                    if (data.response.status == 1) {
+                        $uploadAdvBox.find('#'+previewId).attr('data-url', data.response.data.name);
+                    } else {
+                        alert(data.response.info);
+                    }
+                })
+                .on('fileclear', function (evt, file) {
+                    // 点击右上角叉叉执行
+                    $('#imgUpload').removeAttr('disabled')
+                    $('#imgUpload').closest('div.btn-file').removeClass('btn-disabled')
+                    $uploadAdvBox.find('.fileinput-upload-button').removeAttr('disabled')
+                })
+                .on("filesuccessremove",function(event, uploadedId, index){
+                    // 仅对上传成功的图片有效，未上传的图片不执行这里
+                    // 通过uploadedId找到缓存的data-url，然后去匹配files中的文件，实现删除
+                    // 延迟一秒后删除，否则不准确
+                    setTimeout(function () {
+                        if($uploadAdvBox.find('.file-preview-frame').length < $uploadLimit.val()) {
+                            $('#imgUpload').removeAttr('disabled')
+                            $('#imgUpload').closest('div.btn-file').removeClass('btn-disabled')
+                        }
+                    }, 1000)
+                })
+                .on('fileremoved', function () {
+                    // 该事件钩子针对只选择不上传的情况
+                    if($uploadAdvBox.find('.file-preview-frame').length <= $uploadLimit.val()) {
+                        $('#imgUpload').removeAttr('disabled')
+                        $('#imgUpload').closest('div.btn-file').removeClass('btn-disabled')
+                        $uploadAdvBox.find('.fileinput-upload-button').removeAttr('disabled')
+                    }
+                })
+            if($imgUrl.val()) {
+                // 给file-preview-frame元素附加data-url属性，用于提交的时候收集数据
+                window.onload = function () {
+                    setTimeout(function () {
+                        var $filePreviewFrame = $('.file-preview-frame');
+                        $filePreviewFrame.each(function (index, item) {
+                            var imgLink = $(item).find('img').attr('src')
+                            if(imgLink) {
+                                imgLink = imgLink.replace(/http:\/\/{:C('QINIU_DOMAIN')}\//, '')
+                                $(item).attr('data-url', imgLink)
+
+                            }
+                        })
+                    }, 1000)
+                }
+                // 监听已上传图片的删除事件，针对插件未提供图片初始化删除事件钩子的情况
+                $("#upload_adv_box").on("click", function(event) {
+                    var $target = $(event.target);
+                    if ($target[0].nodeName.toLowerCase() == "button" || $target[0].nodeName.toLowerCase() == "i") {
+                        setTimeout(function () {
+                            if ($uploadAdvBox.find('.file-preview-frame').length <= $uploadLimit.val()) {
+                                $('#imgUpload').removeAttr('disabled')
+                                $('#imgUpload').closest('div.btn-file').removeClass('btn-disabled')
+                                $uploadAdvBox.find('.fileinput-upload-button').removeAttr('disabled')
+                            }
+                        }, 1000)
+                    }
+                })
+            }
+        })
+        /*图片上传插件 S*/
+
+
+        //保存
+        $(function () {
+            $("#saveEdit").on('click', function ()  {
+                var name = $("input[name=name]").val(); //礼品名称
+                var type = $("input[name=jifen]:checked").val(); //选择类型
+                var imgs = $("input[name=img_url]").val(); //图片
+                // var imgs = [];
+                var point = $("input[name=point]").val(); //消耗现金券
+                var stock = $("input[name=stock]").val(); //库存
+                var shiwu_exchange_num= $("#shiwu_exchange_num").val(); //后台已兑换
+                var grade = $("#grade1").val();//兑换等级
+                var grade = $("#grade2").val();//兑换等级
+                var px = $("input[name=px]").val(); //排序值
+                var know = $("#know").val(); //兑换须知
+                var status =  $("input[name=status]:checked").val(); //上架下架
+                var gift_price = $("input[name=gift_price]").val(); //礼品价格
+                var gift_content = ue.getContent(); //礼品详情
+                var coupon_type = $("#coupon_type").val(); //优惠券类型
+                var coupon_full = $("input[name=coupon_full]").val(); //满足金额
+                var coupon_sub = $("input[name=coupon_sub]").val();  //减去金额
+                var coupon_money = $("input[name=coupon_money]").val(); //代金券金额
+                var coupon_gift = $("input[name=coupon_gift]").val(); //礼品
+                var coupon_rule = $("#coupon_rule").val(); //使用规则
+                var start_time = $("input[name=start_time]").val(); //开始时间
+                var end_time = $("input[name=end_time]").val(); //结束时间
+                var coupon_stock = $(".coupon_stock").val(); //优惠券库存
+                var youhui_exchange_num = $("#youhui_exchange_num").val(); //已兑换数量
+                var per_num = $("input[name=per_num]").val(); //个人领取上限
+                var per_num_conpon = $("input[name=per_num2]").val(); //个人领取上限
+                var $uploadAdvBox = $('#upload_adv_box');
+                var $uploadAdvBox1 = $('#upload_adv_box1');
+                if(name == '' || name == undefined){
+                    msg('请输入礼品名称');
+                    return false
+                }
+                if(type == '' || type == 0){
+                    msg('请选择礼品类型');
+                    return false
+                }
+                if(type == 1) {
+                    // 验证实物
+                    var imgs = []
+                    $uploadAdvBox1.find('.file-preview-frame').each(function (index, item) {
+                        console.log(item)
+                        var imgUrl = $(item).attr('data-url')
+                        if(imgUrl) {
+                            imgs.push(imgUrl)
+                        }
+                    })
+                    if(imgs.length <= 0) {
+                        layer.msg('请上传图片')
+                        return false
+                    }
+                    if(imgs.length > 4) {
+                        layer.msg('请上传4张图片')
+                        return false
+                    }
+
+                    var lp_price = $("input[name=gift_price]").val();
+                    var price_len =parseFloat(lp_price);
+                    if(lp_price == '' || lp_price == null){
+                        msg('请输入礼品价格');
+                        return false
+                    }
+                    if((price_len+"").length>6 && (lp_price.indexOf(".")< 0)){
+                        msg('礼品价格请输入六位正整数');
+                        return false
+                    }
+                    if(lp_price == 0){
+                        msg("请输入正确的礼品价格");
+                        return false;
+                    }
+
+                    var pattern=/\.$/; //小数点
+                    if(lp_price.match(pattern) ){
+                        msg('请输入正确的礼品价格');
+                        return false;
+                    }
+
+                    var point = $(".point1").val();
+                    if(point == '' ){
+                        msg('请输入消耗现金券');
+                        return false
+                    }
+                    var stock = $(".stock1").val();
+                    if(stock == '' || stock == null){
+                        msg('请输入库存');
+                        return false
+                    }
+                    // 已兑换量不能大于库存
+                    if(parseInt($("input[name='exchange_num']").val()) > parseInt($("input[ name='stock']").val())){
+                        msg("已兑换量不能大于库存");
+                        return false;
+                    }
+                    //获取用户实际累计已兑换
+                    var real_num = $(".real_num").text();
+                    var numArr = real_num.match(/\d+/g).join('')
+
+                    //判断
+                    if(shiwu_exchange_num !='' && parseInt((numArr*1)+(shiwu_exchange_num*1)) > parseInt($("input[ name='stock']").val())){
+                        msg("实际累计已兑换 + 后台已兑换 必须≤ 库存");
+                        return false;
+                    }
+                    var grade= $("#grade1").val();
+                    if(grade == 0 || grade == ''){
+                        msg('请选择兑换等级');
+                        return false
+                    }
+
+
+                    var px = $(".px1").val();
+                    if(px == '' ){
+                        msg('请输入排序值');
+                        return false
+                    }
+                    if(is_repeat_inkind == '' || is_repeat_inkind == 0){
+                        msg('请选择是否可重复领取');
+                        return false
+                    }
+                    var is_repeat_inkind  = $("input[name=repeat]:checked").val();  //1:可重复领取 2:不可重复领取 现金券实物
+                } else if(type == 2) {
+                    // 验证优惠券
+                    imgs = []
+                    $uploadAdvBox.find('.file-preview-frame').each(function (index, item) {
+                        console.log(item)
+                        var imgUrl = $(item).attr('data-url')
+                        if(imgUrl) {
+                            imgs.push(imgUrl)
+                        }
+                    })
+                    if(imgs.length <= 0) {
+                        layer.msg('请上传图片')
+                        return false
+                    }
+                    if(imgs.length != $('#upload_limit').val()) {
+                        layer.msg('请上传1张图片')
+                        return false
+
+                    }
+                    if(coupon_type == '' || coupon_type == 0){
+                        msg('请选择优惠券类型');
+                        return false
+
+                    }else if(coupon_type == 1){
+                        var coupon_full_len = parseFloat(coupon_full); //满额
+                        if(coupon_full == '' || coupon_full == null){
+                            msg('请输入满减金额');
+                            return false
+                        }
+                        if((coupon_full_len + '').length > 6 && (coupon_full.indexOf(".")< 0)){
+                            msg('满减金额请输入六位正整数');
+                            return false
+                        }
+                        if(coupon_full == 0){
+                            msg("请输入正确的满减金额");
+                            return false;
+                        }
+
+                        var coupon_type_one = /\.$/; //小数点
+                        if(coupon_full.match(coupon_type_one) ){
+                            msg('请输入正确的满减金额');
+                            return false;
+                        }
+                        var coupon_sub_len = parseFloat(coupon_sub);  //减去金额
+                        if(coupon_sub  == '' || coupon_sub  == null){
+                            msg('请输入减去金额');
+                            return false
+                        }
+                        if((coupon_sub_len + '').length > 6 && (coupon_sub.indexOf(".")< 0)){
+                            msg('减去金额请输入六位正整数');
+                            return false
+                        }
+                        if(coupon_sub == 0){
+                            msg("请输入正确的满减金额");
+                            return false;
+                        }
+
+                        if(coupon_sub.match(coupon_type_one) ){
+                            msg('请输入正确的满减金额');
+                            return false;
+                        }
+
+                        if(parseFloat(coupon_full) < parseFloat(coupon_sub)){
+                            msg("满额必须大于减额");
+                            return false;
+                        }
+
+                    }else if(coupon_type == 2){
+                        var coupon_money_len = parseFloat(coupon_money); //代金券金额
+                        if(coupon_money  == '' || coupon_money  == null){
+                            msg('请输入代金券金额');
+                            return false
+                        }
+                        if((coupon_money_len + '').length > 6 && (coupon_money.indexOf(".")< 0)){
+                            msg('代金券金额请输入六位正整数');
+                            return false
+                        }
+                        if(coupon_money  == 0){
+                            msg("请输入正确的代金券金额");
+                            return false;
+                        }
+                        var coupon_type_two = /\.$/; //小数点
+                        if(coupon_money .match(coupon_type_two) ){
+                            msg('请输入正确的代金券金额');
+                            return false;
+                        }
+                    }else if(coupon_type == 3){
+                        if(coupon_gift == '' || coupon_gift == null){
+                            msg('请输入优惠券礼品名称');
+                            return false
+                        }
+                    }
+
+                    if(coupon_rule == '' || coupon_rule  == null){
+                        msg('请输入使用规则');
+                        return false
+                    }
+                    if(start_time == ''){
+                        msg('请选择有效期');
+                        return false
+                    }
+                    if(end_time == ''){
+                        msg('请选择活动结束时间');
+                        return false
+                    }
+
+                    var point = $(".point").val();
+                    if(point == '' ){
+                        msg('请输入消耗现金券');
+                        return false
+                    }
+
+                    var coupon_stock = $(".coupon_stock").val(); //优惠券库存
+                    if(coupon_stock == '' || coupon_stock == null){
+                        msg('请输入库存');
+                        return false
+                    }
+                    //后台已兑换 不能大于 库存
+                    var yiduihaun = $('#youhui_exchange_num').val()
+
+                    if(parseInt(coupon_stock) != '' && parseInt(yiduihaun) > parseInt(coupon_stock)){
+                        msg("已兑换量不能大于库存");
+                        return false;
+                    }
+                    var coupon_real_num = $(".coupon_real_num").text(); //实际累计
+                    var reslReg = coupon_real_num.match(/\d+/g).join(''); //提取实际累计的数字
+                    if(parseInt(yiduihaun) !='' && parseInt(reslReg*1)+parseInt(yiduihaun*1) > parseInt(coupon_stock)){
+                        msg("实际累计已兑换 + 后台已兑换 必须≤ 库存");
+                        return false;
+                    }
+
+                    var grade = $("#grade2").val();
+                    if(grade == 0 || grade == ''){
+                        msg('请选择兑换等级');
+                        return false
+                    }
+                    var px = $(".px").val();
+                    if(px == '' ){
+                        msg('请输入排序值');
+                        return false
+                    }
+                    if( is_repeat_conpon == '' ||  is_repeat_conpon== 0){
+                        msg('请选择是否可重复领取');
+                        return false
+                    }
+                    var is_repeat_conpon  = $("input[name=repeat1]:checked").val();  //1:可重复领取 2:不可重复领取  现金券优惠券
+                }
+
+                if(know == '' || know == null){
+                    msg('请输入兑换须知');
+                    return false
+                }
+                if(status == '' || status == null){
+                    msg('请选择上架下架');
+                    return false
+                }
+
+                var id = '{$info.id}';
+                var obj = {}
+                if(type == 1) {
+                    obj = {
+                        id:id,
+                        name:name,
+                        type:type,
+                        imgs:imgs,
+                        point:point,
+                        stock:stock,
+                        grade:grade,
+                        px:px,
+                        know:know,
+                        status:status,
+                        gift_price:gift_price,
+                        gift_content:gift_content,
+                        start_time:start_time,
+                        end_time:end_time,
+                        exchange_num:shiwu_exchange_num,
+                        is_repeat:is_repeat_inkind,
+                        per_num:per_num,
+                    }
+                }else if(type == 2) {
+                    obj = {
+                        id:id,
+                        name:name,
+                        type:type,
+                        imgs:imgs,
+                        point:point,
+                        stock:coupon_stock,
+                        grade:grade,
+                        px:px,
+                        know:know,
+                        status:status,
+                        coupon_type:coupon_type,
+                        coupon_full:coupon_full,
+                        coupon_sub:coupon_sub,
+                        coupon_money:coupon_money,
+                        coupon_gift:coupon_gift,
+                        coupon_rule:coupon_rule,
+                        start_time:start_time,
+                        end_time:end_time,
+                        exchange_num:youhui_exchange_num,
+                        is_repeat:is_repeat_conpon,
+                        per_num:per_num_conpon,
+                    }
+                }
+                console.log(obj)
+
+                $.ajax({
+                    url: '/goods/save/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: obj,
+                    success: function (res) {
+                        console.log(res)
+                        if(res.error_code == 0){
+                            layer.msg('保存成功', {icon: 1});
+                            window.location.href = '/Goods/index';
+                        }else{
+                            console.log(res.error_msg )
+                            msg(res.error_msg )
+                        }
+                    },
+                    error: function (res) {
+                        layer.msg('服务器异常',function () {
+                        });
+                    }
+                })
+            })
+        })
+        function msg(msg, fn) {
+            layer.msg(
+                    msg,
+                    {time: 2000,},
+                    fn || function () {
+                    }
+            )
+        }
+    </script>
+</block>

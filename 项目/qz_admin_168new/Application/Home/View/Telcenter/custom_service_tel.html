@@ -1,0 +1,192 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>客服通话统计-控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>客服通话统计管理</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" method="GET" action="/telcenter/custom_service_tel">
+                                <div class="col-xs-2">
+                                    客服:<br/>
+                                     <select id="user" name="id" class="select2">
+                                        <option value="">请选择客服</option>
+                                        <volist name="users" id="vo">
+                                            <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    客服分组:<br/>
+                                    <input type="text" name="group" class="form-control" placeholder="客服分组" value="{$Think.get.group}">
+                                </div>
+                                <div class="col-xs-2">
+                                    开始时间:<br/>
+                                    <input type="text" name="begin" class="form-control datepicker" placeholder="开始时间" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    结束时间:<br/>
+                                    <input type="text" name="end" class="form-control datepicker" placeholder="结束时间" value="{$Think.get.end}">
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                     <button type="button" id="export" class="btn btn-info"><i class="fa fa-share-square-o"></i>&nbsp;导出Excel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <thead >
+                        <tr>
+                            <th >客服</th>
+                            <th >呼出量</th>
+                            <th >呼出量<br/>(管辖+代管)</th>
+                            <th >呼通量</th>
+                            <th >呼通量<br/>(管辖+代管)</th>
+                            <th >未呼通量</th>
+                            <th >未呼通量<br/>(管辖+代管)</th>
+                            <th >通话时长</th>
+                            <th >通话时长<br/>(管辖+代管)</th>
+                            <th >平均通话时长</th>
+                            <th >平均通话时长<br/>(管辖+代管)</th>
+                            <th >发单量</th>
+                            <th >呼出率<br/>(管辖+代管)</th>
+                            <th >呼通率<br/>(管辖+代管)</th>
+                            <th >接通拒绝率</th>
+                            <th >分单通话时长</th>
+                            <th >分单平均通话时长 </th>
+                            <th >赠单通话时长</th>
+                            <th >赠单平均通话时长</th>
+                        </tr>
+                        </thead>
+                        <tbody id="dataLists">
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td >{$vo.name}</td>
+                                <td >{$vo.tel_all_count|default=0}</td>
+                                <td >{$vo.tel_count|default=0}</td>
+                                <td >{$vo.yx_all_tel|default=0}</td>
+                                <td >{$vo.yx_tel|default=0}</td>
+                                <td >{$vo.wx_all_tel|default=0}</td>
+                                <td >{$vo.wx_tel|default=0}</td>
+                                <td >{$vo.tel_all_sum|default=0}</td>
+                                <td >{$vo.tel_sum|default=0}</td>
+                                <td >{$vo.tel_all_avg|default=0}</td>
+                                <td >{$vo.tel_avg|default=0}</td>
+                                <td >{$vo.order_count|default=0}</td>
+                                <td >{$vo.tel_rate|default=0}%</td>
+                                <td >{$vo.yx_tel_rate|default=0}%</td>
+                                <td >{$vo.check_rate|default=0}</td>
+                                <td >{$vo.fen_sum}</td>
+                                <td >{$vo.fen_avg}</td>
+                                <td >{$vo.zen_sum}</td>
+                                <td >{$vo.zen_avg}</td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="box box-default">
+        <div class="alert alert-warning">
+            <p>说明</p>
+            <p>呼出率 = 呼出量/发单量*100%</p>
+            <p>呼通率 = 呼通量/发单量*100%</p>
+            <p>接通拒绝率 = 无效（拒绝服务）量/呼通量</p>
+        </div>
+    </div>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#user").select2({
+          allowClear: true,
+          placeholder: "选择客服"
+        });
+        $("#user").select2("val", "{$Think.get.id}");
+        $(".datepicker").datetimepicker({
+              format:"yyyy-mm-dd hh:ii:ss"//,
+              //minViewMode:0
+        });
+        /*$(".datepicker").datepicker({
+            format:"yyyy-mm-dd",
+            minViewMode:0
+        });*/
+
+        $('#myTable').DataTable({
+           paging:false,
+           searching:false,
+           language:{
+                zeroRecords: "没有内容",
+                info:""
+           },
+            scrollY:"600px",
+        });
+
+        $("#export").click(function(event) {
+            var colums = [];
+            var data = [];
+            $("#myTable th").each(function() {
+                var text = $(this).text().trim();
+                var sub = [];
+                sub["text"] = text;
+                sub["fontColor"] = $(this).css("color");
+                sub["bgColor"] = $(this).css("background-color");
+                colums.push(sub);
+            });
+            data.push(colums);
+
+            $("#dataLists tr").each(function(i) {
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function() {
+                    var text = $(this).text().trim();
+
+                    var _td = {
+                        text: text,
+                        fontColor: $(this).css("color"),
+                        bgColor: $(this).css("background-color")
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data: data,
+                title: "客服通话率统计",
+                url: "/export/download",
+                show:false
+            });
+        });
+    </script>
+</block>

@@ -1,0 +1,282 @@
+<div class="account_template">
+    <p>充值会员：{$userinfo.jc}</p>
+    <p>会员ID：{$userinfo.id}</p>
+    <div class="recharge_details">
+        <div class="recharge-tab">
+            <ul>
+                <li class="active" data-id="1">加款金额</li>
+                <li data-id="2">保证金</li>
+                <li data-id="3">返点比例</li>
+            </ul>
+        </div>
+        <div class="tablist-detail">
+            <div class="rechargetable1">
+                <form action="" id="rechargeForm1">
+                    <input type="hidden" name="account_type" value="1" />
+                    
+                    <div class="common-list">
+                        <label>加款金额：</label>
+                        <input type="text" class="form-control trade_amount" name="trade_amount" autocomplete="off" placeholder="请输入">
+                    </div>
+
+                    <div class="common-list">
+                        <label class="fl">加款类型：</label>
+
+                        <label class="trade_label">
+                            <input type="radio" name="trade_child_type" value="11" checked > 
+                            <span>首次加款</span>
+                        </label>
+
+                        <label class="trade_label">
+                            <input type="radio" name="trade_child_type" value="12" > 
+                            <span>充值续费</span>
+                        </label>
+
+                        <label class="trade_label">
+                            <input type="radio" name="trade_child_type" data-other="1" value="13" > 
+                            <span>其它</span>
+                        </label>
+                    </div>
+
+                    <div class="common-list trade_remark_box hidden">
+                        <label class="fl">备注：</label>
+                        <textarea name="trade_remark" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="rechargetable2">
+                <form action="" id="rechargeForm2">
+                    <input type="hidden" name="account_type" value="2" />
+
+                    <div class="common-list">
+                        <label>保证金：</label>
+                        <input type="text" class="form-control trade_amount" name="trade_amount" autocomplete="off" placeholder="请输入">
+                    </div>
+
+                    <div class="common-list">
+                        <label class="fl">备注：</label>
+                        <textarea name="trade_remark" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="rechargetable3">
+                <div class="common-list">
+                    <label>返点比例：</label>
+                    <select class="form-control" id="select_back_ratio" placeholder="请选择">
+                        <!-- <option value="">请选择</option> -->
+                        <volist name="backRatioList" id="item">
+                            <option value="{$key}" {:($userinfo["back_ratio"] == $key ? "selected" : "")} >{$item}</option>
+                        </volist>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="account-btn">
+        <button type="button" class="btn btn_cancel">取消</button>
+        <button type="button" class="btn btn_recharge">保存</button>
+    </div>
+</div>
+
+<!-- 加款确认提示 -->
+<div id="rechargeTip" style="display: none;">
+    <div class="layui-form-item">
+        <p class="money">
+            <span>加款金额：</span>
+            <span style="float: right">+¥<span class="tip_trade_amount">0</span></span>
+        </p>
+        <div class="tip_trade_child_type_box hidden">
+            <span>加款类型：</span>
+            <span class="tip_trade_child_type" style="float: right"></span>
+        </div>
+        <div class="tip_trade_remark_box">
+            <p>备注：</p>
+            <p class="tip_trade_remark"></p>
+        </div>
+    </div>
+</div>
+
+<!-- 返点比例设置确认提示 -->
+<div id="backRatioTip" style="display: none;">
+    <div class="layui-form-item">
+        <p class="money">
+            <span>返点比例：</span>
+            <span style="float: right"><span class="tip_back_ratio">0</span>%</span>
+        </p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var switch_id = "1";
+        $(".account_template").on("click", ".recharge-tab ul li" , function(){
+            switch_id = $(this).data("id");
+
+            $(".recharge-tab ul li").removeClass("active");
+            $(this).addClass("active");
+            $(".tablist-detail>div").hide();
+            $(".rechargetable" + switch_id).show();
+        });
+
+        // 金额改变事件
+        $(".trade_amount").change(function(){
+            this.value = this.value.replace(/[^\d.]/g,""); //清除"数字"和"."以外的字符
+            this.value = this.value.replace(/^\./g,""); //验证第一个字符是数字
+            this.value = this.value.replace(/\.{2,}/g,"."); //只保留第一个, 清除多余的
+            this.value = this.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+            this.value = this.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3'); //只能输入两个小数
+        });
+
+        // 加款类型改变事件
+        $("input[name=trade_child_type]").change(function(){
+            if ($(this).data("other") == 1) {
+                $(".trade_remark_box").removeClass("hidden");
+            } else {
+                $(".trade_remark_box").addClass("hidden");
+            }
+        });
+        
+        // 取消
+        $(".account_template").on("click", ".btn_cancel" , function(){
+            $("#accountModal .modal-body").html("");
+            $("#accountModal").modal("hide");
+        });
+
+        // 确定
+        $(".account_template").on("click", ".btn_recharge" , function(){
+            var that = this;
+            if (switch_id == "3") {
+                saveBackRatio(that);
+                return true;
+            }
+            
+            // 获取表单数据
+            var dataForm = getFormData("#rechargeForm" + switch_id);
+            dataForm["user_id"] = "{$userinfo.id}";
+
+            // 验证金额
+            if (!dataForm["trade_amount"] || dataForm["trade_amount"] == "0") {
+                alert("请添加金额");
+                return false;
+            } else if (dataForm["trade_child_type"] == 13 && !dataForm["trade_remark"]) {
+                alert("请先输入加款备注");
+                return false;
+            }
+
+            // 获取加款确认提示内容
+            $("#rechargeTip").find(".tip_trade_amount").html(dataForm["trade_amount"]);
+            $("#rechargeTip").find(".tip_trade_remark").html(dataForm["trade_remark"]);
+            $("#rechargeTip").find(".tip_trade_child_type_box").addClass("hidden");
+            $("#rechargeTip").find(".tip_trade_remark_box").removeClass("hidden");
+
+            // 如果是轮单费加款
+            if (switch_id == 1) {
+                var trade_child_type_name = $("input[name=trade_child_type]:checked").next("span").html();
+                $("#rechargeTip").find(".tip_trade_child_type").html(trade_child_type_name);
+                $("#rechargeTip").find(".tip_trade_child_type_box").removeClass("hidden");
+                if (dataForm["trade_child_type"] != 13) {
+                    $("#rechargeTip").find(".tip_trade_remark_box").addClass("hidden");
+                    dataForm["trade_remark"] = trade_child_type_name;
+                }
+            }
+
+            var content = $("#rechargeTip").html();
+            var switchTitle = switch_id == 1 ? '加款提示' : '保证金加款提示'
+            layer.open({
+                title: switchTitle,
+                btn: ["确定加款", "取消"],
+                btnAlign: "r",
+                area: "300px",
+                content: content,
+                // 确定按钮的回调
+                yes: function(index, layero){
+                    $(that).attr("disabled", "disabled");
+                    $.post("/signbacknew/account_recharge", dataForm, function(response){
+                        if (response.error_code == 0) {
+                            layer.msg('加款成功');
+                            setTimeout(function (){
+                                layer.closeAll();
+                                window.location.reload();
+                            },2000)
+
+                        } else {
+                            $(that).removeAttr("disabled");
+                            alert(response.error_msg);
+                        }
+                    }).fail(function(){
+                        $(that).removeAttr("disabled");
+                    });
+                },
+                // 取消按钮的回调
+                btn2: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                },
+                cancel: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                }
+            });
+        });
+        
+        // 返点比例
+        function saveBackRatio(that){
+            var back_ratio = $("#select_back_ratio").val();
+            if (back_ratio == "") {
+                alert("请先选择返点比例");
+                return false;
+            }
+
+            // 获取返点比例确认提示内容
+            $("#backRatioTip").find(".tip_back_ratio").html(back_ratio);
+            var content = $("#backRatioTip").html();
+
+            layer.open({
+                title: "返点比例提示",
+                btn: ["确定", "取消"],
+                btnAlign: "r",
+                area: "300px",
+                content: content,
+                // 确定按钮的回调
+                yes: function(index, layero){
+                    $(that).attr("disabled", "disabled");
+                    $.post("/signbacknew/account_back_ratio", {
+                        user_id: "{$userinfo.id}",
+                        back_ratio: back_ratio
+                    }, function(response){
+                        if (response.error_code == 0) {
+                            layer.closeAll();
+                            window.location.reload();
+                        } else {
+                            $(that).removeAttr("disabled");
+                            alert(response.error_msg);
+                        }
+                    }).fail(function(){
+                        $(that).removeAttr("disabled");
+                    });
+                },
+                // 取消按钮的回调
+                btn2: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                },
+                cancel: function(index, layero){
+                    $(that).removeAttr("disabled");
+                    $('body').css({
+                        "overflow-x":"auto",
+                        "overflow-y":"auto"
+                    });
+                }
+            });
+        }
+    });
+</script>

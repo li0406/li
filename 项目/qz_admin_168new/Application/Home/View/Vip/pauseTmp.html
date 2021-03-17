@@ -1,0 +1,136 @@
+<div class="pause_{$index}">
+<form>
+<div class="form-group ">
+    <label class="col-sm-2 control-label">{$order}&nbsp;暂停:</label>
+    <div class="col-sm-2">
+        <input id="pause_start_{$index}"  type="text" class="form-control datepicker" placeholder="暂停开始时间" name="start" value="{$info.start_time}" autocomplete="off" />
+    </div>
+    <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+    <div class="col-sm-2">
+        <input id="pause_end_{$index}"  type="text" class="form-control datepicker" placeholder="暂停结束时间" name="end" value="{$info.end_time}" autocomplete="off"  />
+    </div>
+    <label class="col-sm-1 control-label day" style="text-align: left;">{$info.day|default=0}天</label>
+</div>
+<div class="form-group" >
+    <label class="col-sm-2 control-label">延期天数</label>
+    <div class="col-sm-2">
+        <input id="pause_delayday_{$index}" name="delay_day"  type="text" class="form-control" placeholder="天数" autocomplete="off" />
+    </div>
+    <label class="col-sm-1 control-label text-center" style="text-align: center;">延期至</label>
+    <div class="col-sm-2">
+        <input id="pause_delay_{$index}" name="delay_time" type="text" class="form-control" placeholder="延期到期时间" autocomplete="off" />
+    </div>
+    <label class="col-sm-1 control-label" style="text-align: center;">到期:</label>
+    <label class="col-sm-2 control-label delay_time" style="text-align: center;"></label>
+    <if condition="!isset($read)">
+    <div class="col-sm-2 pull-right">
+        <button type="button" class="btn btn-success btn-sm">保存</button>
+        <button type="button" class="btn btn-danger btn-sm">删除</button>
+    </div>
+    </if>
+</div>
+</form>
+</div>
+<if condition="$read">
+<script type="text/javascript">
+$(".pause_{$index} *").attr("disabled","disabled");
+</script>
+<else />
+<script type="text/javascript">
+    $(".pause_{$index} #pause_start_{$index}").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $(".pause_{$index} #pause_end_{$index}").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    }).on('changeDate',function(ev){
+        var endTime = ev.date.valueOf();
+        var start = $(".pause_{$index} #pause_start_{$index}").datepicker("getDate");
+        if (start == null) {
+            alert("请输入多倍开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("暂停结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days = Math.floor(offset/(24*3600*1000))+1;
+        $(".pause_{$index} .day").html(days+"天");
+    });
+
+    $(".pause_{$index} #pause_delay_{$index}").datepicker({
+        format:"yyyy-mm-dd",
+        minViewMode:0,
+        autoclose:true
+    });
+
+    $(".btn-danger").click(function(event) {
+        $(this).parents(".pause_{$index}").remove();
+    });
+
+    $(".pause_{$index} .btn-success").click(function(event) {
+        var data = $(".pause_{$index} form").serializeArray();
+        var json = $("#search_company").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_company").select2("data") == "string"){
+                json = JSON.parse($("#search_company").select2("data"));
+            }
+            var company_id = json[0].id;
+            data.push({name:"company_id",value:company_id});
+            data.push({name:"company_name",value:json[0].jc});
+        };
+
+        json = $("#search_seller").select2("data");
+        if(json.length > 0){
+            if(typeof $("#search_seller").select2("data") == "string"){
+                json = JSON.parse($("#search_seller").select2("data"));
+            }
+            data.push({name:"saler_id",value:json[0].id});
+            data.push({name:"saler_name",value:json[0].text || json[0].name});
+        }
+        data.push({name:"parentid",value:$(this).parents(".panel-body").find("input[name=contract_id]").val()});
+        $.ajax({
+            url: '/vip/pause/',
+            type: 'POST',
+            dataType: 'json',
+            data: data
+        })
+        .done(function(data) {
+            if (data.code == 200) {
+                $(".pause_{$index} button").remove();
+                $(".pause_{$index} *").attr("disabled","disabled");
+                $(".pause_{$index}").removeClass('pause_{$index}');
+            } else {
+                alert(data.errmsg);
+            }
+        });
+    });
+
+    $("#pause_delayday_{$index}").bind("input propertychange",function(){
+        $(".pause_{$index} .delay_time").html("");
+        if ($(this).val() != "" && !isNaN($(this).val())) {
+            var end_time = $(".now input[name=end]").val();
+            var d = new Date(end_time);
+            var startTime = parseInt(d.getTime());
+            var offset = parseInt($(this).val()) * 86400 * 1000;
+            startTime += offset;
+            nd = new Date(startTime);
+            var y = nd.getFullYear();
+            var m = nd.getMonth()+1;
+            var d = nd.getDate();
+            if(m <= 9) m = "0"+m;
+            if(d <= 9) d = "0"+d;
+            var cdate = y+"-"+m+"-"+d;
+            $(".pause_{$index} .delay_time").html(cdate);
+        }
+    });
+</script>
+</if>

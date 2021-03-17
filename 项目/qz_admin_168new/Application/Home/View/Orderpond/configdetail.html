@@ -1,0 +1,143 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/assets/common/css/multi-select.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/multi-select-search.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2-42/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/mideum.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/home/orderstat/css/config.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .choose-tips{
+            width: 370px;
+            /*margin: 0 auto;*/
+            text-align: left;
+            line-height: 2.5;
+        }
+        .choose-tips .c-all{
+            margin-right: 50px;
+        }
+        .choose-tips .c-choose{
+            margin-right: 33px;
+            cursor: pointer;
+            color: dodgerblue;
+        }
+        .choose-tips .c-has{
+            margin-right: 50px;
+        }
+        .choose-tips .c-cancel{
+            cursor: pointer;
+            color: dodgerblue;
+        }
+    </style>
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>{$detail.pond_name}设置</h1>
+    </section>
+    <section class="content">
+            <div class="row">
+                <div class="col-sm-12 ">
+                    <div class="box box-default">
+                        <div class="box-body">
+                            <div class="row rel">
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-1 control-label w170">派单维度：</label>
+                                        <div class="col-sm-3">
+                                            <select name="dimension" class="form-control dimension">
+                                                <if condition="$detail['pond_dimension'] EQ 2">
+                                                <option value="1">城市</option>
+                                                <option value="2" selected="selected">订单类型</option>
+                                                <else/>
+                                                <option value="1">城市</option>
+                                                <option value="2">订单类型</option>
+                                                </if>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-1 control-label w170">订单来源：</label>
+                                        <div class="col-sm-6">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="type" value="0" <if condition="empty($detail['pond_type']) || $detail['pond_type'] eq 0">checked</if>> 默认
+                                            </label>
+                                            <volist name="orderType" id="vo">
+                                                <if condition="$detail['pond_type'] EQ $vo['id']">
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="type" value="{$vo['id']}" checked> {$vo.type_name}
+                                                    </label>
+                                                    <else/>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="type" value="{$vo['id']}"> {$vo.type_name}
+                                                    </label>
+                                                </if>
+                                            </volist>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-1 control-label w170">城市划分：</label>
+                                        <div class="col-sm-3 huafen" id="inputEmail3">
+                                            <div class="choose-tips">
+                                                <span class="c-all">备选城市</span>
+                                                <span class="c-choose">选取全部</span>
+                                                <span class="c-has">选定城市</span>
+                                                <span class="c-cancel">取消全部</span>
+                                            </div>
+                                            <select class="multiple_group" multiple="multiple" style="height: 600px;">
+                                            <volist name="cityList" id="v" key="key">
+                                                <if condition="in_array($v['cid'],$checkcity)">
+                                                <option value="{$v.cid}" selected="selected">{$v.cname}</option>
+                                                <else/>
+                                                <option value="{$v.cid}">{$v.cname}</option>
+                                                </if>
+                                            </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-1 control-label w170">派单客服：</label>
+                                        <div class="col-sm-3">
+                                            <select id="my_multi_select" multiple="multiple">
+                                                <volist name="kfList" id="vo" key="key">
+                                                <optgroup label="客服第{$key}组">
+                                                    <volist name="vo" id="v" key="k">
+                                                    <if condition="in_array($v['id'],$checkkf)">
+                                                    <option value="{$v.id}" selected="selected">{$v.name}</option>
+                                                    <else/>
+                                                    <option value="{$v.id}">{$v.name}</option>
+                                                    </if>
+                                                    </volist>
+                                                </optgroup>
+                                                </volist>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group tip">
+                                        <p class="red">提示：</p>
+                                        <p>1、主池支持分配城市默认包含全部城市，如有城市无需分配，请自行调整至待分配列表</p>
+                                        <p>2、分池 城市 修改/删除，未分配城市自动回归主池</p>
+                                        <p>3、主池/分池 客服 修改/删除，未分配客服自动回归待分配列表</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-1 col-sm-offset-1">
+                                            <button id="btnSave" type="button" class="btn btn-primary btn-block" >保存</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+</block>
+<block name="script">
+    <script charset="utf-8" src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/mulit-select/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.multi-select.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/jquery.quicksearch.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2-42/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/orderstat/js/configdetail.js?v={:C('STATIC_VERSION')}"></script>
+
+</block>

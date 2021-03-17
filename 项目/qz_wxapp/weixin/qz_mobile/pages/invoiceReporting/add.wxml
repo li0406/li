@@ -1,0 +1,189 @@
+<!--pages/invoiceReporting/add.wxml-->
+<view class="add-invoice-reporting">
+	<view class="top-tip">
+		<view class="top-tip-l" wx:if="{{!topIsOpen}}">
+			<text>填写规则：开票金额要核对清楚，不得超出实际收款金额</text>
+		</view>
+		<view class="top-tip-r" wx:if="{{!topIsOpen}}">
+			<text class="top-tip-r-green" bindtap="topOpen">展开</text>
+		</view>
+		<view class="top-tip-text" wx:if="{{topIsOpen}}">
+			<text>填写规则：开票金额要核对清楚，不得超出实际收款金额；开票类型和开票公司要选择清楚，有不明处可向财务咨询；是否到账根据实际是否收款选择，若收款后开票选是，若未收款提前开票选否；金额以人民币为单位。</text>
+			<text class="btnClose" bindtap="topClose">收起</text>
+		</view>
+	</view>
+	<view class="add-btn">
+		<view class="top-add-list">
+			<view class="list" wx:for="{{chooseReportList}}">
+				<view class="li company">
+					<text class="title">公司名称：</text>
+					<text class="company-name">{{ item.company_name }}</text>
+					<image wx:if="{{item.has_invoice == 1 || item.warning_info}}" class="ml-10" src="../../img/no-pass.png" bindtap="tipReport" data-id="{{item.id}}" data-info="{{item.warning_info}}" data-status="{{item.exam_status}}" data-has="{{item.has_invoice}}"></image>
+					<image class="img-right" src="../../img/delect.png" bindtap="delReport" data-index="{{index}}"></image>
+				</view>
+				<view class="li">
+					<view class="w50">
+						<text class="title">收款金额：</text>
+						<text class="">{{item.payment_total_money}}</text>
+					</view>
+					<view class="w50">
+						<text class="title">报备人：</text>
+						<text class="">{{item.creator_name}}</text>
+					</view>
+				</view>
+				<view class="li">
+					<text class="title">汇款时间：</text>
+					<text class="">{{ item.payment_date }}</text>
+				</view>
+			</view>
+		</view>
+		<button class="one-btn" bindtap="chooseReportBtn">选择小报备</button>
+	</view>
+	<view class="info">
+		<view class="li">
+			<text class="title">开票类型</text>
+			<view class="right right-icon">
+				<picker bindchange="bindPickerChange1" value="{{arrayType[indexType].id}}" range="{{arrayType}}" range-key="{{'name'}}">
+					<view class="picker">
+						{{arrayType[indexType].name}}
+					</view>
+				</picker>
+				<image src="../../img/right.png"></image>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">开票公司</text>
+			<view class="right right-icon">
+				<picker bindchange="bindPickerChange2" value="{{arrayCompany[indexCompany].id}}" range="{{arrayCompany}}" range-key="{{'name'}}">
+					<view class="picker">
+						{{arrayCompany[indexCompany].name}}
+					</view>
+				</picker>
+				<image src="../../img/right.png"></image>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">是否到账</text>
+			<view class="right right-icon">
+				<picker bindchange="bindPickerChange3" value="{{arrayIsDz[indexIsDz].id}}" range="{{arrayIsDz}}" range-key="{{'name'}}">
+					<view class="picker">
+						{{arrayIsDz[indexIsDz].name}}
+					</view>
+				</picker>
+				<image src="../../img/right.png"></image>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">开票金额</text>
+			<view class="right">
+				<input placeholder="请输入" type="number" value="{{parms.invoice_price}}" bindinput="bindInvoicePrice"></input>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="li">
+			<text class="title">申请人邮箱</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.apply_email}}" bindinput="bindApplyEmail"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">收件人姓名</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.receiver_name}}" bindinput="bindReceiverName"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">收件人电话</text>
+			<view class="right">
+				<input placeholder="请输入" type="number" value="{{parms.receiver_phone}}" bindinput="bindReceiverPhone" maxlength="11"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">收件人地址</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.receiver_address}}" bindinput="bindReceiverAddress"></input>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="info-tip">
+			<text class="title">开票资料：</text>
+			<text class="red">如开普票和电子普票，只需提供抬头税号即可，如对 方要求开全，则提供完整的开票资 料，开具专用发票所有开票资料都要填写</text>
+		</view>
+		<view class="li">
+			<text class="title">发票抬头</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.invoice_title}}" bindinput="bindInvoiceTitle"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">纳税人识别号</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.taxpayer_identification_number}}" bindinput="bindTaxpayerIdentificationNumber" maxlength="20"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">地址</text>
+			<view class="right">
+				<input placeholder="请输入" value="{{parms.company_address}}" bindinput="bindCompanyAddress"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">电话</text>
+			<view class="right">
+				<input placeholder="请输入" type="text" value="{{parms.company_phone}}" bindinput="bindCompanyPhone"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">开户行</text>
+			<view class="right">
+				<input placeholder="请输入" type="text" value="{{parms.company_bank}}" bindinput="bindCompanyBank"></input>
+			</view>
+		</view>
+		<view class="li">
+			<text class="title">银行账号</text>
+			<view class="right">
+				<input placeholder="请输入" type="number" value="{{parms.company_bank_account}}" bindinput="bindCompanyPeop"></input>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="info-tip">
+			<text class="title">回传合同和营业执照：</text>
+			<text class="red">扫描件或拍照内容与公司盖章，一定要清楚可见，否则财务处一律不通过</text>
+		</view>
+		<view class="info-up">
+			<view class='uploader-list' wx:for="{{pics}}" wx:key="item.length">
+				<image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImg1' />
+				<image class='delete' data-index="{{index}}" src='../../img/xerror.png' mode="widthFix" bindtap='deleteImg' />
+			</view>
+			<view class="up-add" bindtap="chooseImg">
+				<view class="add-text">上传</view>
+			</view>
+		</view>
+	</view>
+	<view class="info">
+		<view class="info-tip">
+			<text class="title">其他说明：</text>
+			<text class="red">有其他要求说明时填写</text>
+		</view>
+		<view class="info-up">
+			<view class='uploader-list' wx:for="{{picSm}}" wx:key="item.length">
+				<image src='{{item}}' class="item" data-index="{{index}}" mode="scaleToFill" bindtap='previewImgSm' />
+				<image class='delete' data-index="{{index}}" src='../../img/xerror.png' mode="widthFix" bindtap='deleteImgSm' />
+			</view>
+			<view class="up-add" bindtap="chooseImgSm">
+				<view class="add-text">上传</view>
+			</view>
+		</view>
+		<view class="info-mark">
+			<textarea placeholder="请输入" maxlength="255" value="{{parms.other_remarks}}" bindinput="bindOtherRemarks"></textarea>
+		</view>
+	</view>
+	<view class="bottom-btn">
+		<button wx:if="{{parms.id}}" class="delete" bindtap="delete">删除</button>
+		<button class="save" bindtap="save" data-num="1">保存</button>
+		<button wx:if="{{!parms.id}}" class="save" bindtap="save" data-num="2">提交</button>
+	</view>
+</view>

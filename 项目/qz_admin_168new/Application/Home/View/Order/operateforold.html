@@ -1,0 +1,904 @@
+<style>
+    .my-dialog label{height: auto !important;}
+</style>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body table-responsive no-padding">
+                    <!-- 第一列 -->
+                    <form id="myForm" class="col-xs-4 border-r padding5">
+                        <div class="basic_info">
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">发布时间：</span>
+                                <span>{$info.time}</span>
+                                <!--<button id="copy" type="button" class="width_60 zclip"><i class="fa fa-files-o"></i>复制</button>-->
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <div class="col-xs-6 no-padding">
+                                    <span class="width_size">订单来源：</span>
+                                    <select name="source_type" class="width_80">
+                                        <volist name="source_in" id="vo">
+                                            <if condition="$key EQ $info['source_type']">
+                                                <option value="{$key}" selected="selected">{$vo}</option>
+                                                <else/>
+                                                <option value="{$key}">{$vo}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-6 no-padding">
+                                    <span>支撑发单人：</span>
+                                    <select name="zhuanfaren" class="width_80">
+                                        <option value="">-请选择-</option>
+                                        <volist name="zhuanfaren" id="vo">
+                                            <if condition="$vo EQ $info['zhuanfaren']">
+                                                <option value="{$vo}" selected="selected">{$vo}</option>
+                                                <else/>
+                                                <option value="{$vo}">{$vo}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <if condition="in_array($info['source'],array(18082757))">
+                                <div class="col-xs-12 no-padding">
+                                    <div class="col-xs-6 no-padding">
+                                        <span class="width_size">页面来源：</span>
+                                        <select name="source_type" class="width_80">
+                                            <option value="18082757">上门量房</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </if>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">&nbsp;发布IP：</span>
+                                <span>{$info.ip}</span><if condition="isset($ipMark)"><span class="green">重{$ipMark}</span></if>
+                                <span>
+                                    <a href="http://www.baidu.com/s?wd={$info.ip}&ie=utf-8" class="relation_icon icon_baidu" title="百度搜索" target="_blank"></a>
+                                    <a href="http://www.so.com/s?q={$info.ip}" class="relation_icon icon_360"  title="360搜索"  target="_blank"></a>
+                                    <a href="/orders/searchrtbasia?ipstr={$info.ip}" class="relation_icon icon_person"  title="ip真人率查询" target="_blank"></a>
+                                </span>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">手机号码：</span>
+                                <span>{$info.tel}</span>
+                                <span style="margin-left: 12px;">
+                                    <a href="javascript:void(0)" title="voip电话" data-id="{$info.id}" class="relation_icon icon_headset"></a>
+                                    <a href="/voip/voiprecord?id={$info.id}" title="voip电话记录" class="relation_icon icon_list" target="_blank"></a>
+                                    <if condition="$logCount GT 0">
+                                    <a  title="短信已发送" href="javascript:void(0)" class="relation_icon icon_email icon_email_disabled"></a>
+                                    <else/>
+                                    <a id="icon_email" title="发送短信" href="javascript:void(0)" class="relation_icon icon_email"></a>
+                                    </if>
+                                    <if condition="$info['openeye_st'] EQ NULL">
+                                    <a id="icon_eye" href="javascript:void(0)" class="relation_icon icon_eye" title="申请显号"></a>
+                                    <else/>
+                                    <a href="javascript:void(0)" class="relation_icon icon_eye icon_eye_disabled" title="该号码已申请显号"></a>
+                                    </if>
+                                    <a title="百度搜索" href="/orders/tel_baidusearch?id={$info.id}" class="relation_icon icon_baidu" target="_blank"></a>
+                                    <a title="360搜索" href="/orders/tel_360search?id={$info.id}" class="relation_icon icon_360"  target="_blank"></a>
+                                    <a title="搜狗搜索" href="/orders/tel_sogousearch?id={$info.id}" class="relation_icon icon_sogou"  target="_blank"></a>
+                                    <a title="神马搜索" href="/orders/tel_smsearch?id={$info.id}" class="relation_icon icon_sm"  target="_blank"></a>
+                                </span>
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <span class="width_size">微信号：</span>
+                                <input class="width_150" type="text" id="contact_wx" name="contact_wx" value="{$info.wx_show|default=''}">
+                                <input type="checkbox" id="equalphone" name="same_tel" value="1"> <label for="equalphone">手机同号</label>
+                                <input type="checkbox" id="onlybywx" name="is_wx" value="1" <if condition="$info['is_wx'] == 1">checked</if>> <label for="onlybywx">要求微信联系</label>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size" style="width: 90px">备用联系方式：</span>
+                                <input class="width_100" type="text" id="other_contact" name="other_contact" value="{$info['other_contact']}">
+                                <span id="other_contact_span" style="color:red"></span>
+                            </div>
+                            <div class="col-xs-12 no-padding">
+                                <span class="width_size" style="width: 85px;">备用联系人：</span>
+                                <input class="width_150" type="text" id="standby_user" name="standby_user" value="{$info['standby_user']}">
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">房屋地址：</span>
+                                <input class="width_100" type="text" name="dz" value="{$info.dz}">
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size"><i class="red">*</i>联系人：</span>
+                                <input class="width_100" type="text" name="name" value="{$info.name}">
+                                <select name="sex" id="">
+                                    <option value="">性别</option>
+                                    <option value="先生" <if condition="$info['sex'] EQ '先生'">selected</if> >先生</option>
+                                    <option value="女士" <if condition="$info['sex'] EQ '女士'">selected</if> >女士</option>
+                                </select>
+                            </div>
+                            <div id="order-form">
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">所属区域：</span>
+                                    <!--<span>{$city[0]["cname"]}</span>-->
+                                    <!--<input type="hidden" name="cs" value="{$info['cs']}">-->
+                                    <!--<select class="width_80" name="qx">-->
+                                        <!--<option value="">-请选择-</option>-->
+                                        <!--<volist name="city" id="vo">-->
+                                            <!--<if condition="$vo['qz_areaid'] EQ $info['qx']">-->
+                                                <!--<option value="{$vo.qz_areaid}" selected>{$vo.qz_area}</option>-->
+                                                <!--<else/>-->
+                                                <!--<option value="{$vo.qz_areaid}">{$vo.qz_area}</option>-->
+                                            <!--</if>-->
+                                        <!--</volist>-->
+                                    <!--</select>-->
+                                    <select class="width_70" name="cs">
+                                        <volist name="quyu" id="vo">
+                                            <if condition="$vo['cid'] EQ $info['cs']">
+                                                <option value="{$vo.cid}" selected="selected">{$vo.char_name}</option>
+                                                <else/>
+                                                <option value="{$vo.cid}">{$vo.char_name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                    <select class="width_70" name="qx">
+                                        <option value="">-请选择-</option>
+                                        <volist name="city" id="vo">
+                                            <if condition="$vo['qz_areaid'] EQ $info['qx']">
+                                                <option value="{$vo.qz_areaid}" selected="selected">{$vo.qz_area}</option>
+                                                <else/>
+                                                <option value="{$vo.qz_areaid}">{$vo.qz_area}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+
+                                    <if condition="!isset($history)">
+                                        <button type="button" class="bgcolor"><i class="fa fa-tag"></i>无</button>
+                                        <else/>
+                                        <button id="history" type="button" class="bgcolor blue"><i class="fa fa-tag"></i>有</button>
+                                    </if>
+                                </div>
+                                <div class="col-xs-12 no-padding">
+                                    <select name="xiaoqutype" style="width:60px;">
+                                        <option  class="width_size"  value="1" <if condition = "$info['xiaoqu_type'] EQ 1">selected</if> >小区</option>
+                                        <option  class="width_size"  value="2" <if condition = "$info['xiaoqu_type'] EQ 2">selected</if> >道路</option>
+                                        <option  class="width_size"  value="3" <if condition = "$info['xiaoqu_type'] EQ 3">selected</if> >其他</option>
+                                    </select>
+                                    <input class="width_90 xiaoqu-entry" type="text" name="xiaoqu" autocomplete="off" value="{$info.xiaoqu}" maxlength="20" style="height:20px;">
+                                    <div class="xiaoqu-box">
+                                        <ul id="xiaoqu_ul">
+                                        </ul>
+                                    </div>
+                                    <span>坐标：</span>
+                                    <input class="width_130" type="text" name="zuobiao" style="height:20px;" value="{$info.jingwei}">
+                                    <a href="https://api.map.baidu.com/lbsapi/getpoint/index.html" style="margin-left:10px;margin-top:-3px;" target="_blank"><img src="/assets/common/img/location.jpg" style="width:17px;"/></a>
+                                </div>
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">装修类型：</span>
+                                    <select name="lx" class="width_70">
+                                        <option value="">-请选择-</option>
+                                        <option value="2" <if condition="$info['lx'] EQ 2">selected</if> >公装</option>
+                                        <option value="1" <if condition="$info['lx'] EQ 1">selected</if> >家装</option>
+                                    </select>
+                                    <select name="lxs" class="width_80">
+                                        <option value="">-请选择-</option>
+                                        <volist name="lxs" id="vo">
+                                            <option value="{$key}" <if condition="$key EQ $info['lxs']">selected</if> >{$vo}</option>
+                                        </volist>
+                                    </select>
+                                    <span>用途：</span>
+                                    <input class="width_90" type="text" name="yt" value="{$info.yt}" placeholder="装修用途">
+                                </div>
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">户型结构：</span>
+                                    <select name="huxing" class="width_100">
+                                        <option value="">-请选择-</option>
+                                        <volist name="huxing" id="vo">
+                                            <option value="{$vo.id}" <if condition="$vo['id'] EQ $info['huxing']">selected</if>>{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                    <select name="shi" class="width_50">
+                                        <volist name="shi" id="vo">
+                                            <option value="{$key}" <if condition="$vo EQ $info['shi']">selected</if> >{$vo}</option>
+                                        </volist>
+                                    </select>
+                                    <span>室</span>
+                                    <span>面积：</span>
+                                    <input class="width_60" type="text" name="mianji" value="{$info.mianji}">㎡
+                                </div>
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">风格：</span>
+                                    <select name="fengge" class="width_70">
+                                        <option value="">-请选择-</option>
+                                        <volist name="fengge" id="vo">
+                                            <if condition="$vo['id'] EQ $info['fengge']">
+                                                <option value="{$vo.id}" selected>{$vo.name}</option>
+                                                <else/>
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                    <span>预算：</span>
+                                    <select class="width_70" name="fangshi">
+                                        <option value="">-请选择-</option>
+                                        <volist name="fangshi" id="vo">
+                                            <if condition="$vo['id'] EQ $info['fangshi']">
+                                                <option value="{$vo.id}" selected>{$vo.name}</option>
+                                                <else/>
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                    <select class="width_70" name="yusuan">
+                                        <option selected="" value="">-请选择-</option>
+                                        <volist name="yusuan" id="vo">
+                                            <if condition="$vo['id'] EQ $info['yusuan']">
+                                                <option value="{$vo.id}" selected>{$vo.name}</option>
+                                                <else/>
+                                                <option value="{$vo.id}">{$vo.name}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">拿房时间：</span>
+                                    <input type="text" name="nf_time" class="lf_datepicker inputer width_100" value="{$info['nf_time']}">
+                                    <span class="width_size">钥匙：</span>
+                                    <select class="key_select width_70" name="keys">
+                                        <option value="">-请选择-</option>
+                                        <volist name="keys" id="vo">
+                                            <if condition="$key EQ $info['keys']">
+                                                <option value="{$key}" selected>{$vo}</option>
+                                                <else/>
+                                                <option value="{$key}">{$vo}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-12 no-padding mt3">
+                                    <span class="width_size">量房时间：</span>
+                                    <select class="width_100" name="lftime">
+                                        <option value="">-请选择-</option>
+                                        <volist name="lf_time" id="vo">
+                                            <if condition="$vo EQ $info['lftime']">
+                                                <option value="{$vo}" selected>{$vo}</option>
+                                                <else/>
+                                                <option value="{$vo}">{$vo}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                    <span class="width_size">开工时间：</span>
+                                    <select class="width_100" name="start">
+                                        <option value="">-请选择-</option>
+                                        <volist name="start_time" id="vo">
+                                            <option value="{$vo}" <if condition="$vo EQ $info['start']">selected</if> >{$vo}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size pull-left">特殊需求：</span>
+                                <textarea class="pull-left text-height120" name="text" style="line-height: 12px;">{$info.text}</textarea>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size pull-left">回访记录：</span>
+                                <textarea class="pull-left text-height60" name="huifan" >{$info.huifan}</textarea>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">待定时间：</span>
+                                <input type="text" name="visitime" class="datepicker width_120" value="{$info['visitime']}" style="height: 20px;">
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span class="width_size">编辑人：</span>
+                                <span>{$info.customer}</span>
+                                <button id="btnSave" type="button" class="btn btn-info btn-sm pull-right width_60">①保存</button>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3 border-t">
+                                <span class="width_size">当前状态：</span>
+                                <span class="red">{:getOrderStatus($info['on'], $info['on_sub'], $info['type_fw'])}<i class="fa fa-long-arrow-right mr10"></i></span>
+                                <select name="state" class="select_order_state width_90">
+                                    <volist name="status" id="vo">
+                                        <option value="remark_{$vo.id}" <if condition="$vo['id'] EQ $info['orderstatus']">selected</if> >{$vo.name}</option>
+                                    </volist>
+                                </select>
+                                <volist name="status" id="vo" key="$key">
+                                    <if condition="count($vo['child']) GT 0">
+                                    <select id="remark_{$key}" class="select_order_item width_150 <if condition="$key EQ 0">hide_select </if>">
+                                    <option value="">-请选择备注-</option>
+                                    <volist name="vo.child" id="v" key="k">
+                                        <option value="{$v}" <if condition="$v EQ $info['remarks']">selected</if> >{$v}</option>
+                                    </volist>
+                                    </select>
+                                    </if>
+                                </volist>
+                            </div>
+                            <div class="col-xs-12 no-padding mt3">
+                                <span>审核人：</span>
+                                <span>{$csos_new.user_name}</span>
+                                <button id="btnCheck" type="button" class="btn btn-info btn-sm pull-right width_60">②审核</button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- 第二列 -->
+                    <div class="col-xs-4 border-r padding10">
+                        <div class="col-xs-12 no-padding">
+                            <span>对接人：</span>
+                            <if condition="$info['on'] EQ 4">
+                                <span>{$info.fen_customer|default="未知"}</span>
+                                <else />
+                                <span>未知</span>
+                            </if>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <span>分配状态：</span>
+                            <if condition="$info['on'] EQ 4 AND $info['type_fw'] EQ 1">
+                                <span>分</span>
+                                <elseif condition="$info['on'] EQ 4 AND $info['type_fw'] EQ 2" />
+                                <span>赠</span>
+                                <else/>
+                                <span>未知</span>
+                            </if>
+                            <a href="/map/mapmarker?id={$info.id}" target="_blank" class="btn btn-info btn-sm pull-right">地图辅助</a>
+                        </div>
+                        <if condition="$info['on'] EQ 4 AND $info['type_fw'] EQ 2 AND $info['order_to_new'] NEQ 2">
+                            <div class="col-xs-12 no-padding">
+                                <button id="btnNoNew" type="button" class="btn btn-info btn-sm pull-right width_100" value="{$info.id}" title="赠送订单,再访后还是不能成为新订单">不能生成新单</button>
+                                <button id="btnNew" type="button" class="btn btn-info btn-sm pull-right width_100" value="{$info.id}" title="赠送订单,再访有效后生成一个新的订单">生成新单</button>
+                            </div>
+                        </if>
+                        <div class="col-xs-12 no-padding mt3">
+                            <span>已分配公司：</span>
+                            <!--<button id="copy-company" type="button" class="width_60 zclip"><i class="fa fa-files-o"></i>复制</button>-->
+                        </div>
+                        <div class="col-xs-12 no-padding mt3 wx_company_list" style="min-height: 45px;"  id="cityTmp">
+                            <volist name="company" id="vo">
+                                <div class="col-xs-6 no-padding">
+                                    <div class="lh16">
+                                        <if condition="$vo['type_fw'] EQ 1"><span>分</span><else/><span>赠</span></if>
+                                        <if condition="$vo['isread'] EQ 0">
+                                            <span class="red fen-company">{$vo.jc}</span>
+                                            <else/>
+                                            <span class="green fen-company">{$vo.jc}</span>
+                                        </if>
+                                        <if condition="!empty($vo['qq'])">
+                                            <a href="http://wpa.qq.com/msgrd?v=3&uin={$vo.qq}&site=qq&menu=yes" target="_blank"><i class="relation_icon icon_qq"></i></a>
+                                        </if>
+                                        <if condition="!empty($vo['qq1'])">
+                                            <a href="http://wpa.qq.com/msgrd?v=3&uin={$vo.qq1}&site=qq&menu=yes" target="_blank"><i class="relation_icon icon_qq"></i></a>
+                                        </if>
+                                    </div>
+                                </div>
+                            </volist>
+                        </div>
+                        <div class="col-xs-12 no-padding mt3" id="nowCompanys">
+                            <volist name="nowCompanys" id="vo">
+                                <p class="red">【{$vo.qz_area}】</p>
+                                <div class="col-xs-12 no-padding">
+                                    <volist name="vo.child" id="v">
+                                        <div class="col-xs-6 no-padding">
+                                            <span class="<if condition="$v['wxcount'] GT 0">green<else/>red</if>" data-toggle="tooltip" data-placement="top" title="{$v.tags|default=''}">{$v.jc}</span>
+                                            <span class="green">[{$v.fen|default=0},{$v.zen|default=0}]</span>
+                                            <if condition="isset($v['end_time'])">
+                                                <span class="red">到 {$v.end_time}</span>
+                                            </if>
+                                            <if condition="isset($v['newMark'])">
+                                                <span class="green">新</span>
+                                            </if><switch name="v.viptype">
+                                            <case value="0.5"><span class="green">半</span></case>
+                                            <case value="2"><span class="green">双</span></case>
+                                            <case value="3"><span class="green">三</span></case>
+                                            <case value="4"><span class="green">四</span></case>
+                                            <case value="5"><span class="green">五</span></case></switch>
+                                        </div>
+                                    </volist>
+                                </div>
+                            </volist>
+                        </div>
+                        <!--<div class="col-xs-12 no-padding mt3">-->
+                            <!--<span>{$info.cname}上次分配公司：</span>-->
+                            <!--<div>-->
+                                <!--<volist name="fenpei_now_company" id="vo">-->
+                                    <!--<span class="col-xs-3 text-center" style="padding:0 5px;">{$vo.jc}</span>-->
+                                <!--</volist>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="col-xs-12 no-padding mt3">-->
+                            <!--<span>最近30天过期会员：</span>-->
+                            <!--<div class="row">-->
+                                <!--<volist name="lostCompany" id="vo">-->
+                                    <!--<div class="col-sm-3 text-center" style="padding: 0 3px;">-->
+                                        <!--<span class="red">{$vo.jc}</span><span>已过期<i class="red">{$vo.day}</i>天</span>-->
+                                    <!--</div>-->
+                                <!--</volist>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                    <!-- 第三列 -->
+                    <div class="col-xs-4 padding10">
+                        <div class="col-xs-12 no-padding mt3" id="otherCompanys">
+                            <div>相邻城市装修公司：</div>
+                            <volist name="otherCompanys" id="vo">
+                                <div class="col-xs-12 no-padding mt3">
+                                    <p class="red">【{$vo.cname}】</p>
+                                    <div class="col-xs-12 no-padding">
+                                        <volist name="vo.child" id="v">
+                                            <div class="col-xs-6 no-padding">
+                                                <if condition="$v['wxcount'] GT 0">
+                                                    <span class="green" data-toggle="tooltip" data-placement="top" title="{$v.tags|default=''}">{$v.jc}</span>
+                                                    <else/>
+                                                    <span class="red" data-toggle="tooltip" data-placement="top" title="{$v.tags|default=''}">{$v.jc}</span>
+                                                </if>
+                                                <span class="green"> [{$v.fen|default=0},{$v.zen|default=0}]</span>
+                                                <if condition="isset($v['end_time'])">
+                                                    <span class="red">到 {$v.end_time}</span>
+                                                </if>
+                                                <if condition="isset($v['newMark'])">
+                                                    <span class="green">新</span>
+                                                </if><switch name="v.viptype">
+                                                <case value="0.5"><span class="green">半</span></case>
+                                                <case value="2"><span class="green">双</span></case>
+                                                <case value="3"><span class="green">三</span></case>
+                                                <case value="4"><span class="green">四</span></case>
+                                                <case value="5"><span class="green">五</span></case></switch>
+                                                </span>
+                                            </div>
+                                        </volist>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span>{$vo.cname}上次分配公司：</span>
+                                    <div>
+                                        <volist name="vo.fen_company" id="v">
+                                            <span class="text-center" style="padding:0 5px;">{$v.jc}</span>
+                                        </volist>
+                                    </div>
+                                </div>
+                            </volist>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mask"></div>
+    <div class="show_callnum_pop pop_set">
+        <div class="show_num_header"><span>申请显号</span></div>
+        <div class="show_num_body">
+            <div class="show_num_item"><span class="pull-left show_num_tit">申请人：</span><span class="pull-left">{$Think.session.uc_userinfo.name}</span></div>
+            <div class="show_num_item"><span class="pull-left show_num_tit">申请订单号：</span><span class="pull-left">{$info.id}</span></div>
+            <div class="show_num_item"><span class="pull-left show_num_tit">申请理由：</span>
+                <textarea   class="pull-left"></textarea>
+                <span style="color: red">*</span>
+                <input  type="hidden" value ="{$jinji}" >
+            </div>
+        </div>
+        <div class="show_num_footer">
+            <if condition="$jinji EQ 0">
+                <div class="btn btn-info callnum_pop_ok">确定</div>
+                <div class="btn btn-default call_pop_close">关闭</div>
+                <else/>
+                <button class="btn btn-info callnum_pop_ok " style="float:left" >紧急入口</button>
+                <button  class="btn btn-info callnum_pop_ok"  disabled="disabled" >确定</button>
+                <div class="btn btn-default call_pop_close">关闭</div>
+            </if>
+        </div>
+    </div>
+    <input type="hidden" name="dwz" value="{$info.dwz}" />
+</section>
+<script type="text/javascript">
+    function tel_repeat() {
+        var other_contact = trim($("#other_contact").val());
+        var phone = other_contact.replace(/[^0-9]/g, "");
+        if (phone != '') {
+            $.ajax({
+                url: '/order/tel_repeat',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    phone: phone
+                }
+            }).done(function (data) {
+                if (data.status == 0) {
+                    $("#other_contact_span").text(data.info);
+                }
+            });
+        }
+    }
+
+    $("body").on("click", "#btnEdits", function () {
+        $(".applygaiwk").show();
+    });
+
+    $('.applygaiwkhang .closegb').click(function () {
+        $(".applygaiwk").hide();
+    });
+
+    tel_repeat();
+    //备用联系鼠标移出
+    $("#other_contact").on('blur', function () {
+        $("#other_contact_span").text('');
+        tel_repeat();
+    });
+
+    $('.datepicker').datetimepicker({
+        weekStart: 1,
+        todayHighlight: 1,
+        todayBtn: true,
+        minView: 0,
+        pickerPosition: "bottom-left",
+        autoclose: true
+    });
+
+    $(".lf_datepicker").datepicker({
+        format: "yyyy-mm-dd",
+        minViewMode: 0,
+        autoclose: true
+    }).on('changeDate', function (ev) {
+        var val = $("textarea[name=text]").val();
+        val += " " + $("input[name=nf_time]").val();
+        $("textarea[name=text]").val(val);
+    });
+
+    $('#icon_eye').on('click', function () {
+        $('.show_callnum_pop').fadeIn();
+        $('.mask').fadeIn();
+    });
+
+    $('.call_pop_close').on('click', function () {
+        $('.call_pop').fadeOut();
+        $('.show_callnum_pop').fadeOut();
+        $('.mask').fadeOut();
+    });
+
+    $('.callnum_pop_ok').on('click', function () {
+        $.ajax({
+            url: '/order/tel_openeye',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: '{$info.id}',
+                text: $('.show_callnum_pop textarea').val()
+            }
+        }).done(function (data) {
+            if (data.code == 200) {
+                $('.show_callnum_pop').fadeOut();
+                $('.mask').fadeOut();
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    $("#icon_email").click(function (event) {
+        var _this = $(this);
+        if (_this.hasClass('icon_email_disabled')) {
+            return false;
+        }
+        if (!confirm("确定发送短信通知?")) {
+            return false;
+        }
+        $.ajax({
+            url: '/sms/sendsms/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: "{$info.id}"
+            }
+        }).done(function (data) {
+            if (data.code == 200) {
+                alert("短信发送成功！");
+                _this.addClass('icon_email_disabled');
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    $('.select_order_state').on('change', function () {
+        var id = $(this).val();
+        $('.select_order_item').addClass('hide_select');
+        $("#" + id).removeClass('hide_select');
+        $('.order_note').show();
+        if ($("#" + id).length == 0) {
+            $('.order_note').hide();
+        }
+    });
+    $('.select_order_state').trigger('change');
+
+    // 钥匙选择字体变化
+    $('.key_select').on('change', function () {
+        if ($('.key_select option:selected').val() == '1') {
+            $(this).removeClass('red').addClass('green').addClass('key_select_option');
+        } else if ($('.key_select option:selected').val() == '0') {
+            $(this).removeClass('green').addClass('red').addClass('key_select_option');
+        } else {
+            $(this).removeClass('green').removeClass('red').removeClass('key_select_option');
+        }
+    });
+    $('.key_select').trigger('change');
+
+    $(".icon_headset").click(function (event) {
+        var _this = $(this);
+        if (!confirm("确定IP话机拨打电话?")) {
+            return false;
+        }
+        $.ajax({
+            url: '/voip/tel_voipcallback',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: _this.attr("data-id")
+            }
+        }).done(function (data) {
+            if (data.code == 200) {
+                alert(data.errmsg);
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    $('.call_pop_close').on('click', function () {
+        $('.call_pop').fadeOut();
+        $('.show_callnum_pop').fadeOut();
+        $('.mask').fadeOut();
+        $('body').css('overflowY', 'auto');
+    });
+
+    $("#icon_email").click(function (event) {
+        var _this = $(this);
+        if (_this.hasClass('icon_email_disabled')) {
+            return false;
+        }
+        if (confirm("确定发送短信吗?")) {
+            $.ajax({
+                url: '/sms/sendsms/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: "{$info.id}"
+                }
+            }).done(function (data) {
+                if (data.code == 200) {
+                    alert("短信发送成功！");
+                    $(".icon_email").addClass('icon_email_disabled').attr("title", "短信已发送");
+                } else {
+                    alert(data.errmsg || data.info);
+                }
+            });
+        }
+    });
+
+    $("#history").click(function (event) {
+        BootstrapDialog.show({
+            title: "历史签单小区",
+            message: function (dialog) {
+                var $message = $('<div style="margin:-15px; overflow-y:auto; max-height:400px;"></div>');
+                var pageToLoad = dialog.getData('pageToLoad');
+                $message.load(pageToLoad);
+                return $message;
+            },
+            data: {
+                'pageToLoad': '/order/history?xiaoqu={$info.xiaoqu}&cs={$info.cs}'
+            },
+            type: BootstrapDialog.TYPE_DEFAULT,
+            onshow: function (e) {
+                e.$modalDialog.css("width", "400px");
+            }
+        });
+    });
+
+    //修改城市，ajax获取城市对应的区域以及装修公司的信息
+    $('select[name=cs]').change(function(event) {
+        var cid = $(this).val();
+        $.ajax({
+            url: '/orders/getareabycid/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                cid:cid
+            }
+        }).done(function(data) {
+            if (data.status == 1) {
+                $('select[name=qx]').html(data.data.area);
+                $('#nowCompanys').html(data.data.nowCompanys);
+                $('#otherCompanys').html(data.data.otherCompanys);
+                $('#cityTmp').html(data.data.cityTmp);
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    //修改区域,获取对应区域的小区名称
+    $("input[name=xiaoqu]").on("input propertychange", function () {
+        var cs = $('input[name=cs]').val();
+        var xiaoqu = $.trim($("input[name=xiaoqu]").val());
+        if (cs != '' && xiaoqu != '') {
+            $.ajax({
+                url: '/orders/getcommunitybycity/',
+                type: 'GET',
+                dataType: 'JSON',
+                data: {
+                    cs: cs,
+                    xiaoqu: xiaoqu
+                }
+            }).done(function (data) {
+                if (data.status == 0) {
+                    //下拉框内容
+                    $("#xiaoqu_ul").html(data.data);
+                    $(".xiaoqu-box").show();
+                } else {
+                    alert(data.errmsg || data.info);
+                }
+            });
+        }
+    });
+    /*小区input下拉*/
+    $(".xiaoqu-entry").click(function (event) {
+        $(".xiaoqu-box").show();
+        if ($(".xiaoqu-box").val() == "") {
+            $(".xiaoqu-box ul li").click(function () {
+                $('.xiaoqu-entry').val($(this).html());
+                //小区道路显示
+                $("select[name=xiaoqutype]").val($(this).attr("data-type"));
+                //坐标显示
+                $("input[name=zuobiao]").val($(this).attr("data-jw"));
+                $(".xiaoqu-box").hide();
+            })
+        }
+        $('.xiaoqu-entry').change(function () {
+            $(".xiaoqu-box").show();
+            var result = $('.xiaoqu-entry').val();
+            for (var i = 0; i < $(".xiaoqu-box ul li").length; i++) {
+                var oLiResult = $(".xiaoqu-box ul li").eq(i).html();
+                if (oLiResult.indexOf(result) != -1) {
+                    $(".xiaoqu-box ul li").eq(i).show();
+                    $(".xiaoqu-box ul li").eq(i).click(function () {
+                        $('.xiaoqu-entry').val($(this).html());
+                        $("input[name=zuobiao]").val($(this).attr("data-jw"));
+                        $(".xiaoqu-box").hide();
+                    })
+                } else {
+                    $(".xiaoqu-box ul li").eq(i).hide();
+                }
+            }
+        });
+        event.stopPropagation();
+    });
+
+    $(window).click(function () {
+        $(".xiaoqu-box").hide();
+    });
+
+    $("#btnNoNew").click(function (event) {
+        BootstrapDialog.show({
+            title: "不能生成原因",
+            message: function (dialog) {
+                var $message = $('<textarea id="content" placeholder="填写原因"></textarea>');
+                return $message;
+            },
+            type: BootstrapDialog.TYPE_INFO,
+            buttons: [{
+                label: '确定',
+                action: function (dialogItself) {
+                    $.ajax({
+                        url: '/order/ordertonewchange',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: {
+                            id: '{$info.id}',
+                            text: $("#content").val()
+                        }
+                    }).done(function (data) {
+                        if (data.code == 200) {
+                            alert("操作成功！");
+                            $(".my-dialog").modal("hide");
+                        } else {
+                            alert(data.errmsg || data.info);
+                        }
+                    });
+                    dialogItself.close();
+                }
+            }, {
+                label: '关闭',
+                action: function (dialogItself) {
+                    dialogItself.close();
+                },
+                cssClass: 'pull-left'
+            }]
+        });
+    });
+
+    $("#btnNew").click(function (event) {
+        if (confirm("确定生成新单吗？")) {
+            $.ajax({
+                url: '/order/ordernftoneworder',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {
+                    id: '{$info.id}'
+                }
+            }).done(function (data) {
+                if (data.code == 200) {
+                    alert(data.errmsg);
+                    $(".my-dialog").modal("hide");
+                } else {
+                    alert(data.errmsg || data.info);
+                }
+            });
+        }
+    });
+
+    //保存
+    $("#btnSave").on("click", function (event) {
+        //小区名不为空
+        var data = $("#myForm").serializeArray();
+        //var data ={};
+        //可保存的信息
+        //data.source_type = $("select[name=source_type]").val();
+        //data.zhuanfaren = $("select[name=zhuanfaren]").val();
+        //data.huifan = $("textarea[name=huifan]").val();
+        data.push({
+            name: "id",
+            value: "{$info.id}"
+        });
+        $.ajax({
+            url: '/order/orderup/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: data
+        }).done(function (data) {
+            if (data.code == 200) {
+                alert("业主信息保存成功");
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    $("#btnCheck").on("click", function (event) {
+        var status = $(".select_order_state").val();
+        var sub_status = $("#" + status).val();
+        if ('remark_4' == status) {
+            if (!confirm('是否确认分单（确认后暂时无法更改业主信息）')) {
+                return false;
+            }
+        }
+        if ('remark_6' == status) {
+            if (!confirm('是否确认赠单（确认后暂时无法更改业主信息）')) {
+                return false;
+            }
+        }
+        if (sub_status == '') {
+            alert('请选择订单备注！');
+            return false;
+        }
+        $.ajax({
+            url: '/orders/orderstatus/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                id: "{$info.id}",
+                status: status,
+                sub_status: sub_status
+            }
+        }).done(function (data) {
+            if (data.code == 200) {
+                if (data.info == '4' || data.info == '6') {
+                    $('#btnCheck').attr('disabled', 'disabled');
+                }
+                alert("订单审核操作成功！");
+            } else {
+                alert(data.errmsg || data.info);
+            }
+        });
+    });
+
+    $(function () {
+        $("#equalphone").on('click', function () {
+            if ($(this).is(':checked') == true) {
+                if ($("#contact_wx").val().length > 0) {
+                    $(this).removeAttr('checked');
+                    alert('请将微信编辑清空后，再勾选“手机同号”复选框。');
+                    return;
+                }
+                $("#contact_wx").attr('disabled', true);
+            } else {
+                $("#contact_wx").removeAttr('disabled');
+            }
+        });
+    })
+</script>

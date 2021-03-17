@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="keywords" content="密码找回">
+    <meta name="description" content="密码找回">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>密码找回-齐装网</title>
+    <include file="Index:resource" />
+    <link href="{$static_host}/assets/user/register/css/default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <include file="Index:header" />
+    <div class="wrap">
+        <div class="loginlogo">
+            <a class="logo" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo-r.png"/></a>
+        </div>
+    </div>
+    <div class="wrap oflow">
+        <div class="helpstep">
+            <span class="active">确认账号</span>
+            <em></em>
+            <span>安全验证</span>
+            <em></em>
+            <span>重置密码</span>
+            <em></em>
+            <span>完成</span>
+        </div>
+        <div class="gpmain">
+            <p>
+              <i>帐号</i>
+              <input name="name" type="text" placeholder="请填写用户名" />
+            </p>
+            <div class="tips nametip"></div>
+            <p>
+              <i>验证码</i>
+              <input class="half" name="code" type="text" placeholder="请填写验证码" maxlength="4">
+              <a href="javascript:void(0)" class="verify"><img src="/verify/" height="30"></a>
+              <a class="new" href="javascript:void(0)">换一张</a>
+            </p>
+            <div class="tips codetip"></div>
+            <a class="btn" href="javascript:void(0)">下一步</a>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(function(){
+      $(".verify").click(function(event) {
+         $(this).find("img").attr("src","/verify/"+Math.random());
+      });
+
+      $(".new").click(function(event) {
+         $(this).parent().find("img").attr("src","/verify/"+Math.random());
+      });
+
+      $(".btn").click(function(event) {
+          if($("input[name=name]").val() == ""){
+            $(".nametip").html("请填写用户名");
+            $("input[name=name]").focus();
+            return false;
+          }
+          // //验证手机,邮箱
+          // var reg = /^[0-9]{11}$/gi;
+          // var reg1 =/^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,5}$/gi;
+
+          // if(!reg.test($("input[name=name]").val()) && !reg1.test($("input[name=name]").val())){
+          //   $(".nametip").html("请填写正确的手机/邮箱");
+          //   $("input[name=name]").focus();
+          //   return false;
+          // }
+
+          $(".nametip").html("");
+          if($("input[name=code]").val() == ""){
+            $(".codetip").html("请填写验证码");
+            $("input[name=name]").focus();
+            return false;
+          }
+          $(".nametip").html("");
+
+          $.ajax({
+            url: '/getpassword/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                name:$("input[name=name]").val(),
+                code:$("input[name=code]").val(),
+                step:1
+              }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                  window.location.href = "/getpassword/"
+              }else{
+                if(data.data == 1){
+                   $(".nametip").html(data.info);
+                   $("input[name=name]").focus();
+                }else{
+                  $("input[name=code]").focus();
+                  $(".codetip").html(data.info);
+                }
+              }
+          })
+          .fail(function(xhr) {
+             $(".codetip").html("提交失败,请稍后再试");
+          });
+      });
+  });
+</script>
+</html>

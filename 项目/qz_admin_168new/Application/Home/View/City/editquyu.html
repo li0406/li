@@ -1,0 +1,221 @@
+<extend name="Main:baseTemplate" />
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/js/plugins/colorpicker/spectrum.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+            <h1>修改分站城市</h1>
+            <ol class="breadcrumb">
+                <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+                <li class="active"><a href="/city/index">区域城市管理</a></li>
+            </ol>
+        </section>
+        <section class="content">
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <form id="form1" action="" method="POST">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="title">城市名</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="cname" id="cname" autocomplete=off placeholder="例：苏州" value="{$quyuInfo.cname}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">区划代码</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="cid" id="cid" autocomplete=off placeholder="例：320500" value="{$quyuInfo.cid}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">二级域名</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="bm" id="bm" placeholder="例：suzhou" value="{$quyuInfo.bm}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">序号：</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" name="xh" id="xh" placeholder="排序" value="{$quyuInfo.xh}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">省份排序：</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" id="px" name="px" type="text" placeholder="省份排序" value="{$quyuInfo.px}" >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">ABC排序</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <input type="input" class="form-control" id="px_abc" name="px_abc" type="text" placeholder="ABC排序" value="{$quyuInfo.px_abc}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">城市标红</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <select name="mark_red" class="form-control">
+                <if condition="$quyuInfo['mark_red'] EQ '1' ">
+                    <option value="0">不标红</option><option value="1" selected>标红</option>
+                <else/>
+                    <option value="0" selected>不标红</option><option value="1">标红</option>
+                </if>
+                </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">城市级别</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                   <select name="little" class="form-control">
+                <if condition="$quyuInfo['little'] EQ '1'">
+                    <option value="0">地级市</option><option value="1" selected>县级市</option>
+                <else/>
+                    <option value="0" selected>地级市</option><option value="1">县级市</option>
+                </if>
+                </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">开通状态</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                    <select name="type" class="form-control">
+                <if condition="$quyuInfo['type'] EQ '1'">
+                    <option value="0">关闭</option><option value="1" selected>开通</option>
+                <else/>
+                    <option value="0" selected>关闭</option><option value="1">开通</option>
+                </if>
+                </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" id="submit" class="btn btn-success"><i class="fa fa-save"></i>&nbsp;保存</button>
+                    <button type="button" class="btn btn-default" onclick="history.back(-1)"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                </div>
+                </form>
+            </div>
+        </div>
+        </div>
+        </section>
+</block>
+<block name="script">
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#cname").blur(function(){
+        var cname = $("#cname").val();
+        if(cname == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavecname',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                cname : $("#cname").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('此城市分站已存在');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#cid").blur(function(){
+        var cid = $("#cid").val();
+        if(cid == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavecid',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                cid : $("#cid").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('区划代码已存在');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#bm").blur(function(){
+        var bm = $("#bm").val();
+        if(bm == ''){
+            return false;
+        }
+        $.ajax({
+            url: '/city/ishavebm',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                bm : $("#bm").val()
+            },
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                alert('二级域名已存在');
+            }
+        }).fail(function(xhr){
+            alert(xhr.responseText);
+        });
+    });
+
+    $("#submit").click(function(event){
+
+        if($('[name=cname]').val() === ''){
+            $("input[name=cname]").focus();
+            $("input[name=cname]").addClass('focus');
+            alert("请填写城市名~ ");
+            return false;
+        }
+        if($("input[name=cid]").val() === ''){
+            $("input[name=cid]").focus();
+            $("input[name=cid]").addClass('focus');
+            alert("请填写区划代码~ ");
+            return false;
+        }
+        if($("input[name=bm]").val() === ''){
+            $("input[name=bm]").focus();
+            $("input[name=bm]").addClass('focus');
+            alert("请填写域名~ ");
+            return false;
+        }
+        $("#form1").submit();
+    });
+});
+</script>
+</block>

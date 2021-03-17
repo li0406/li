@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <block name="meta">
+        <title></title>
+    </block>
+    <block name="style"></block>
+    <include file="Index:resource_509" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/search/css/basic.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+<include file="Index:header_509" />
+<div class="search-article">
+    <div class="search-box">
+        <div class="wrap">
+            <div id="seach">
+                <input type="text" autocomplete="off" name="seach" class="text" placeholder="请输入关键字">
+                <button class="button cw-icon search-btn">
+                    <img src="/assets/home/search/img/search.png" />
+                </button>
+                <span class="clear-icon"></span>
+            </div>
+        </div>
+    </div>
+    <div class="article-nav">
+        <div class="wrap">
+            <ul class="navlist">
+                <li data-url="">全部</li>
+                <!--<li data-url="lc">装修流程</li>-->
+                <li data-url="gonglue">装修攻略</li>
+                <li data-url="baike">装修百科</li>
+                <li data-url="wenda">装修问答</li>
+                <!--<li data-url="zhinan">装修指南</li>
+                <li data-url="xcdg">选材导购</li>-->
+            </ul>
+        </div>
+    </div>
+    <div class="wrap search-result">
+        <if condition="$total GT 0">
+            <if condition="empty($keyword)">
+                为您找到{$total}个相关结果
+                <else/>
+                为您找到{$total}个与“{$keyword}”相关结果
+            </if>
+        </if>
+    </div>
+    <block name="content">
+    </block>
+</div>
+<include file="Index:footer_509" />
+<block name="script"></block>
+<script type="text/javascript">
+    var http = '{$SCHEME_HOST.scheme_full}';
+    var domain = '{$SCHEME_HOST.domain}';
+    $(".navlist li").removeClass("active").eq("{$tab|default=0}").addClass("active");
+    $(function () {
+        var search = '';
+        $("input[name=seach]").bind('input propertychange',function () {
+            search = $("input[name=seach]").val();
+            if(search != ''){
+                $(".clear-icon").show();
+            }else{
+                $(".clear-icon").hide()
+            }
+        });
+        //清空搜索框内容
+        $("body").on("click","#seach .clear-icon",function () {
+            $('input[name=seach]').val("");
+            $(this).hide()
+        });
+        //获取url中的keyword
+        var getParameterByName = function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/,
+                "\\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results == null ? "" : decodeURIComponent(
+                results[1]);
+        };
+        var keyword = getParameterByName("keyword");
+        $("input[name=seach]").val(keyword);
+        //搜索
+        $(".search-btn").click(function () {
+            searchData()
+        });
+
+        //导航切换
+        //var indexCode = ''
+        $(".navlist li").click(function () {
+            search = $("input[name=seach]").val();
+            var str= $(this).data('url');
+            if(search == ''){
+                window.location.href = '/search/'+str
+            }else{
+                window.location.href = '/search/'+str+ '?keyword='+search
+            }
+        });
+
+        //键盘enter
+        $("#seach input").keyup(function(e){
+            if(e.keyCode == 13){
+                searchData()
+            }
+        });
+
+        function searchData() {
+            var str_index = location.href.indexOf('?');
+            search = $("input[name=seach]").val();
+            if(str_index > -1){
+                var str = location.href.slice(0,str_index)
+                if(search != ''){
+                    window.location.href = str+ '?keyword='+search
+                }else{
+                    window.location.href = str
+                }
+            }else{
+                var str = location.href
+                if(search != ''){
+                    window.location.href = str+ '?keyword='+search
+                }else{
+                    window.location.href = str
+                }
+            }
+        }
+    })
+</script>

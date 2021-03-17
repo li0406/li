@@ -1,0 +1,734 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>自发活动</title>
+    <include file="Index:resource"/>
+    <include file="Home:resource"/>
+    <script type="text/javascript" src="/assets/user/event/js/jquery.smint.js?v={:C('STATIC_VERSION')}"></script>
+
+    <link rel="stylesheet" href="/assets/common/plugin/datetimepicker/css/bootstrap.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet"
+          href="/assets/common/plugin/datetimepicker/css/bootstrap-datetimepicker.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript"
+            src="/assets/common/plugin/datetimepicker/js/bootstrap-datetimepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript"
+            src="/assets/common/plugin/datetimepicker/js/bootstrap-datetimepicker.zh-CN.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+//    $('.ht-nav').smint({
+//    	'scrollSpeed' : 1000
+//    });
+
+            //开关
+            $('.c-switch-box').on('click', function () {
+                if ($(this).find('.c-switch').hasClass('c-switch-on')) {
+                    $(this).find('.c-switch').removeClass('c-switch-on');
+                    $(this).find('.c-switch-text').text('暂停');
+
+                }
+                else {
+                    $(this).find('.c-switch').addClass('c-switch-on');
+                    $(this).find('.c-switch-text').text('正在进行');
+
+                }
+            });
+        });
+    </script>
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+    <![endif]-->
+    <link rel="stylesheet" href="{$static_host}/assets/user/event/css/ht-addgift.css?v={:C('STATIC_VERSION')}">
+</head>
+<body>
+<include file="Home:header"/>
+
+<div class="ht-wrap oflow ht-relative">
+    <include file="Home:comnavleft"/>
+    <include file="header"/>
+    <!--<ul class="ht-nav-tit">
+        <li class="active"><a href="/oneselfevent/">优惠活动</a></li>
+        <li class="special-gift"><a href="/oneselfevent/special">专用礼券</a></li>
+        <li class="common-gift"><a href="/oneselfevent/common">通用礼券</a></li>
+    </ul>-->
+    <div class="ht-main">
+        <form  id="formSubmit" action="editgift" method="post">
+        <div class="ht-normal-form">
+            <ul class="normal-info">
+                <li>
+                    <span>
+                        <i class="red">*</i>礼券名称:
+                    </span>
+                    <input type="hidden" value="{$info.id}" name="id" />
+                    <input class="full in-focus" name="tname" type="text" placeholder="" value="{$info.name}"
+                           data-focus="" maxlength="15">
+                    <i class="red err-tips"></i>
+                </li>
+
+                <li class="gift-active">
+                    <span>
+                        <i class="red">*</i>优惠活动:
+                    </span>
+                    <div class="gift-active-box">
+                        <div style="display: inline-block" class="active-style">
+                            <label for="for-money">
+                                <input type="radio" name="active-style-item" id="for-money" value="1" <if condition="$info['active_type'] EQ 1">checked</if>>
+                                满减金额&nbsp;&nbsp;满&nbsp;
+                                <input class="shorted  in-focus in-num active-type before_money" type="text" name="cals_1"
+                                       value="{$info.money1}" maxlength="6">
+                                减
+                                <input class="half  in-focus in-num active-type after_money" type="text" name="cal_1" value="{$info.money2}" maxlength="6">
+                                <br>
+                            </label>
+                        </div>
+
+                        <div style="display: inline-block" class="active-style">
+                            <label for="for-gift">
+                                <input type="radio" name="active-style-item" id="for-gift" value="2" <if condition="$info['active_type'] EQ 2">checked</if>>
+                                满送礼品&nbsp;&nbsp;满&nbsp;
+                                <input class="shorted  in-focus in-num active-type before-gift" type="text" name="cals_2"
+                                       value="{$info.money3}" maxlength="6">
+                                送
+                                <input class="half  in-focus active-type after-gift " type="text" name="cal_2" value="{$info.gift}" maxlength="7">
+                                <br>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </li>
+                <li>
+                    <span>
+                        <i class="red">*</i>发放数量:
+                    </span>
+                    <input class="full in-focus in-num" type="text" name="tnum" placeholder="" value="{$info.amount}"
+                           data-focus="" maxlength="6">
+                    <i class="red err-tips"></i>
+                </li>
+                <li>
+                    <span>
+                         <i class="red">*</i>活动开始时间
+                    </span>
+                    <input class="full in-focus timer3 form-control timer" type="text" name="active_start" placeholder="" value="{$info.activity_start|date='Y-m-d H:i:s',###}"
+                           data-focus="">
+                    <i class="red err-tips"></i>
+                </li>
+                <li>
+                    <span>
+                         <i class="red">*</i>活动结束时间
+                    </span>
+                    <input class="full in-focus timer4 form-control timer" type="text" name="active_end" placeholder="" value="{$info.activity_end|date='Y-m-d H:i:s',###}"
+                           data-focus="">
+                    <p class="red c-mark">注：活动时间为礼券可以领用的时间</p>
+                    <i class="red err-tips"></i>
+                </li>
+                <li>
+                    <span>
+                         <i class="red">*</i>有效时间-开始:
+                    </span>
+                    <input class="full in-focus timer1 form-control timer" type="text" name="valid_start" placeholder="" value="{$info.start|date='Y-m-d H:i:s',###}"
+                           data-focus="">
+                    <i class="red err-tips"></i>
+                </li>
+                <li>
+                    <span>
+                         <i class="red">*</i>有效时间-结束:
+                    </span>
+                    <input class="full in-focus timer2 form-control timer" type="text" name="valid_end" placeholder="" value="{$info.end|date='Y-m-d H:i:s',###}"
+                           data-focus="">
+                    <p class="red c-mark">注：有效时间为礼券可进行兑换的时间</p>
+                    <i class="red err-tips"></i>
+                </li>
+
+                <li class="c-use-rule">
+                    <span>
+                        使用规则:
+                    </span>
+                    <textarea class="c-rule" maxlength="300" name="rule">{$info.rule}</textarea>
+                    <i class="red err-tips"></i>
+                </li>
+                <li>
+                    <span><i class="red">*</i>模板选用:</span>
+                    <div class="c-module module-chose1 ">
+
+                        <label for="model1">&nbsp;
+                            <input type="hidden" name="modul" id="model1" value="1" <if condition="$info['module'] EQ 1">checked</if>>
+                            <!--<input type="radio" name="modul" id="model1" value="1" <if condition="$info['module'] EQ 1">checked</if>>模板一-->
+                        </label>
+                        <!--<img src="/assets/user/home/img/modul_1.png" alt="" class="modul_img modul_img1">-->
+                        <div class="modul-box">
+                            <div style="display: inline-block">
+                                <img src="/assets/user/home/img/modul_m1.png" alt="" class="modul_img modul_img1">
+                                <span>移动端</span>
+                            </div>
+                            <div style="display: inline-block">
+                                <img src="/assets/user/home/img/modul_pc1.png" alt="" class="modul_img modul_img1">
+                                <span>PC端</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-module module-chose2">
+                        <label for="model2">&nbsp;
+                            <input type="hidden" name="modul" id="model2" value="2" <if condition="$info['module'] EQ 2">checked</if>>
+                            <!--<input type="radio" name="modul" id="model2" value="2" <if condition="$info['module'] EQ 2">checked</if>>模板二-->
+                        </label>
+                        <!--<img src="/assets/user/home/img/modul_2.png" alt="" class="modul_img modul_img2">-->
+                        <div class="modul-box">
+                            <div style="display: inline-block">
+                                <img src="/assets/user/home/img/modul_m2.png" alt="" class="modul_img modul_img1">
+                                <span>移动端</span>
+                            </div>
+                            <div style="display: inline-block">
+                                <img src="/assets/user/home/img/modul_pc2.png" alt="" class="modul_img modul_img2">
+                                <span>PC端</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="shengming">
+                        <label for="mianze"><input type="checkbox" name="mianze" id="mianze">我已认真阅读并同意 <a
+                                href="javascript:void(0)" class="protocol">《商家优惠券协议》</a></label>
+                        <!--<p>我已认真阅读并同意 <a href="#">《商家优惠券协议》</a></p>-->
+                    </div>
+                </li>
+                <li>
+                    <div class="c-btns">
+                        <input class="c-btn btn-submit" type="button" disabled value="上传审核">
+                        <input class="c-btn btn-review" type="button" value="预览">
+                        <!--<input class="c-btn" type="button" value="取消">-->
+                        <a href="/oneselfevent/special" class="c-btn btn-cancel">取消</a>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+        </form>
+        <div class="mask" style="display: none;">
+            <i class="fa fa-close close-mask"></i>
+            <div>
+                <!--模板一-->
+                <div class="ticket-modul clearfix module-1">
+                    <div class="gift-box clearfix gift-box-m1">
+                        <div class="gift-left">
+                            <div class="gift-top">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money1">999999</span>
+                                </p>
+                                <p class="ticket-words1">满<em class="half_money1">999999</em>元可用</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="gift-right">
+                            <p>立即 <br> 领取</p>
+                        </div>
+                    </div>
+                    <div class="gift-box clearfix gift-box-pc1">
+                        <div class="gift-left">
+                            <div class="gift-top">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money1">999999</span>
+                                </p>
+                                <p class="ticket-words">满<em class="half_money1">999999</em>元可用</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="gift-right">
+                            <!--<p>立即 <br> 领取</p>-->
+                        </div>
+                    </div>
+                   <!-- <div class="ticket-modul-m clearfix">
+                        <div class="ticket-left ticket_m">
+                            <div class="ticket-up">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money1">1000</span>
+                                </p>
+                                <p class="ticket-words">立减<em class="half_money1">1000</em>元装修神券</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="ticket-right ">
+                            <div class="get-ticket">
+                                <p class="get-now">立即领取</p>
+                            </div>
+                            &lt;!&ndash;<p>去使用</p>&ndash;&gt;
+                        </div>
+                    </div>
+                    <div class="clearfix">
+                        <div class="ticket-left ticket_pc_left">
+                            <div class="ticket-up">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money1">1000</span>
+                                </p>
+                                <p class="ticket-words">立减<em class="half_money1">1000</em>元装修神券</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="ticket-right ticket_pc">
+                            &lt;!&ndash; <div class="get-ticket">
+                                 <p>立即领取</p>
+                             </div>&ndash;&gt;
+                            &lt;!&ndash;<p>去使用</p>&ndash;&gt;
+                        </div>
+                    </div>-->
+                </div>
+                <!--模板二-->
+                <div class="ticket-modul clearfix module-2">
+                    <div class="gift-box clearfix gift-box-m2">
+                        <div class="gift-left">
+                            <div class="gift-top">
+                                <p>
+                                    <!--<i class="fa fa-jpy" aria-hidden="true"></i>-->
+                                    <span class="full_money2">保温杯</span>
+                                </p>
+                                <p class="ticket-words">满<em class="half_money2">999999</em>元可领</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="gift-right">
+                            <p>立即 <br> 领取</p>
+                        </div>
+                    </div>
+                    <div class="gift-box clearfix gift-box-pc2">
+                        <div class="gift-left">
+                            <div class="gift-top">
+                                <p>
+                                    <!--<i class="fa fa-jpy" aria-hidden="true"></i>-->
+                                    <span class="full_money2">保温杯</span>
+                                </p>
+                                <p class="ticket-words">满<em class="half_money2">999999</em>元可领</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s">2018.11.28</span>~<span
+                                    class="active_time_e">2018.11.30</span></p>
+                        </div>
+                        <div class="gift-right">
+                            <!--<p>立即 <br> 领取</p>-->
+                        </div>
+                    </div>
+                   <!-- <div class="ticket-modul-m clearfix">
+                        <div class="ticket-left ticket-left-1 ticket_m">
+                            &lt;!&ndash;<p class="ticket-title">干将一号干将路店</p>&ndash;&gt;
+                            <div class="ticket-up">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money2">1000</span>
+                                </p>
+                                <p class="ticket-words">立减<em class="half_money2">1000</em>元装修神券</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s1">2018.11.28</span>~<span
+                                    class="active_time_e1">2018.11.30</span></p>
+                        </div>
+                        <div class="ticket-right ticket-black ticket-black_m">
+                            <div class="get-ticket">
+                                <p class="get-now">立即领取</p>
+                            </div>
+                            &lt;!&ndash;<p>去使用</p>&ndash;&gt;
+                        </div>
+                    </div>
+                    <div class="clearfix">
+                        <div class="ticket-left ticket-left-1 ticket_pc_left">
+                            &lt;!&ndash;<p class="ticket-title">干将一号干将路店</p>&ndash;&gt;
+                            <div class="ticket-up">
+                                <p>
+                                    <i class="fa fa-jpy" aria-hidden="true"></i>
+                                    <span class="full_money2">1000</span>
+                                </p>
+                                <p class="ticket-words">立减<em class="half_money2">1000</em>元装修神券</p>
+                            </div>
+                            <p class="ticket-time">有效时间：<span class="active_time_s1">2018.11.28</span>~<span
+                                    class="active_time_e1">2018.11.30</span></p>
+                        </div>
+                        <div class="ticket-right ticket-black">
+                            &lt;!&ndash;<div class="get-ticket">
+                                <p>立即领取</p>
+                            </div>&ndash;&gt;
+                            &lt;!&ndash;<p>去使用</p>&ndash;&gt;
+                        </div>
+                    </div>-->
+                </div>
+                <!--协议-->
+                <div class="reles-box" style="display: none;">
+                    <p class="rules-title">商家优惠礼券协议</p>
+                    <div class="rules-content">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin
+                        gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor.
+                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam
+                        fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus sapien nunc
+                        eget.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin
+                        gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor.
+                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam
+                        fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus sapien nunc
+                        eget.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin
+                        gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor.
+                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam
+                        fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus sapien nunc
+                        eget.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin
+                        gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor.
+                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam
+                        fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus sapien nunc
+                        eget.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin
+                        gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor.
+                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam
+                        fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus sapien nunc
+                        eget.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                    </div>
+                    <!--<div class="rules-check">
+                        <label for="check-item">
+                            <input type="checkbox" id="check-item" name="mianze">我已认真阅读并同意该协议
+                        </label>
+                    </div>
+                    <button class="rules-btn " disabled>确认</button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<include file="Index:footer"/>
+</body>
+<script type="text/javascript">
+    $(function () {
+        var vs_time, ve_time, as_time, ae_time;
+
+        $('.timer').datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            language: 'zh-CN',
+            autoclose: true,
+            todayBtn: true
+        });
+
+
+        /*     layui.use('laydate', function () {
+                 var laydate = layui.laydate;
+                 laydate.render({
+                     elem: '.timer1',
+                     type: 'datetime',
+                     done: function (value) {
+                         vs_time = new Date(value).getTime()
+                     }
+                 })
+                 laydate.render({
+                     elem: '.timer2',
+                     type: 'datetime',
+                     done: function (value) {
+                         ve_time = new Date(value).getTime()
+                     }
+                 })
+                 laydate.render({
+                     elem: '.timer3',
+                     type: 'datetime',
+                     done: function (value) {
+                         as_time = new Date(value).getTime()
+                     }
+                 })
+                 laydate.render({
+                     elem: '.timer4',
+                     type: 'datetime',
+                     done: function (value) {
+                         ae_time = new Date(value).getTime()
+                     }
+                 })
+             })
+     */
+
+
+        var flag = false, tname, tmoney, tnum, tmodul;
+        $('input[name = mianze]').on('change', function () {
+            var mianze = $('input[name = mianze]').prop('checked')
+            if (mianze) {
+                $('.btn-submit').addClass('btn-active')
+                $('.btn-submit').removeAttr('disabled')
+            } else {
+                $('.btn-submit').removeClass('btn-active')
+                $('.btn-submit').attr('disabled', true)
+            }
+        })
+        var moduleText;
+        $('input[name=modul]').on('change', function () {
+            var modules = $('input:radio[name = modul]:checked')
+            moduleText = modules.parent().text().trim();
+            if (modules.val() == null) {
+                flag = false
+                return false
+            } else {
+                tmodul = modules.parent().text()
+                flag = true
+            }
+        })
+        if($('input:radio[name = modul]:checked')){
+            flag = true
+        }else{
+            flag = false
+        }
+        moduleText = $('input:radio[name = modul]:checked').parent().text().trim()
+
+
+
+        $('.protocol').on('click', function () {
+            $('.mask').show()
+            $('.reles-box').show()
+            $('.ticket-modul').hide()
+        })
+        $('.close-mask').on('click', function () {
+            $('.mask').hide()
+            $('.reles-box').hide()
+            $('.ticket-modul').hide()
+        })
+        $('.in-num').keyup(function () {
+            var tmptxt = $(this).val();
+            $(this).val(tmptxt.replace(/\D/g, ''));
+        }).bind("paste", function () {
+            var tmptxt = $(this).val();
+            $(this).val(tmptxt.replace(/\D/g, ''));
+        });
+        var gift_flag = true;
+        var gift_full, gift_half, gift_style;
+        gift_style = $('input:radio[name = active-style-item]:checked').val()
+        styleChange(gift_style)
+        $('input[name=active-style-item]').on('change', function () {
+            gift_flag = true
+            gift_style = $('input:radio[name = active-style-item]:checked').val()
+            console.log(gift_style)
+            $('input[name=cals_1]').val("")
+            $('input[name=cal_1]').val("")
+            $('input[name=cals_2]').val("")
+            $('input[name=cal_2]').val("")
+            styleChange(gift_style)
+        })
+        if($('input:radio[name = active-style-item]:checked').val()){
+            gift_flag = true
+        }else{
+            gift_flag = false
+        }
+        function styleChange(style){
+            gift_full=gift_half =''
+            if (style == 1) {
+                $('.module-chose1').show()
+                $('.module-chose2').hide()
+                $('.active-type').on('change', function (){
+                    gift_full = $('input[name=cals_1]').val()
+                    gift_half = $('input[name=cal_1]').val()
+                    if (gift_full > 999999) {
+                        msg('最大输入金额为999999')
+                        $('input[name=cals_1]').val('')
+                        return false
+                    } else if (gift_half > 999999) {
+                        msg('最大输入金额为999999')
+                        $('input[name=cal_1]').val('')
+                        return false
+                    }
+                })
+
+            }
+            else if (style == 2) {
+                $('.module-chose2').show()
+                $('.module-chose1').hide()
+                $('.active-type').on('change', function (){
+                    gift_full = $('input[name=cals_2]').val()
+                    gift_half = $('input[name=cal_2]').val()
+                    if (gift_full > 999999) {
+                        msg('最大输入金额为999999')
+                        $('input[name=cals_2]').val('')
+                        return false
+                    } else if (gift_half.length > 7) {
+                        msg('最多输入7个字符')
+                        $('input[name=cal_2]').val('')
+                        return false
+                    }
+                })
+            }
+        }
+        $('.btn-review').on('click', function () {
+            // if (flag) {
+                $('.mask').show()
+                if (gift_style == 1) {
+                    $('.module-1').show()
+                    $('.module-2').hide()
+                    $('.full_money1').text($('.after_money').val() || 0)
+                    $('.half_money1').text($('.before_money').val() || 0)
+                    var sTime =  getTimeFn($('.timer1').val())
+                    var eTime = getTimeFn($('.timer2').val())
+                    $('.active_time_s').text(sTime)
+                    $('.active_time_e').text(eTime)
+
+                } else if (gift_style == 2) {
+                    $('.module-2').show()
+                    $('.module-1').hide()
+                    $('.full_money2').text($('.after-gift').val() || 0)
+                    $('.half_money2').text($('.before-gift').val() || 0)
+                    var sTime =  getTimeFn($('.timer1').val())
+                    var eTime = getTimeFn($('.timer2').val())
+                    $('.active_time_s1').text(sTime)
+                    $('.active_time_e1').text(eTime)
+
+                }
+            // }
+        })
+
+        function getTimeFn(time) {
+            var str1 = time || 0;
+            var star = new Date(str1)
+            var temp  = star.getFullYear() + "."+ (parseInt(star.getMonth())+1) + '.' + star.getDate()
+            return temp
+
+        }
+
+
+        $('.btn-submit').on('click', function () {
+
+            if (!$('input[name=tname]').val()) {
+                msg('请填写礼券名称')
+                return false
+            }
+          /*  if($('input[name=active-style-item]').val() == 1){
+                if (!$('input[name=cals_1]').val() || !$('input[name=cal_1]').val()) {
+                    msg('请填写立减金额')
+                    return false
+                }
+            }else{
+                if (!$('input[name=cals_2]').val() || !$('input[name=cal_2]').val()) {
+                    msg('请填写满送礼品')
+                    return false
+                }
+            }*/
+            if (!gift_flag) {
+                msg('请选择优惠活动')
+                return false
+            }
+
+            gift_style = $('input:radio[name = active-style-item]:checked').val()
+            console.log('fasfsd',gift_style)
+            if ((gift_style == 1 && !$('.after_money').val())) {
+                msg('请输入满减金额')
+                return false
+            }
+            if(gift_style == 1 && parseInt($('input[name=cals_1]').val()) < parseInt($('input[name=cal_1]').val())){
+                msg("金额填写有误，减免金额需小于使用金额")
+                return false
+            }
+            console.log($('input[name=cal_2]').val())
+            if ((gift_style == 2 && !parseInt($('input[name=cals_2]').val())) || (gift_style == 2 && !$('input[name=cal_2]').val())) {
+                msg('请输入满送礼品')
+                return false
+            }
+
+            if (!$('input[name =tnum]').val()) {
+                msg('请填写发放数量')
+                return false
+            }
+
+            if (!$('.timer3').val() || !$('.timer4').val()) {
+                msg('请选择活动时间')
+                return false
+            }
+            if (toTimeStamp($('.timer3').val()) > toTimeStamp($('.timer4').val())) {
+                msg('活动开始时间大于结束时间')
+                $('.timer4').val('')
+                return false
+            }
+            if($('.timer2').val()<$('.timer4').val()){
+                msg('有效结束时间早于活动结束时间，请重新选择')
+                $('.timer4').val('')
+                return false
+            }
+
+
+            if (!$('.timer1').val() || !$('.timer2').val()) {
+                msg('请选择有效时间')
+                return false
+            }
+            if (toTimeStamp($('.timer1').val()) > toTimeStamp($('.timer2').val())) {
+                msg('开始时间大于结束时间')
+                $('.timer2').val('')
+                return false
+            }
+            if($('.timer1').val()<$('.timer3').val()){
+                msg('有效开始时间早于活动开始时间，请重新选择')
+                $('.timer3').val('')
+                return false
+            }
+
+//            if (!flag) {
+//                msg('请选择模板')
+//                return false
+//            }
+            if($('input:radio[name = modul]:checked').val == ''){
+                msg('请选择模板')
+                return false
+            }
+
+            //ajax请求
+            console.log($('#formSubmit').serializeArray());
+            $('.btn-submit').attr('disabled', true)
+            // return
+            $.ajax({
+                //几个参数需要注意一下
+                type: "POST",//方法类型
+                dataType: "json",//预期服务器返回的数据类型
+                url: "editgift/" ,//url
+                data:$('#formSubmit').serializeArray(),
+                success: function (result) {
+                    console.log(result);//打印服务端返回的数据(调试用)
+                    if (result.error_code == 202) {
+                        msg(result.error_msg);
+                        window.location.href = '/oneselfevent/special/';
+                    }else{
+                        msg("保存失败");
+                        $('.btn-submit').removeAttrs('disabled');
+                    }
+                },
+                error : function() {
+                    msg("网络异常，请稍后重试！");
+                    $('.btn-submit').removeAttrs('disabled')
+                }
+            });
+
+        })
+
+
+    })
+
+    function toTimeStamp(time) {
+        if (time != undefined) {
+            var date = time;
+            date = date.substring(0, 19);
+            date = date.replace(/-/g, '/');
+            var timestamp = new Date(date).getTime();
+            return timestamp;
+        }
+    };
+
+    function msg(msg, fn) {
+        layui.use('layer', function () {
+            var layer = layui.layer;
+            layer.msg(
+                msg,
+                {time: 5000,},
+                fn || function () {
+                }
+            )
+        })
+    }
+
+</script>
+</html>

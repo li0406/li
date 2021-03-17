@@ -1,0 +1,211 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>重点系数统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/home/orderstat/css/coefficientstatistics.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}">
+    <link rel="stylesheet" href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}">
+
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>重点系数统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <ul class="coefficient-statistics">
+                                <li class="activity">重点系数变化统计</li>
+                                <li>重点系数总览</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab1">
+                <div class="box" style="padding-bottom:20px;">
+                    <h4 style="padding-left:15px;">日重点系数变化统计</h4>
+                    <div class="box-header">
+                        <form action="/orderstat/coefficientstatistics" method="get">
+                            <div class="col-xs-2">
+                                <div>查询时间</div>
+                                <input type="text" name="date" placeholder="选择时间" class="form-control datepicker" autocomplete="off" value="{$Think.get.date}" />
+                            </div>
+                            <div class="col-xs-2">
+                                <button type="submit" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export">导出EXCEL</button>
+                                <input type="hidden" name="tab" value="1" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table id="myTable" class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th class="col-xs-2">重点系数变化情况</th>
+                                <th>地级市</th>
+                                <th>县级市</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.name}（<span class="red">{$vo.count}</span>）</td>
+                                    <td>{$vo.city_a}</td>
+                                    <td>{$vo.city_b}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12" id="tab2">
+                <div class="box" style="padding-bottom:20px;">
+                    <h4 style="padding-left:15px;">重点系数统计</h4>
+                    <div class="box-header">
+                        <form action="/orderstat/coefficientstatistics/" method="get">
+                            <div class="col-xs-2">
+                                <div>城市</div>
+                                <select id="city" name="city" type="text" placeholder="选择城市" class="form-control">
+                                    <option value="">选择城市</option>
+                                    <volist name="cityList" id="vo">
+                                    <option value="{$vo.city_id}">{$vo.city_name}</option>
+                                    </volist>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>城市类别</div>
+                                <select id="level" name="level" type="text" placeholder="请选择" class="form-control">
+                                    <option value="">请选择</option>
+                                    <option value="0">A类</option>
+                                    <option value="1">B类</option>
+                                    <option value="2">C类</option>
+                                    <option value="4">S1</option>
+                                    <option value="5">S2</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-2">
+                                <div>查询月份</div>
+                                <input  id="date" name="month" type="text" placeholder="请选择" class="datetimepicker form-control" value="{$Think.get.month}" autocomplete="off" />
+                            </div>
+                            <div class="col-xs-2">
+                                <button type="submit" class="research-btn">查询</button>
+                                <button type="button" class="daochu-btn export">导出EXCEL</button>
+                                <input type="hidden" name="tab" value="2" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>城市</th>
+                                <th>类别</th>
+                                <volist name="detailsList.days" id="vo">
+                                <th>{$vo}</th>
+                                </volist>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="detailsList.list" id="vo">
+                                <tr>
+                                <td>{$vo.city_name}</td>
+                                <td>
+                                    <switch name="vo.little">
+                                    <case value="0">A类</case>
+                                    <case value="1">B类</case>
+                                    <case value="2">C类</case>
+                                    <case value="4">S1</case>
+                                    <case value="5">S2</case>
+                                    </switch>
+                                </td>
+                                <volist name="vo.date" id="v">
+                                <td>{$v}</td>
+                                </volist>
+                                </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+
+
+        $("#city").val("{$Think.get.city}");
+        $("#level").val("{$Think.get.level}");
+        var str = '';
+        var mydate = new Date();
+        year = mydate.getFullYear()-1;
+        month = mydate.getMonth()+1;
+        str = year + "-" + month;
+        $('.datepicker').datepicker({
+            autoclose: true,
+            format: 'yyyy-mm-dd'
+        });
+        $('.datetimepicker').datepicker({
+            format:"yyyy-mm",
+            minViewMode:1,
+            autoclose: true,
+            startDate:str,
+            endDate:new Date(),
+            todayBtn:false
+        });
+        $(".coefficient-statistics li").click(function () {
+            var index = $(this).index();
+            $(this).addClass("activity").siblings().removeClass("activity");
+            $("#tab1,#tab2").hide();
+            $("#tab"+(index+1)).show();
+        });
+         $(".coefficient-statistics li").removeClass('activity').eq({$Think.get.tab|default=1}-1).addClass('activity').trigger('click');
+
+        $(".export").click(function(event) {
+            var index = $(".coefficient-statistics li.activity").index();
+            var title = $(".coefficient-statistics li.activity").text();
+            var table = $("table").eq(index);
+            var colums = [];
+            var data =[];
+
+            table.find('thead th').each(function(j){
+                var sub =[];
+                sub["text"] = $(this).text().trim();
+                colums.push(sub);
+            });
+            data.push(colums);
+
+            table.find('tbody tr').each(function(i){
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function(j){
+                    var _td = {
+                        text:$(this).text().trim()
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            $(this).exportExcel({
+                data:data,
+                title:title,
+                url:'/export/download/',
+                show:false
+            });
+        });
+    </script>
+</block>

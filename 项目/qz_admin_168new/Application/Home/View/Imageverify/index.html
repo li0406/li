@@ -1,0 +1,197 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>综合图片审核 - 齐装网</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/Imageverify/css/index.css?v={:C('STATIC_VERSION')}"/>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>综合图片审核</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/imageverify/">综合图片审核</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="searchform" action="/imageverify/" method="get">
+                            <div class="row">
+                                <div class="col-xs-12" id="formbox">
+                                    <div class="auto-width">
+                                        <label for="search-city">选择站点：</label>
+                                        <select name="cs" class="select2" id="search-city">
+                                            <option value="">全部城市</option>
+                                            <volist name="citys" id="vo">
+                                            <option value="{$vo.cid}">{$vo.char_name}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label>装修案例ID：</label>
+                                        <input name="cid" class="form-control" value="{$Think.get.cid}" placeholder="装修案例ID"/>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label>设计师ID：</label>
+                                        <input name="des_id" class="form-control" value="{$Think.get.des_id}" placeholder="设计师ID"/>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label >装修公司ID：</label>
+                                        <input name="com_id" class="form-control" value="{$Think.get.com_id}" placeholder="装修公司ID"/>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label>开始发布时间：</label>
+                                        <input name="time_start" class="form-control datetimepicker" value="{$Think.get.time_start}" placeholder="开始发布时间"/>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label>结束发布时间：</label>
+                                        <input name="time_end" class="form-control datetimepicker" value="{$Think.get.time_end}" placeholder="结束发布时间"/>
+                                    </div>
+                                    <div class="auto-width">
+                                        <label for="search-status">审核状态：</label>
+                                        <select id="search-status" name="status" class="form-control">
+                                            <option value="0">全部状态</option>
+                                            <option value="1">未审核</option>
+                                            <option value="2">已审核</option>
+                                            <option value="3">审核不通过</option>
+                                            <option value="4">申诉中</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-1 pull-right">
+                                    <br>
+                                    <button id="search" type="submit"class="key-down-event btn btn-block btn-primary normal pull-right">
+                                        <i class="fa fa-search"></i> 搜索
+                                    </button>
+                                </div>
+                                <div class="col-xs-1 pull-right">
+                                    <br>
+                                    <button id="reset" type="reset" class="key-down-event btn btn-block btn-default normal pull-right">
+                                        <i class="fa fa-rotate-right"></i> 重置
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="box-footer with-border">
+                        <div class="img-list">
+                            <volist name="info.list" id="vo">
+                                <div class="img-item"><!-- col-xs-2 -->
+                                    <div class="img-box" data-toggle="modal" data-id="{$vo.caseid}" imgid="{$vo.imgid}" href="#img-set">
+                                        <if condition="$vo['img_host'] EQ 'qiniu'">
+                                        <img alt="{$info.user.qc}" src="//{:C('QINIU_DOMAIN')}/{$vo.src}-w240"/>
+                                        <else/>
+                                        <img alt="{$info.user.qc}" src="http://{:C('STATIC_HOST1')}/{$vo.src}/m_{$vo.src_img}"/>
+                                        </if>
+                                        <div class="img-hover">
+                                            <span class="pull-left">{$vo.company_name|mbstr=0,10}</span>
+                                            <span class="pull-right">{$vo.cname}</span>
+                                        </div>
+                                    </div>
+                                    <div class="img-info">
+                                        <p><span class="pull-left">{$vo.title|mbstr=0,8}</span><span class="pull-right"><a href="http://{$vo.bm}.{:C('QZ_YUMING')}/caseinfo/{$vo.caseid}.shtml" target="_blank">{$vo.caseid}</a>
+                                        </span></p>
+                                        <p>
+                                            <span class="pull-left">{$vo.time|date="Y-m-d H:i",###}</span>
+                                            <if condition="$vo['status'] == 1">
+                                            <span class="pull-right badge bg-green">未审核</span>
+                                            <elseif condition="$vo['status'] == 2"/>
+                                            <span class="pull-right badge bg-aqua">已审核</span>
+                                            <elseif condition="$vo['status'] == 3"/>
+                                            <span class="pull-right badge bg-red">不通过</span>
+                                            <elseif condition="$vo['status'] == 4"/>
+                                            <span class="pull-right badge bg-red">申诉中</span>
+                                            <else/>
+                                            <span class="pull-right badge bg-blue">未知</span>
+                                            </if>
+                                        </p>
+                                    </div>
+                                </div>
+                            </volist>
+                        </div>
+                    </div>
+                    {$info.page}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade imgbox" tabindex="-1" role="dialog" id="img-set">
+            <div class="modal-dialog modal-lg" role="document" style="width:99.9%">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" id="closeWin" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">案例图片</h4>
+                    </div>
+                    <div class="modal-body"></div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="searchStatus" value="{$Think.get.status}">
+    </section>
+</block>
+<block name="script">
+    <script src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/plugins/select2/select2.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/Imageverify/js/imageverify.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $(".select2").select2();
+            $(".select2").select2("val", '{$Think.get.cs}');
+            $('.datetimepicker').datetimepicker({
+                weekStart: 1,
+                todayHighlight: 1,
+                todayBtn: true,
+                minView: 0,
+                autoclose: true
+            });
+
+            var searchStatus = '{$Think.get.status}';
+
+            if (searchStatus == '') {
+                searchStatus = '1';
+            }
+
+            $('select[name=status]').val(searchStatus);
+
+            $('#img-set').on('hide.bs.modal', function () {
+                window.location.reload();
+            });
+
+            $('#reset').click(function () {
+                $(':input', '#searchform').not(':button,:submit,:reset,:hidden').val('444').removeAttr('checked').removeAttr('selected');
+                $(".select2").select2("val", "");
+                $('#formbox input').each(function () {
+                    $(this).attr('value', '');
+                })
+            });
+
+            //搜索
+//            $('#search').click(function () {
+//                var cs = $('select[name=cs]').val();
+//                var cid = $('input[name=cid]').val();
+//                var des_id = $('input[name=des_id]').val();
+//                var com_id = $('input[name=com_id]').val();
+//                var time_start = $('input[name=time_start]').val();
+//                var time_end = $('input[name=time_end]').val();
+//                var status = $('select[name=status]').val();
+//
+//                window.location.href = '/imageverify/?cs=' + cs + '&cid=' + cid + '&des_id=' + des_id + '&com_id=' + com_id + '&status=' + status + '&time_start=' + time_start + '&time_end=' + time_end;
+//            });
+        });
+    </script>
+</block>

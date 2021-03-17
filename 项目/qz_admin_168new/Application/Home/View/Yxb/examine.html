@@ -1,0 +1,203 @@
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css" media="all" href="/assets/home/yy/css/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/home/erp/css/erpindex.css?v={:C('STATIC_VERSION')}">
+</block>
+
+
+<block name="content">
+    <section class="content-header">
+        <h4 class="big_title">ERP账号审核</h4>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body">
+                        <form id="dataform" action="/yxb/examine/" method="get">
+                            <div class="row">
+                                <div class="shurubdwk">
+                                    <div class="col-xs-3 inputfather">
+                                        <span class="saixtitle">所属城市：</span>
+                                        <select class="select2" id="city" name="city" placeholder="选择城市">
+                                            <option value="">请选择</option>
+                                            <volist name="city" id="vo">
+                                                <if condition="$_GET['city'] EQ $vo['cid']">
+                                                    <option value="{$vo.cid}" selected>{$vo.cname}</option>
+                                                    <else/>
+                                                    <option value="{$vo.cid}">{$vo.cname}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3 inputfather">
+                                        <span class="saixtitle changwid">公司名称/ID：</span>
+                                        <input class="form-control companyname" type="text"
+                                               name="company" placeholder="请输入" autocomplete="off" maxlength="12" value="{$Think.get.company}">
+                                    </div>
+                                    <div class="col-xs-3 inputfather">
+                                        <span class="saixtitle">审核状态：</span>
+                                        <select class="form-control zhuangtai" name="status" >
+                                            <option value="">请选择</option>
+                                            <volist name="status" id="vo">
+                                                <if condition="$_GET['status'] EQ $key">
+                                                    <option value="{$key}" selected>{$vo}</option>
+                                                    <else/>
+                                                    <option value="{$key}">{$vo}</option>
+                                                </if>
+
+
+                                            </volist>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3 inputfather">
+                                        <span class="saixtitle">登录账号：</span>
+                                        <input class="form-control loginhao" name="account" type="text" value="{$Think.get.account}"
+                                               placeholder="请输入" maxlength="12">
+                                    </div>
+                                    <div class="clearbt"></div>
+                                    <div class="col-xs-3 inputfather datedwwk">
+                                        <span class="saixtitle changwid2">有效日期-开始：</span>
+                                        <input class="form-control startdate youxiaostart" name="start_time_range" type="text" value="{$Think.get.start_time_range}">
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-xs-3 inputfather datedwwk">
+                                        <span class="saixtitle changwid2">有效日期-结束：</span>
+                                        <input class="form-control jiesudate" name="end_time_range" type="text" value="{$Think.get.end_time_range}">
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                                <div class="bdniuwaik">
+                                    <div class="col-xs-1 floatright">
+                                        <span class="btn btn-block btn-default dianjireset">重置</span>
+                                    </div>
+                                    <div class="col-xs-1 floatright">
+                                        <button type="button" class="btn btn-block btn-primary dianjisos">搜索</button>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box-body">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>公司ID
+                                    <if condition="$_GET['ordertype'] eq 1 and $_GET['order'] eq 2">
+                                        <i class="fa fa-caret-up paixupic" data-type="1"  data-order="{$ordertype[1]|default=1}"></i>
+                                        <else/>
+                                        <i class="fa fa-caret-down paixupic" data-type="1"  data-order="{$ordertype[1]|default=1}"></i>
+                                    </if>
+                                </th>
+
+                                <th>公司名称</th>
+                                <th>登录账号</th>
+                                <th>所属城市</th>
+                                <th>审核状态</th>
+                                <th id="start_time" data-type="1">有效日期-开始
+                                    <if condition="$_GET['ordertype'] eq 2 and $_GET['order'] eq 2">
+                                        <i class="fa fa-caret-up paixupic" data-type="2" data-order="{$ordertype[2]|default=1}"></i>
+                                        <else/>
+                                        <i class="fa fa-caret-down paixupic" data-type="2" data-order="{$ordertype[2]|default=1}"></i>
+                                    </if>
+
+                                </th>
+                                <th id="end_time" data-type="1">有效日期-结束
+                                    <if condition="$_GET['ordertype'] eq 3 and $_GET['order'] eq 2">
+                                        <i class="fa fa-caret-up paixupic" data-type="3" data-order="{$ordertype[3]|default=1}"></i>
+                                        <else/>
+                                        <i class="fa fa-caret-down paixupic" data-type="3" data-order="{$ordertype[3]|default=1}"></i>
+                                    </if>
+
+                                </th>
+                                <th id="sum_day" data-type="1">总天数
+                                    <if condition="$_GET['ordertype'] eq 4 and $_GET['order'] eq 2">
+                                        <i class="fa fa-caret-up paixupic" data-type="4" data-order="{$ordertype[4]|default=1}"></i>
+                                        <else/>
+                                        <i class="fa fa-caret-down paixupic" data-type="4" data-order="{$ordertype[4]|default=1}"></i>
+                                    </if>
+                                </th>
+                                <th>申请时间
+                                    <if condition="$_GET['ordertype'] eq 5 and $_GET['order'] eq 2">
+                                        <i class="fa fa-caret-up paixupic" data-type="5" data-order="{$ordertype[5]|default=1}"></i>
+                                        <else/>
+                                        <i class="fa fa-caret-down paixupic" data-type="5" data-order="{$ordertype[5]|default=1}"></i>
+                                    </if>
+                                </th>
+
+                                <th>申请人</th>
+                                <th>操作</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.id}</td>
+                                    <td class="jc">{$vo.jc}</td>
+                                    <td>{$vo.account}</td>
+                                    <td>{$vo.cname}</td>
+                                    <switch name="vo.status" >
+                                        <case value="1"><td>待审核</td></case>
+                                        <case value="3"><td  class="yanse_red">驳回</td></case>
+                                        <case value="4"><td class="yanse_yelleow">未开通</td></case>
+                                        <default /><td class="yanse_success">审核通过</td>
+                                    </switch>
+                                    <td>{$vo.start_tt}</td>
+                                    <td>{$vo.end_tt}</td>
+                                    <td>
+                                        <if condition="$vo['sum_day'] NEQ 0">
+                                            {$vo.sum_day}
+                                        </if>
+                                    </td>
+                                    <td>{$vo.add_time}</td>
+                                    <td>{$vo.uname}</td>
+                                    <td>
+                                        <if condition="$vo['status'] EQ 1">
+                                            <if condition="check_user_menu_auth('http://168new.qizuang.com/yxb/shenghe/')">
+                                                <a class="editbj editbj2" href="/yxb/shenghe/?userid={$vo.id}&pagetype=1&timeid={$vo.time_id}">审核</a>
+                                            </if>
+                                            <else/>
+                                            <if condition="check_user_menu_auth('http://168new.qizuang.com/yxb/chakan/') OR ($uid EQ $vo['uid'])">
+                                                <a class="editbj clearjvli" href="/yxb/chakan/?userid={$vo.id}&pagetype=5&timeid={$vo.time_id}">查看</a>
+                                            </if>
+                                        </if>
+                                        <if condition="$vo['status'] NEQ 2">
+                                            <if condition="($vo['status'] EQ 4) OR ($vo['status'] EQ 3)">
+                                                <if condition="$uid EQ $vo['uid']">
+                                                <a class="editbj" href="/yxb/edit/?userid={$vo.id}&pagetype=4&timeid={$vo.time_id}&tiao=2">编辑</a>
+                                                </if>
+                                                <else/>
+
+                                                <if condition="$uid EQ $vo['uid']">
+                                                <a class="editbj clearjvli" href="/yxb/edit/?userid={$vo.id}&pagetype=2&timeid={$vo.time_id}&&tiao=2">编辑</a>
+                                                </if>
+                                            </if>
+
+
+                                        </if>
+                                    </td>
+                                </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tcbeijing"></div>
+
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/home/yy/js/moment.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/home/yy/js/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/home/erp/js/examine.js?v={:C('STATIC_VERSION')}"></script>
+</block>

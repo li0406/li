@@ -1,0 +1,153 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网文章榜管理后台 - 控制台</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/artdialog/ui-dialog.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" href="/assets/common/js/plugins/validation/css/validationEngine.jquery.css?v={:C('STATIC_VERSION')}">
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>美图大师</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/meitudesigner/">美图大师</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-3">
+                            装修公司或设计师名字：<input type="text" id="condition" class="form-control condition" placeholder="装修公司或设计师名字" value="{$Think.get.condition}">
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button type="button" id="search" class="btn btn-block btn-primary normal">
+                                    <i class="fa fa-search"></i>查询
+                                </button>
+                            </div>
+                            <div class="col-xs-1 pull-right">
+                                <br/>
+                                <a href="/meitudesigner/operate/" class="pull-right">
+                                    <button class="btn btn-block btn-success normal" style="width:auto">
+                                        <i class="fa fa-plus-circle"></i>新增设计师
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">美图大师列表</h3>
+                    </div>
+                    <div class="box-body">
+                        <form id="form">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>公司名称</th>
+                                        <th>设计师名</th>
+                                        <th>推荐状态</th>
+                                        <th>排序</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    <volist name="info.info.list" id="vo">
+                                        <tr>
+                                            <td>
+                                                <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/company_home/{$vo.comid}" target="_blank">
+                                                    {$vo.comname}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="http://{$vo.bm}.{:C('QZ_YUMING')}/blog/{$vo.uid}" target="_blank">{$vo.name}</a>
+                                            </td>
+                                            <td>
+                                                <if condition="$vo['enabled']">
+                                                    已推荐
+                                                <else/>
+                                                    未推荐
+                                                </if>
+                                            </td>
+                                            <td>{$vo.px}</td>
+                                            <td>{$vo.time|date='Y-m-d',###}</td>
+                                            <td>
+                                                <a href="/meitudesigner/operate/?id={$vo.id}">
+                                                    <span title="编辑" class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="javascript:void(0)" class="delete" data-id="{$vo.id}">
+                                                    <span title="删除" class="fa fa-trash"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </volist>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="col-xs-12">
+                            {$info.info.page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/artdialog/dialog.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.delete').click(function(event) {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '/meitudesigner/deletemeitudesigner/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        id:id
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == '1'){
+                        window.location.href = window.location.href;
+                    }else{
+                        var e = dialog({
+                            title: '消息',
+                            content: data.info,
+                            okValue: '确 定',
+                            quickClose: true,
+                            ok: function () {}
+                        });
+                        e.show();
+                    }
+                })
+                .fail(function(xhr) {
+                    var e = dialog({
+                        title: '消息',
+                        content: '操作失败,请联系技术部门！',
+                        okValue: '确 定',
+                        quickClose: true,
+                        ok: function () {}
+                    });
+                    e.show();
+                })
+            });
+            $('#search').click(function(){
+                var condition = $('#condition').val();
+                window.location.href = '/meitudesigner/?condition=' +condition;
+            })
+        })
+    </script>
+</block>

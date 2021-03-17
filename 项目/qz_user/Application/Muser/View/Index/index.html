@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width"/>
+<meta content="telephone=no" name="format-detection" />
+<meta name="applicable-device" content="mobile">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="stylesheet" href="/assets/muser/css/font-awesome.min.css?v={:C('STATIC_VERSION')}">
+<link rel="stylesheet" href="/assets/muser/css/m-reset.css?v={:C('STATIC_VERSION')}"/>
+<link rel="stylesheet" href="/assets/muser/css/style.css?v={:C('STATIC_VERSION')}" type="text/css" />
+<script type="text/javascript" src="/assets/common/js/jquery.min.js?v={:C('STATIC_VERSION')}"></script>
+<title>登录-齐装网</title>
+</head>
+<body>
+    <div class="m-wrap">
+        <div class="logo"></div>
+        <div class="login-edit">
+            <div class="edit">
+                <i class="icon-user"></i>
+                <input class="input" type="text" name="name" placeholder="请输入用户名" value="{$Think.cookie.u_cookie_login}">
+            </div>
+            <div class="edit">
+                <i class="icon-lock"></i>
+                <input class="input" type="password" name="pwd" placeholder="请输入订单查看密码">
+            </div>
+            <div class="container">
+                {$verify}
+            </div>
+            <button id="btnLogin" type="button" class="btn">登录</button>
+        </div>
+        <img class="bg" src="/assets/muser/img/bg.png">
+    </div>
+    <div class="tips-mask">
+        <div class="tips-win">
+            <div class="domain">提示</div>
+            <p class="alert-info">密码错误五次，您可以找回密码，或10分钟后再试</p>
+            <div class="okBtn">
+                OK
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="/assets/common/js/App.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/muser/js/Validate.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $("#btnLogin").click(function(event) {
+            var _this = $(".login-edit");
+            var data = {
+                name:$("input[name=name]",_this).val(),
+                pwd:$("input[name=pwd]",_this).val(),
+                verify:$("input[name=verify]",_this).val()
+            }
+            $(".okBtn").click(function(event) {
+                $(".tips-mask").fadeOut();
+
+            });
+
+            $(".login-edit").Validate({
+                rules:{
+                    name:{
+                        message:"请输入用户名"
+                    },
+                    pwd:{
+                        message:"请输入订单查看密码"
+                    }
+                },
+                ajaxSubmit:true,
+                data:data,
+                url:"/dologin",
+                ajaxCallback:function(data){
+                    if(data.status == 1){
+                        window.location.href ="/home/";
+                    }else{
+                        $(".alert-info").text(data.info)
+                        $(".tips-mask").fadeIn();
+
+                        if(data.data != ""){
+                            $(".container").html(data.data);
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

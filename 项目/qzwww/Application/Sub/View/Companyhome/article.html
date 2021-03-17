@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <title>{$keys.title}-{$title}</title>
+    <meta name="keywords" content="{$keys.keywords}" />
+    <meta name="description" content="{$keys.description}" />
+    <include file="Index:resource" />
+    <link href="{$static_host}/assets/sub/company/css/home.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <include file="Companyhome:header" />
+    <div class="wrap">
+        <div class="bread"><a href="/company_home/{$userInfo.user.id}">首页</a>><a href="/company_zixun/{$userInfo.user.id}">公司资讯</a>
+            <if condition="$userInfo['article']['title'] NEQ ''">
+                >{$userInfo.article.title}
+            </if>
+        </div>
+    </div>
+    <div class="wrap oflow">
+        <div class="compleft">
+           <dl class="compzxtit">
+              <dt>
+                文章资讯
+              </dt>
+              <volist name="userInfo.types.zxType" id="vo">
+                <dd><a href="/company_zixun/{$userInfo.user.id}/{$vo.id}">{$vo.name}<em>({$vo.count})</em>></a></dd>
+              </volist>
+              <dt>
+                优惠活动
+              </dt>
+              <dd><a href="/company_zixun/{$userInfo.user.id}/1/1">正在进行<em>({$userInfo.types.yxhd.hd})</em>></a></dd>
+              <dd><a href="/company_zixun/{$userInfo.user.id}/1/2">往期活动<em>({$userInfo.types.yxhd.historyhd})</em>></a></dd>
+            </dl>
+        </div>
+        <div class="compright">
+            <div class="compwzmain">
+                <h1>{$userInfo.article.title}</h1>
+                <div class="fenx">
+                    <div class="laiy">来源：{$userInfo.user.qc}</div>
+                    <span>{$userInfo.article.time|date="Y年m月d日",###}</span>
+                    &nbsp;
+                    <if condition="$userInfo['collect']">
+                    <a href="javascript:javascript:void(0)" data-id="{$userInfo.article.id}"  class="collect collect-bind" data-on="1">已收藏</a>
+                    <else/>
+                     <a href="javascript:javascript:void(0)" data-id="{$userInfo.article.id}"  class="collect" data-on="0">收藏</a>
+                    </if>
+                    <if condition="$isshow">
+                        <a href="javascript:;" class="pricebox">咨询获取该优惠</a>
+                    </if>
+                </div>
+                <div class="wzcontent">
+                  {$userInfo.article.text}
+                  <br style="clear:both;"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+    var shen = null,shi = null;
+    shen = citys["shen"];
+    shi = citys["shi"];
+
+    $(".pricebox").click(function(event) {
+        $.ajax({
+            url: '/dispatcher/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+               type:"zixunfb",
+               action:"load",
+               select_comid : '{$userInfo.user.id}',
+               display_type : '1',
+               cs:"{$cityid}"
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                $("body").append(data.data);
+                $("input[name='name']").focus();
+            }
+        });
+    });
+
+
+</script>
+<if condition="!isset($_SESSION['u_userInfo'])">
+<script type="text/javascript">
+    $(".collect").click(function(event) {
+        $.ajax({
+            url: '/login/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                ssid:"{$ssid}"
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.href="{$SCHEME_HOST.scheme_full}{:C('QZ_PASSPORT_ACCOUNT_DONAMES')}/login?redirect="+window.location.href;
+            }
+        }).fail(function(xhr) {
+            //显示提示
+            $.pt({
+                target: _this,
+                content: '操作失败,请稍后再试！',
+                width: 'auto'
+            });
+        });
+    });
+</script>
+<elseif condition="isset($_SESSION['u_userInfo']) AND $_SESSION['u_userInfo']['classid'] NEQ 3 AND !$caseInfo['collect']"/>
+    <script type="text/javascript">
+    $(".collect").click(function(event) {
+        var id = $(this).attr("data-id");
+        var _this = $(this);
+        if(_this.attr("data-on") == 1){
+            return false;
+        }
+        $.ajax({
+            url: '/collect/',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                classtype:"5",
+                classid:id,
+                ssid:"{$ssid}"
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                _this.attr("data-on",1).addClass('collect-bind').html("已收藏").Alert({
+                    css:{
+                        "width":"200px",
+                        "height":"60px",
+                        "background":"#E76363",
+                        "margin-left":"-100px",
+                        "margin-top":"-30px",
+                        "font-size":"20px",
+                        "line-height":"60px"
+                    },
+                    text:"收藏成功 +1"
+                });
+            }
+        }).fail(function(xhr) {
+            //显示提示
+            $.pt({
+                target: _this,
+                content: '操作失败,请稍后再试！',
+                width: 'auto'
+            });
+        });
+    });
+</script>
+</if>
+</html>

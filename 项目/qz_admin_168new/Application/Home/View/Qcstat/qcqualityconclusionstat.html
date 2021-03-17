@@ -1,0 +1,224 @@
+
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>质检判定错误明细统计-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/home/css/qc.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>质检判定错误明细统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header">
+                        <div class="col-xs-12">
+                            条件查询
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <form action="/qcstat/qcqualityconclusionstat" method="get" class="">
+                            <div class="form-group pull-left col-sm-12">
+                                <div class="col-xs-2">
+                                     <label>抽查单号：</label>
+                                     <input id="start" class="form-control" type="text" name="id" placeholder="抽查单号" value="{$Think.get.id}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label>抽检开始时间：</label>
+                                    <input class="form-control datepicker" type="text" name="begin" placeholder="抽检开始时间" value="{$Think.get.begin}">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label>抽检结束时间：</label>
+                                    <input class="form-control datepicker" type="text" name="end" placeholder="抽检结束时间" value="{$Think.get.end}">
+                                </div>
+                                 <div class="col-xs-2">
+                                    <label>质检员：</label>
+                                    <select id="qc" name="qc">
+                                        <option value="">请选择</option>
+                                        <volist name="info.zhi_jian" id="vo">
+                                        <option value="{$vo.id}">{$vo.name}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    <label style="display: block;">&nbsp;</label>
+                                    <button id="btnSearch" type="submit" class="btn btn-primary btn-sm btn-flat  ml10"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div id="chart1" class="col-sm-12" style="height:300px;">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="no-padding" style="vertical-align: middle;" rowspan="2">质检日期</th>
+                                    <th class="col-sm-1 no-padding" style="vertical-align: middle;" rowspan="2">质检人</th>
+                                    <th class="col-sm-1 no-padding" style="vertical-align: middle;" rowspan="2">抽查类型</th>
+                                    <th class="col-sm-1 no-padding" style="vertical-align: middle;" rowspan="2">抽查单号</th>
+                                    <th colspan="8"  style="vertical-align: middle;">评判说明</th>
+                                    <th class="col-sm-1 no-padding" style="vertical-align: middle;" rowspan="2">备注</th>
+                                </tr>
+                                <tr>
+                                    <th class="col-sm-1" style="vertical-align: middle;">问题点勾选错误</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">问题点多勾或少勾</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">备注说明有误</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">备注存在错别字</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">质检未检查出客服存在的问题</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">客服投诉撤销</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">质检评判错误撤销</th>
+                                    <th class="col-sm-1" style="vertical-align: middle;">其它</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <volist name="list.list" id="vo">
+                                    <tr>
+                                        <td  style="vertical-align: middle;">{$vo.qctime}</td>
+                                        <td  style="vertical-align: middle;">{$vo.op_name}</td>
+                                        <td  style="vertical-align: middle;">
+                                            <if condition="$vo['type'] EQ 1">
+                                            听单
+                                            <else/>
+                                            抽听
+                                            </if>
+                                        </td>
+                                        <td  style="vertical-align: middle;">{$vo.order_id}</td>
+                                        <td  style="vertical-align: middle;">
+                                            {$vo.25}
+                                        </td>
+                                        <td  style="vertical-align: middle;">{$vo.26}</td>
+                                        <td  style="vertical-align: middle;">{$vo.27}</td>
+                                        <td  style="vertical-align: middle;">{$vo.28}</td>
+                                        <td  style="vertical-align: middle;">{$vo.29}</td>
+                                        <td  style="vertical-align: middle;">{$vo.31}</td>
+                                        <td  style="vertical-align: middle;">{$vo.32}</td>
+                                        <td  style="vertical-align: middle;">{$vo.30}</td>
+                                        <td  style="vertical-align: middle;">{$vo.sampling_remark}</td>
+                                    </tr>
+                                </volist>
+                            </tbody>
+                        </table>
+                        {$info.list.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal"  role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document" style="width: 1420px; margin-top: 10px;">
+            <div class="modal-content">
+                <div class="modal-header" style="padding:5px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center">质检评分</h4>
+                </div>
+                <div class="modal-body no-padding">
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('chart1'));
+    var data =  $.parseJSON('{$list.chartData|json_encode}');
+    $("#qc").select2();
+    $("#qc").select2("val","{$Think.get.qc}");
+
+    $(".datepicker").datepicker({
+        format:"yyyy-mm-dd"
+    });
+
+    $(".icheck").click(function(event) {
+        $("#myModal .modal-body").load($(this).attr("data-href")+"&rand="+new Date().getTime(),function(){
+            $("#myModal").modal("show").on("shown.bs.modal",function(){
+                isLoading = false;
+                $.ajax({
+                    url: '/voip/voiprecord/',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: {
+                        id: $("input[name=orderid]").val(),
+                        type:'qc'
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == '1') {
+                        $("#video").html(data.data);
+                    }
+                });
+            });
+        })
+    });
+    ViewSourceInit();
+    function ViewSourceInit() {
+        myChart.clear();
+        var legend = new Array();
+        var series = new Array();
+        var xAxisData = new Array();
+        var date = $.parseJSON('{$list.date|json_encode}');
+
+        for(var i in date){
+            xAxisData.push(date[i]);
+        }
+
+        for(var i in data["caption"]){
+            legend.push(data["caption"][i].name);
+        }
+
+        for(var i in data["item"]){
+            var seriesData = new Array();
+            for(var j in data["item"][i]["date"]){
+                seriesData.push(data["item"][i]["date"][j]["count"]);
+            }
+            var obj = {
+                name:data["item"][i].name,
+                type:'line',
+                data:seriesData,
+                smooth: true
+            }
+            series.push(obj);
+        }
+
+        var option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:legend
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xAxisData
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: series
+        };
+        myChart.setOption(option);
+    }
+</script>
+</block>

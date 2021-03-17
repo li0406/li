@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="keywords" content="密码找回">
+    <meta name="description" content="密码找回">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>密码找回-齐装网</title>
+    <include file="Index:resource" />
+    <link href="{$static_host}/assets/user/register/css/default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+<body>
+<include file="Index:header" />
+<div class="wrap">
+<div class="loginlogo">
+  <a class="logo" href="{:C('QZ_YUMING_SCHEME')}://{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo-r.png"/></a>
+</div>
+</div>
+<div class="wrap oflow">
+  <div class="helpstep">
+  <span class="active">确认账号</span>
+  <em class="active"></em>
+  <span class="active">安全验证</span>
+  <em></em>
+  <span>重置密码</span>
+  <em></em>
+  <span>完成</span>
+  </div>
+  <div class="gpmain box2">
+    <if condition="$mode EQ 0">
+    <div class="mode">
+    <p>
+    <if condition="isset($_SESSION['u_userInfo'])">
+      很抱歉,您的帐号还没有绑定,请至用户中心进行操作！
+      <a href="/home/">点击进入</a>
+    <else/>
+      很抱歉,您的帐号还没有绑定,请联系客服进行人工操作,客服电话: {:OP("QZ_CONTACT_TEL400")}!
+      <a href="/home/">请登录后重置</a>
+    </if>
+    </p>
+    </div>
+    <elseif condition="$mode EQ 1"/>
+    <div class="mode">
+        <p>我们会将验证码发送到您的安全手机<em style="color:red;">{$userInfo.tel_safe_show}</em> 请立即查收！</p>
+
+        <button class="btn button sendTel">立即发送验证码去手机</button>
+        收不到短消息?<a href="javascript:void(0)" class="resetTel">重新发送</a><span class="time">( 60 秒后重新发送 )</span>
+        <div class="tips"></div>
+      </div>
+    <elseif condition="$mode EQ 2"/>
+    <div class="mode">
+        <p>我们会将验证码发送到您的安全邮箱<em style="color:red;">{$userInfo.mail_safe_show}</em> 请立即查收！</p>
+        <button class="btn button sendMail">立即发送验证码去邮箱</button>
+        收不到邮件？看看垃圾邮件或者点此
+        <a href="javascript:void(0)" class="resetMail">重新发送</a>
+        <div class="tips"></div>
+      </div>
+    <elseif condition="$mode EQ 3"/>
+      <div class="mode">
+      <p>
+        <h2>亲,您可以通过以下的方式找回您的密码:</h2>
+      </p>
+      <p><em>通过安全邮箱 >>>>>>>></em><a href="javascript:void(0)" data="2" class="step">点击此进入</a></p>
+      <p><em>通过安全手机 >>>>>>>></em><a href="javascript:void(0)" data="1" class="step">点击此进入</a></p>
+      </div>
+      <div class="mode">
+        <p>我们会将验证码发送到您的安全手机<em style="color:red;">{$userInfo.tel_safe_show}</em> 请立即查收！</p>
+        <button class="btn button sendTel">立即发送验证码去手机</button>
+        收不到短消息?<a href="javascript:void(0)" class="resetTel">重新发送</a><span class="time">( 60 秒后重新发送 )</span>
+        <div class="tips"></div>
+      </div>
+      <div class="mode">
+        <p>我们会将验证码发送到您的安全邮箱<em style="color:red;">{$userInfo.mail_safe_show}</em> 请立即查收！</p>
+        <button class="btn button sendMail">立即发送验证码去邮箱</button>
+        收不到邮件？看看垃圾邮件或者点此
+        <a href="javascript:void(0)" class="resetMail">重新发送</a>
+        <div class="tips"></div>
+      </div>
+    </if>
+  </div>
+</div>
+<include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  var time = 60;
+  $(function(){
+      $(".mode").removeClass('active').eq(0).addClass('active');
+      $(".step").click(function(event) {
+          var i =$(this).attr("data");
+          $(".mode").removeClass('active').eq(i).addClass('active');
+      });
+
+      $(".sendTel").click(function(event) {
+          $(this).attr("disabled","disabled");
+          initG();
+      });
+
+      function initG(){
+          $.ajax({
+              url: '/gtverify/initgeet',
+              type: 'POST',
+              dataType: 'JSON',
+              data:{
+                  scence:1
+              }
+          }).done(function(data) {
+              initGeetest({
+                  // 以下配置参数来自服务端 SDK
+                  gt: data.data.gt,
+                  challenge: data.data.challenge,
+                  offline: !data.data.success,
+                  new_captcha: true,
+                  product: 'bind'
+              }, function (captchaObj) {
+                  captchaObj.reset();
+                  captchaObj.onReady(function(){
+                      //验证码ready之后才能调用verify方法显示验证码
+                      captchaObj.verify();
+                  }).onSuccess(function(){
+                      var validate = captchaObj.getValidate();
+                      $.ajax({
+                          url: '/gtverify/verifygeetest',
+                          type: 'POST',
+                          dataType: 'json',
+                          data: {
+                              geetest_challenge: validate.geetest_challenge,
+                              geetest_validate: validate.geetest_validate,
+                              geetest_seccode: validate.geetest_seccode,
+                              scence:1
+                          }
+                      }).done(function(data) {
+                          if (data.status == 1) {
+                              interval();
+                              $(".tips").html("");
+                              $.ajax({
+                                  url: '/getpassword/',
+                                  type: 'POST',
+                                  dataType: 'JSON',
+                                  data: {
+                                      token: "{$token}",
+                                      step:2,
+                                      mode:2
+                                  }
+                              })
+                              .done(function(data) {
+                                  if(data.status == 1){
+                                      window.location.href = "/getpassword/";
+                                  }else{
+                                      $(".tips").html(data.info);
+                                  }
+                              })
+                              .fail(function(xhr) {
+                                  $(".tips").html("发生错误,请稍后再试！");
+                              });
+                          }
+                      });
+                  }).onError(function(){
+                      alert("发送失败,请稍后再试!")
+                  })
+              })
+          });
+      }
+
+      $(".resetTel").click(function(event) {
+          if(time == 0){
+             time = 60;
+             initG();
+          }
+      });
+
+      $(".sendMail").click(function(event) {
+          $(this).attr("disabled","disabled");
+          interval();
+          sendMail();
+      });
+
+      function interval(){
+         $(".time").html("( "+time+" 秒后重新发送 )").show();
+         $(".resetTel").addClass('red');
+         var t = setInterval(function(){
+              time--;
+              if(time == 0){
+                 clearInterval(t);
+                 $(".time").hide();
+                 $(".sendTel").attr("disabled",false);
+              }
+              $(".time").html("( "+time+" 秒后重新发送 )");
+          },1000);
+      }
+
+      function sendMail(){
+          $(".tips").html("");
+          $.ajax({
+            url: '/getpassword/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                token: "{$token}",
+                step:2,
+                mode:1
+            }
+          })
+          .done(function(data) {
+              if(data.status == 1){
+                   window.location.href = "/getpassword/";
+              }else{
+                $(".tips").html(data.info);
+              }
+          })
+          .fail(function(xhr) {
+              $(".tips").html("发生错误,请稍后再试！");
+          });
+      }
+  });
+</script>
+</html>
+

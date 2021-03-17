@@ -1,0 +1,117 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>渠道来源发单明细</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/home/orderstat/css/citygeneralization.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>渠道来源发单明细</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" method="GET" action="/orderstat/qudaoresource">
+                                <div class="col-xs-4">
+                                    <div class="col-xs-4">
+                                        <div>订单状态：</div>
+                                        <select id="status" name="status" type="text" placeholder="全部" class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="1">分单</option>
+                                            <option value="2">赠单</option>
+                                            <option value="3">分没人跟</option>
+                                            <option value="4">赠没人跟</option>
+                                            <option value="5">其他</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-2" style="margin-left:-300px;">
+                                    <button type="reset" class="reset">重置</button>
+                                    <button type="submit" class="search">搜索</button>
+                                    <input type="hidden" name="src" value="{$Think.get.src}" />
+                                    <input type="hidden" name="id" value="{$Think.get.id}" />
+                                    <input type="hidden" name="date" value="{$Think.get.date}" />
+                                    <input type="hidden" name="begin" value="{$Think.get.begin}" />
+                                    <input type="hidden" name="end" value="{$Think.get.end}" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h4 class="box-title">订单列表</h4>
+                    </div>
+                    <div class="box-body table-responsive no-padding" style="padding-bottom: 10px !important;">
+                        <table id="myTable" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>发单日期</th>
+                                <th>渠道来源</th>
+                                <th>订单备注</th>
+                                <th>城市区县</th>
+                                <th>手机号码</th>
+                                <th>手机号重复</th>
+                                <th>IP重复</th>
+                                <th>订单状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="list.list" id="vo">
+                            <tr>
+                                <td>{$vo.time_real}</td>
+                                <td>{$vo.source_name}</td>
+                                <td>{$vo.remarks}</td>
+                                <td>{$vo.cname}/{$vo.qz_area}</td>
+                                <td>{$vo.tel}</td>
+                                <td>
+                                    <if condition="$vo['tel_count'] GT 1">
+                                        重复
+                                    <else/>
+                                    不重复
+                                    </if>
+                                </td>
+                                <td><if condition="$vo['ip_count'] GT 1">
+                                        重复
+                                    <else/>
+                                    不重复
+                                    </if></td>
+                                <td>
+                                <if condition="$vo['on'] EQ 4 AND $vo['type_fw'] EQ 1">
+                                 分单
+                                <elseif condition="$vo['on'] EQ 4 AND $vo['type_fw'] EQ 2"/>
+                                 赠单
+                                 <elseif condition="$vo['on'] EQ 4 AND $vo['type_fw'] EQ 3"/>
+                                 分没人跟
+                                <elseif condition="$vo['on'] EQ 4 AND $vo['type_fw'] EQ 4"/>
+                                 赠没人跟
+                                <else/>
+                                其他
+                                </if>
+                                </td>
+                            </tr>
+                            </volist>
+                            </tbody>
+                        </table>
+                        {$list.page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript">
+        $(".reset").click(function () {
+            $("#order-status").val("0");
+        })
+        $("#status").val("{$Think.get.status}");
+
+    </script>
+</block>

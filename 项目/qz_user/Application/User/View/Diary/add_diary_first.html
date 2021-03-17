@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="用户中心">
+  <meta name="description" content="用户中心">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <title>用户中心-齐装网</title>
+  <include file="Index:resource" />
+  <include file="User:resource" />
+  <script type="text/javascript" charset="utf-8" src="{$static_host}/assets/common/js/labelauty.js?v={:C('STATIC_VERSION')}"></script>
+  <link rel="stylesheet" href="{$static_host}/assets/user/user/css/yh-dairy.css?v={:C('STATIC_VERSION')}">
+</head>
+  <script>
+      $(document).ready(function () {
+          //参数{input类名，选择类型(单选or多选)}
+          $(".rdolist").labelauty("rdolist", "rdo");
+          $(".chklist").labelauty("chklist", "check");
+      });
+  </script>
+  <style type="text/css">
+    #btn_sub{display: inline-block;}.disable{cursor: pointer;}
+  </style>
+<body>
+  <include file="User:header" />
+  <div class="ht-wrap oflow">
+    <include file="User:usernavleft" />
+    <div class="yh-main">
+      <h1 class="yh-tit">新建装修日记</h1>
+      <ul class="diary-edit">
+        <li>
+          <span>主题:</span>
+          <div class="rdo">
+            <input name="title" type="text" style="width:250px;"><i class="red err-tips"></i>
+          </div>
+        </li>
+        <li>
+          <span>户型:</span>
+          <div class="rdo">
+            <volist name="huxing" id="vo" key="key">
+              <if condition="$key EQ 1">
+                <input type="radio" name="rdo"  class="rdolist" checked=""  />
+                <label class="rdobox checked" data-value="{$vo.id}">
+                  <span class="check-image"></span>
+                  <span class="radiobox-content">{$vo.name}</span>
+                </label>
+              <else/>
+                <input type="radio" name="rdo"  class="rdolist"  />
+                <label class="rdobox" data-value="{$vo.id}">
+                  <span class="check-image"></span>
+                  <span class="radiobox-content">{$vo.name}</span>
+                </label>
+              </if>
+
+            </volist>
+            <p class="red"></p>
+          </div>
+        </li>
+        <li><span>面积:</span><input name="mianji" type="text">M² <i class="red err-tips"></i></li>
+        <li>
+          <span>城市:</span>
+          <select name="cs">
+            <option value="{$info.citys.shen.id}">{$info.citys.shen.oldname}</option>
+          </select>
+          <select name="qx">
+              <volist name="info.citys.shi" id="vo">
+                  <if condition="$info['user']['qx'] EQ $vo['qz_areaid']">
+                    <option value="{$vo.qz_areaid}" selected="selected">{$vo.oldName}</option>
+                  <else/>
+                    <option value="{$vo.qz_areaid}">{$vo.oldName}</option>
+                  </if>
+              </volist>
+          </select>
+          <i class="red err-tips"></i>
+        </li>
+        <li><span>小区名称:</span><input class="write" name="xiaoqu" type="text" placeholder="小区名称" style="width:450px;"><i class="red err-tips"></i></li>
+        <li>
+          <span>风格:</span>
+            <div class="fuxuan">
+              <volist name="fengge" id="vo">
+                <input type="checkbox" name="chk" value="{$vo.id}" class="chklist" />
+                <label class="chkbox" data-value="{$vo.id}">
+                    <span class="check-image"></span>
+                    <span class="radiobox-content">{$vo.name}</span>
+                </label>
+              </volist>
+               <p class="red">选择您装修的风格，最多可选两项</p>
+            </div>
+        </li>
+        <li>
+          <span>装修方式:</span>
+          <select name="decorate_type">
+            <volist name="info.fangshi" id="vo">
+                <option value="{$vo.id}">{$vo.name}</option>
+            </volist>
+          </select>
+        </li>
+        <li>
+          <span>装修公司:</span>
+          <div class="pull-left">
+            <em><label><input name="check_company" type="radio" value="1" checked="checked">已选择装修公司</label><input type="text" name="company_name" class="ml10" placeholder="请输入装修公司名称"><i class="red err-tips"></i></em>
+            <em><label><input name="check_company" type="radio" value="0">未选择装修公司</label></em>
+
+          </div>
+        </li>
+        <li class="isAgree"><span>&nbsp;</span>
+            <input type="checkbox" id="isAgree" > 我已遵循《<a href="javascript:;" id="postStandard">日记发布标准</a>》
+        </li>
+
+
+      </ul>
+      <div class="ht-yes"><a href="javascript:;" id="btn_sub">开始写日记</a><i class="red err-tips" id="error_msg"></i></div>
+    </div>
+  </div>
+  <include file="Index/footer" />
+  <script type="text/javascript">
+  $(function(){
+
+    //发文标准
+    $("#postStandard").click(function(event) {
+        postStandard('日记发布标准','riji');
+        $('#isAgree').attr("checked", true);
+    });
+
+
+    //点击开始写日记触发的事件
+    $("#btn_sub").click(function() {
+        if($('#isAgree').is(':checked')) {
+            //do something
+        }else{
+            alert('您必须先同意遵守《日记发布标准》');
+            return false;
+        }
+
+      /* 提交验证 */
+      $(".err-tips").html("");
+      $("p[class='red']").html("");
+      var fengge_array=new Array();
+      var title=$("input[name='title']").val();
+      var huxing = $(".rdo .checked").attr("data-value");
+      var mianji=$("input[name='mianji']").val();
+      var xiaoqu=$("[name='xiaoqu']").val();
+      var cs=$("select[name='cs']").val();//获取城市
+      var qx=$("select[name='qx']").val();//获取区县
+
+      var decorate_type=$("select[name='decorate_type']").val();//是半包还是全包
+      var check_company=$("input[name='check_company']:checked").val();//是否选择装修公司
+      var company_name=$("input[name='company_name']").val();//装修公司名称
+      //验证标题
+      if (!App.validate.run(title))
+      {
+        $("input[name='title']").focus();
+        $("input[name='title']").next().html("请填写日记标题");
+        return false;
+      };
+      //验证面积
+      if(!App.validate.run(mianji,"num"))
+      {
+        $("input[name='mianji']").focus();
+        $("input[name='mianji']").next().html("请填写正确的面积");
+        return false;
+      }
+      //验证小区地址
+      if(!App.validate.run(xiaoqu))
+      {
+        $("input[name='xiaoqu']").focus();
+        $("input[name='xiaoqu']").next().html("小区名称必须填写");
+        return false;
+      }
+      //验证区县选择
+      if (!App.validate.run(qx)) {
+        $("select[name='qx']").focus();
+        $("select[name='qx']").next().html("区县必须选择");
+      }
+      //验证风格选择
+      var fengge = "";
+      $(".fuxuan .checked").each(function(i){
+          fengge += $(this).attr("data-value")+",";
+      });
+
+      if(fengge == ""){
+        $(".fuxuan p[class='red']").html("选择您的装修风格");
+        return false;
+      }
+
+      if( $(".fuxuan .checked").length > 2){
+
+         $(".fuxuan p[class='red']").html("请不要选择超过2项");
+         return false;
+      }
+      //验证小区地址是否选择装修公司
+      if (check_company==1&&!App.validate.run(company_name))
+      {
+        $(".yh-main input[name='company_name']").focus();//装修公司名称选中
+        $(".yh-main input[name='company_name']").next().html("请填写合作的装修公司名称");
+        return false;
+      }
+
+
+      $.post("/add_diary/1",{
+        title:title,
+        huxing:huxing,
+        mianji:mianji,
+        qx:qx,
+        xiaoqu:xiaoqu,
+        fengge:fengge,
+        decorate_type:decorate_type,
+        check_company:check_company,
+        company_name:company_name
+      },function(res){
+        if (res.info!="Ok")
+        {
+          //如果创建第二步失败
+          $("#error_msg").html(res.data);
+        }else{
+          //如果创建第二步成功 页面跳转到写新日记中去
+          url="/write_diary/"+res.data;
+          window.location.href=url;
+        }
+      },'json');
+    });
+  });
+  </script>
+</body>
+</html>

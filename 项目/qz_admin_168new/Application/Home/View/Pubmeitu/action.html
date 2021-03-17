@@ -1,0 +1,166 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>公装美图管理</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/home/css/bootstrap-switch.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/assets/home/css/style.css?v={:C('STATIC_VERSION')}">
+
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>公装美图--添加{$attname}</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/pubmeitu">公装美图管理</a></li>
+            <li><a href="/pubmeitu/att?type={$Think.get.type}">{$attname}管理</a></li>
+            <li class="active">添加/修改</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <div class="form-horizontal">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">名称：</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" name="title" value="{$att.name}">
+                        </div>
+                        <div class="col-sm-3 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">属性：</label>
+                        <div class="col-sm-3">
+                            <select name="select" class="form-control">
+                                <option value="1">公装美图类型</option>
+                                <option value="2">公装美图风格</option>
+                                <option value="3">公装美图面积</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">排序：</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" name="px" value="{$att.px}">
+                        </div>
+                        <div class="col-sm-3 tips link-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">推荐状态：</label>
+                        <div class="col-sm-5">
+                            <div class="switch" data-on-label="SI" data-off-label="NO">
+                                <if condition="$att['istop'] EQ 1">
+                                    <input id="create-switch" type="checkbox" checked />
+                                <else/>
+                                    <input id="create-switch" type="checkbox" />
+                                </if>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">启用状态：</label>
+                        <div class="col-sm-5">
+                            <div class="switch" data-on-label="SI" data-off-label="NO">
+                                <if condition="$att['enabled'] EQ 1">
+                                    <input id="create-enabled" type="checkbox" checked />
+                                <else/>
+                                    <input id="create-enabled" type="checkbox" />
+                                </if>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label"></label>
+                        <button type="submit" id="submit" class="btn btn-success button">保存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back()"><i class="fa fa-mail-reply"></i>&nbsp;返回</button>
+                        <input type="hidden" name="attid" value="{$att.id}"/>
+                    </div>
+                </div>
+            </div>
+            <!-- E form -->
+        </div>
+    </section>
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+    <script charset="utf-8" src="/assets/home/js/bootstrap-switch.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var attname = "{$Think.get.type}";
+            if(attname == 'fg'){
+                $("option[value='2']").attr("selected",true);
+            }
+            else if(attname == 'mj'){
+                $("option[value='3']").attr("selected",true);
+            }
+            else{
+                $("option[value='1']").attr("selected",true);
+            }
+
+            //推荐滑块js
+            $('#create-switch').bootstrapSwitch({onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                }else{
+                    $el.attr("checked","checked")
+                }
+            }});
+
+            //推荐滑块js
+            $('#create-enabled').bootstrapSwitch({onSwitchChange:function(e, data){
+                var $el = $(e.target);
+                if($el.attr("checked") == "checked"){
+                    $el.attr("checked",false);
+                }else{
+                    $el.attr("checked","checked")
+                }
+            }});
+
+            //保存按钮
+            $("#submit").click(function(event) {
+                //检查标题
+                $(".tips").html("");
+                $(".focus").removeClass('focus');
+                var _this = $(this);
+                if($("input[name=title]").val() == ""){
+                    $("input[name=title]").focus();
+                    $("input[name=title]").parent().parent().find(".tips").html("请填写属性名称！");
+                    return false;
+                }
+
+                var data = {
+                    attid:$("input[name=attid]").val(),
+                    title:$("input[name=title]").val(),
+                    px:$("input[name=px]").val(),
+                    type:$("select[name=select]").val(),
+                    istop:$("#create-switch:checked").val() == "on"?1:0,
+                    enabled:$("#create-enabled:checked").val() == "on"?1:0,
+                }
+
+                $.ajax({
+                    url: '/pubmeitu/action/',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data:{
+                        data:data
+                    }
+                })
+                .done(function(data) {
+                    if(data.status == 1){
+                        window.location.href="/pubmeitu/att?type="+attname;
+                    }
+                });
+
+            });
+        })
+    </script>
+</block>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="renderer" content="webkit" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+        <meta name="mobile-agent" content="format=html5;url={$SCHEME_HOST.scheme_full}m.{$SCHEME_HOST.domain}/baike/" />
+        <title>{$keys.title}-{$title}</title>
+        <meta name="keywords" content="{$keys.keywords}" />
+        <meta name="description" content="{$keys.description}" />
+        <include file="Index:resource" />
+        <link rel="stylesheet" href="{$static_host}/assets/home/baike/css/baike.css?v={:C('STATIC_VERSION')}">
+    </head>
+    <body>
+    {$headerTmp}
+    <div class="banner"></div>
+
+    <div class="wrap">
+        <div class="bread revise mt10">
+                <a href="/">齐装网</a> &gt;
+                <a href="/baike/">装修百科</a> &gt;
+                <a href="/baike/{$info.bigCateUrl}">推荐百科</a>
+        </div>
+    </div>
+    <div class="wrap">
+        <ul class="tj-list1 mt20 data">
+            <volist name="category" id="vo">
+            <li>
+                <a href="/baike/{$vo.id}.html" target="_blank" class="tj-box">
+                <div class="ejType">{$vo.name}</div>
+                <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{$vo.thumb}" alt="">
+                </a>
+                <div class="jxbk-container">
+                    <p class="jxbk-title"><a target="_blank" href="/baike/{$vo.id}.html">{$vo.title}</a></p>
+                    <div class="jxbk-content">
+                        <a target="_blank" href="/baike/{$vo.id}.html">{$vo.content}</a>
+                    </div>
+                </div>
+            </li>
+            </volist>
+        </ul>
+        <div class="load-more">
+               <div class="loading">加载更多...</div>
+        </div>
+    </div>
+
+     <!-- 底部弹窗e -->
+    <include file="Common@Friendlink/index"/>
+    <include file="Index:footer"/>
+    <input id="safecode" type="hidden" value="{$safecode}" />
+    <input id="safekey" type="hidden" value="{$safekey}" />
+    <script>
+        $(".load-more").hide();
+        var page = 2,
+            isLoad=true;
+        $(function () {
+            getData(page);
+            $(window).scroll(function(){
+                var top=$(".load-more").offset().top - $(window).scrollTop();
+                console.log($(".load-more").offset().top);
+                if(top<916&&isLoad){
+                    page++;
+                    getData(page);
+                }else{
+                    $(".loading").css("display","none");
+                }
+            });
+        });
+        function getData(page) {
+            $.ajax({
+                type : "POST",
+                url : "/baike/baike_recommend/",
+                dataType : "JSON",
+                beforeSend:function () {
+                    $(".load-more").show();
+                },
+                data:{page:page}
+            })
+                .done(function(data) {
+                    $(".load-more").hide();
+                    if(data.status == 1){
+                        if(data.info.length==0){
+                            isLoad=false;
+                            return;
+                        }
+                        var html = getHtml(data.info);
+                        $(".data").append(html);
+                        page++;
+                    }
+                })
+                .fail(function(xhr) {
+                    alert("网络发生错误,请稍后重试！");
+                });
+        }
+
+        //生成html
+        function getHtml(data) {
+            var html = '';
+            var leng = data.length;
+            for(var i=0;i<leng;i++){
+                html += '<li>\
+                    <a href="/baike/' + data[i].id + '.html" target="_blank" class="tj-box"><div class="ejType">' + data[i].name + '</div><img src="{$SCHEME_HOST.scheme_full}{:C(\'QINIU_DOMAIN\')}/' + data[i].thumb + '" alt=""></a>\
+                        <div class="jxbk-container">\
+                            <p class="jxbk-title"><a target="_blank" href="/baike/' + data[i].id + '.html">' + data[i].title + '</a></p>\
+                            <div class="jxbk-content">\
+                                <a target="_blank" href="/baike/' + data[i].id + '.html">' + data[i].content + '</a>\
+                            </div>\
+                    </div>\
+                </li>';
+            }
+            return html;
+        }
+    </script>
+    </body>
+</html>

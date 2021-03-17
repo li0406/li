@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用户中心">
+    <meta name="description" content="用户中心">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$user.tip}登录-齐装网</title>
+    <include file="OAuth:resource" />
+    <link href="{$static_host}/assets/user/index/css/default.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+    <link href="{$static_host}/assets/user/index/css/oauth.css?v={:C('STATIC_VERSION')}" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+    <include file="User@Index:header" />
+    <div class="wrap">
+        <div class="loginlogo">
+             <a class="logo" href="{$SCHEME_HOST.scheme_full}{:C('QZ_YUMINGWWW')}/"><img src="{$static_host}/assets/common/pic/logo.jpg"/></a>
+        </div>
+    </div>
+    <div class="wrap login_container">
+        <div class="login_info">
+            <em>快速绑定帐号,省去您登录的烦恼！</em>
+        </div>
+        <div class="login_box">
+            <div class="login_hd">
+                <i class="{$user.icon}"></i><em style="display:inline-block;width:auto; height:30px; vertical-align:top; line-height:30px; font-size:14px;">{$user.tip}</em>
+            </div>
+            <div class="login_content">
+                <div class="login_logo">
+                <if condition="$user.img EQ ''">
+                <img src="{$SCHEME_HOST.scheme_full}{:C('QINIU_DOMAIN')}/{:OP('DEFAULT_LOGO')}" width="100" height="100" />
+                <else />
+                <img src="{$user.img}" width="100" height="100" />
+                </if>
+                </div>
+                <div class="login_nickname">
+                    {$user.screen_name}
+                </div>
+            </div>
+        </div>
+        <div class="login_mark">
+            <em class="icon-exchange"></em>
+        </div>
+        <div class="login_box">
+            <div class="login_hd">
+                <em style="">齐装网帐号</em>
+            </div>
+            <div class="login_content">
+                <div class="input">
+                    <input type="text" name="user" class="user" placeholder="手机/邮箱/帐号" />
+                </div>
+                <div class="red err-tips">
+                </div>
+                <div class="input">
+                    <input type="password" name="pwd" class="pwd" placeholder="密码" />
+                </div>
+                <div class="red err-tips">
+                </div>
+                <button id="btnSave" type="button" class="button">绑定帐号</button>
+                <em class="red mt20 error"></em>
+                <a class="red pull-right mt20" href="/jump/">跳过此步</a>
+                <a class="pull-right mt20" href="{$SCHEME_HOST.scheme_full}u.qizuang.com/reg/" style="color:#999; margin-right:10px;">没有帐号?</a>
+            </div>
+        </div>
+        <br style="clear:both;">
+    </div>
+    <include file="User@Index:footer" />
+</body>
+<script type="text/javascript">
+    $("#btnSave").click(function(event) {
+        $(".focus").removeClass('focus');
+        $(".err-tips").html('');
+
+        if(!App.validate.run($(".login_box input[name=user]").val())){
+            $(".login_box input[name=user]").focus().parent().addClass('focus').find(".err-tips").html("请输入手机/邮箱/帐号");
+            return false;
+        }
+
+        if(!App.validate.run($(".login_box input[name=pwd]").val())){
+            $(".login_box input[name=pwd]").focus().parent().addClass('focus').find(".err-tips").html("请输入密码");
+            return false;
+        }
+
+        $.ajax({
+            url: '/validateaccount/',
+            type: 'POST',
+            dataType: 'JSON',
+
+            data: {
+                user:$(".login_box input[name=user]").val(),
+                pwd:$(".login_box input[name=pwd]").val()
+            }
+        })
+        .done(function(data) {
+            if(data.status == 1){
+                window.location.href = data.data;
+            }else{
+                $(".error").html(data.info);
+            }
+        })
+        .fail(function() {
+            $(".error").html("发生了未知的错误,请重新绑定!");
+        });
+    });
+
+</script>
+</html>

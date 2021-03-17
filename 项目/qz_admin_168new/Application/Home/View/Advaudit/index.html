@@ -1,0 +1,197 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>齐装网website管理后台-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+<section class="content-header">
+    <h1 class="">广告审核管理
+    </h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">条件查询</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                      <form class="form-horizontal" method="GET" action="/adv/">
+                        <div class="col-xs-2">
+                            <select id="search"   name="cs" type="text" placeholder="所属城市" >
+                                <option value="">全部城市</option>
+                                <volist name="citys" id="vo">
+                                <option value="{$vo.cid}">{$vo.cname}</option>
+                                </volist>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <input type="text" name="query" class="form-control"  placeholder="公司名称/ID" value="{$query}">
+                        </div>
+                        <div class="col-xs-1">
+                          <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>查询</button>
+                        </div>
+                      </form>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-default">
+                <table class="table table-bordered table-hover">
+                    <tr>
+                       <th class="col-sm-1">ID</th>
+                       <th class="col-sm-2">公司名称</th>
+                       <th class="col-sm-1">所属城市</th>
+                       <th class="col-sm-1">广告位置</th>
+                       <th class="col-sm-1">预览图片</th>
+                       <th class="col-sm-1">申请时间</th>
+                       <th class="col-sm-1">审核时间</th>
+                       <th class="col-sm-1">审核人</th>
+                       <th class="col-sm-1">状态</th>
+                       <th class="col-sm-2">操作</th>
+                    </tr>
+                    <volist name="list.list" id="vo">
+                    <tr>
+                       <td class="col-sm-1">{$vo.company_id}</td>
+                       <td class="col-sm-2">{$vo.company_name}</td>
+                       <td class="col-sm-1">{$vo.cname}</td>
+                       <td class="col-sm-1">
+                       <switch name="vo.module">
+                            <case value="home_advbanner">轮播广告</case>
+                            <case value="home_bigbanner_a">通栏A</case>
+                            <case value="home_bigbanner_b">通栏B</case>
+                       </switch>
+                       </td>
+                       <td class="col-sm-1">
+                           <button type="button" class="btn btn-default btn-sm btn-preview" data-url="{$vo.preview}">预览</button>
+                       </td>
+                       <td class="col-sm-1">
+                            {$vo.audit_time|date="Y-m-d",###}
+                       </td>
+                       <td class="col-sm-1">
+                            <if condition="$vo['uptime'] NEQ ''">
+                                -
+                            <else/>
+                             {$vo.uptime|date="Y-m-d",###}
+                            </if>
+                       </td>
+                       <td class="col-sm-1">
+                            {$vo.op_uname|default='-'}
+                       </td>
+                       <td class="col-sm-1">
+                            <switch name="vo.audit_status">
+                                <case value="0">申请</case>
+                                <case value="1">通过</case>
+                                <case value="2">不通过</case>
+                            </switch>
+                       </td>
+
+                       <td class="col-sm-2">
+                            <if condition="$vo['audit_status'] EQ 0">
+                            <a title="点击审核" data-id="{$vo.audit_id}" class="fa fa-caret-square-o-up"></a>
+                            </if>
+                       </td>
+                    </tr>
+                    </volist>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+<div id="myModal2" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">广告审核</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancel" type="button" class="btn btn-danger" data-dismiss="modal">取消</button>
+                <button id="btnAdd" type="button" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#search").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+
+    $("#search").select2("val","{$cs}");
+
+    $(".btn-preview").click(function(event) {
+        var img = $("<img src='"+$(this).attr("data-url")+"' style='width:100%'/>");
+        $("#myModal .modal-body").html(img);
+        $("#myModal").modal();
+    });
+
+    $(".fa-caret-square-o-up").click(function(event) {
+        var _this = $(this);
+        $.ajax({
+            url: '/advaudit/audit/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                id: _this.attr("data-id")
+            }
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                    $("#myModal2 .modal-body").html(data.data);
+                    $("#myModal2").modal();
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                  msg:"获取失败,请联系技术部门！",
+                  level:2
+            });
+        });
+    });
+
+    $("body").on("click","#btnAdd",function(){
+        var _this = $(this);
+        $.ajax({
+            url: '/advaudit/audit/',
+            type: 'POST',
+            dataType: 'JSON',
+            data: $("#myForm").serializeArray()
+        })
+        .done(function(data) {
+            if (data.status == 1) {
+                window.location.href = window.location.href;
+            } else {
+                _this.Alert({
+                    msg:data.info,
+                    level:2
+                });
+            }
+        })
+        .fail(function() {
+            _this.Alert({
+                msg:"提交失败,请联系技术部门！",
+                level:2
+            });
+        });
+    });
+</script>
+</block>

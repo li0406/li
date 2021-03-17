@@ -1,0 +1,283 @@
+<!--会员报备审核-->
+<extend name="Main:baseTemplate"/>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}"/>
+    <link rel="stylesheet" href="/assets/common/js/plugins/select2/select2.min.css?v={:C('STATIC_VERSION')}">
+    <link href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/home/reportcheck/css/check.css?v={:C('STATIC_VERSION')}">
+    <style>
+        .reset-width {
+            width: 12%;
+        }
+
+        #tablelist td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .width-150 {
+            width: 150px !important;
+        }
+    </style>
+</block>
+
+<block name="content">
+    <section class="content-header">
+        <h1>小报备客服审核</h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> 控制面板</a></li>
+            <li><a href="/reportcheck/payment_service_check/">小报备客服审核</a></li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <form class="form-horizontal" id="search_form">
+                                <div class="col-xs-12 ">
+                                    <div class="col-xs-2 reset-width">
+                                        <div>公司名称：</div>
+                                        <input type="text" name="company" class="form-control clear-target"
+                                               placeholder="请输入公司名称或ID" value="{$_GET['company']}">
+                                    </div>
+                                    <div class="col-xs-2 reset-width">
+                                        <div>报备人：</div>
+                                        <input type="text" name="saler" class="form-control clear-target"
+                                               placeholder="请输入报备人" value="{$_GET['saler']}">
+                                    </div>
+                                    
+                                    <div class="col-xs-2 reset-width">
+                                        <div>城市：</div>
+                                        <select id="select_city" name="city_id" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="citylist" id="item">
+                                                <option value="{$item.cid}">{$item.cname}</option>
+                                            </volist>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-xs-2 reset-width">
+                                        <div>合作类型：</div>
+                                        <select id="cooperation_type" name="cooperation_type" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <volist name="cooperation_type_list" id="vo">
+                                                <if condition="$key eq $_GET['cooperation_type']">
+                                                    <option value="{$key}" selected>{$vo}</option>
+                                                <else/>
+                                                    <option value="{$key}">{$vo}</option>
+                                                </if>
+                                            </volist>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-xs-2">
+                                        <div>审核状态：</div>
+                                        <select id="exam_status" name="exam_status" type="text" class="form-control">
+                                            <option value="">请选择</option>
+                                            <option value="5" {:($_GET["exam_status"] == 5 ? "selected" : "")}>审核通过/待客服上传</option>
+                                            <option value="6" {:($_GET["exam_status"] == 6 ? "selected" : "")}>客服审核不通过</option>
+                                            <option value="3" {:($_GET["exam_status"] == 3 ? "selected" : "")}>审核通过/客服完成上传</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-xs-2 reset-width">
+                                        <div>&nbsp;</div>
+                                        <button type="submit" id="search" class="btn btn-success">查询</button>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <button type="button" id="reset" class="btn">重置</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover table-bordered" id="tablelist">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>公司名称</th>
+                                <th>会员ID</th>
+                                <th>合作类型</th>
+                                <th>城市</th>
+                                <th>返点比例</th>
+                                <th>返点订单</th>
+                                <th>签单金额</th>
+                                <th>本次到账金额</th>
+                                <th>保证金抵扣</th>
+                                <th>轮单费抵扣</th>
+                                <th>报备人</th>
+                                <th>状态</th>
+                                <th>审核时间</th>
+                                <th class="width-150">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <volist name="data.list" id="item">
+                                <tr>
+                                    <td>{$item.id}</td>
+                                    <td>{$item.company_name}</td>
+                                    <td>{$item.company_id}</td>
+                                    <td>{$item.cooperation_type_name}</td>
+                                    <td>{$item.city_name}</td>
+                                    <td>{$item.back_ratio|default="-"}</td>
+                                    <td>{$item.order_id|default="-"}</td>
+                                    <td>{$item.order_sign_money|default="-"}</td>
+                                    <td>{$item.payment_total_money|default="-"}</td>
+                                    <td>
+                                        <if condition="$item['cooperation_type'] eq $platform_turn_type">
+                                            {$item.deposit_to_platform_money}
+                                        <else />
+                                            {$item.deposit_money}
+                                        </if>
+                                    </td>
+
+                                    <td>{$item.round_order_money|default="-"}</td>
+                                    <td>{$item.creator_name}</td>
+                                    <td>
+                                        <switch name="item.exam_status">
+                                            <case value="3"><span style="color: #008000">{$item.exam_status_name}</span></case>
+                                            <case value="5"><span style="color: #FFCC00">{$item.exam_status_name}</span></case>
+                                            <case value="6"><span style="color: #FF0000">{$item.exam_status_name}</span></case>
+                                        </switch>
+                                    </td>
+                                    <td>{:date("Y/m/d H:i", $item["exam_time"])}</td>
+                                    <td>
+                                        <a href="/reportcheck/payment_service_show?id={$item.id}" target="_blank">查看</a>
+                                        <eq name="item.exam_status" value="5">
+                                            <a href="javascript:void(0);" data-id="{$item.id}" class="btn_exam">审核</a>
+                                        </eq>
+                                    </td>
+                                </tr>
+                            </volist>
+                            
+                            <if condition="$data['page']['total_number'] eq 0">
+                                <tr>
+                                    <td colspan="20" align="center">暂无数据</td>
+                                </tr>
+                            </if>
+                            </tbody>
+                        </table>
+                    </div>
+                    <if condition="$data['page']['total_number'] gt 0">
+                        <div class="col-xs-12">{$data.pageshow}</div>
+                    </if>
+                </div>
+            </div>
+        </div>
+        <div class="mask" id="exam_layout">
+            <div class="tip-box">
+                <div class="tip-wrapper">
+                    <div class="tip-header">
+                        <h2>审核</h2>
+                    </div>
+                    <div class="tip-body">
+                        <ul>
+                            <li class="check-box" id="exam_status">
+                                <span>审核：</span>
+                                <label for="pass">
+                                    <input type="radio" name="check-result" id="pass" value="1">通过
+                                </label>
+                                <label for="no-pass">
+                                    <input type="radio" name="check-result" id="no-pass" value="2">不通过
+                                </label>
+                            </li>
+                            <li class="remark-item" style="display: none;" id="exam_remark">
+                                <span>备注：</span>
+                                <textarea></textarea>
+                            </li>
+                            <li style="margin-top: 15px;">
+                                <input type="hidden" name="id" id="check_id" />
+                                <button class="btn btn-primary btn-check btn-confirm btn-confirm-exam">确认</button>
+                                <button class="btn btn-default btn-check btn-cancel btn-cancel-exam">取消</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+
+<block name="script">
+    <script src="/assets/common/js/plugins/select2/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $("#select_city").select2();
+            $("#select_city").select2("val", "{$_GET['city_id']}");
+
+            // 重置
+            $("#reset").click(function(){
+                $("input[name=company]").val("");
+                $("input[name=saler]").val("");
+                $("#select_city").select2("val", "");
+            });
+
+            // 审核弹窗
+            $(".btn_exam").click(function(){
+                $("#check_id").val($(this).data("id"));
+                $("#exam_layout").fadeIn();
+            });
+            
+            // 审核弹窗取消
+            $(".btn-cancel-exam").on("click", function () {
+                $("#exam_layout").fadeOut()
+            })
+
+            $("#exam_status input[type=radio]").change(function () {
+                if (this.value == "1") {
+                    $("#exam_remark").hide();
+                } else {
+                    $("#exam_remark").show();
+                }
+            });
+
+            //审核操作
+            $('.btn-confirm-exam').click(function () {
+                var id = $("#check_id").val();
+                var remark = $('#exam_remark').find("textarea").val();
+                var exam_status = $("#exam_status input[type=radio]:checked").val();
+                if (exam_status == undefined) {
+                    alert("请先选择审核状态");
+                    return false;
+                }
+
+                check_payment_report(id, remark, exam_status, 1);
+            });
+
+            // 审核方法
+            function check_payment_report(id, remark, exam_status, isconfirm){
+                $.ajax({
+                    url: "/reportcheck/check_payment_report",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        id: id,
+                        remark: remark,
+                        exam_status: exam_status,
+                        isconfirm: isconfirm,
+                        actfrom: 2
+                    }
+                }).done(function (response) {
+                    if (response.error_code == 1100001) {
+                        if (confirm("余额不够确定要审核通过吗？") == true) {
+                            check_payment_report(id, remark, exam_status, 2);
+                        }
+                    } else if (response.error_code == 0) {
+                        window.location.reload();
+                    }else {
+                        alert(response.error_msg);
+                    }
+                });
+            }
+        });
+    </script>
+</block>

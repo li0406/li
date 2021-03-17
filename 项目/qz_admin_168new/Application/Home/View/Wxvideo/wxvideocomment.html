@@ -1,0 +1,179 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>小程序视频评论管理-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>{$title}</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                标题:<input type="text" name="title" class="form-control"  placeholder="昵称" value="{$search.title}">
+                            </div>
+                            <div class="col-xs-2">
+                                审核状态:
+                                <select id="recommend_state" class="form-control istop">
+                                    <option value="">全部</option>
+                                    <option value="0">未审核</option>
+                                    <option value="1">合格</option>
+                                    <option value="2">违规</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button id="btnSearch" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                            </div>
+                            <div class="col-xs-1">
+                                <br/>
+                                <button class="btn btn-warning normal" id="resetVal" >
+                                    <i class="fa fa-refresh"></i>重置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th class="col-sm-1">排序</th>
+                            <th class="col-sm-1">昵称</th>
+                            <th>评论内容</th>
+                            <th class="col-sm-1">点赞量</th>
+                            <th class="col-sm-1">审核状态</th>
+                            <th class="col-sm-1">审核</th>
+                        </tr>
+                        <volist name="list.list" id="vo">
+                            <tr>
+                                <td>{$vo.count}</td>
+                                <td >{$vo.username}</td>
+                                <td class="col-sm-1 yulan" info="{$vo.content}" title="{$vo.content}"><a href="javascript:;">{$vo.content}</a></td>
+                                <td class="col-sm-2">{$vo.likes}</td>
+                                <td class="col-sm-1">
+                                    <switch name="vo.recommend">
+                                    <case value="0">未审核</case>
+                                    <case value="1">合格</case>
+                                    <case value="2">违规</case>
+                                    </switch>
+                                </td>
+                                <td class="col-sm-1">
+                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="1" class="fa fa-check" title="合格"></a>
+                                    <a href="javascript:void(0)" data-id="{$vo.id}" data-value="2" class="fa fa-times" title="违规"></a>
+                                </td>
+                            </tr>
+                        </volist>
+                    </table>
+                    {$list.page}
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-body" style="padding: 10px 15px;">
+                        <div class="table checkTable" style="border: 1px dashed #C7D6B8;min-width: 400px">
+                            <h4 style="margin-left: 12px;">评价详情</h4>
+                            <div class="tableRow">
+                                <div class="tableCell">
+                                    <div class="input">
+                                        <textarea name="text" placeholder="" style="height:300px;" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $('#recommend_state').val('{$search.recommend}' == '' ? '' : '{$search.recommend}');
+    $(".fa-check").click(function(event) {
+        var _this = $(this);
+        if (confirm("确定修改为合格吗？")) {
+            $.ajax({
+                url: '/wxvideo/checkcomment/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: _this.attr("data-id"),value: _this.attr("data-value")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                   window.location.href = window.location.href;
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            })
+            .fail(function() {
+                _this.Alert({
+                    msg:"操作失败,请联系技术部门！",
+                    level:2
+                });
+            });
+        };
+    });
+    $(".fa-times").click(function(event) {
+        var _this = $(this);
+        if (confirm("确定修改为违规吗？")) {
+            $.ajax({
+                url: '/wxvideo/checkcomment/',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {id: _this.attr("data-id"),value: _this.attr("data-value")}
+            })
+            .done(function(data) {
+                if (data.status == 1) {
+                   window.location.href = window.location.href;
+                } else {
+                    _this.Alert({
+                        msg:data.info,
+                        level:2
+                    });
+                }
+            })
+            .fail(function() {
+                _this.Alert({
+                    msg:"操作失败,请联系技术部门！",
+                    level:2
+                });
+            });
+        };
+    });
+    //搜索
+    $('#btnSearch').click(function(){
+        var title                   = $("input[name=title]").val();
+        var recommend               = $("#recommend_state").val();
+        var uri = window.location.href;
+        
+        window.location.href = uri+'&title=' +title +'&recommend='+recommend;
+    })
+    //重置搜索条件
+    $("#resetVal").click(function(){
+        $("input[name=title]").val('');
+        $("#recommend_state").val('');
+    });
+
+    //预览评论
+    $(".yulan").on('click',function(event){
+        $("#myModal").modal();
+        var info=$(this).attr('info');
+        $("textarea[name='text']").val(info);
+    });
+</script>
+</block>

@@ -1,0 +1,122 @@
+<div class="panel-body packageNew">
+    <form>
+        <div class="panel panel-default">
+            <div class="panel-heading" style="text-align: center;">添加订单包<button class="close" onclick="signBackActive.close_contact_layout()">×</button></div>
+
+            <div class="panel-body">
+                <div class="row" style="margin: 15px;">
+                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">分单量:</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="" name="fen_number" />
+                    </div>
+                    <label class="col-sm-2 control-label" style="text-align: center; line-height: 34px;">赠单量:</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="" name="zen_number"/>
+                    </div>
+                </div>
+
+                <div class="row" style="margin: 15px;">
+                    <label class="col-sm-2 control-label" style="text-align: right; line-height: 34px;">保证金:</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="" name="deposit_money" />
+                    </div>
+                    <label class="col-sm-2 control-label" style="text-align: center; line-height: 34px;">返点:</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control datepicker" autocomplete="off"
+                               placeholder="" name="back_ratio" maxlength="2"/>
+                    </div>
+                </div>
+
+                <div class="row" style="text-align: center;">
+                    <button id="btnAdd" type="button" class="btn btn-success">
+                        <i class="fa fa-floppy-o"></i> 保存
+                    </button>
+                    &nbsp;&nbsp;
+                    <button type="button" class="btn btn-danger" onclick="signBackActive.close_contact_layout()">
+                        <i class="fa fa-trash-o"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+
+        $(".packageNew #btnAdd").click(function(event) {
+            var _this = $(this);
+
+            var reg = /^(0|\+?[1-9][0-9]*)$/;
+            var reg1 = /^([1-9]\d|\d|-1)$/;
+
+
+            if($(".packageNew input[name=fen_number]").val() == ''){
+                alert("请输入分单量")
+                return false;
+            }else if(!reg.test($(".packageNew input[name=fen_number]").val())){
+                alert("分单量只能输入正整数")
+                return false;
+            }
+            if($(".packageNew input[name=zen_number]").val() == ''){
+                alert("请输入赠单量")
+                return false;
+            }else if(!reg.test($(".packageNew input[name=zen_number]").val())){
+                alert("赠单量只能输入正整数")
+                return false;
+            }
+            if($(".packageNew input[name=fen_number]").val() == 0 && $(".packageNew input[name=zen_number]").val() == ''){
+                alert("分单、增单不可为空")
+                return false;
+            }
+
+            if($(".packageNew input[name=deposit_money]").val() == ''){
+                alert("请输入保证金")
+                return false;
+            }else if($(".packageNew input[name=deposit_money]").val() == 0){
+                alert("保证金不能为0")
+                return false;
+            }else if(!reg.test($(".packageNew input[name=deposit_money]").val())){
+                alert("保证金只能输入正整数")
+                return false;
+            }
+
+
+            if($(".packageNew input[name=back_ratio]").val() == ''){
+                alert("请输入返点比例")
+                return false;
+            }else if(!reg1.test($(".packageNew input[name=back_ratio]").val())){
+                alert("只可输入1-99间的整数")
+                return false;
+            }
+
+            var data = $(".packageNew form").serializeArray();
+
+            data.push({
+                name: "company_id",
+                value: signBackActive["param"]["company_id"]
+            });
+
+            $.ajax({
+                url: '/signbackuser/addCompanyPackage/',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    signBackActive.close_contact_layout();
+                    signBackActive.get_package_temp();
+                } else {
+                    alert(data.errmsg);
+                };
+            })
+            .fail(function() {
+                alert("发生异常,请稍后再试！");
+            });;
+        });
+    });
+</script>

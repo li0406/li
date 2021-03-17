@@ -1,0 +1,162 @@
+<extend name="Main:baseTemplate"/>
+<block name="title">
+    <title>招聘通话统计详情</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" href="/assets/home/recruit/days.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="content">
+    <section class="content-header">
+        <h4>招聘通话统计详情</h4>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box laytop">
+                    <div class="box-header">
+                        <h4 style="display: inline-block">通话记录详情 > {$user.name}
+                        </h4>
+                        <span class="btn btn-success" style="margin-top: 3px;float: right"
+                              onclick="javascript:window.history.back(-1);">返回</span>
+                    </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>呼出量</th>
+                            <th>呼通量</th>
+                            <th>未呼通量</th>
+                            <th>平均时长</th>
+                            <th>总时长</th>
+                            <th>呼叫记录</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.days}</td>
+                                <td>{$vo.count}</td>
+                                <td>{$vo.tel_count}</td>
+                                <td>{$vo.un_tel_count}</td>
+                                <td>{$vo.avg_time}</td>
+                                <td>{$vo.sum_time}</td>
+                                <td><a class="dianji" data-day='{$vo.days}'>查看</a></td>
+                            </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!--详情弹窗-->
+        <div class="yinying"></div>
+
+        <div class="laytanchu">
+            <div class="waik">
+                <span class="guanbi fa fa-close"></span>
+                <span class="fangda">放大</span>
+                <div class="row">
+                    <!-- 弹窗 -->
+                    <div id="box-bg" class="col-xs-12 hidden-record">
+                        <div id="box">
+                            <div class="box-prompt"><span>提示</span>
+                                <input type="button" name="" value="×">
+                            </div>
+                            <div id="pic">
+                                <!--content-->
+                            </div>
+                            <div class="auto-record hidden-record">
+                                <audio class="player" src="" autoplay="" preload="auto" controls="" data-on="0">
+                                </audio>
+                            </div>
+                            <button id="confirm" class="box-btn">确定</button>&nbsp;
+                            <button id="cancel">取消</button>
+                        </div>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="box laytop">
+                            <div class="box-header">
+                                <h4>记录列表</h4>
+                            </div>
+
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>产生时间</th>
+                                    <th>呼叫动作</th>
+                                    <th>挂机类型</th>
+                                    <th>通话录音</th>
+                                    <th>callSid</th>
+                                    <th>主叫号码</th>
+                                    <th>被叫号码</th>
+                                    <th>拨打人</th>
+                                </tr>
+                                </thead>
+                                <tbody class="appendhtml" data-day="">
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</block>
+
+<block name="script">
+<script>
+
+    var page = 1;
+    var id = {$user.id};
+    window.flag = true;
+    var itemUrl = '/recruit/items';
+    $(function () {
+
+        $('.dianji').click(function () {
+            $('.yinying').fadeIn();
+            $('.laytanchu').fadeIn();
+        });
+
+        $('.laytanchu .guanbi').click(function () {
+            $('.laytanchu').hide();
+            $('.yinying').fadeOut();
+            $('.appendhtml').html('');
+            window.flag = true;
+            page = 1;
+        });
+        $('.laytanchu .fangda').click(function () {
+            if ($('.laytanchu').hasClass('yangshifd')) {
+                $('.laytanchu').removeClass('yangshifd');
+                $('.laytanchu .fangda').html("放大");
+            } else {
+                $('.laytanchu').addClass('yangshifd');
+                $('.laytanchu .fangda').html("缩小");
+            }
+        });
+
+        $('.dianji').on('click', function () {
+            var day= $(this).data("day");
+            getData(id,page,day);
+            $('.appendhtml').attr('data-day',day);
+        });
+
+        $(".laytanchu .waik").unbind("scroll").bind("scroll", function (e) {
+            var sum = this.scrollHeight;
+            if (window.flag) {
+                if (sum <= $(this).scrollTop() + $(this).height()) {
+                    day = $('.appendhtml').data('day');
+                    page++;
+                    getData(id,page,day);
+                }
+            }
+        });
+    });
+
+</script>
+<!--不要更换JS次序-->
+<script type="" src="/assets/home/recruit/days.js?v={:C('STATIC_VERSION')}"></script>
+</block>

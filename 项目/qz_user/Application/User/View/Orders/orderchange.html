@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="{$keys.keywords}">
+    <meta name="description" content="{$keys.description}">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{$keys.title}-{$title}</title>
+    <include file="Index:resource" />
+    <include file="Home:resource" />
+    <link rel="stylesheet" href="{$static_host}/assets/user/orders/css/ht-order.css?v={:C('STATIC_VERSION')}">
+    <script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+</head>
+
+<body>
+    <include file="Home:header" />
+    <div class="ht-wrap oflow ht-relative">
+        <include file="Home:comnavleft" />
+        <include file="Orders:header" />
+        <div class="ht-main">
+            <if condition="$info['user']['safe_account']">
+            <form id="myForm" onsubmit="return false;">
+            <ul class="compinfo-secret">
+                <li><span>设置新密码：</span>
+                    <input name="password" type="password">
+                </li>
+                <li><span>重复新密码：</span>
+                    <input name="confirmpassword" type="password">
+                </li>
+                <li><span>验证码：</span>
+                    <input name="code" type="text">
+                    <button id="btnSend" type="button">发送验证码至手机/邮箱</button>
+                </li>
+                <li>
+                  <div class="ht-tips red"></div>
+                </li>
+            </ul>
+            </form>
+            <div class="ht-yes mt20"><a  href="javascript:void(0)" ><i class="icon-ok mr10"></i>确认修改</a> <input class="order_safecode" type="hidden" /></div>
+            <else/>
+            <p class="ht-info">请先绑定您的安全手机/安全邮箱 <a href="/home/" class="red">点击进入</a></p>
+            </if>
+        </div>
+    </div>
+    <include file="Index:footer" />
+</body>
+<script type="text/javascript">
+  $(function(){
+     $(".verifyimg").click(function(event) {
+        $(this).attr("src","/verify?rand="+Math.random());
+  });
+
+  $(".compinfo-secret #btnSend").click(function(event) {
+      var _this = $(this);
+      _this.attr("disabled","disabled");
+      var safe_account = "{$info.user.safe_account}";
+      $(".ht-tips").html("");
+      switch(safe_account){
+          case "mail":
+              sendEmail(account,_this);
+          break;
+          default:
+              initG();
+          break;
+      }
+  });
+
+  var initG = function(){
+      $.ajax({
+          url: '/gtverify/initgeet',
+          type: 'POST',
+          dataType: 'JSON',
+          data:{
+              scence:2
+          }
+      })
+      .done(function(data) {
+          initGeetest({
+              // 以下配置参数来自服务端 SDK
+              gt: data.data.gt,
+              challenge: data.data.challenge,
+              offline: !data.data.success,
+              new_captcha: true,
+              product: 'bind'
+          }, function (captchaObj) {
+              captchaObj.reset();
+              captchaObj.onReady(function(){
+                  //验证码ready之后才能调用verify方法显示验证码
+                  captchaObj.verify();
+              }).onSuccess(function(){
+                  var validate = captchaObj.getValidate();
+                  $.ajax({
+                      url: '/gtverify/verifygeetest',
+                      type: 'POST',
+                      dataType: 'json',
+                      data: {
+                          geetest_challenge: validate.geetest_challenge,
+                          geetest_validate: validate.geetest_validate,
+                          geetest_seccode: validate.geetest_seccode,
+                          scence:2
+                      }
+                  }).done(function(data) {
+                      if (data.status == 1) {
+                          $.ajax({
+                              type : "POST",
+                              url : "/orders/sendsms/",
+                              dataType : "json",
+                              data:{
+                                  scence:2
+                              },
+                              success : function(data){
+                                  if(data.status == 0){
+                                      $("#btnSend").attr("disabled",false);
+                                      $(".ht-tips").html(data.info);
+                                  }else if(data.status == 1){
+                                      alert('验证码发送成功');
+                                      countDown($("#btnSend"),60);
+                                  }
+                              },
+                              error:function(xhr){
+                                  $("#btnSend").attr("disabled",false);
+                                  $(".ht-tips").html("发送失败,请稍后再试！");
+                              }
+                          });
+                      }
+                  });
+              }).onError(function(){
+                  alert("发送失败,请稍后再试!")
+              })
+          })
+      });
+  }
+
+  var t3 = null;
+  function countDown(obj, num) {
+      if (num > 0) {
+          obj.text(num + " 秒后重新发送");
+          num--;
+          t3 = setTimeout(function (obj, num) {
+              countDown(obj, num);
+          }, 1000, obj, num);
+      } else {
+          clearTimeout(t3)
+          obj.attr("disabled",false);
+          obj.text("发送验证码至手机/邮箱").attr("disabled",false);
+      }
+  }
+
+  $(".ht-yes a").click(function(event) {
+      $(".ht-tips").html("");
+      var _this = $(this);
+      $(".focus").removeClass('focus');
+      if(!App.validate.run($("input[name=password]").val())){
+          $("input[name=password]").addClass('focus');
+          $("input[name=password]").focus();
+          $(".ht-tips").html("请填写您的新密码");
+          return false;
+      }
+
+      if(!App.validate.run($("input[name=password]").val().length,"length",6)){
+          $("input[name=password]").addClass('focus');
+          $("input[name=password]").focus();
+          $(".ht-tips").html("密码长度至少6位");
+          return false;
+      }
+
+      if(!App.validate.run($("input[name=password]").val(),"blend")){
+          $("input[name=password]").addClass('focus');
+          $("input[name=password]").focus();
+          $(".ht-tips").html("请不要填写纯数字/纯字母");
+          return false;
+      }
+
+      if($("input[name=password]").val() != $("input[name=confirmpassword]").val()){
+          $("input[name=password]").addClass('focus');
+          $("input[name=password]").focus();
+          $(".ht-tips").html("两次密码不一致!");
+          return false;
+      }
+
+      if(!App.validate.run($("input[name=code]").val())){
+          $("input[name=code]").addClass('focus');
+          $("input[name=code]").focus();
+          $(".ht-tips").html("请填写您的验证码");
+          return false;
+      }
+
+      $.ajax({
+          type : "POST",
+          url : "/orderchange/",
+          dataType : "JSON",
+          data:{
+              password:$("input[name=password]").val(),
+              comfirmpassword:$("input[name=password]").val(),
+              code:$("input[name=code]").val()
+          },
+          success:function(data){
+              if(data.status == 1){
+                  _this.attr("disabled",false);
+                  $(".ht-tips").html("密码修改成功");
+                  $("#myForm")[0].reset();
+              }else{
+                  $(".ht-tips").html(data.info);
+              }
+          },
+          error:function(xhr){
+              _this.attr("disabled",false);
+              $(".ht-tips").html("发生了未知的错误,请刷新再试！");
+          }
+      });
+  });
+
+  function sendEmail(mail,target){
+         var data = {
+                email:mail,
+                code:$(".compinfo-secret input[name=verifyCode]").val()
+            }
+            $.ajax({
+                type : "POST",
+                url : "/sendemail/",
+                dataType : "json",
+                data:data,
+                success : function(data){
+                    if(data.status == 0){
+                        target.attr("disabled",false);
+                        $(".ht-tips").html(data.info);
+                    }else{
+                        if(data.data != ""){
+                          $(".order_safecode").val(data.data.name+"="+data.data.value + "&expires=" +data.data.expires);
+                        }
+                    }
+                },
+                error:function(xhr){
+                    target.attr("disabled",false);
+                    $(".ht-tips").html("发送失败,请稍后再试！");
+                }
+            });
+    }
+});
+</script>
+</html>

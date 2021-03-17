@@ -1,0 +1,198 @@
+<div class="panel-body contractNew">
+<form>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            新合同
+        <a href="javascript:void(0)" class="pull-right preview">预览</a>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">本次合同时间:</label>
+                <div class="col-sm-2">
+                    <input id="begin" type="text" class="form-control datepicker" placeholder="本次合同开始时间" name="begin" value="{$list.now.start_time}" autocomplete="off" />
+                </div>
+                <label class="col-sm-1 control-label" style="text-align: center;">至:</label>
+                <div class="col-sm-2">
+                    <input id="end" type="text" class="form-control datepicker" placeholder="本次合同结束时间" name="end" value="{$list.now.end_time}"   autocomplete="off"/>
+                </div>
+                <div class="col-sm-1">
+                    <select class="form-control" name="cooperationType">
+                        <volist name="cooperationType" id="vo">
+                            <if condition="$list['now']['cooperation_type'] EQ $key">
+                                <option value="{$key}" selected="selected">{$vo}</option>
+                                <else />
+                                <option value="{$key}">{$vo}</option>
+                            </if>
+                        </volist>
+                    </select>
+                </div>
+                <div class="col-sm-1">
+                    <select class="form-control" name="viptype">
+                        <option value="">请选择</option>
+                        <volist name="viptype" id="vo">
+                        <if condition="$list['now']['viptype'] EQ $key">
+                        <option value="{$key}" selected="selected">{$vo}</option>
+                        <else />
+                        <option value="{$key}">{$vo}</option>
+                        </if>
+                        </volist>
+                    </select>
+                </div>
+                <label class="col-sm-1 control-label day" style="text-align: left;">0天</label>
+                <div class="col-sm-2">
+                    <button id="btnAdd" title="保存本次合同" type="button" class="btn  btn-success btn-xs "><i class="fa fa-floppy-o"></i> 保存</button>
+                    <button title="保存本次合同" type="button" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> 删除</button>
+                </div>
+            </div>
+        </div>
+        <div class="panel-heading">
+            广告报备
+        </div>
+        <div class="panel-body advform">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">投放位置:</label>
+                <div class="col-sm-2">
+                    <select name="type" class="form-control">
+                        <option value="1">老站</option>
+                        <option value="2">新站</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">轮显:</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="lunbo" placeholder="轮显报备时长" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">通栏A:</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="tl_A" placeholder="通栏A报备时长" />
+                </div>
+                <label class="col-sm-2 control-label">通栏B:</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="tl_B" placeholder="通栏B报备时长" />
+                </div>
+            </div>
+            <div class="form-group adv-item">
+                <label class="col-sm-2 control-label">通栏C:</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="tl_C" placeholder="通栏C报备时长" />
+                </div>
+                <label class="col-sm-2 control-label">通栏D:</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="tl_D" placeholder="通栏D报备时长" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+ </form>
+</div>
+
+<script type="text/javascript">
+$(function() {
+    $(".btn-danger").click(function(event) {
+        $(this).parents(".contractNew").remove();
+        $("#btnNew").attr("disabled", false);
+    });
+
+    $(".contractNew #btnAdd").click(function(event) {
+        var _this = $(this);
+        var data = $(".contractNew form").serializeArray();
+
+        var json = $("#search_company").select2("data");
+        if (json.length > 0) {
+            if (typeof $("#search_company").select2("data") == "string") {
+                json = JSON.parse($("#search_company").select2("data"));
+            }
+            var company_id = json[0].id;
+            data.push({
+                name: "company_id",
+                value: company_id
+            });
+            data.push({
+                name: "company_name",
+                value: json[0].jc
+            });
+        };
+
+        json = $("#search_seller").select2("data");
+        if (json.length > 0) {
+            if (typeof $("#search_seller").select2("data") == "string") {
+                json = JSON.parse($("#search_seller").select2("data"));
+            }
+            data.push({
+                name: "saler_id",
+                value: json[0].id
+            });
+            data.push({
+                name: "saler_name",
+                value: json[0].name
+            });
+        }
+        data.push({
+            name: "parentid",
+            value: $("input[name=all_contract_id]").val()
+        });
+        data.push({
+            name: "isnew",
+            value: 1
+        });
+        $.ajax({
+                url: '/vip/addnewcontract/',
+                type: 'post',
+                dataType: 'json',
+                data: data
+            })
+            .done(function(data) {
+                if (data.code == 200) {
+                    $(".contractNew button").remove();
+                    $(".contractNew *").attr("readOnly", "readOnly");
+                    $(".contractNew").removeClass('contractNew');
+                    $("#btnNew").attr("disabled", false);
+                } else {
+                    alert(data.errmsg);
+                };
+            });
+    });
+
+    $(".contractNew #begin").datepicker({
+        format: "yyyy-mm-dd",
+        minViewMode: 0,
+        autoclose: true
+    });
+
+    $(".contractNew #end").datepicker({
+        format: "yyyy-mm-dd",
+        minViewMode: 0,
+        autoclose: true
+    }).on('changeDate', function(ev) {
+        var endTime = ev.date.valueOf();
+        var start = $(".contractNew #begin").datepicker("getDate");
+        if (start == null) {
+            alert("请输入本次合同开始时间");
+            return false;
+        }
+        var d = new Date(start);
+        var startTime = parseInt(d.getTime());
+        if (endTime < startTime) {
+            alert("本次合同结束时间不能小于开始时间");
+            return false;
+        }
+
+        var offset = endTime - startTime;
+        var days = Math.floor(offset / (24 * 3600 * 1000)) + 1;
+        $(".contractNew .day").html(days + "天");
+    });
+
+    $("select[name=type]").change(function(event) {
+        var parent = $(this).parents(".advform");
+        $(".adv-item", parent).show();
+        if ($(this).val() == 2) {
+            $(".adv-item", parent).hide();
+        }
+    });
+
+});
+</script>

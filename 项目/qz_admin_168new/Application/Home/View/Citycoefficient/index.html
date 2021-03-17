@@ -1,0 +1,175 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>城市分单系数-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/fileinput/fileinput.min.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/css/Alert.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>城市分单系数</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" >
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    选择城市:
+                                    <select name="citys" class="col-sm-12" multiple="multiple">
+                                        <volist name="citys" id="vo">
+                                            <if condition="array_key_exists($vo['cid'],$city)">
+                                            <option value="{$vo.cid}" selected="selected">{$vo.cname}</option>
+                                            <else/>
+                                            <option value="{$vo.cid}">{$vo.cname}</option>
+                                            </if>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-1">
+                                    <br/>
+                                    <button id="btnSearch" type="button" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                                <div class="pull-right col-sm-1">
+                                <br/>
+                                    <button id="btnImport" type="button" class="btn btn-block btn-info">批量导入</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <tr>
+                            <th>城市</th>
+                            <volist name="months" id="vo">
+                            <th>{$vo}白班系数</th>
+                            </volist>
+                        </tr>
+                        <volist name="list" id="vo">
+                        <tr>
+                        <td>{$vo.city_name}</td>
+                        <volist name="vo.date" id="v">
+                        <td>{$v.day|default="-"}</td>
+                        </volist>
+                        </tr>
+                        </volist>
+                    </table>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>1.城市系数计算时，发单量包含所有无效单。</p>
+                        <p>2.原则上，每3个月调整1次，城市系数</p>
+                        <p>3.分单率系数在1日前完成系统上线</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">批量导入</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="myForm">
+                    <div class="form-group">
+                        <label class=" control-label">选择时间:</label>
+                        <div class=" file-group">
+                             <input  name="date" class="form-control datepicker" type="text" placeholder="选择时间" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class=" control-label">选择文件:</label>
+                        <div class=" file-group">
+                             <input id="fileUp" name="fileup" type="file" />
+                        </div>
+                    </div>
+                    </form>
+                    <div class="form-group">
+                    <p>1.文件导入格式: A列城市 B列白班系数 C列晚班系数</p>
+                    <p>2.文件数据从第二行开始，第一行是文件头，请保留</p>
+                    <p>3.城市系数只能覆盖当月的,历史数据不可覆盖</p>
+                    <p>4.最新城市列表<a href="/export/downloadcity/">点击下载</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/fileinput/fileinput_locale_zh.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/Alert.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+$("#btnImport").click(function(event) {
+    $("#myForm")[0].reset();
+    $("#fileUp").fileinput("reset")
+    $("#myModal").modal();
+});
+
+$("#fileUp").fileinput({
+    language: 'zh', //设置语言,
+    allowedFileExtensions:['xls','xlsx'],
+    uploadUrl:"/export/loadcitycoefficient/",
+    browseClass:"btn btn-primary",
+    uploadClass:"btn btn-info",
+    removeClass:"btn btn-danger",
+    showPreview:false,
+    uploadAsync:true,
+    showRemove:true,
+    showCancel:false,
+    showUpload:true,
+    maxFileCount:1,
+    dropZoneEnabled:false,
+    uploadExtraData:function(){
+        return {
+             date:$(".datepicker").val()
+        }
+    }
+}).on('fileuploaded', function(event, data) {
+    if(1 == data.response.status){
+        window.location.href =  window.location.href;
+    }else{
+        $("#myModal").Alert({
+            msg:data.response.info,
+            level:2
+        });
+    }
+});
+
+$(".datepicker").datepicker({
+      format:"yyyy-mm",
+      minViewMode:1
+});
+
+$("select[name=citys]").select2({
+    allowClear: true,
+    placeholder: "选择城市"
+});
+
+$("#btnSearch").click(function(event) {
+    var json = $("select[name=citys]").select2("data");
+    var str = "";
+    for(var i in json){
+       str += json[i]["id"]+",";
+    }
+    window.location.href = "/citycoefficient/?city="+str;
+
+});
+</script>
+</block>

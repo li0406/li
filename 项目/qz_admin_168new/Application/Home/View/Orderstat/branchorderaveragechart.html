@@ -1,0 +1,235 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>分单量数据分析-多时段平均分单量柱状图</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/daterangepicker/daterangepicker-bs3.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>分单量数据分析</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="btn-group btn-group" role="group" aria-label="Large button group">
+                            <button type="button" class="btn btn-info">分单量总览</button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/customerorderstatistics/">分时段统计</a>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <a href="/orderstat/fendanteamanalysissheet/">团队分析</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box box-default">
+                    <div class="box-header text-center">
+                        <div class="box-title">多时段平均分单量柱状图</div>
+
+                        <div class="pull-right" role="group" aria-label="Large button group">
+                            <a class="btn btn-info" href="/orderstat/branchorderoverview/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                切换至表格
+                            </a>
+                            <eq name="Think.get.average" value="1">
+                                <a class="btn btn-info" href="/orderstat/branchorderaveragechart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=0">
+                                    切换至部门
+                                </a>
+                            <else />
+                                <a class="btn btn-info" href="/orderstat/branchorderaveragechart/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average=1">
+                                    切换至人均
+                                </a>
+                            </eq>
+                        </div>
+                        <div class="col-xs-12 no-padding">
+                            <a class="btn btn-default btn-sm pull-right" style="margin-top: 10px;" href="/orderstat/dansdfdzxt/?start_time={$Think.get.start_time}&end_time={$Think.get.end_time}&average={$Think.get.average}">
+                                按时间段查看
+                            </a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="col-xs-12">
+                            <div class="pull-left" style="line-height: 34px;">
+                                <input id="addHuanBi" type="checkbox" name="加入环比">
+                                <label for="addHuanBi" class="text-warning">加入环比</label>
+                            </div>
+                            <div class="pull-left" style="line-height: 34px;padding: 0 30px;">
+                                <input id="addTongBi" type="checkbox" name="加入同比">
+                                <label for="addTongBi" class="text-success">加入同比</label>
+                            </div>
+
+                            <div class="col-xs-3">
+                                <div class="col-xs-11 no-padding">
+                                    <div class="btn btn-info pull-left custom">自定义</div>
+                                    <div class="input-group customTime hide">
+                                        <input type="text" class="form-control pull-right" id="reservation" placeholder="自定义时间段">
+                                        <div class="input-group-addon btn-default">取消</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="canvas" class="col-xs-11 no-padding" style="height: 600px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/plugins/moment/js/moment.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/daterangepicker/daterangepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/echarts.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    // 图表初始化渲染
+    var Dom = document.querySelector("#canvas");
+    var myChart = echarts.init(Dom);
+    var option = {
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            left:'right',
+            data:['现时间段'], //'加入环比','加入同比','自定义时间段'
+            itemGap:10,
+            orient:'vertical'
+        },
+        xAxis: {
+            data: {$main.time}
+        },
+        yAxis: {},
+        series: [
+            {
+                name: '现时间段',
+                type: 'bar',
+                data: {$main.chart}
+            },
+            {
+                name: '加入环比',
+                type: 'bar'
+            },
+            {
+                name: '加入同比',
+                type: 'bar'
+            },
+            {
+                name: '自定义时间段',
+                type: 'bar'
+            }
+        ]
+    };
+    myChart.setOption(option);
+
+    // 自定义时间段需选择
+    $('.custom').on('click',function(){ // 自定义按钮操作
+        $(this).addClass('hide');
+        $('.customTime').removeClass('hide');
+    });
+    $('.customTime .btn-default').on('click',function(){ // 取消操作
+        $('.custom').removeClass('hide');
+        $('.customTime').addClass('hide');
+        if(option.series[3].data){
+            option.series[3].data = '';
+            option.legend.data[3] = '';
+            var myChart = echarts.init(Dom);
+            myChart.setOption(option);
+        }
+    });
+    $('#reservation').daterangepicker({ // 时间段选择
+        'locale':{
+            format: 'YYYY-MM-DD',
+            applyLabel : '确定',
+            cancelLabel : '取消',
+            fromLabel : '起始时间',
+            toLabel : '结束时间',
+            customRangeLabel : '自定义',
+            daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+            monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月',
+                    '七月', '八月', '九月', '十月', '十一月', '十二月' ],
+            firstDay : 1
+        }},
+        function(start, end, label) {
+            getChartData(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'), 3);
+        }
+    );
+
+    // 窗口大小改变时，图表重新渲染
+    window.onresize=function(){
+        var myChart = echarts.init(Dom);
+        myChart.setOption(option);
+    }
+    // 选择多条数据------加入环比、加入同比
+    $('input[type="checkbox"]').each(function(index, el) {
+        var opt = option;
+        $(this).on('click', function(){
+            if($(this).prop('checked')){
+                if($(this).attr('name') == "加入环比"){
+                    var start_time = '{$main.huan.start}';
+                    var end_time = '{$main.huan.end}';
+                    getChartData(start_time, end_time, 1);
+                }else{
+                    var start_time = '{$main.tong.start}';
+                    var end_time = '{$main.tong.end}';
+                    getChartData(start_time, end_time, 2);
+                }
+            }else{
+                if($(this).attr('name') == "加入环比"){
+                    option.series[1].data = '';
+                    option.legend.data[1] = '';
+                    var myChart = echarts.init(Dom);
+                    myChart.setOption(option);
+                }else{
+                    option.series[2].data = '';
+                    option.legend.data[2] = '';
+                    var myChart = echarts.init(Dom);
+                    myChart.setOption(option);
+                }
+            }
+        })
+    });
+
+    //获取请求数据
+    function getChartData(start_time, end_time, location){
+        var average = '{$Think.get.average}';
+        $.ajax({
+            url: '/orderstat/branchorderaveragechart/',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {
+                average:average,
+                start_time:start_time,
+                end_time:end_time
+            }
+        })
+        .done(function(data) {
+            if(data.status == '1'){
+                var prev = '';
+                if (location == 1) {
+                    prev = prev + '环比 ';
+                } else if (location == 2) {
+                    prev = prev + '同比 ';
+                } else if (location == 3) {
+                    prev = prev + '自定义 ';
+                };
+                var info = data.data;
+                option.series[location].data = $.parseJSON(info.chart);
+                option.legend.data[location] = prev + info.date;
+                option.series[location].name = prev + info.date;
+                var myChart = echarts.init(Dom);
+                myChart.setOption(option);
+            }else{
+                alert('请求失败，请联系技术部');
+            }
+        })
+        .fail(function(xhr) {
+            alert('网络错误');
+        });
+    }
+</script>
+</block>

@@ -1,0 +1,121 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>电话呼呼出率统计-控制台</title>
+</block>
+<block name="style">
+<link rel="stylesheet" type="text/css" href="/assets/common/css/select2_metro.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>电话呼呼出率统计</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">条件查询</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal" method="GET" action="/orderanalysis/calloutgoing">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    选择城市：
+                                    <select id="search"   name="cs" type="text" placeholder="所属城市" >
+                                        <option value="">全部城市</option>
+                                        <volist name="citys" id="vo">
+                                        <option value="{$vo.cid}">{$vo.cname}</option>
+                                        </volist>
+                                    </select>
+                                </div>
+                                <div class="col-xs-2">
+                                    选择日期:<input type="text" name="date" class="form-control datepicker"  placeholder="开始时间" value="{$date}">
+                                </div>
+                                <div class="col-xs-1">
+                                      <br/>
+                                      <button id="btnSearch" type="submit" class="btn btn-primary" data-loading-text="查询中....." ><i class="fa fa-search"></i>查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="box box-default">
+                    <table id="myTable" class="table table-bordered table-hover dataTable">
+                        <thead>
+                            <tr>
+                                <tr>
+                                <th>城市</th>
+                                <th>当日未接通量</th>
+                                <th >当日未接通率</th>
+                                <th >当日接通量</th>
+                                <th >当日接通率</th>
+                                <th >当月累计未接通量</th>
+                                <th >当月累计接通量</th>
+                                <th >当月累计未接通率</th>
+                                <th >当月累计接通率</th>
+                            </tr>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.cname}</td>
+                                <td>{$vo.nowuncallcount}</td>
+                                <td >{$vo.nowuncallrate}%</td>
+                                <td >{$vo.nowcallcount}</td>
+                                <td >{$vo.nowcallrate}%</td>
+                                <td >{$vo.uncallcount}</td>
+                                <td >{$vo.callcount}</td>
+                                <td >{$vo.uncallrate}%</td>
+                                <td >{$vo.callrate}%</td>
+                            </tr>
+                            </volist>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-default">
+                    <div class="alert alert-warning">
+                        <p>说明</p>
+                        <p>当日未接通量:今日0:00-今日24:00系统呼出未接通量（不含显号）</p>
+                        <p>当日未接通率:今日0:00-今日24:00系统呼出未接通量（不含显号）/今日0:00-今日24:00系统呼出的总量</p>
+                        <p>当月累计未接通量:1日0:00~今日24:00累计系统呼出未接通量（不含显号）</p>
+                        <p>当月累计未接通率:1日0:00~今日24:00累计系统呼出未接通量（不含显号）/1日0:00~今日24:00累计系统呼出的总量（不含显号）</p>
+                        <p>当日接通量（不含显号）:今日0:00-今日24:00系统呼出接通量（不含显号）</p>
+                        <p>当日接通率:今日0:00-今日24:00系统呼出接通量（不含显号）/今日0:00-今日24:00系统呼出的总量（不含显号）</p>
+                        <p>当月累计接通量:1日0:00~今日24:00累计系统呼出接通量（不含显号）</p>
+                        <p>当月累计接通率:1日0:00~今日24:00累计系统呼出接通量（不含显号）/1日0:00~今日24:00累计系统呼出的总量（不含显号）</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</block>
+<block name="script">
+<script type="text/javascript" src="/assets/common/js/select2.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/datetimepicker/bootstrap-datepicker.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript">
+    $("#search").select2({
+        allowClear: true,
+        placeholder: "选择城市"
+    });
+    $("#search").select2("val","{$cs}");
+    $(".datepicker").datepicker({
+          format:"yyyy-mm-dd",
+          minViewMode:0
+    });
+
+    $('#myTable').DataTable({
+       paging:false,
+       searching:false,
+       language:{
+            zeroRecords: "没有内容",
+            info:""
+       }
+    });
+</script>
+</block>

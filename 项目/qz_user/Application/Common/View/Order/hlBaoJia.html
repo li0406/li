@@ -1,0 +1,130 @@
+<div class="hlbox">
+    <div class="qu-ap-left">
+        <h3>4份价值万元{:date("Y")}年最新设计与报价方案</h3>
+        <p><input placeholder="请输入免费领取的手机号"  name="topbar_tel" value="" type="text">
+        <input class="butt" id="topbarBJ" type="submit" value="3秒免费领"></p>
+    </div>
+    <div class="qu-ap-right">
+        <h3>装修开工必须<span class="red">吉利</span>！10秒测算您的装修<span class="red">吉日</span>！</h3>
+        <p>
+            <select class="selet" name="xztime">
+            <option value="1">一个月内装修</option>
+            <option value="2">半年内装修</option>
+            <option value="3">半年后装修</option>
+            </select>
+            <input placeholder="请输入免费领取的手机号" name="hltel" type="text">
+            <input class="butt" type="submit" value="测算吉日">
+        </p>
+    </div>
+</div>
+<script type="text/javascript">
+$(".qu-ap-right .butt").click(function(event){
+    var _this = $(this);
+    if(!App.validate.run($("input[name=hltel]").val())){
+        $("input[name=hltel]").focus();
+        $.pt({
+            target: $("input[name=hltel]"),
+            content: '请填写您的电话',
+            width: 'auto'
+        });
+        return false;
+    }
+    if(!App.validate.run($("input[name=hltel]").val(),"moblie")){
+        $("input[name=hltel]").focus();
+        $.pt({
+            target: $("input[name=hltel]"),
+            content: '无效的电话',
+            width: 'auto'
+        });
+        return false;
+    }
+    $.ajax({
+        url: '/fb_order/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            tel: $("input[name=hltel]").val(),
+            hltime: $(".qu-ap-right select[name=xztime]").val(),
+            source: '450',
+            safecode:$("#safecode").val(),
+            safekey: $("#safekey").val(),
+            ssid:"",
+            step:99
+        }
+    })
+    .done(function(data) {
+        $("#safecode").val(data.data.safecode);
+        $("#safekey").val(data.data.safekey);
+        if (data.status == 1) {
+            $("body").append(data.data.tmp);
+        } else {
+            $.pt({
+                target: _this,
+                content: data.info,
+                width: 'auto'
+            });
+        }
+    })
+    .fail(function(xhr) {
+        $.pt({
+            target: _this,
+            content: '发布失败,请刷新页面！',
+            width: 'auto'
+        });
+     });
+});
+$("#topbarBJ").click(function(event){
+    var _this = $(this);
+    if(!App.validate.run($(".hlbox input[name=topbar_tel]").val())){
+        $(".hlbox input[name=topbar_tel]").focus();
+        $.pt({
+            target: $(".hlbox input[name=topbar_tel]"),
+            content: '请填写您的电话',
+            width: 'auto'
+        });
+        return false;
+    }
+    if(!App.validate.run($(".hlbox input[name=topbar_tel]").val(),"moblie")){
+        $(".hlbox input[name=topbar_tel]").focus();
+        $.pt({
+            target: $(".hlbox input[name=topbar_tel]"),
+            content: '无效的电话',
+            width: 'auto'
+        });
+        return false;
+    }
+    $.ajax({
+        url: '/fb_order/',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            tel: $(".hlbox input[name=topbar_tel]").val(),
+            source: '451',
+            safecode:$("#safecode").val(),
+            safekey: $("#safekey").val(),
+            ssid:"",
+            step:1
+        }
+    })
+    .done(function(data) {
+        $("#safecode").val(data.data.safecode);
+        $("#safekey").val(data.data.safekey);
+        if (data.status == 1) {
+            $("body").append(data.data.tmp);
+        } else {
+            $.pt({
+                target: _this,
+                content: data.info,
+                width: 'auto'
+            });
+        }
+    })
+    .fail(function(xhr) {
+        $.pt({
+            target: _this,
+            content: '发布失败,请刷新页面！',
+            width: 'auto'
+        });
+     });
+});
+</script>

@@ -1,0 +1,227 @@
+<extend name="Common:basic"/>
+<block name="keywords">
+<meta name="keywords" content="{$info.SEO_keywords}" />
+<notempty name="info.header.canonical">
+<link rel="canonical" href="{$info.header.canonical}/"/>
+</notempty>
+</block>
+<block name="description">
+<meta name="description" content="{$info.SEO_description}" />
+</block>
+<block name="title">
+    <meta property="og:image" content="{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.domain}/assets/sub/index/img/360search.png" />  <!-- a.19.06.01 meta代码pc站、m站添加   添加 -->
+    <title>{$info.SEO_title}</title>
+</block>
+<block name="link">
+	<link rel="stylesheet" type="text/css" href="/assets/mobile/wenda/css/index.css?v={:C('STATIC_VERSION')}">
+</block>
+<block name="top">
+    <div class="m-header-his" >
+        <i class="fa fa-angle-left"></i>
+    </div>
+    <a href="/" class="m-header-left"></a>
+    <div class="m-header-tit">装修问答</div>
+</block>
+<block name="content">
+    <div id="wenda-gold-35"></div>
+    <div id="position">
+        <div class="type-list">
+            <div class="parent-list" id="wrapper">
+                <ul id="parent-content">
+                    <if condition="$cateId eq ''">
+                        <li data-id="0"><span class="ask-active">装修问答<i></i></span></li>
+                    <else/>
+                        <li data-id="0"><span><a href="/wenda">装修问答</a><i></i></span></li>
+                    </if>
+                    <volist name="category" id="v">
+                        <li data-id='{$v.cid}'><span {$v.cls}><a href="/wenda/ask-{$v.cid}/">{$v.name}</a><i></i></span></li>
+                    </volist>
+                    </ul>
+            </div>
+            <div class="children-list">
+                <div class="list-box" id="wrapper">
+                    <div class="children-content">
+                        <volist name="subCategory" id="v">
+                            <span {$v.cls}><a href="/wenda/ask-{$v.cid}/" >{$v.name}</a></span>
+                        </volist>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<div class="zx-ask-list">
+		<volist name="list" id="v">
+		<div class="zx-ask-item">
+			<div class="item-content">
+				<div class="item-top oflow">
+					<div class="user-img fl"><img src="{$v.logo}" alt="{$v.username}" /></div>
+					<div class="user-name fl">{$v.username}</div>
+				</div>
+				<p class="item-body">
+					<a href="/wenda/x{$v.id}.html" <if condition="$v.anwsers EQ 0">rel="nofollow"</if>>{$v.title}</a>
+				</p>
+				<div class="item-foot">
+					<span class="fl">{$v.post_time|date="Y-m-d",###}</span>
+					<span class="fr"><a href="/wenda/ask-{$v.cid}">{$v.name}</a><i class="sm-line-y"></i><i>{$v.anwsers}</i>人回答</span>
+				</div>
+			</div>
+		</div>
+        </volist>
+	</div>
+    <include file="Common/footfadantc"/>
+</block>
+
+<block name="script">
+<!-- <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=q23cg2dVNxDL71KLzs64mujph1fE6zX4"></script>
+<script type="text/javascript" src="/assets/mobile/common/js/geolocation.js?v={:C('STATIC_VERSION')}"></script> -->
+<script type="text/javascript" src="/assets/mobile/js/jroll.js?v={:C('STATIC_VERSION')}"></script>
+<script type="text/javascript" src="/assets/mobile/qzgold/js/qz_gold.js?v={:C('STATIC_VERSION')}"></script>
+
+<script>
+$(function(){
+    var cityId = "{$cityInfo.id}";
+        // 调用广告
+    qzInsertGold('#wenda-gold-35', 35, cityId)
+
+    var li_width=$("#parent-content li").width();
+    var num=$("#parent-content li").length;
+    $("#parent-content").width(li_width*num+1);
+    var boolState = true;
+    var baseUrl;
+    var category;
+    var cateId='{$cateId}';
+    if(cateId==""){
+        baseUrl = '/wenda/ask-1';
+        category =1;
+    }else{
+      baseUrl = '/wenda/ask-'+cateId;
+      category = cateId;
+    }
+    var isEmpty = false;
+    var page = 1;
+    var nextPage = 1;
+    var startup = true;
+    var url = '';
+
+	$(window).on("scroll", function(){
+		if(boolState){
+			if ($(document).height() - $(this).scrollTop() - $(this).height() < 220){
+	            getNextPage();
+	            boolState = false;
+	        }else{
+	        	boolState = true;
+	        }
+		}
+    });
+
+    getNextPage = function(){
+
+        if(isEmpty == false){
+
+            nextPage = page + 1;
+            url = baseUrl + "?cate=" + category + "&p=" + nextPage;
+
+            $.ajax({
+                url: url + '&act=ajax',
+                type: 'POST',
+                dataType: 'html',
+            })
+            .done(function(result) {
+                if(result == 'empty'){
+                    isEmpty == true;
+                    alert('没有更多了!');
+                    return false;
+                }
+                $('.zx-ask-list').append(result);
+                page = nextPage;
+                startup = false;
+                boolState = true;
+            })
+            .fail(function(xhr) {
+                alert("加载失败,请刷新再试！");
+                boolState = false;
+            });
+        }
+    }
+
+
+	// 横向滚动导航
+	var jroll = new JRoll("#wrapper", {scrollX:true,scrollY:false});
+	$('.zx-ask-box').on('click','li',function(){
+		var bool = $(this).find('span').hasClass('ask-active');
+		if(!bool){
+
+            $('.zx-ask-list').html('');
+
+            category = $(this).attr('data-id');
+            page = 1;
+            startup = true;
+            isEmpty = false;
+
+            getNextPage();
+
+			$(this).find('span').addClass('ask-active');
+			$(this).siblings().find('span').removeClass('ask-active')
+		}
+	});
+
+
+	if($('.zx-ask-item').length && $('.zx-ask-item').length<=1){
+		$('#feeter').css({
+			'padding-bottom':'80px',
+			'position':'fixed',
+			'left':'0',
+			'bottom':'0',
+			'z-index':'0'
+		});
+		$('.zb-link-bottom').css({'z-index':'1'})
+	}else{
+		$('#feeter').css({
+			'padding-bottom':'100px',
+			'position':'',
+			'left':'none',
+			'bottom':'none',
+			'z-index':'none'
+		});
+		$('.zb-link-bottom').css({'z-index':'1'})
+	}
+
+	$('body').on('touchstart','.zx-ask-item',function(event){
+		$(this).css({'background':'#f5f5f5'})
+	});
+	$('body').on('touchend','.zx-ask-item',function(event){
+		$(this).css({'background':''})
+	});
+
+	// 搜索内容
+	$('#search-btn').click(function(){
+		var inputvalue = $('#search-input').val();
+		if(inputvalue){
+			$('#searchform').submit();
+		}else{
+			alert('请输入内容...');
+		}
+	});
+    
+    // 点击标题时清空搜索框本地存储的内容
+    $('.item-body').click(function() {
+        localStorage.removeItem("inputSet")
+    })
+
+
+
+
+});
+</script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "{$SCHEME_HOST.scheme_full}{$SCHEME_HOST.host}{$_SERVER['REQUEST_URI']}",
+            "appid": "1575859058891466",
+            "title": "{$info.SEO_title}",
+            "images": [],
+            "pubDate": ""
+        }
+    </script>
+</block>

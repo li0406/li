@@ -1,0 +1,184 @@
+<extend name="Main:baseTemplate" />
+<block name="title">
+    <title>压单数据统计</title>
+</block>
+<block name="style">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/select2/select2.css?v={:C('STATIC_VERSION')}" />
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/datetimepicker/datepicker.css?v={:C('STATIC_VERSION')}" />
+    <link href="/assets/common/phpexcel/phpexcel.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link href="/assets/common/phpexcel/handsontable.full.min.css?v={:C('STATIC_VERSION')}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/common/js/plugins/dataTables/dataTables.bootstrap.min.css?v={:C('STATIC_VERSION')}" />
+</block>
+<block name="content">
+    <section class="content-header">
+        <h1>压单数据统计 <a href="/orderstat/pauseordersummary">压单数据分析</a></h1>
+    </section>
+    <section class="content">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <form class="col-xs-12 no-padding" method="get" action="/orderstat/pauseorderstat">
+                    <div class="col-xs-2">
+                        <div>客服姓名</div>
+                        <select id="kfList" name="kf" data-search='1' class="form-control" name="kf">
+                            <option value="">请选择</option>
+                            <volist name="kfList" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服组</div>
+                        <select id="groups1" name="group" data-search='1' type="text" class="form-control" tabindex="3">
+                            <option value="">请选择</option>
+                            <volist name="groups" id="vo">
+                                <option value="{$vo.kfgroup}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>客服部</div>
+                        <select id="manager1" name="manager" data-search='1' name="cs" type="text" class="form-control" tabindex="3">
+                            <option value="">请选择</option>
+                            <volist name="manager" id="vo">
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-xs-2">
+                        <div>在职状态</div>
+                        <select id="state"  name="state" data-search='1' type="text" class="form-control" tabindex="3">
+                            <option value="3">请选择</option>
+                            <option value="1">在职</option>
+                            <option value="2">离职</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-1">
+                        <div style="opacity:0;">重置</div>
+                        <button id="btnReset" type="button" class="btn-info form-control">重置</button>
+                    </div>
+                    <div class="col-xs-1 ">
+                        <div style="opacity:0;">查询</div>
+                        <button type="submit" id="olSearch" class="btn-info form-control">查询</button>
+                    </div>
+                    <div class="col-xs-1">
+                        <div style="opacity:0;">导出</div>
+                        <button type="button" id="export" class="btn-success form-control">导出</button>
+                    </div>
+                </form>
+            </div>
+            <div class="box-body">
+                <table id="myTable" class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>客服姓名</th>
+                        <th>客服组</th>
+                        <th>客服师</th>
+                        <th>压单总数</th>
+                        <th>当前压单数</th>
+                        <th>压单转分单</th>
+                        <th>压单转赠单</th>
+                        <th>压单转无效单</th>
+                        <th>压单转其他</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <volist name="list" id="vo">
+                        <tr>
+                            <td>{$vo.name}</td>
+                            <td>{$vo.group_name}</td>
+                            <td>{$vo.manager_name}</td>
+                            <td>{$vo.all_count}</td>
+                            <td>{$vo.pause_count}</td>
+                            <td>{$vo.fen_count}</td>
+                            <td>{$vo.zen_count}</td>
+                            <td>{$vo.wx_count}</td>
+                            <td>{$vo.other_count}</td>
+                        </tr>
+                    </volist>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</block>
+<block name="script">
+    <script type="text/javascript" src="/assets/common/js/plugins/select2/select2.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/handsontable.full.min.js?v={:C('STATIC_VERSION')}"></script>
+    <script src="/assets/common/phpexcel/phpexcel.js?v={:C('STATIC_VERSION')}"></script>
+    <script type="text/javascript" src="/assets/common/js/plugins/dataTables/jquery.dataTables.min.js?v={:C('STATIC_VERSION')}"></script>
+
+    <script>
+        $("#btnReset").click(function (){
+            $("#kfList").select2("val","");
+            $("#groups1").select2("val","");
+            $("#manager1").select2("val","");
+            $("#state").val(1);
+        });
+
+        $('#myTable').DataTable({
+            paging:false,
+            searching:false,
+            language:{
+                zeroRecords: "没有内容",
+                info:""
+            },
+            "bSort":true,
+        });
+
+        $("#kfList").select2({
+            allowClear: true,
+            placeholder: "选择客服"
+        });
+        $("#kfList").select2("val","{$Think.get.kf}");
+        $("#groups1").select2({
+            allowClear: true,
+            placeholder: "选择客服组"
+        });
+        $("#groups1").select2("val","{$Think.get.group}");
+        $("#manager1").select2({
+            allowClear: true,
+            placeholder: "选择客服部"
+        });
+        $("#manager1").select2("val","{$Think.get.manage}");
+        $("#state").val("{$Think.get.state|default=1}");
+
+        $("#export").click(function(event) {
+            var _this = $(this);
+            var taget = $("#myTable");
+
+            var colums = [];
+            var data = [];
+            taget.find("th").each(function() {
+                var text = $(this).text().trim();
+                var sub = [];
+                sub["text"] = text;
+                sub["fontColor"] = $(this).css("color");
+                sub["bgColor"] = $(this).css("background-color");
+                colums.push(sub);
+            });
+            data.push(colums);
+            taget.find("tbody tr").each(function(i) {
+                var tr = $(this);
+                var sub = [];
+                tr.find("td").each(function() {
+                    var text = $(this).text().trim();
+                    var _td = {
+                        text: text,
+                        fontColor: $(this).css("color"),
+                        bgColor: $(this).css("background-color")
+                    }
+                    sub.push(_td);
+                });
+                data.push(sub);
+            });
+
+            _this.exportExcel({
+                data: data,
+                title: "压单数据统计",
+                url: "/export/download",
+                show:false
+            });
+        });
+    </script>
+</block>

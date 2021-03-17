@@ -1,0 +1,303 @@
+<div class="win_box step bind_box">
+    <div class="win_box_bg">
+    </div>
+    <div class="win_box_content">
+        <div class="zb_box_in">
+            <div class="zb_box_title">
+                <div class="zb_box_hd">
+                    <div class="zb_box_info">
+                    {$info.title}
+                    </div>
+                </div>
+                <span class="win_box_close" title="关闭">
+                </span>
+            </div>
+            <div class="zb_box_form">
+                <div class="input">
+                    为了保证您的帐号安全，更换密保{$info.tag}前请先进行安全验证
+                </div>
+                <if condition="($info['type'] EQ 'tel' AND !$info['user']['tel_safe_chk']) OR (!$info['user'] AND $info['type'] EQ 'tel')">
+                    <div class="input">
+                        <label class="label-control">{$info.subtitle}</label>
+                        <input type="text" class="input-control" placeholder="手机" name="val" />
+                        <em class="red err-tips"></em>
+                        <input type="hidden" name="verifyType" value="moblie">
+                    </div>
+                <elseif condition="($info['type'] EQ 'mail' AND !$info['user']['mail_safe_chk']) OR (!$info['user'] AND $info['type'] EQ 'mail')"/>
+                    <div class="input">
+                        <label class="label-control">{$info.subtitle}</label>
+                        <input type="text" class="input-control" placeholder="邮箱" name="val" />
+                        <em class="red err-tips"></em>
+                        <input type="hidden" name="verifyType" value="email">
+                    </div>
+                <else/>
+                    <div class="input">
+                        <label class="label-control">验证方式</label>
+                        <select name="type" class="input-control">
+                            <if condition="$info['user']['tel_safe_chk']">
+                                <option value="1">密保手机{$info.user.tel_safe}</option>
+                            </if>
+                            <if condition="$info['user']['mail_safe_chk']">
+                                <option value="2">密保邮箱{$info.user.mail_safe}</option>
+                            </if>
+                        </select>
+                    </div>
+                </if>
+                <div class="input mt20">
+                    <input type="text" class="input-control" placeholder="手机/邮箱验证码" name="code" style="width:120px; margin-left:70px;" /><button  id="btncode" type="button" class="input-button">获取验证码</button>
+                    <em class="red err-tips"></em>
+                </div>
+
+                <div class="input ">
+                    <button id="btnSub" type="button" class="button ml70 mb30">确定</button>
+                    <em class="red err-tips"></em>
+                    <input class="order_safecode" type="hidden" />
+                </div>
+                <div class="input">
+                    <div class="input-line"></div>
+                </div>
+                <div class="input ">
+                如果您的安全账户无法使用,请致电<em class="red">{:OP('QZ_CONTACT_TEL400')}</em>,联系客服
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".bind_box .win_box_close").click(function(event) {
+        $(".bind_box").remove();
+    });
+    $(".bind_box .win_box_bg").click(function(event) {
+        $(".bind_box").remove();
+    });
+
+    var initG = function(){
+        $.ajax({
+            url: '/gtverify/initgeet',
+            type: 'POST',
+            dataType: 'JSON',
+            data:{
+                scence:2
+            }
+        })
+        .done(function(data) {
+            initGeetest({
+                // 以下配置参数来自服务端 SDK
+                gt: data.data.gt,
+                challenge: data.data.challenge,
+                offline: !data.data.success,
+                new_captcha: true,
+                product: 'bind'
+            }, function (captchaObj) {
+                captchaObj.reset();
+                captchaObj.onReady(function(){
+                    //验证码ready之后才能调用verify方法显示验证码
+                    captchaObj.verify();
+                }).onSuccess(function(){
+                    var validate = captchaObj.getValidate();
+                    $.ajax({
+                        url: '/gtverify/verifygeetest',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            geetest_challenge: validate.geetest_challenge,
+                            geetest_validate: validate.geetest_validate,
+                            geetest_seccode: validate.geetest_seccode,
+                            scence:2
+                        }
+                    }).done(function(data) {
+                        if (data.status == 1) {
+                            var url,tel,email = "";
+                            var _this = $(".bind_box #btncode");
+
+                            if($(".bind_box select[name=type]").length > 0){
+                                if($(".bind_box select[name=type]").val() == 1){
+                                    url = "{$info.to_sms}";
+                                }else{
+                                    url = "{$info.to_email}";
+                                }
+                            }else{
+                                email = tel = $(".bind_box input[name=val]").val();
+
+                                if("{$info.type}" == "tel"){
+                                    url = "/sendsms/";
+                                    if(!App.validate.run($(".bind_box input[name=val]").val())){
+                                        $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("请输入正确的手机");
+                                        return false;
+                                    }
+
+                                    if(!App.validate.run($(".bind_box input[name=val]").val(),"moblie")){
+                                        $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("无效的手机号");
+                                        return false;
+                                    }
+                                } else {
+                                    url = "/sendemail/";
+                                    if(!App.validate.run($(".bind_box input[name=val]").val())){
+                                        $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("请输入正确的邮箱");
+                                        return false;
+                                    }
+                                    if(!App.validate.run($(".bind_box input[name=val]").val(),"email")){
+                                        $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("无效的邮箱");
+                                        return false;
+                                    }
+                                }
+                            }
+
+                            $.ajax({
+                                type : "POST",
+                                url : url,
+                                dataType : "json",
+                                data:{
+                                    ssid:"{$info.ssid}",
+                                    tel:tel,
+                                    email:email
+                                },
+                                success : function(data){
+                                    if(data.status == 0){
+                                        _this.prop("disabled",false);
+                                        _this.parent().find(".err-tips").html(data.info);
+                                    }else{
+                                        if(data.status == 1){
+                                            countDown(_this,60);
+                                            alert('验证码发送成功');
+                                        }
+                                    }
+                                },
+                                error:function(xhr){
+                                    _this.prop("disabled",false);
+                                    _this.parent().find(".err-tips").html("发生了未知的错误,请稍后再试！");
+                                }
+                            });
+
+
+                        }
+                    });
+                }).onError(function(){
+                    alert("发送失败,请稍后再试!")
+                })
+            })
+        });
+    }
+
+    //开始验证
+    $(".bind_box #btnSub").click(function(event) {
+        $(".err-tips").html("");
+        $(".focus").removeClass("focus");
+        var _this = $(this);
+
+        var typeName = $(".bind_box input[name=verifyType]").val();
+
+        if(typeName == 'email'){
+            if(!App.validate.run($(".bind_box input[name=val]").val())){
+                $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("请输入邮箱地址");
+                return false;
+            }
+            if(!App.validate.run($(".bind_box input[name=val]").val(),"email")){
+                $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("请输入正确的邮箱");
+                return false;
+            }
+        }
+
+        if(typeName == 'moblie'){
+            if(!App.validate.run($(".bind_box input[name=val]").val())){
+                $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("请填写您的手机号");
+                return false;
+            }
+            if(!App.validate.run($(".bind_box input[name=val]").val(),"moblie")){
+                $(".bind_box input[name=val]").addClass('focus').focus().parent().find(".err-tips").html("手机号填写错误");
+                return false;
+            }
+        }
+
+        if(!App.validate.run($(".bind_box input[name=code]").val())){
+            $(".bind_box input[name=code]").addClass('focus').focus().parent().find(".err-tips").html("请输入短信/邮箱验证码");
+            return false;
+        }
+        var tel ="";
+        if($(".bind_box select[name=type]").length > 0){
+            if($(".bind_box select[name=type]").val() == 1){
+                tel = $(".bind_box input[name=real_tel]").val();
+            }else{
+                tel = $(".bind_box input[name=real_mail]").val();
+            }
+            getSafeAccount(_this,"{$info.type}",$(".bind_box input[name=code]").val());
+        }else{
+            tel = $(".bind_box input[name=val]").val();
+            bindSafeAccount(_this,"{$info.type}",tel,$(".bind_box input[name=code]").val());
+        }
+    });
+
+    function getSafeAccount(o,type,code){
+        $.ajax({
+            type : "POST",
+            url : "/confirmaccount/",
+            dataType : "JSON",
+            data:{
+                ssid:"{$info.ssid}",
+                type:type,
+                refresh:1,
+                code:code
+            },
+            success : function(data){
+                if(data.status == 0){
+                    o.parent().find(".err-tips").html(data.info);
+                }else{
+                    $(".bind_box").remove();
+                    $("body").append(data.data);
+                }
+            },
+            error:function(xhr){
+               o.parent().find(".err-tips").html("发生了未知的错误,请稍后再试！");
+            }
+        });
+    }
+
+    function bindSafeAccount(o,type,account,code){
+        $.ajax({
+            type : "POST",
+            url : "/bindaccount/",
+            dataType : "json",
+            data:{
+                ssid:"{$info.ssid}",
+                account:account,
+                type:type,
+                code:code
+            },
+            success : function(data){
+                if(data.status == 0){
+                    o.parent().find(".err-tips").html(data.info);
+                }else{
+                    window.location.href =  window.location.href;
+                }
+            },
+            error:function(xhr){
+               o.parent().find(".err-tips").html("发生了未知的错误,请稍后再试！");
+            }
+        });
+
+    }
+
+    //取验证码
+    $(".bind_box #btncode").click(function(event) {
+        var _this = $(this);
+        _this.attr("disabled","disabled");
+        $(".err-tips").html("");
+        $(".focus").removeClass("focus");
+        initG();
+    });
+
+    var t3 = null;
+    function countDown(obj, num) {
+        if (num > 0) {
+            obj.text(num + "秒重新发送");
+            num--;
+            t3 = setTimeout(function (obj, num) {
+                countDown(obj, num);
+            }, 1000, obj, num);
+        } else {
+            clearTimeout(t3)
+            obj.attr("disabled",false);
+            obj.text("获取验证码").attr("disabled",false);
+        }
+    }
+</script>

@@ -1,0 +1,291 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>发布装修问答 - {$title}</title>
+<include file="Index:resource" />
+<link rel="stylesheet" href="{$static_host}/assets/home/ask/css/ask.css?v={:C('STATIC_VERSION')}" />
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome.min.css?v={:C('STATIC_VERSION')}" />
+<!--[if IE 7]>
+<link rel="stylesheet" href="{$static_host}/assets/home/diary/css/font-awesome-ie7.min.css?v={:C('STATIC_VERSION')}">
+<![endif]-->
+<script type="text/javascript" src="{$static_host}/assets/common/js/plupload/plupload.full.min.js?v={:C('STATIC_VERSION')}"></script>
+<link src="{$static_host}/assets/common/js/plupload/plupload.css?v={:C('STATIC_VERSION')}" rel="stylesheet" />
+</head>
+<body>
+{$headerTmp}
+<div class="wrap oflow">
+	<div class="bread position"><a href="/">首页</a> &gt; <a href="/wenda/">装修问答</a></div>
+  <form class="form-horizontal" action="" method="POST" id="newQuestion">
+  <dl class="ask-edit-box">
+	<dt>一句话简要描述您的问题：<em>6万家正规装修公司,600万齐装网网友帮您10分钟找到答案</em></dt>
+	<dd><span>问题标题</span>
+		<input id="title" name="title" type="text" placeholder="完整的说出您遇到的问题，例如：抽油烟机的烟管不够长怎么办？" value="{$asktitle}">
+		<p id="titleCount">还可以输入 <em class="red">50</em> 字</p>
+		<p style="text-align:left;"><i class="red err-tips"></i></p>
+	</dd>
+	<dd><span>问题补充<br>（选填）</span>
+    	<textarea  class="edit" id="content" name="content"></textarea>
+  		<p><em class="pull-left" id="uploadimg"><i class="icon-picture mr10"></i>上传图片</em>
+
+        <i id="contentCount">还可以输入 <em>1500</em> 字</i></p>
+	</dd>
+    <dd style="margin-bottom:10px;"><div class="plupload"><ul id="ul_pics" class="ul_pics clearfix"></ul></div></dd>
+	<dd><span>所在城市</span>
+		<select name="area_id" id="area_id">
+			<volist name="provinces" id="v">
+			<option value="{$v.qz_provinceid}" {$v.selected}>{$v.qz_province}</option>
+			</volist>
+		</select>
+		<select name="city_id" id="city_box" >
+            <volist name="citys" id="v">
+            <option value="{$v.cityid}" {$v.selected}>{$v.city}</option>
+            </volist>
+		</select>
+	</dd>
+	<dd><span>问题分类</span>
+		<select name="cid" id="category_id">
+            <option value="0">请选择分类</option>
+			<volist name="category" id="v">
+			<option value="{$v.cid}">{$v.name}</option>
+			</volist>
+		</select>
+		<select name="sub_category" id="sub_category">
+            <option>请选择分类</option>
+		</select>
+	</dd>
+    <dd class="isAgree"><span>&nbsp;</span>
+        <input type="checkbox" id="isAgree" > 我已遵循《<a href="javascript:;" id="postStandard">问答发布标准</a>》
+		<div class="nochoose-tit" style="color:red"></div>
+    </dd>
+	<dd>
+        <a id="submit" class="submit" href="javascript:void(0)">发布问题</a>
+    </dd>
+  </dl>
+
+</form>
+</div>
+<div class="success-box">
+    <img src="{$static_host}/assets/home/ask/images/icon.png" alt="">
+    <p>发布成功</p>
+</div>
+<script type="text/javascript">
+var uploader = new plupload.Uploader({
+    runtimes: 'html5,flash,html4',
+    browse_button: 'uploadimg',
+    url: "/wenda/upload",
+    flash_swf_url: '{$static_host}/assets/common/js/plupload/plupload/Moxie.swf',
+    filters:{
+        max_file_size: '204kb',
+        prevent_duplicates : true,
+        mime_types: [
+            {title: "files", extensions: "jpg,png,jpeg"}
+        ]
+    },
+    multi_selection: true,
+    init: {
+        FilesAdded: function(up, files) { //文件上传前
+            if(uploader.files.length > 2){
+                alert('最多只允许上传2个文件');
+                up.removeFile(file);
+            }else{
+                var li = '';
+                plupload.each(files, function(file) { //遍历文件
+                    li += "<li id='" + file['id'] + "'><div class='progress'><span class='bar'></span><span class='percent'>0%</span></div></li>";
+                });
+                $("#ul_pics").append(li);
+                uploader.start();
+            }
+        },
+        UploadProgress: function(up, file) {
+        var percent = file.percent;
+            $("#" + file.id).find('.bar').css({"width": percent + "%"});
+            $("#" + file.id).find(".percent").text(percent + "%");
+        },
+        FileUploaded: function(up, file, info) {
+            var data = JSON.parse(info.response);
+            $("#" + file.id).html("<div class='uploadimg'><img src='{:C('QINIU_SCHEME')}://{:C('QINIU_DOMAIN')}/" + data.pic + "'/></div>");
+            $("#" + file.id).append($("<input type='hidden' name='imgId[]' value='" + data.pic + "'/>"));
+        },
+        Error: function(up, err) {
+            alert(err.message);
+        }
+    }
+});
+uploader.init();
+</script>
+<include file="Index:footer" />
+<script type="text/javascript" src="/assets/common/js/gt.js?v={:C('STATIC_VERSION')}"></script>
+<script language="javascript">
+$(function() {
+    //发文标准
+    $("#postStandard").click(function(event) {
+        $('body').append('<div class="win_box win_tpbox" style="display: block;"><div class="win_box_bg"></div><div class="win_box_content loginbox"><div class="win_box_in" style="width:460px;height:420px;font-size:14px"><div class="logintit"><h2 style="font-size:16px;text-align:center">问答发布标准</h2><a href="javascript:void(0)" title="关闭" class="log-close"></a></div><p>1、问答问题标准：</p><p>（1）同一个用户账号不可重复提交相同的问题；</p><p>（2）所提的问题不得出现违反国家相关法律及宣传的流氓词汇。</p><p>2、问答答案编辑标准：</p><p>（1）所回答的内容不可以出现电话、QQ、网址等信息，不可有诋毁之意，不得出现违反国家相关法律的内容。</p><p>（2）回答时不可以直接复制以上回答过的用户答案内容。</p><p>3、问答评论要求：</p><p>&nbsp; 不可以出现电话、QQ、网址等信息，不可有诋毁之意，不得出现违反国家相关法律的内容。</p><p><br></p><p style="color:#FF0000">友情提示：</p><p style="color:#FF0000">&nbsp; 频道编辑人员会对发布内容进行审核。如有违规内容，编辑人员将会对其进行删除处理，如仍然违规，给予警告提醒，情节严重者，将设置其账号不得发表任何信息（禁言）3~7小时。感谢您的配合~！</p></div></div></div>');
+
+        $(".win_tpbox .log-close").click(function(event) {
+            $(".win_tpbox").remove();
+        });
+        $(".win_tpbox .win_box_bg").click(function(event) {
+            $(".win_tpbox").remove();
+        });
+        $('#isAgree').attr("checked", true);
+    });
+
+    $("#verifyimg").click(function(event) {
+        $(this).attr("src","/wenda/addquestion/act/verify?rand="+Math.random());
+    });
+
+	$("#area_id").change(function(){
+		$("#city_box").load("{$modurl}/addquestion/getcity/"+$("#area_id").val());
+	});
+
+	$("#category_id").change(function(){
+        var cid = $("#category_id").val();
+        if(cid !== '0'){
+            $("#sub_category").load("{$modurl}/addquestion/getsubcate/" + cid);
+        }else{
+            $("#sub_category").empty();
+        }
+	});
+
+	var initG = function(){
+		$.ajax({
+			url: '/initgeet/',
+			type: 'POST',
+			dataType: 'JSON',
+			data:{
+				scence:3
+			}
+		})
+		.done(function(data) {
+			initGeetest({
+				// 以下配置参数来自服务端 SDK
+				gt: data.data.gt,
+				challenge: data.data.challenge,
+				offline: !data.data.success,
+				new_captcha: true,
+				product: 'bind'
+			}, function (captchaObj) {
+				captchaObj.reset();
+				captchaObj.onReady(function(){
+					//验证码ready之后才能调用verify方法显示验证码
+					captchaObj.verify();
+				}).onSuccess(function(){
+					var validate = captchaObj.getValidate();
+					$.ajax({
+						url: '/verifygeetest/',
+						type: 'POST',
+						dataType: 'json',
+						data: {
+							geetest_challenge: validate.geetest_challenge,
+							geetest_validate: validate.geetest_validate,
+							geetest_seccode: validate.geetest_seccode,
+							scence:3
+						}
+					}).done(function(data) {
+						if (data.status == 1) {
+							var data = $("#newQuestion").serializeArray();
+							$.ajax({
+								url: '/wenda/addquestion/',
+								type: 'POST',
+								dataType: 'JSON',
+								data: data
+							})
+							.done(function(data) {
+								if(data.status == 1){
+									$('.success-box').show();
+									setTimeout(function(){
+										window.history.go(-1);
+									},1000);
+								}else{
+									alert(data.info);
+								}
+							})
+							.fail(function(xhr) {
+								$("#message").html("发布失败,请刷新再试！");
+							});
+						} else{
+							alert('验证不通过！');
+						}
+					});
+
+				}).onError(function(){
+					alert("发送失败,请稍后再试!")
+				})
+			})
+		});
+	}
+
+    $("#submit").click(function () {
+        if($('#isAgree').is(':checked')) {
+            //do something
+			$(".nochoose-tit").html('');
+        }else{
+            //alert('您必须要遵守《百科编辑标准》');
+            $(".nochoose-tit").html('您必须要遵守《问答编辑标准》');
+            return false;
+        }
+
+        if(!App.validate.run($("input[name=title]").val())){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("请填写标题");
+            return false;
+        }
+
+        if($("input[name=title]").val().length < 5 || $("input[name=title]").val().length > 50){
+            $("input[name=title]").focus();
+            $("input[name=title]").addClass('focus');
+            $("input[name=title]").parent().find(".err-tips").html("请输入5-50个字符");
+            return false;
+        }
+
+        if($("input[name=contents]").val() === ''){
+            alert('数据为空');
+            $("input[name=contents]").focus();
+            $("input[name=contents]").addClass('focus');
+            $("#content_tip").html("请填写内容");
+            return false;
+        }
+        if($("#category_id").val() == 0 ){
+            alert('请选择一级分类！');
+            return false;
+        }
+        if($("#sub_category").val() == 0 ){
+            alert('请选择二级分类！');
+            return false;
+        }
+
+        if($("#area_id").length == 0 && $("#city_box").length() == 0){
+            alert('请选择城市！');
+            return false;
+        }
+
+       	initG();
+    });
+
+
+    $("#title").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length > 50){
+            var offset = length - 50;
+            $("#titleCount").html('<i style="color:red">您已经超出了 '+offset+" 字</i>");
+        }else{
+            $("#titleCount em").html(50 - length);
+        }
+    });
+
+    $("#content").bind("input propertychange",function(){
+        var length = $(this).val().length;
+        if(length > 1500){
+            var offset = length - 1500;
+            $("#contentCount").html('<i class="red">您已经超出了 '+offset+" 字</i>");
+        }else{
+            $("#contentCount em").html(1500 - length);
+        }
+    });
+
+});
+</script>
+</body>
+</html>
